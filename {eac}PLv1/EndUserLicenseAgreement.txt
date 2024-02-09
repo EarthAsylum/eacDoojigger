@@ -1,0 +1,557 @@
+=== {eac}PLv1 - End-User License Agreement ===
+Author: 			[EarthAsylum Consulting](https://www.earthasylum.com)
+Last Updated: 		06-Jun-2022
+Contributors:		[Kevin Burkholder](https://profiles.wordpress.org/kevinburkholder/)
+License: 			EarthAsylum Consulting Proprietary License - {eac}PLv1
+License URI:		https://earthasylum.com/end-user-license-agreement/
+
+IMPORTANT -- Please Read -- By downloading, installing, or using the software,
+you represent that you purchased the software from an approved source and you
+agree to be bound by the terms of this agreement. If you are accepting these
+terms on behalf of another person, company or other legal entity, you represent
+and warrant that you have full authority to bind that person, company or legal
+entity to these terms.
+
+== Copyright ==
+
+= Copyright © 2019-2022, *EarthAsylum Consulting*, All rights reserved. =
+
+__This is proprietary, copyrighted software.__
+
++	Title to the Software will remain the exclusive intellectual property of *EarthAsylum Consulting*.
+
++	You, the customer, are granted a non-exclusive, non-transferable, license to access, install, and use
+this software in accordance with the license level purchased.
+
++	You are not permitted to share, distribute, or make available this software to any third-party.
+
+This *End-User License Agreement* ("Agreement") is a legal agreement hereby
+entered into between you, either an individual, company or other legal entity,
+and its affiliates (hereafter, "Customer") and *EarthAsylum Consulting*
+(hereafter, "Licensor") for the Software.
+
+IF YOU DO NOT AGREE TO THESE TERMS:
+
++	DO NOT DOWNLOAD, INSTALL, COPY, ACCESS OR USE THE SOFTWARE; AND
++	PROMPTLY DELETE OR RETURN THE SOFTWARE FOR A FULL REFUND.
+
+== EULA (End-User License Agreement) ==
+
+= 1. DEFINITIONS =
+
+1.	__Affiliates__ ​means an entity controlled by, under common control with,
+or controlling such party, where control is denoted as having fifty percent
+(50%) or more of the voting power (or equivalent) of the applicable legal
+entity. Subject to the terms and conditions of this Agreement, Affiliates may
+use the license granted hereunder. All references to Licensor shall be deemed to
+be references to Licensor and its Affiliates and all references to Customer
+shall be deemed to be references to Customer’s company or other legal entity and
+its Affiliate(s).
+
+2.	__Computer__ ​means the hardware, if the hardware is a single computer
+system, whether physical or virtual, or means the computer system with which the
+hardware operates, if the hardware is a computer system component.
+
+3.	__Derivative Works__ ​means a revision, enhancement, modification,
+translation, abridgment, condensation, or expansion of Software or any other
+form in which such Software may be recast, transferred or adapted, which, if
+used without the consent of Licensor, would constitute a copyright infringement.
+
+4.	__Documentation__ ​means the official explanatory materials in printed,
+electronic or online form provided by Licensor to Customer on the use of the
+Software. For the avoidance of doubt, any installation guide or end user
+documentation not prepared or provided by Licensor, any online community site,
+unofficial documentation, videos, white papers, or feedback does not constitute
+Documentation.
+
+5.	__Fees__ means the fees for the Software license (including any renewal or
+extension thereof), Support Services, or any other product or service purchased
+under this Agreement.
+
+6.	__Partners__ means distributors and resellers authorized by Licensor or
+its distributors to resell the Software, or a co-branded version of the Software
+authorized by Licensor.
+
+7.	__Software__ ​means the executable version of the product, together with
+the Documentation  and supporting assets, and all third-party software that
+Licensor may have purchased or licensed from third parties and delivered to
+Customer as part of the Software, as well as any Updates provided by Licensor to
+Customer pursuant to this Agreement.
+
+8.	__Support Services__ ​means the service for the correction of errors
+and/or support of the Software and the issuance of any Updates.
+
+9.	__Updates__ ​means all subsequent releases and versions of the Software
+that Licensor makes generally available to its customers as part of purchased
+Support Services and which are not separately priced or marketed by Licensor.
+
+10.	__License Levels__
+Unless otherwise specified, the license level purchased indicates the number of domains
+and/or sites on which Software may be used.
++	A *domain* is any unique website address and does not include related sub-domains.
+	(for this purpose, a sub-domain is a domain).
++	A *site* is a single site (or blog) in a WordPress multi-site domain.
+
+= 2. INTELLECTUAL PROPERTY RIGHTS =
+
+1.	__Ownership__. Title to the Software, Documentation, Updates and all
+patents, copyrights, trade secrets and other worldwide proprietary and
+intellectual property rights in or related thereto are and will remain the
+exclusive property of Licensor and its licensors. Customer may not remove any
+titles, trademarks or trade names, copyright notices, legends, or other
+proprietary markings in or on the Software, hardware or Documentation and will
+not acquire any rights in the Software, except the limited license specified in
+this Agreement. Licensor and its licensors own all rights in any copy,
+translation, modification, adaptation or Derivative Works of the Software,
+including any improvement or development thereof. Licensor retains all rights
+not expressly granted to Customer in this Agreement. Customer shall promptly
+notify Licensor in writing upon discovery of any unauthorized use of the
+Software or Documentation or infringement of Licensor’s proprietary rights in
+the Software or Documentation.
+
+2.	__Open Source Components__. The Software may include certain third-party
+software as set forth in the Documentation, and may be used only in accordance
+with the licenses set forth therein, which prevail over the terms of this
+Agreement with respect to such third-party software. With respect to the
+Software, third-party components are integrated by Licensor for and on behalf of
+Customer in accordance with this Agreement. Therefore, any third-party software
+delivered to Customer pursuant to this Agreement, including any third-party
+plug-in that may be provided with the Software, is included for use at
+Customer’s option, solely in accordance with the corresponding third-party
+software license(s). Licensor shall have no liability for Customer’s use of any
+third-party software.
+
+= 3. LICENSE GRANT AND FEES =
+
+1.	__Software License__. Customer is granted a non-exclusive,
+non-transferable, non-assignable, restricted license during the term set forth
+in this Agreement, to access, install, and use Software in accordance with the
+relevant Documentation for Customer’s own internal business purposes only.
+Customer may not use the Software for providing hosted or service bureau services
+to the general public or any third-party entities that are not managed facilities
+for which Customer provides integral technology services. Customer acknowledges the
+Software and Documentation is proprietary to Licensor and may not be distributed
+to any third parties. The license granted herein is subject to the  specific
+restrictions and limitations set forth herein, the terms of any open
+source licenses governing the components included in the Software, and/or any
+additional licensing restrictions and limitations specified in the
+Documentation, or by notification and/or policy change posted at Licensor’s
+website.
+
+2.	__License to Government__. If any Software is being licensed under the
+terms of a proposal or agreement with the U.S. Government or on the U.S.
+Government’s behalf, the Software is commercial computer software that was
+developed exclusively at private expense, and (a) if acquired by or on behalf of
+a civilian agency, shall be subject to the commercial computer software license
+terms set forth in this Agreement as specified in 48 C.F.R 12.212 of the Federal
+Acquisition Regulation and its successors; or (b) if acquired by or on behalf of
+units of the Department of Defense, shall be subject to the commercial computer
+software license terms set forth in this Agreement as specified in 48 C.F.R
+227.7202, Defense Federal Acquisition Regulation Supplement and its successors.
+
+3.	__Fees__. Customer agrees to pay Fees to Licensor for the licenses and
+associated services.
+
+= 4. LICENSE RESTRICTIONS =
+
+1.	__Restrictions on Use__. Subject to the terms of the open source licenses
+governing any open source components of the Software, Customer shall not: (a)
+Allow third parties or develop methods for third parties to use the Software;
+(b) sell, rent, lease, use collectively, record, license, sublicense, share,
+distribute, publicly communicate, transfer or exploit in any other manner the
+Software or Documentation; (c) except as permitted by applicable law, decompile,
+disassemble, or reverse engineer the Software, in whole or in part, and Customer
+shall not carry out any action to the detriment of Licensor’s intellectual
+property rights or those of its suppliers; (d) make copies, execute, publish, or
+reproduce Software or Documentation, unless expressly authorized in this
+Agreement (and all copies must maintain Licensor’s copyright notices); (e)
+make available, reveal, disclose, offer, or allow the use of Software by third
+parties, without the prior written consent of Licensor; (f) alter or modify the
+Software without the prior written consent of Licensor; (g) reject, avoid,
+elude, remove, deactivate, or evade, in any way, any protection mechanism of the
+Software, including without limitation any mechanism used to restrict or control
+Software functions; (h) provide or offer access to any third parties to any
+restricted online access keys or authentication passwords provided by Licensor
+for downloading Software.
+
+2.	__Trademarks__. Customer may not delete, remove, hide, move, or alter any
+trademark, logo, icon, image, or text that represents the Licensor’s name, any
+derivation thereof, or any icon, image, or text that is likely to be confused
+with the same. All representations of the Licensor’s name, logo or other mark of
+Licensor or any of its Affiliates’ names or marks must remain as originally
+distributed regardless of the presence or absence of a trademark, copyright, or
+other intellectual property symbol or notice.
+
+3.	__Legal and Export Control Compliance__. ​Customer agrees to comply with
+all applicable laws. Without limiting the foregoing, Customer agrees to comply
+with all United States export laws and applicable import laws of Customer’s
+locality (if Customer is not located in the United States), and Customer agrees
+not to export any Software without first obtaining all required authorizations
+or licenses. In particular, but without limitation, the Software may not be
+exported or re-exported (a) into any U.S. embargoed countries; or (b) to anyone
+on the U.S. Treasury Department’s list of Specially Designated nationals or the
+U.S. Department of Commerce Denied Person’s List or Entity List. By using the
+Software, Customer makes representations and warranties of not being located in
+any such country or on any such list.​Customer also agrees not to use the
+Software for any purposes prohibited by United States law.
+
+= 5. SUPPORT =
+
+1.	__Support__. Subject to Customer’s payment of the Fees for Support
+Services, Licensor will provide Support Services to Customer per the Support
+Services Addendum attached hereto as Exhibit A. Licensor will provide Customer
+with any Updates that it makes generally available to its other users that have
+purchased the same level of support.
+
+= 6. LIMITED WARRANTY AND DISCLAIMERS =
+
+1.	__Limited Warranty__. ​Licensor warrants that, for a period of
+(30) days from the [original delivery date], the Software will be reasonably free
+from defects in materials and workmanship and substantially conform to the
+specifications set forth in the Documentation. All specifications are provided
+based on testing of the Software in a laboratory setting, and actual performance
+may be affected by network connections, software and hardware configuration and
+hardware specifications. This limited warranty does not apply to third-party
+open source software.
+
+2.	__Exclusive Remedy__. Licensor’s entire liability and Customer’s exclusive
+remedy in case of a breach of the foregoing limited warranty shall be correction
+of the error or, at Licensor’s sole option, replacement of the Software.
+
+3.	__Exclusion of Warranty__. This limited warranty is void if the defect has
+resulted from accident, abuse, negligence, misapplication, or where the Software
+has not been properly installed or used in accordance with the Documentation.
+
+4.	__Disclaimer__. EXCEPT FOR THE LIMITED WARRANTIES SET FORTH ABOVE, THE
+SOFTWARE AND SUPPORT SERVICES ARE PROVIDED ON AN "AS IS" BASIS WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESS OR IMPLIED. LICENSOR DOES NOT WARRANT THAT THE
+SOFTWARE OR SUPPORT SERVICES WILL MEET CUSTOMER’S REQUIREMENTS OR THAT THE
+OPERATION THEREOF WILL BE FAIL SAFE, UNINTERRUPTED, ERROR FREE, OR THAT THE
+SOFTWARE WILL PROTECT AGAINST ALL POSSIBLE THREATS. LICENSOR DISCLAIMS ALL OTHER
+WARRANTIES, EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT,
+NON-INTERFERENCE, AND ACCURACY OF INFORMATIONAL CONTENT.
+
+5.	__Exceptions__. Some states or jurisdictions do not allow the exclusion of
+expressed or implied warranties, so the above disclaimer may not apply to
+Customer. IN THAT EVENT, SUCH EXPRESSED OR IMPLIED WARRANTIES SHALL BE LIMITED IN
+DURATION TO THE WARRANTY PERIOD (OR THE MINIMUM PERIOD REQUIRED BY APPLICABLE
+LAW).
+
+= 7. LIMITATION OF LIABILITY =
+
+IN NO EVENT, WHETHER IN TORT, CONTRACT, OR OTHERWISE, SHALL LICENSOR OR ITS
+LICENSORS, PARTNERS, OR SUPPLIERS BE LIABLE TO CUSTOMER OR ANY THIRD PARTIES
+UNDER THIS AGREEMENT FOR ANY INDIRECT, SPECIAL, INCIDENTAL, PUNITIVE, OR
+CONSEQUENTIAL DAMAGES, COSTS, LOSSES OR EXPENSE, (INCLUDING BUT NOT LIMITED TO
+LOST PROFITS, LOSS OR INTERRUPTION OF USE, LOSS OF DATA, LOSS OF GOODWILL, WORK
+STOPPAGE, DAMAGE TO NETWORKS, EQUIPMENT, OR HARDWARE, OR THE COST OF PROCUREMENT
+OF SUBSTITUTE GOODS OR TECHNOLOGY). Regardless of whether the claim for such
+damages is based in contract, tort, or any other legal theory, in no event
+shall Licensor’s aggregate liability to Customer for direct damages exceed the
+original purchase price of the Software, Support Services or other amounts paid
+by Customer, even if Licensor has been advised of such damages. The foregoing
+limitations shall apply to the maximum extent permitted by applicable law​. THE
+LIMITATION OF LIABILITY HEREIN IS BASED ON THE FACT THAT END USERS USE THEIR
+COMPUTERS FOR DIFFERENT PURPOSES. ACCORDINGLY, ONLY CUSTOMER CAN IMPLEMENT
+BACK-UP PLANS AND SAFEGUARDS APPROPRIATE TO CUSTOMER’S NEEDS IN THE ENTENT AN
+ERROR IN THE SOFTWARE CAUSES COMPUTER PROBLEMS AND RELATED DATA LOSSES. FOR
+THESE BUSINESS REASONS, CUSTOMER AGREES TO THE LIABILITY LIMITATIONS HEREIN AND
+ACKNOWLEDGE THAT WITHOUT CUSTOMER’S AGREEMENT TO THIS PROVISION, THE FEES
+CHARGED FOR THE SOFTWARE WOULD BE HIGHER.
+
+= 8. CONFIDENTIALITY AND NOTIFICATIONS =
+
+1.	__Confidentiality__. Customer acknowledges and agree that the Software
+incorporates confidential and proprietary information ("Confidential
+Information") developed or acquired by Licensor including, but not limited to,
+technical and non-technical data, formulas, patterns, compilations, devices,
+methods, techniques, drawings and processes related to the Software, which
+constitutes the valuable intellectual property of Licensor and its suppliers.
+
+2.	__Use of Confidential Information__. Each party will comply with all laws
+and regulations that apply to use, transmission, storage, disclosure, or
+destruction of Confidential Information. Both Parties agree to hold the other
+party’s Confidential Information in the strictest confidence. Confidential
+Information shall not be disclosed by either party to anyone except an employee,
+or agent who has a need to know same, or who is bound by a non-disclosure and
+confidentiality provision at least as restrictive as those set forth in this
+Agreement. Each party agrees to ensure that its employees, agents,
+representatives, and contractors are advised of the confidential nature of the
+Confidential Information and are precluded from taking any action prohibited
+under this Agreement. ​Licensor may use any technical information that Customer
+provides to Licensor for any of Licensor’s reasonable business purposes,
+including product support and development.
+
+3.	__Ownership of Information__. Except as explicitly stated in this
+Agreement, the party receiving the Confidential Information is granted no
+license or conveyance of disclosing party’s Confidential Information or any
+intellectual property rights therein. Title to the disclosing party’s
+Confidential Information shall remain solely with the party disclosing the
+Confidential Information.
+
+4.	__Remedies__. It is further understood and agreed that money damages may
+not be a sufficient remedy for any breach of the confidentiality provisions of
+this Agreement and that either party may be entitled to equitable relief,
+including injunction and specific performance, as a remedy for any such breach.
+Such remedies may not be deemed exclusive remedies for a breach of these
+provisions but may be deemed in addition to all other remedies available at law
+or in equity.
+
+5.	__Notices__. Licensor may send Customer required legal notices and other
+communications about the Software, including special offers and pricing or other
+similar information, customer surveys or other requests for feedback
+("Communications"). Licensor will send Communications via in-product notices or
+email to registered email addresses of named contacts, or will post
+Communications on Licensor’s website. Customer may notify Licensor of Customer’s
+preference not to receive any such Communications (which may have a technical
+impact on Customer’s use of the Software and the provision of any Support
+Services). Licensor reserves the right, at any time and from time to time, to
+revise, supplement, and otherwise modify this Agreement and to impose new or
+additional rules, policies, terms or conditions (collectively, "Additional
+Terms") on Customer’s use of the Software. Such Additional Terms will be
+effective immediately and incorporated into this Agreement upon posting the
+revised agreement on Licensor’s website and Customer waives any right to receive
+a specific notice of each such revision. Customer’s use of the Software
+signifies acceptance of the Agreement inclusive of future revisions.
+
+= 9. TERM AND TERMINATION =
+
+This Agreement and the licenses granted hereunder shall remain in effect until
+terminated by either party. Licensor may terminate this Agreement and the
+licenses granted hereunder, upon written notice for any material breach of this
+Agreement that Customer fails to cure within ten (10) days following written
+notice specifying such breach. Customer may terminate this Agreement and the
+licenses granted hereunder upon written notice for any material breach of this
+Agreement that Licensor fails to cure within ten (10) days following written
+notice specifying such breach. Except as expressly provided herein, sections
+of this Agreement shall survive termination.
+
+= 10. INDEMNIFICATION =
+
+Licensor shall indemnify and hold harmless Customer and its officers, employees,
+agents and representatives and defend any action brought against same with
+respect to any third-party claim, demand or cause of action, including
+reasonable attorney’s fees, to the extent that it is based upon a claim that the
+Software infringes or violates any United States patents, copyrights, trade
+secrets, or other proprietary rights of a third-party. Customer may, at its own
+expense, assist in such defense if it so desires, provided that Licensor shall
+control such defense and all negotiations relating to the settlement of any such
+claim. Customer shall promptly provide Licensor with written notice of any claim
+which Customer believes falls within the scope of this indemnification provision
+of the Agreement. In the event that the Software or any portion thereof is held
+to constitute an infringement and its use is enjoined, Licensor may, at its sole
+option and expense, (i) modify the infringing Software so that it is
+non-infringing, (ii) procure for Customer the right to continue to use the
+infringing Software, or (iii) replace said Software with suitable,
+non-infringing software. Notwithstanding the foregoing, Licensor will have no
+obligation for any claims to the extent such claims result from (i)
+modifications or alterations of the Software made by or for Customer or any
+other party that were not provided by Licensor or authorized by Licensor in
+writing; (ii) use outside the scope of the license granted hereunder, (iii) use
+of a superseded or previous version of the Software if infringement would have
+been avoided by the use of a newer version which Licensor made available to
+Customer, or (iv) use of the Software in combination with any other software,
+hardware or products not supplied by Licensor. This indemnity obligation is
+subject to the limitation of liability and does not apply to any open source
+components of the Software.
+
+= 11. GENERAL PROVISIONS =
+
+1.	__Assignment__. Neither party may assign this Agreement or any right or
+obligation hereunder without the other party’s prior written consent. However,
+Licensor may assign this Agreement in the event of a merger or consolidation or
+the purchase of all or substantially all of its assets. This Agreement will be
+binding upon and inure to the benefit of the permitted successors and assigns of
+each party.
+
+2.	__Force Majeure__. Licensor will not be held responsible for any failure,
+delay or interruption caused by circumstances outside its control, such as
+network failure, network connection failure, earthquake, flooding, strikes,
+embargos or acts of government. If such event giving rise to Force Majeure lasts
+for more than (120) days, then either party may terminate this Agreement
+without such termination giving rise to any liability or right to any refund.
+
+3.	__Taxes__. Customer agrees to pay all taxes (including but not limited to
+sales, use, excise, and value-added taxes), tariffs, duties, customs fees or
+similar charges imposed or levied on the Software Customer licenses, with the
+exception of taxes on Licensor’s net income.
+
+4.	__Entire Agreement and Amendments__. This Agreement constitutes the entire
+agreement between the parties and supersedes all written or oral prior
+agreements or understandings between the parties.
+
+5.	__Severability__. If any provision of this Agreement is held illegal or
+unenforceable by any court of competent jurisdiction, such provision shall be
+deemed severed from the remaining provisions of this Agreement and shall not
+affect or impair the validity or enforceability of the remaining provisions of
+this Agreement.
+
+6.	__Waiver__. No failure of either party to exercise or enforce any of its
+rights under this Agreement will act as a waiver of those rights.
+
+7.	__Choice of Law and Venue__. The validity, interpretation and enforcement
+of this Agreement will be governed by and construed in accordance with the laws
+of the United States and of the State of Pennsylvania without giving effect to the
+conflicts of law provisions thereof or the United Nations Convention on
+Contracts for the International Sale of Goods. Customer hereby irrevocably
+consents to jurisdiction of both the state and federal courts located in
+Chester County, Pennsylvania.
+
+8.	__Relationship of the Parties__. Each party will be and act as an
+independent contractor and not as an agent or partner of, or joint venturer with
+the other party, and neither party will have any right, power or authority to
+act or create any obligation, express or implied, on behalf of the other party.
+
+9.	__Attorneys’ Fees__. If any legal action, including, without limitation,
+an action for arbitration or injunctive relief, is brought relating to this
+Agreement or the breach hereof, the prevailing party in any final judgment or
+arbitration award, or the non-dismissing party in the event of a dismissal
+without prejudice, shall be entitled to the full amount of all reasonable
+expenses, including all court costs, arbitration fees and actual attorneys’ fees
+paid or incurred in good faith.
+
+== Exhibit A  ==
+
+= Support Services Addendum =
+
+This section shall apply to the extent that Customer has paid for Support
+Services for the current term.
+
+= 1. DEFINITIONS =
+
+__Coverage Period__ means 9:00am to 5:00pm EST, Monday through Friday, and
+excluding US national holidays.
+
+__Maintenance Patch__ means a release of or for a Supported Product that
+includes the most recent Resolutions.
+
+__Resolution__ means either a software modification or addition that, when made
+or added to the Supported Product, corrects a Supported Incident; or a
+work-around, procedure or routine that, when observed in the regular
+installation or operation of the Software, eliminates the practical adverse
+effect of such Supported Incident on Customer; or replacement of the Supported
+Product. (Resolutions may include patches and bug fixes).
+
+__Supported Incidents__ ​means a material defect in materials and workmanship of
+the Supported Products, or failure of the Supported Product to conform to the
+specifications set forth in the documentation ("Documentation") relating to that
+version of the Supported Product, resulting in the inability to use, or
+restriction in the use of, the Supported Product.
+
+__Supported Products__ means the current version of the Software and any prior
+version for which Licensor provides support.
+
+= 2. SERVICE DESCRIPTION AND SCOPE =
+
+A. Scope of Support Services. The scope of Support Service sincludes the
+following:
+
++	EMail and Telephone Support. Customer may use email and/or phone support to
+receive help with regard to installation, configuration and administration of the Software.
+
++	Alternative Support. Customer may use alternative support and communications methods
+agreed upon by Customer and Licensor. Alternatives may include online chat, remote access,
+virtual meeting applications, or other remote communications.
+
+Support Services do not include development, consulting or technical training.
+Any additional tasks derived from the ticket beyond knowledge transmission, and
+not specified hereunder, such as development, documentation, specific testing or
+remote access may be charged on an hourly basis unless otherwise agreed to by
+the parties. The Support Services and Maintenance Services are collectively
+referred to as the "Services."
+
+B. Service Modification. Modifications to the scope of the Support Services may
+be made from time to time by Licensor and will be notified to Customer in
+writing.
+
+C. Exclusion from Services. Licensor is not obligated to provide Support
+Services in the following situations:
+
++	Unsupported Incidents.
+
++	Improper installation or operation of the Supported Product not in accordance
+with Licensor’s specifications or the Documentation.
+
++	The Supported Product has been damaged or the Supported Incident is caused by
+Customer’s negligence, or other causes beyond the reasonable control of Licensor.
+
++	The Supported Incident is caused by third party hardware or software not sold
+or licensed by or through Licensor.
+
++	Customer has not installed and implemented a Maintenance Patch/Update or
+Upgrade so that the Software is not a release supported by Licensor.
+
+Such issues may be addressed separately upon request to Licensor or an
+authorized partner at the applicable hourly rates for consulting.
+
+= 3. MAINTENANCE SERVICE AND SUPPORT SERVICE PERIOD =
+
+The Maintenance and Support Service period shall be for a period of time as set
+forth in a valid order form.
+
+= 4. MEANS OF PROVIDING THE MAINTENANCE AND SUPPORT SERVICES =
+
+Licensor will provide the Services by remote assistance. Except in the case of
+emergencies, requests for Services must be made to Licensor’s customer service
+email address. In response to requests, support technicians may respond via email
+or phone.
+
+= 5. RESPONSE CRITERIA =
+
+Licensor’s initial response may result in resolution of the request or form the
+basis for determining what additional actions may be required to achieve
+Resolution. Licensor will use commercially reasonable efforts to respond to Service
+requests based on the Severity level as determined by Licensor, except that Licensor
+is not responsible for delays in response delivery caused by systems and network problems.
+
+= 6. MAINTENANCE PATCHES AND UPGRADES/UPDATES =
+
+In addition to Resolutions, during the term of this Exhibit, Licensor shall make
+Maintenance Patches and Upgrades/Updates available if and when made generally
+available by Licensor. If a question arises as to whether a product offering is
+an Upgrade/Update or a new product or separate component, Licensor’s
+determination will prevail, provided that Licensor treats the product offering
+as a new product or feature for its end user customers generally.
+
+= 7. CUSTOMER RESPONSIBILITIES =
+
+Customer agrees to:
+
++	Pay the applicable Services fees and any communications charges associated
+with accessing the Services (unless Licensor specifies otherwise).
+
++	Ensure that any access codes Licensor provides are used only by Customer’s
+authorized personnel.
+
++	Designate a Licensor certified representative (a “Primary Technical Contact”)
+to be the focal point to which Licensor may direct general technical information
+pertaining to Customer’s Supported Products. Customer’s Primary Technical Contact
+must have sufficient technical knowledge of Customer’s Supported Product environment
+to enable effective communication with the Licensor support center.
+
++	Provide Licensor with all relevant and available diagnostic information
+(including product or system information) pertaining to software problems for which
+Customer requests assistance.
+
++	Provide Licensor with appropriate remote access to Customer’s system if necessary
+to assist in isolating the software problem cause. Customer will remain responsible for
+adequately protecting the system and all data contained therein whenever it is
+remotely accessed by Licensor with Customer’s permission.
+
++	Use the information obtained under these Services only for the support of the
+information processing requirements within Customer’s enterprise.
+
++	Ensure that Services are used only in relation to duly licensed Supported Products.
+
++	Make reasonable efforts to correct any issue and deploy corrections after consulting
+with Licensor.
+
++	Promptly install all Maintenance Patches and  Resolutions.
+
+== Our Policies ==
+
++	[Terms and Conditions](/terms-and-conditions/)
++	[Privacy Policy](/privacy-policy/)
++	[Refunds and Cancellations](/refunds-and-cancellations/)
++	[End-User License  Agreement](/end-user-license-agreement/)

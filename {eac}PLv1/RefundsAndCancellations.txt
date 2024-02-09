@@ -1,0 +1,37 @@
+=== Refunds And  Cancellations ===
+Author: 			[EarthAsylum Consulting](https://www.earthasylum.com)
+Last Updated: 		06-Jun-2022
+Contributors:		[Kevin Burkholder](https://profiles.wordpress.org/kevinburkholder/)
+License: 			EarthAsylum Consulting Proprietary License - {eac}PLv1
+License URI:		https://earthasylum.com/refunds-and-cancellations/
+
+IMPORTANT -- Please read this Policy carefully.
+
+== Refunds and Cancellations ==
+
+= Overview =
+
+Generally, we do not offer refunds. All of our paid software has a minimum of a 30-day free trial period. If you find the software unsuitable for your needs, you may cancel your subscription or registration prior to the end of that trial period from the “My Account” page on our website or by contacting us directly.
+
+After that trial period, you will be billed for the term of the license (1 month, 3 months, or 1 year). If during that time, you need to cancel your subscription, you may do so through the “My Account” page on our website. However, cancelling your subscription does not initiate a refund and your registration will be valid until the end of the then current term.
+
+= Refunds  =
+
+We recognize that there may be extenuating circumstances and, although rarely, a refund may be necessary. If you feel this is the case, you may contact us directly.
+
+If a refund is approved, then your refund will be processed, and a credit will automatically be applied to your credit card or original method of payment, within a certain number of days.
+
+= Need help? =
+
+Contact us directly for questions related to refunds and cancellations.
+
+=  How to reach us =
+
+You may contact us by email at support@earthasylum.com
+
+== Our Policies ==
+
++	[Terms and Conditions](/terms-and-conditions/)
++	[Privacy Policy](/privacy-policy/)
++	[Refunds and Cancellations](/refunds-and-cancellations/)
++	[End-User License  Agreement](/end-user-license-agreement/)

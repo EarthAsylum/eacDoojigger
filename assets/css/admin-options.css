@@ -1,0 +1,187 @@
+/**
+ * {eac}Doojigger for WordPress - Administrator options screen stylesheet
+ * @version 23.1007.1
+ */
+
+.nav-tab {
+	border-top-left-radius: .5em .5em;
+	border-top-right-radius: .5em .5em;
+	padding: 2px .75em;
+	color: #007cba; background: #e4f1fb;
+	margin-left: 0;
+	/* override primary button class */
+	margin-right: 2px !important;
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0  !important;
+	border-bottom: none !important;
+}
+.nav-tab-active {
+	color: white; background: #3baae3;
+}
+
+.tab-content {
+	border: 1px solid #ccc; padding: 1em; background: #f2f5f7; border-top: none;
+}
+
+/*section*/
+.settings-grid {}
+
+/*header|fieldset*/
+.settings-grid-container {
+	display: grid; grid-template-columns: 17em minmax(0, 1fr); grid-column-gap: 0; grid-row-gap: .25em;
+	padding: .25em; position: relative;
+	transition: all 750ms ease-in-out;
+	overflow: hidden; /* fix Safari crap */
+}
+
+/*header details|div*/
+.settings-grid-head {
+	color: #007cba; padding: .5em; background: #fff; font-weight: bold;
+}
+
+/*fieldset div*/
+.settings-grid-item {
+	color: #000; background: #fff;
+	padding: .5em 1.5em;
+}
+
+.settings-grid-item blockquote {
+	color: inherit; display: block; margin: 0 0 .5em 0
+}
+.settings-grid-item cite {
+	color: #555; padding-left: 1.5em; display: block;
+}
+.settings-grid-item blockquote em,
+.settings-grid-item cite em {
+	color: inherit; font-style: normal; font-weight: normal;
+}
+.settings-grid-item blockquote small,
+.settings-grid-item blockquote mark,
+.settings-grid-item cite small,
+.settings-grid-item cite mark {
+	color: #555; background-color: inherit; font-size: .9em; font-style: normal;  font-weight: normal;
+}
+.settings-grid-item cite em,
+.settings-grid-item cite code {
+	color: #555; font-style: normal;
+}
+.settings-grid-item table {
+	font-size: 1em;
+}
+.settings-grid-item input,.settings-grid-item textarea,.settings-grid-item select {
+	max-width: 100%;
+}
+.settings-grid-item input[readonly] {
+	color: rgba(51,51,51,.5); background-color: #fff;
+}
+
+.settings-grid-item input::placeholder,
+.settings-grid-item textarea::placeholder {
+	font-style: italic; opacity: .6;
+}
+
+.settings-grid-item input[type='checkbox'] + label,
+.settings-grid-item input[type='radio'] + label {
+	padding-right: 1em;
+}
+
+@media (max-width: 782px) {
+	.settings-grid-item input[type='checkbox'] + label,
+	.settings-grid-item input[type='radio'] + label {
+		line-height: 2.25;
+	}
+}
+
+.settings-grid-item .input-file-wrap input[type='submit'] {
+	margin-right: 1em;
+}
+.settings-grid-item .input-file-wrap input[type='file'] {
+	font-size: smaller; color: #555;
+}
+.settings-grid-item .input-file-wrap input[type='file']::-webkit-file-upload-button,
+.settings-grid-item .input-file-wrap input[type='file']::file-selector-button {
+	visibility: hidden; width: 1em; margin-left: -1em;
+}
+
+.settings-grid-item .button-small {min-width: 7em; text-align: center;}
+.settings-grid-item .button-large {min-width: 9em; text-align: center;}
+
+fieldset.settings-closed {
+	display: none;
+/*
+	transform-origin: top;
+	transform: scaleY(0);
+	max-height: 0;
+ */
+}
+fieldset.settings-opened {
+/*
+	transform-origin: top;
+	transform: scaleY(1);
+	max-height: 500em;
+ */
+}
+
+.CodeMirror {height: auto; min-height: 3em; width: 85% !important;}
+.CodeMirror,
+.wp-editor-container {border: 1px solid #8c8f94 !important; border-radius: 4px !important;}
+.wp-editor-wrap {width:85%;}
+.wp-editor-wrap .ed_button {min-width:auto;}
+.wp-editor-wrap iframe {width: 99% !important;}
+
+/* for banner and nag-notice (if present) */
+.wp-header-end {clear: both; visibility: visible;}
+
+table#settings_system_info {border-spacing: 0.5em 0;}
+table#settings_system_info tbody {font-size:.9em;}
+table#settings_system_info tbody td {min-width: 12em;}
+
+#settings_banner {
+	z-index: 99; /* stay below the admin sidebar on small screens */
+	position: fixed; left: 160px; right: 0; padding: 0; opacity: 0.9; background: white;
+}
+#settings_h1 {
+	float: left; font-weight: 500; padding: 9px 4px;
+}
+#settings_info {
+	float: right; margin: 0; padding: 9px 4px;
+}
+#settings_banner #settings_h1 {
+	padding-left: 0.67em;
+}
+#settings_banner #settings_info {
+	margin: 0.67em 0.5em;
+}
+#settings_info .dashicons.button,
+#settings_info .dashicons.button-primary,
+#settings_info .dashicons.button-secondary {
+	width: 48px; height: 1.5em; min-height: auto; padding: 0;
+	font-size: 1.75em; line-height: 1.4; text-align: center;
+}
+#settings_info .dashicons p {
+	font-size: .5em; color: initial; margin: -4px 0; overflow: hidden;
+}
+#settings_banner.sticky {
+	box-shadow: 0 8px 16px 0 rgb(85 93 102 / 30%);
+}
+
+.folded #settings_banner {left: 36px; /* width: calc(100% - 36px); */}
+
+@media screen and (min-width: 783px) and (max-width: 960px) {
+	.auto-fold #settings_banner {left: 36px;}
+}
+@media screen and (max-width: 782px) {
+	#settings_banner {left: 0; /* width: calc(100% + 1.5em); */}
+	.wp-responsive-open #settings_banner {left: 190px;}
+	.wp-responsive-open #settings_info {display: none;}
+	.wp-responsive-open .settings-grid-container {grid-template-columns: none; grid-row-gap: 0}
+}
+@media screen and (max-width: 650px) {
+	#settings_info {display: none;}
+	#wpadminbar {position: fixed};
+}
+
+.dashicons {text-decoration: none; padding: 0 2px;}
+.eac-gray {color: #707070 !important;} .eac-green {color: #6e9882 !important;} .eac-orange {color: #da821d !important;}
+#settings_info .eac-orange {border-color: #6e9882;}
+#settings_info .eac-green {border-color: #da821d;}
