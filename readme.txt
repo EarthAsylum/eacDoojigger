@@ -1,11 +1,11 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI: 		https://eacDoojigger.earthasylum.com/
 Author: 			[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag: 		2.4.2-github
-Last Updated: 		23-Jan-2024
+Stable tag: 		2.4.2
+Last Updated: 		10-Feb-2024
 Requires at least: 	5.5.0
 Tested up to: 		6.4
-Requires PHP: 		7.2
+Requires PHP: 		7.4
 Contributors:       kevinburkholder
 License: 			EarthAsylum Consulting Proprietary License - {eac}PLv1
 License URI:		https://eacDoojigger.earthasylum.com/end-user-license-agreement/
@@ -393,7 +393,7 @@ An {eac}Doojigger extension to install the Facebook/Meta Pixel to enable trackin
 
 == Copyright ==
 
-= Copyright © 2019-2023, *EarthAsylum Consulting*, All rights reserved. =
+= Copyright © 2019-2024, *EarthAsylum Consulting*, All rights reserved. =
 
 __This is proprietary, copyrighted software.__
 
@@ -409,10 +409,11 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 2.4.2 – January 23, 2023 =
+= Version 2.4.2 – February 10, 2024 =
 
 +	Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
 +	Fixed error in debugging_extension::capture_deprecated()
++	Now hosted on github.
 
 = Version 2.4.1 – December 27, 2023 =
 
