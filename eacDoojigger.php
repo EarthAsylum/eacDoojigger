@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:			{eac}Doojigger
  * Plugin URI:			https://eacDoojigger.earthasylum.com/
- * Update URI: 			https://d2xk802d4616wu.cloudfront.net/eacDoojigger/wp_updater.php
+ * Update URI: 			https://dev.earthasylum.net/wp-json/registrar/plugin/eacdoojigger
  * Description:			{eac}Doojigger for WordPress - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
  * Version:				2.4.1
  * Requires at least:	5.5.0
