@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI: 		https://eacDoojigger.earthasylum.com/
 Author: 			[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag: 		2.4.2
-Last Updated: 		10-Feb-2024
+Stable tag: 		2.4.2-RC2
+Last Updated: 		15-Feb-2024
 Requires at least: 	5.5.0
 Tested up to: 		6.4
 Requires PHP: 		7.4
@@ -409,8 +409,9 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 2.4.2 – February 10, 2024 =
+= Version 2.4.2 – February 15, 2024 =
 
++	Ignore 'onlyPHP' flag when loading to prevent critical errors with 404 redirects.
 +	Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
 +	Fixed error in debugging_extension::capture_deprecated()
 +	Now hosted on github.
