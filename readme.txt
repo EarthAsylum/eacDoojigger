@@ -411,6 +411,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 = Version 2.4.2 – February 15, 2024 =
 
++	Added environment to plugin updater uri - ?environment=wp_get_environment_type().
 +	Ignore 'onlyPHP' flag when loading to prevent critical errors with 404 redirects.
 +	Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
 +	Fixed error in debugging_extension::capture_deprecated()
