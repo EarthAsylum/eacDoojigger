@@ -322,34 +322,34 @@ _Kevin Burkholder_
 == Screenshots ==
 
 1. General settings
-![General](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-1.png)
+![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-1.png)
 
 2. General settings - Maintenance Mode
-![General](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-2.png)
+![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-2.png)
 
 3. General settings - Material Icons
-![General](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-3.png)
+![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-3.png)
 
 4. General settings - Session Extension
-![General](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-4.png)
+![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-4.png)
 
 5. Tools settings
-![Tools](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-5.png)
+![Tools](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-5.png)
 
 6. Debugging settings
-![Debugging](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-6.png)
+![Debugging](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-6.png)
 
 7. Security settings (1)
-![Security](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-7.png)
+![Security](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-7.png)
 
 8. Security settings (2)
-![Security](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-8.png)
+![Security](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-8.png)
 
 9. My Awesome Plugin with My Awesome Extension
-![myAwesomePlugin](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-9.png)
+![myAwesomePlugin](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-9.png)
 
 10. My Awesome Plugin Contextual Help
-![ContextualHelp](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-10.png)
+![ContextualHelp](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-10.png)
 
 
 == Other Notes ==
