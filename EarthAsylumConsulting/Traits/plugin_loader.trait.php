@@ -20,7 +20,7 @@ namespace EarthAsylumConsulting\Traits
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
+	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
 	 * @version		2.x
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -44,7 +44,7 @@ namespace EarthAsylumConsulting\Traits
 		 */
 		public static function loadPlugin(bool $onlyPHP = true): void
 		{
-			if (! $onlyPHP || self::isPHP())
+			if (! $onlyPHP || self::isPHP() )
 			{
 				self::$instance = self::load_plugin();
 			}
@@ -250,7 +250,7 @@ namespace EarthAsylumConsulting\Traits
 		 *
 		 * @return bool
 		 */
-		private static function isPHP(): bool
+		public static function isPHP(): bool
 		{
 			if (array_key_exists('REQUEST_URI', $_SERVER))
 			{

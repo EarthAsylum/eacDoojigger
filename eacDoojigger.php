@@ -5,7 +5,7 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
  * @version		2.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -15,12 +15,12 @@
  * @wordpress-plugin
  * Plugin Name:			{eac}Doojigger
  * Plugin URI:			https://eacDoojigger.earthasylum.com/
- * Update URI: 			https://d2xk802d4616wu.cloudfront.net/eacDoojigger/wp_updater.php
+ * Update URI: 			https://swregistry.earthasylum.com/software-updates/eacdoojigger.json
  * Description:			{eac}Doojigger for WordPress - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
- * Version:				2.4.1
+ * Version:				2.5.0-RC1
  * Requires at least:	5.5.0
  * Tested up to: 		6.4
- * Requires PHP:		7.2
+ * Requires PHP:		7.4
  * Author:				EarthAsylum Consulting
  * Author URI:			http://www.earthasylum.com
  * License: 			EarthAsylum Consulting Proprietary License - {eac}PLv1
@@ -53,7 +53,7 @@ namespace EarthAsylumConsulting
 		require __NAMESPACE__.'/Traits/plugin_environment.trait.php';
 	}
 
-	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION','2.4.1');
+	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION','2.5.0');
 
 	/**
 	 * loader/initialization class
@@ -76,7 +76,7 @@ namespace EarthAsylumConsulting
 				'NameSpace'			=> __NAMESPACE__,
 				'PluginClass'		=> __NAMESPACE__.'\\Plugin\\eacDoojigger',
 				'RequiresWP'		=> '5.5',			// WordPress
-				'RequiresPHP'		=> '7.2',			// PHP
+				'RequiresPHP'		=> '7.4',			// PHP
 				'NetworkActivate'	=>	true,			// require (or forbid) network activation
 				'AutoUpdate'		=> 'self',			// automatic update 'self' or 'wp'
 			];
@@ -99,9 +99,9 @@ namespace  // global scope
 	}
 
 	/**
-	 * Run the plugin loader - only for php files
+	 * Run the plugin loader - only for php files?
 	 */
- 	\EarthAsylumConsulting\eacDoojigger::loadPlugin(true);
+ 	\EarthAsylumConsulting\eacDoojigger::loadPlugin(false);
 
 	/**
 	 * Load required extension(s)

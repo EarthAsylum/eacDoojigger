@@ -11,7 +11,7 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		2.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -40,6 +40,7 @@ abstract class abstract_extension
 	const ALLOW_CLI			= 0b00010000;		// enabled for wp-cli requests
 	const DEFAULT_DISABLED	= 0b00100000;		// force {classname}_enabled' option to default to not enabled
 	const ALLOW_ALL			= self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ALLOW_CRON|self::ALLOW_CLI;
+	const ALLOW_NON_PHP		= 0b01000000;		// enabled when loaded for a url not ending in .php
 
 	/**
 	 * @var bool is this extension network enabled
@@ -187,24 +188,32 @@ abstract class abstract_extension
 			}
 		}
 
-		// check network admin - before adding option meta data
-		if ( ! (($flags & self::ALLOW_NETWORK)) )
+		// check request uri for .php
+		if ( ! ($flags & self::ALLOW_NON_PHP) )
+		{
+			if ( ! eacDoojigger::isPHP() ) {
+				return $this->isEnabled(false);
+			}
+		}
+
+		// check network admin
+		if ( ! ($flags & self::ALLOW_NETWORK) )
 		{
 			if ( $this->plugin->is_network_admin() ) {
 				return $this->isEnabled(false);
 			}
 		}
 
-		// check cron request - before adding option meta data
-		if ( ! (($flags & self::ALLOW_CRON)) )
+		// check cron request
+		if ( ! ($flags & self::ALLOW_CRON) )
 		{
 			if ( wp_doing_cron() ) {
 				return $this->isEnabled(false);
 			}
 		}
 
-		// check wp-cli request - before adding option meta data
-		if ( ! (($flags & self::ALLOW_CLI)) )
+		// check wp-cli request
+		if ( ! ($flags & self::ALLOW_CLI) )
 		{
 			if ( (PHP_SAPI === 'cli') || (defined('WP_CLI') && WP_CLI) ) {
 				return $this->isEnabled(false);

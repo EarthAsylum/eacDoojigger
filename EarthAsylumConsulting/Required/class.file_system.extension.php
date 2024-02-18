@@ -59,7 +59,7 @@ class file_system_extension extends \EarthAsylumConsulting\abstract_extension
 	public function __construct($plugin)
 	{
 		$this->enable_option = false;
-		parent::__construct($plugin, self::ALLOW_ALL);
+		parent::__construct($plugin, self::ALLOW_ALL|self::ALLOW_NON_PHP);
 
 		// store as separate option keys
 		$this->isReservedOption('filesystem_multisite',true);
