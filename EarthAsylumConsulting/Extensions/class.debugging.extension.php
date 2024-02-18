@@ -11,7 +11,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2021 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @version		1.x
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -22,7 +22,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0123.1';
+		const VERSION	= '23.1028.1';
 
 		/**
 		 * @var array PHP to print string
@@ -63,8 +63,6 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		private $logText 	= null; // log data on file output
 		private $phpData 	= null; // log data on PHP errors
 		private $wpData 	= null; // log data on WP errors
-
-		private $current_user 	= null;
 
 		/**
 		 * @var object wp-config-transformer
@@ -339,7 +337,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function capture_deprecated(...$args)
 		{
-			$error_message 	= basename(current_action(),'_run').'::'.rtrim(implode(' ',func_get_args()));
+			$error_message 	= basename(current_action(),'_run').'::'.rtrim(implode(' '.func_get_args()));
 			$this->wpData[] = $error_message;
 			$backtraceTo = $this->get_option('debug_backtrace');
 			$error_trace 	= debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,$backtraceTo);

@@ -151,7 +151,7 @@ The option array is registered as:
 	);
 
 *my_option_name screen shot*
-![option_name screen shot](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/my_option.png)
+![option_name screen shot](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/my_option.png)
 
 __Option name__
 
@@ -531,6 +531,6 @@ These methods use a short-lived transient so that messages may survive a page re
 == Screenshots ==
 
 1. My Awesome Plugin with My Awesome Extension
-![myAwesomeExtension](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-9.png)
+![myAwesomeExtension](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-9.png)
 
 

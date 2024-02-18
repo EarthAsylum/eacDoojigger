@@ -44,11 +44,10 @@ namespace EarthAsylumConsulting\Traits
 		 */
 		public static function loadPlugin(bool $onlyPHP = true): void
 		{
-			// 14-feb-2024 - ignore onlyPHP flag to prevent critical (404) redirect errors
-		//	if (! $onlyPHP || self::isPHP())
-		//	{
+			if (! $onlyPHP || self::isPHP())
+			{
 				self::$instance = self::load_plugin();
-		//	}
+			}
 		}
 
 

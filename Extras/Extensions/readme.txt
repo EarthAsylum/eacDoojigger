@@ -416,7 +416,7 @@ There is also a fully functional *myFunctions* extension plugin in the *Extras/E
 == Screenshots ==
 
 1. My Awesome Plugin with My Awesome Extension
-![myAwesomeExtension](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-9.png)
+![myAwesomeExtension](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-9.png)
 
 
 == Other Notes ==

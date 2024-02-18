@@ -1328,7 +1328,6 @@ abstract class abstract_core
 		// return a stringable object with filtered properties
 		return new class($properties)
 			{
-				public $original,$major,$minor,$patch,$release,$build,$primary,$version;
 				function __construct($p) {
 					foreach ($p as $k=>$v) {if (is_string($k)) $this->$k=$v;}
 				}

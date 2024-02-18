@@ -368,13 +368,13 @@ There is also a fully functional *myFunctions* extension plugin in the *Extras/E
 == Screenshots ==
 
 1. My Awesome Plugin with My Awesome Extension
-![myAwesomePlugin](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-9.png)
+![myAwesomePlugin](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-9.png)
 
 2. Upgrade Notice
-![Upgrade Notice](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/upgrade_notice.png)
+![Upgrade Notice](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/upgrade_notice.png)
 
 3. Activation Error
-![Activation Error](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/activate_error.png)
+![Activation Error](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/activate_error.png)
 
 
 == Other Notes ==

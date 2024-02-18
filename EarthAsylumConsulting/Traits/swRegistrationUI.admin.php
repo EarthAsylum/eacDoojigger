@@ -183,11 +183,11 @@ trait swRegistrationUI
 			$this->add_filter( 'plugin_update_parameters', function($parameters)
 				{
 					$options =  [
-						'registration'	=> $this->getRegistrationKey(),
-						'license'		=> $this->isRegistryValue('license'),
-						'valid'			=> ($this->isValidRegistration()) ? 'true' : 'false',
+						'key'		=> $this->getRegistrationKey(),
+						'license'	=> $this->isRegistryValue('license'),
+						'valid'		=> ($this->isValidRegistration()) ? 'true' : 'false',
 					];
-					$parameters['plugin_options'] = array_merge($parameters['plugin_options'],$options);
+					$parameters['plugin_options'] = $options;
 					return $parameters;
 				}
 			);

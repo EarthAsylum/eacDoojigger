@@ -644,7 +644,7 @@ __*Screen Shot*__
 
 >	These examples where derived from the [Software taxonomy](https://swregistry.earthasylum.com/software-taxonomy/) custom taxonomy extension used by [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/).
 
-![{eac}SoftwareRegistry Software Product](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/software-taxonomy.png)
+![{eac}SoftwareRegistry Software Product](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/software-taxonomy.png)
 
 - - -
 - - -

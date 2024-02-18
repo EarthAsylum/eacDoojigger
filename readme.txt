@@ -1,16 +1,15 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI: 		https://eacDoojigger.earthasylum.com/
 Author: 			[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag: 		2.4.2-RC2
-Last Updated: 		15-Feb-2024
+Stable tag: 		2.4.1
+Last Updated: 		27-Dec-2023
 Requires at least: 	5.5.0
 Tested up to: 		6.4
-Requires PHP: 		7.4
+Requires PHP: 		7.2
 Contributors:       kevinburkholder
 License: 			EarthAsylum Consulting Proprietary License - {eac}PLv1
 License URI:		https://eacDoojigger.earthasylum.com/end-user-license-agreement/
 Tags: 				plugin development, rapid development, multi-function, security, encryption, debugging, administration, contextual-help, session management, maintenance mode, plugin framework, plugin derivative, plugin extensions, toolkit
-GitHub URI:			https://earthasylum.github.io/docs.eacDoojigger/
 
 {eac}Doojigger - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
 
@@ -322,34 +321,34 @@ _Kevin Burkholder_
 == Screenshots ==
 
 1. General settings
-![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-1.png)
+![General](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-1.png)
 
 2. General settings - Maintenance Mode
-![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-2.png)
+![General](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-2.png)
 
 3. General settings - Material Icons
-![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-3.png)
+![General](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-3.png)
 
 4. General settings - Session Extension
-![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-4.png)
+![General](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-4.png)
 
 5. Tools settings
-![Tools](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-5.png)
+![Tools](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-5.png)
 
 6. Debugging settings
-![Debugging](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-6.png)
+![Debugging](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-6.png)
 
 7. Security settings (1)
-![Security](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-7.png)
+![Security](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-7.png)
 
 8. Security settings (2)
-![Security](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-8.png)
+![Security](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-8.png)
 
 9. My Awesome Plugin with My Awesome Extension
-![myAwesomePlugin](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-9.png)
+![myAwesomePlugin](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-9.png)
 
 10. My Awesome Plugin Contextual Help
-![ContextualHelp](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-10.png)
+![ContextualHelp](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-10.png)
 
 
 == Other Notes ==
@@ -381,9 +380,6 @@ An {eac}Doojigger extension to include and enable use of the Amazon Web Services
 +	[{eac}SimpleCDN](https://eacDoojigger.earthasylum.com/eacsimplecdn/)
 An {eac}Doojigger extension to enable the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience.
 
-+	[{eac}ObjectCache](https://eacDoojigger.earthasylum.com/objectcache/)
-A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects.
-
 +	[{eac}Readme](https://eacDoojigger.earthasylum.com/eacreadme/)
 An {eac}Doojigger extension to translate a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document.
 
@@ -393,7 +389,7 @@ An {eac}Doojigger extension to install the Facebook/Meta Pixel to enable trackin
 
 == Copyright ==
 
-= Copyright © 2019-2024, *EarthAsylum Consulting*, All rights reserved. =
+= Copyright © 2019-2023, *EarthAsylum Consulting*, All rights reserved. =
 
 __This is proprietary, copyrighted software.__
 
@@ -408,14 +404,6 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
-
-= Version 2.4.2 – February 15, 2024 =
-
-+	Added environment to plugin updater uri - ?environment=wp_get_environment_type().
-+	Ignore 'onlyPHP' flag when loading to prevent critical errors with 404 redirects.
-+	Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
-+	Fixed error in debugging_extension::capture_deprecated()
-+	Now hosted on github.
 
 = Version 2.4.1 – December 27, 2023 =
 

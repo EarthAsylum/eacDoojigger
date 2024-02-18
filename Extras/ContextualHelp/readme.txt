@@ -189,4 +189,4 @@ Where desired, add field level help
 == Screenshots ==
 
 1. My Awesome Plugin Contextual Help
-![ContextualHelp](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-10.png)
+![ContextualHelp](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/screenshot-10.png)

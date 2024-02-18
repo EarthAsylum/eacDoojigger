@@ -121,10 +121,10 @@ In your main plugin file (myAwesomeExtension.php)
 == Screenshots ==
 
 1.	Upgrade Notice
-![Upgrade Notice](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/upgrade_notice.png)
+![Upgrade Notice](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/upgrade_notice.png)
 
 2.	View Details
-![View Details](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/view_details.png)
+![View Details](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/view_details.png)
 
 
 == JSON Updater Object ==
@@ -295,7 +295,7 @@ When WordPress shows an update available for version 1.0.1, it will only parse
 
 `This version fixes critical bugs. Please update immediately.`
 
-![Upgrade Notice](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/upgrade_notice.png)
+![Upgrade Notice](https://d2xk802d4616wu.cloudfront.net/eacDoojigger/assets/upgrade_notice.png)
 
 If there is no `= 1.0.1 =` section, then there is no upgrade notice.
 
