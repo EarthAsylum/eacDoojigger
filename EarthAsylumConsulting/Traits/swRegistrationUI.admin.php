@@ -183,7 +183,7 @@ trait swRegistrationUI
 			$this->add_filter( 'plugin_update_parameters', function($parameters)
 				{
 				//	$parameters['plugin_options']['registration'] 	= $this->getRegistrationKey();
-					$parameters['requestHeaders']['Authorization'] 	= "bearer ".$this->getRegistrationKey();
+					$parameters['requestHeaders']['Authorization'] 	= "token ".base64_encode($this->getRegistrationKey());
 					return $parameters;
 				}
 			);
