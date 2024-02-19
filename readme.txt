@@ -407,6 +407,13 @@ this software in accordance with the license level purchased.
 See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user-license-agreement/)
 
 
+== Upgrade Notice ==
+
+= 2.0.0 =
+
+To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins; 2. Upgrade {eac}Doojigger; 3. Upgrade all derivative plugins; 4. Re-enable all derivative plugins.
+
+
 == Changelog ==
 
 = Version 2.5.0 – February 18, 2024 =
@@ -415,6 +422,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 	+ 	Extensions are not loaded unless self::ALLOW_NON_PHP is set on construct.
 	+	This allows handling of non-php files and redirects passed through WordPress.
 	+	Limits loading of unneeded extensions.
++	Pass authentication header on plugin_update_parameters filter in swRegistrationUI.
 +	Added environment to plugin updater uri - ?environment=wp_get_environment_type().
 +	Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
 +	Fixed error in debugging_extension::capture_deprecated()
@@ -423,11 +431,3 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 	+	With [Software Product Taxonomy](https://swregistry.earthasylum.com/software-taxonomy/) extension for github hosting.
 
 = See changelog.md for more =
-
-
-== Upgrade Notice ==
-
-= 2.0.0 =
-
-To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins; 2. Upgrade {eac}Doojigger; 3. Upgrade all derivative plugins; 4. Re-enable all derivative plugins.
-

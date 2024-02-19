@@ -6,6 +6,7 @@
 	+ 	Extensions are not loaded unless self::ALLOW_NON_PHP is set on construct.
 	+	This allows handling of non-php files and redirects passed through WordPress.
 	+	Limits loading of unneeded extensions.
++	Pass authentication header on plugin_update_parameters filter in swRegistrationUI.
 +	Added environment to plugin updater uri - ?environment=wp_get_environment_type().
 +	Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
 +	Fixed error in debugging_extension::capture_deprecated()

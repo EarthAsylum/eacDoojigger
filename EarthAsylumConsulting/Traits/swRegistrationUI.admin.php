@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	23.1028.1
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	24.0218.1
  */
 
 trait swRegistrationUI
@@ -168,32 +168,28 @@ trait swRegistrationUI
 		if (is_admin())
 		{
 			// when updated, refresh the registration
-			$this->add_action( 'version_updated', 						array($this, 'update_request_refresh'),10,3 );
+			$this->add_action( 'version_updated', 				array($this, 'update_request_refresh'),10,3 );
 
-			// add registration link
+			// add registration link on plugins page
 			$registrationLink = $this->plugin->getSettingsLink(true,'registration','Registration','Registration');
 
 			\add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->plugin->PLUGIN_SLUG,
 				function($pluginLinks, $pluginFile, $pluginData) use ($registrationLink) {
-					return array_merge(['registration'=>$registrationLink],$pluginLinks);
+					return array_merge(['registration' => $registrationLink], $pluginLinks);
 				},25,3
 			);
 
-			// pass key and license in plugin updater request
+			// pass registration key in plugin updater request (from plugin_update.trait)
 			$this->add_filter( 'plugin_update_parameters', function($parameters)
 				{
-					$options =  [
-						'registration'	=> $this->getRegistrationKey(),
-						'license'		=> $this->isRegistryValue('license'),
-						'valid'			=> ($this->isValidRegistration()) ? 'true' : 'false',
-					];
-					$parameters['plugin_options'] = array_merge($parameters['plugin_options'],$options);
+				//	$parameters['plugin_options']['registration'] 	= $this->getRegistrationKey();
+					$parameters['requestHeaders']['Authorization'] 	= "bearer ".$this->getRegistrationKey();
 					return $parameters;
 				}
 			);
 
 			// Add contextual help
-			$this->add_action( 'options_settings_help', 				array( $this, 'getRegistryHelp') );
+			$this->add_action( 'options_settings_help', 		array( $this, 'getRegistryHelp') );
 
 			if (! $this->isValidRegistration())
 			{

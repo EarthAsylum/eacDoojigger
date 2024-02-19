@@ -145,7 +145,9 @@ trait plugin_update
 			wp_parse_args($plugin_info, [
 					'plugin_slug' 			=> '',						// required
 					'plugin_uri'			=> '',						// required if disableAutoUpdates=false
-					'plugin_options'		=> [], 						// parameters added to uri
+					'plugin_options'		=> [ 						// parameters added to uri
+						'environment'		=> wp_get_environment_type(),
+					],
 					'transient_name'		=> true,					// use transient
 					'transient_time'		=> 12 * HOUR_IN_SECONDS,	// transient time
 					'disableAutoUpdates' 	=> false,					// disable auto updating
@@ -154,7 +156,6 @@ trait plugin_update
 					'requestSslVerify'		=> true,					// verify valid ssl cert
 			])
 		);
-		$this->update_plugin_info['plugin_options']['environment'] = wp_get_environment_type();
 
 		// we must know the slug name to do anything
 		if (empty($this->update_plugin_info['plugin_slug']))
