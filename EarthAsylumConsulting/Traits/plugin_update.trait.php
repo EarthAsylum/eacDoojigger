@@ -402,14 +402,17 @@ trait plugin_update
 		$blogVersion = get_bloginfo('version');
 		if ($result['info']->tested) {
 			if (version_compare( $result['info']->tested, substr($blogVersion,0,strlen($result['info']->tested)) ) == 0) {
-				$result['info']->tested = $blogVersion;
+				$result['info']->tested = substr($blogVersion,0,5);
 			}
 		}
 		if ($result['update']->tested) {
 			if (version_compare( $result['update']->tested, substr($blogVersion,0,strlen($result['update']->tested)) ) == 0) {
-				$result['update']->tested = $blogVersion;
+				$result['update']->tested = substr($blogVersion,0,5);
 			}
 		}
+
+		// make sure we have a correct slug
+		$result['info']->slug = $result['update']->slug = $this->update_plugin_info['plugin_name'];
 
 		// save to transient
 		if ($this->update_plugin_info['transient_name'] && $this->update_plugin_info['transient_time'])
