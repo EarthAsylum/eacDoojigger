@@ -71,31 +71,31 @@ trait standard_options
 		if (defined('WP_ENVIRONMENT_TYPE') || class_exists('EarthAsylumConsulting\\eacDoojiggerEnvironment', false))
 		{
 			return [
-					'siteEnvironment'		=> array(
-												'type'		=> 	'disabled',
-												'label'		=> 	$this->plugin->is_network_admin() ? 'Network Environment' : 'Site Environment',
-												'options'	=> 	[self::ENVIRONMENT_LIVE, self::ENVIRONMENT_TEST],
-												'info'		=>	'The WordPress environment is: '. (defined('WP_ENVIRONMENT_TYPE') ? WP_ENVIRONMENT_TYPE : 'not defined')
+				'siteEnvironment'		=> array(
+					'type'		=> 	'disabled',
+					'label'		=> 	$this->plugin->is_network_admin() ? 'Network Environment' : 'Site Environment',
+					'options'	=> 	[self::ENVIRONMENT_LIVE, self::ENVIRONMENT_TEST],
+					'info'		=>	'The WordPress environment is: '. (defined('WP_ENVIRONMENT_TYPE') ? WP_ENVIRONMENT_TYPE : 'not defined')
 /*
-												'info'		=>	"See the 'WP Environment' option in the WordPress ".
-																($this->plugin->is_network_admin()
-																	? "<a href='".network_admin_url('settings.php')."'>Network settings</a>."
-																	: "<a href='".admin_url('options-general.php')."'>General settings</a>.")."<br/>".
-																'The WordPress environment is: '. (defined('WP_ENVIRONMENT_TYPE') ? WP_ENVIRONMENT_TYPE : 'not defined')
+					'info'		=>	"See the 'WP Environment' option in the WordPress ".
+									($this->plugin->is_network_admin()
+										? "<a href='".network_admin_url('settings.php')."'>Network settings</a>."
+										: "<a href='".admin_url('options-general.php')."'>General settings</a>.")."<br/>".
+									'The WordPress environment is: '. (defined('WP_ENVIRONMENT_TYPE') ? WP_ENVIRONMENT_TYPE : 'not defined')
 */
-											),
-					];
+				),
+			];
 		}
 		else
 		{
 			return [
-					'siteEnvironment'		=> array(
-												'type'		=> 	'select',
-												'label'		=> 	$this->plugin->is_network_admin() ? 'Network Environment' : 'Site Environment',
-												'options'	=> 	[self::ENVIRONMENT_LIVE, self::ENVIRONMENT_TEST],
-												'info'		=>	'The WordPress environment is: '. (defined('WP_ENVIRONMENT_TYPE') ? WP_ENVIRONMENT_TYPE : 'not defined')
-											),
-					];
+				'siteEnvironment'		=> array(
+						'type'		=> 	'select',
+						'label'		=> 	$this->plugin->is_network_admin() ? 'Network Environment' : 'Site Environment',
+						'options'	=> 	[self::ENVIRONMENT_LIVE, self::ENVIRONMENT_TEST],
+						'info'		=>	'The WordPress environment is: '. (defined('WP_ENVIRONMENT_TYPE') ? WP_ENVIRONMENT_TYPE : 'not defined')
+				),
+			];
 		}
 	}
 
@@ -108,14 +108,14 @@ trait standard_options
 	private function stdOptions_adminSettingsMenu(): array
 	{
 		return [
-					'adminSettingsMenu'		=> array(
-												'type'		=> 	'checkbox',
-												'label'		=> 	'Settings Admin Menu',
-												'options'	=> 	['Main Sidebar','Plugins Menu','Tools Menu','Settings Menu'],
-												'default'	=> 	['Main Sidebar'],
-												'info'		=> 	'Add "'.$this->plugin->getPluginValue('Title').'" settings menu for easy access'
-											),
-				];
+			'adminSettingsMenu'		=> array(
+				'type'		=> 	'checkbox',
+				'label'		=> 	'Settings Admin Menu',
+				'options'	=> 	['Main Sidebar','Plugins Menu','Tools Menu','Settings Menu'],
+				'default'	=> 	['Main Sidebar'],
+				'info'		=> 	'Add "'.$this->plugin->getPluginValue('Title').'" settings menu for easy access'
+			),
+		];
 	}
 
 
@@ -130,34 +130,34 @@ trait standard_options
 		{
 			$this->rename_network_option('UninstallOptions','uninstall_options');
 			return [
-						'uninstall_options'		=> array(
-													'type'		=> 	'checkbox',
-													'label'		=> 	'Uninstall Options',
-													'options'	=> 	[
-																		['Options &amp; Settings'		=> 'options'],
-																		['Transient (temporary) Data'	=> 'transients'],
-																	],
-													'default'	=>	['options','transients'],
-													'info'		=> 	'Check data that should be removed when this plugin is uninstalled'
-												),
-					];
+				'uninstall_options'		=> array(
+					'type'		=> 	'checkbox',
+					'label'		=> 	'Uninstall Options',
+					'options'	=> 	[
+										['Options &amp; Settings'		=> 'options'],
+										['Transient (temporary) Data'	=> 'transients'],
+									],
+					'default'	=>	['options','transients'],
+					'info'		=> 	'Check data that should be removed when this plugin is uninstalled'
+				),
+			];
 		}
 		else
 		{
 			$this->rename_option('UninstallOptions','uninstall_options');
 			return [
-						'uninstall_options'		=> array(
-													'type'		=> 	'checkbox',
-													'label'		=> 	'Uninstall Options',
-													'options'	=> 	[
-																		['Options &amp; Settings'		=> 'options'],
-																		['Transient (temporary) Data'	=> 'transients'],
-																		['Custom Database Tables'		=> 'tables'],
-																	],
-													'default'	=>	['options','transients'],
-													'info'		=> 	'Check data that should be removed when this plugin is uninstalled'
-												),
-					];
+				'uninstall_options'		=> array(
+					'type'		=> 	'checkbox',
+					'label'		=> 	'Uninstall Options',
+					'options'	=> 	[
+										['Options &amp; Settings'		=> 'options'],
+										['Transient (temporary) Data'	=> 'transients'],
+										['Custom Database Tables'		=> 'tables'],
+									],
+					'default'	=>	['options','transients'],
+					'info'		=> 	'Check data that should be removed when this plugin is uninstalled'
+				),
+			];
 		}
 	}
 
@@ -170,13 +170,13 @@ trait standard_options
 	private function stdOptions_emailFatalNotice(): array
 	{
 		return [
-					'emailFatalNotice'		=> array(
-												'type'		=> 	'email',
-												'label'		=> 	'Email Fatal Errors',
-												'default'	=> 	get_bloginfo('admin_email'),
-												'info'		=> 	'Attempt to send fatal PHP error notifications to this email address.'
-											),
-				];
+			'emailFatalNotice'		=> array(
+				'type'		=> 	'email',
+				'label'		=> 	'Email Fatal Errors',
+				'default'	=> 	get_bloginfo('admin_email'),
+				'info'		=> 	'Attempt to send fatal PHP error notifications to this email address.'
+			),
+		];
 	}
 
 
@@ -187,28 +187,18 @@ trait standard_options
 	 */
 	private function stdOptions_backupOptions(): array
 	{
-		$this->add_filter( "options_form_post__btnBackupOptions", array($this, 'stdOptions_post_backupOptions') );
-
 		return [
-					'_btnBackupOptions'		=> array(
-												'type'		=> 	'button',
-												'label'		=> 	'Backup Settings',
-												'default'	=> 	'Backup',
-												'info'		=> 	"Backup all {$this->pluginName} settings.",
-											),
-				];
-	}
-
-	/**
-	 * When _btnBackupOptions button is posted, display notice
-	 *
-	 * @internal
-	 * @return	void
-	 */
-	public function stdOptions_post_backupOptions(): void
-	{
-		$this->plugin->do_option_backup();
-		$this->add_option_success('button',"Your settings have been backed up.");
+			'_btnBackupOptions'		=> array(
+				'type'		=> 	'button',
+				'label'		=> 	'Backup Settings',
+				'default'	=> 	'Backup',
+				'info'		=> 	"Backup all {$this->pluginName} settings.",
+				'validate'	=> 	function($value) {
+									$this->plugin->do_option_backup();
+									$this->add_option_success('button',"Your settings have been backed up.");
+								},
+			),
+		];
 	}
 
 
@@ -219,31 +209,20 @@ trait standard_options
 	 */
 	private function stdOptions_restoreOptions(): array
 	{
-		$this->add_filter( "options_form_post__btnRestoreOptions", array($this, 'stdOptions_post_restoreOptions') );
-
 		$backupTime = ( $backup = $this->plugin->get_option_backup() )
 						? wp_date($this->plugin->date_time_format,$backup['{timestamp}']) : "";
 		return [
-					'_btnRestoreOptions'.( ($backupTime) ? '' : '_hidden' )
-											=> array(
-												'type'		=> 	($backupTime) ? 'button' : 'hidden',
-												'label'		=> 	'Restore Settings',
-												'default'	=> 	'Restore',
-												'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings from the backup created on {$backupTime}." : "No backup to restore from.",
-											),
-				];
-	}
-
-	/**
-	 * When _btnRestoreOptions button is posted, display notice
-	 *
-	 * @internal
-	 * @return	void
-	 */
-	public function stdOptions_post_restoreOptions(): void
-	{
-		$this->plugin->do_option_restore();
-		$this->add_option_success('button',"Your settings have been restored and are reflected below.");
+			'_btnRestoreOptions'.( ($backupTime) ? '' : '_hidden' ) => array(
+				'type'		=> 	($backupTime) ? 'button' : 'hidden',
+				'label'		=> 	'Restore Settings',
+				'default'	=> 	'Restore',
+				'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings from the backup created on {$backupTime}." : "No backup to restore from.",
+				'validate'	=> 	function($value) {
+									$this->plugin->do_option_restore();
+									$this->add_option_success('button',"Your settings have been restored and are reflected below.");
+								},
+			),
+		];
 	}
 
 
@@ -256,28 +235,18 @@ trait standard_options
 	{
 		if ( ! $this->plugin->is_network_admin() ) return [];
 
-		$this->add_filter( "options_form_post__btnBackupNetwork", array($this, 'stdOptions_post_backupNetwork') );
-
 		return [
-					'_btnBackupNetwork'		=> array(
-												'type'		=> 	'button',
-												'label'		=> 	'Backup Network Settings',
-												'default'	=> 	'Backup All',
-												'info'		=> 	"Backup all {$this->pluginName} settings for all network sites.",
-											),
-				];
-	}
-
-	/**
-	 * When _btnBackupNetwork button is posted, display notice
-	 *
-	 * @internal
-	 * @return	void
-	 */
-	public function stdOptions_post_backupNetwork(): void
-	{
-		$this->plugin->do_network_backup();
-		$this->add_option_success('button',"The settings for all sites have been backed up.");
+			'_btnBackupNetwork'		=> array(
+				'type'		=> 	'button',
+				'label'		=> 	'Backup Network Settings',
+				'default'	=> 	'Backup All',
+				'info'		=> 	"Backup all {$this->pluginName} settings for all network sites.",
+				'validate'	=> 	function($value) {
+									$this->plugin->do_network_backup();
+									$this->add_option_success('button',"The settings for all sites have been backed up.");
+								},
+			),
+		];
 	}
 
 
@@ -290,31 +259,20 @@ trait standard_options
 	{
 		if ( ! $this->plugin->is_network_admin() ) return [];
 
-		$this->add_filter( "options_form_post__btnRestoreNetwork", array($this, 'stdOptions_post_restoreNetwork') );
-
 		$backupTime = ( $backup = $this->plugin->get_network_backup() )
 						? wp_date($this->plugin->date_time_format,$backup['{timestamp}']) : "";
 		return [
-					'_btnRestoreNetwork'.( ($backupTime) ? '' : '_hidden' )
-											=> array(
-												'type'		=> 	($backupTime) ? 'button' : 'hidden',
-												'label'		=> 	'Restore Network Settings',
-												'default'	=> 	'Restore All',
-												'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings for all network sites from the backup created on {$backupTime}." : "No backup to restore from.",
-											),
-				];
-	}
-
-	/**
-	 * When _btnRestoreNetwork button is posted, display notice
-	 *
-	 * @internal
-	 * @return	void
-	 */
-	public function stdOptions_post_restoreNetwork(): void
-	{
-		$this->plugin->do_network_restore();
-		$this->add_option_success('button',"Your settings for all sites have been restored. Network settings are reflected below.");
+			'_btnRestoreNetwork'.( ($backupTime) ? '' : '_hidden' )	=> array(
+				'type'		=> 	($backupTime) ? 'button' : 'hidden',
+				'label'		=> 	'Restore Network Settings',
+				'default'	=> 	'Restore All',
+				'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings for all network sites from the backup created on {$backupTime}." : "No backup to restore from.",
+				'validate'	=> 	function($value) {
+									$this->plugin->do_network_restore();
+									$this->add_option_success('button',"Your settings for all sites have been restored. Network settings are reflected below.");
+								},
+			),
+		];
 	}
 
 
@@ -325,32 +283,22 @@ trait standard_options
 	 */
 	private function stdOptions_clearCache(): array
 	{
-		$this->add_filter( "options_form_post__btnClearCache", array($this, 'stdOptions_post_clearCache') );
-
 		return [
-					'_btnClearCache'		=> array(
-												'type'		=> 	'button',
-												'label'		=> 	'Clear Caches &amp; Transients',
-												'default'	=> 	'Clear Caches',
-												'info'		=> 	"Clear WordPress caches and {$this->pluginName} transients.",
-												'after' 	=>  wp_using_ext_object_cache()
-																? '' : '&nbsp;&nbsp;<input class="input-checkbox" type="checkbox" name="clear_transients" id="clear_transients" value="true" checked="checked">'.
-																'<label for="clear_transients">Include Transients</label>',
-											),
-				];
-	}
-
-	/**
-	 * When _btnClearCache button is posted, display notice
-	 *
-	 * @internal
-	 * @return	void
-	 */
-	public function stdOptions_post_clearCache(): void
-	{
-		$withTrans = (isset($_POST['clear_transients']) && $_POST['clear_transients'] == 'true');
-		$this->plugin->flush_caches( $withTrans );
-		if ($withTrans) $this->page_reload(true);
+			'_btnClearCache'		=> array(
+				'type'		=> 	'button',
+				'label'		=> 	'Clear Caches &amp; Transients',
+				'default'	=> 	'Clear Caches',
+				'info'		=> 	"Clear WordPress caches and {$this->pluginName} transients.",
+				'after' 	=>  wp_using_ext_object_cache()
+								? '' : '&nbsp;&nbsp;<input class="input-checkbox" type="checkbox" name="clear_transients" id="clear_transients" value="true" checked="checked">'.
+								'<label for="clear_transients">Include Transients</label>',
+				'validate'	=> 	function($value) {
+									$withTrans = (isset($_POST['clear_transients']) && $_POST['clear_transients'] == 'true');
+									$this->plugin->flush_caches( $withTrans );
+									if ($withTrans) $this->page_reload(true);
+								},
+			),
+		];
 	}
 
 
@@ -366,15 +314,16 @@ trait standard_options
 		$this->add_filter( "options_form_post__btnNetworkCache", array($this, 'stdOptions_post_networkCache') );
 
 		return [
-					'_btnNetworkCache'		=> array(
- 												'type'		=> 	'button',
-												'label'		=> 	'Clear Network Caches &amp; Transients',
-												'default'	=> 	'Network Caches',
-												'info'		=> 	"Clear WordPress caches and {$this->pluginName} transients for all network sites.",
-												'after' 	=>  '&nbsp;&nbsp;<input class="input-checkbox" type="checkbox" name="site_transients" id="site_transients" value="true">'.
-																'<label for="site_transients">Include Transients</label>',
-											),
-				];
+			'_btnNetworkCache'		=> array(
+				'type'		=> 	'button',
+				'label'		=> 	'Clear Network Caches &amp; Transients',
+				'default'	=> 	'Network Caches',
+				'info'		=> 	"Clear WordPress caches and {$this->pluginName} transients for all network sites.",
+				'after' 	=>  wp_using_ext_object_cache()
+								? '' : '&nbsp;&nbsp;<input class="input-checkbox" type="checkbox" name="site_transients" id="site_transients" value="true">'.
+								'<label for="site_transients">Include Transients</label>',
+			),
+		];
 	}
 
 	/**
@@ -391,9 +340,9 @@ trait standard_options
 				$this->plugin->flush_caches( $withTrans );
 			}
 		);
-		if ($withTrans) $this->page_reload(true);
 		$message = ($withTrans) ? 'cache & transient' : 'cache';
 		$this->add_option_success('button',"The {$message} cleanup action has been triggered on all sites.");
+		if ($withTrans) $this->page_reload(true);
 	}
 
 
@@ -425,12 +374,12 @@ trait standard_options
 		$html .= "</table>";
 
 		return [
-					'_dspNetworkActive'		=> array(
- 												'type'		=> 	'display',
-												'label'		=> 	'Active Sites/Blogs',
-												'default'	=> 	$html,
-											),
-				];
+			'_dspNetworkActive'		=> array(
+				'type'		=> 	'display',
+				'label'		=> 	'Active Sites/Blogs',
+				'default'	=> 	$html,
+			),
+		];
 	}
 
 
@@ -442,12 +391,12 @@ trait standard_options
 	private function stdOptions_noSubmit(): array
 	{
 		return [
-					'_btnSubmitOptions'		=> array(
- 												'type'		=> 	'hidden',
-												'label'		=> 	'submit',
-												'default'	=> 	'',
-											),
-				];
+			'_btnSubmitOptions'		=> array(
+				'type'		=> 	'hidden',
+				'label'		=> 	'submit',
+				'default'	=> 	'',
+			),
+		];
 	}
 
 
@@ -461,16 +410,16 @@ trait standard_options
 		$nonce 		= wp_create_nonce("{$this->pluginName}_export");
 		$basename 	= "{$this->pluginName}_".($this->is_network_admin() ? 'network' : 'site')."_settings.json";
 		return [
-					'_btnExportOptions'		=> array(
-												'type'		=> 	'display',
-												'label'		=> 	'Export Settings',
-												'default'	=> 	"<a href='".
-																admin_url("admin-post.php?action={$this->pluginName}_settings_export&_wpnonce={$nonce}").
-																"' class='button button-large' style='text-align:center'>Export</a>",
-												'info'		=> 	"Export &amp; download all {$this->pluginName} settings to {$basename}.",
-												'help'		=> "[info]",
-											),
-				];
+			'_btnExportOptions'		=> array(
+				'type'		=> 	'display',
+				'label'		=> 	'Export Settings',
+				'default'	=> 	"<a href='".
+								admin_url("admin-post.php?action={$this->pluginName}_settings_export&_wpnonce={$nonce}").
+								"' class='button button-large' style='text-align:center'>Export</a>",
+				'info'		=> 	"Export &amp; download all {$this->pluginName} settings to {$basename}.",
+				'help'		=> "[info]",
+			),
+		];
 	}
 
 	/**
@@ -559,14 +508,14 @@ trait standard_options
 		$this->add_filter( "options_form_post__btnImportOptions", array($this, 'stdOptions_post_optionImport'),10,4 );
 
 		return [
-					'_btnImportOptions'		=> array(
-												'type'		=> 	'file',
-												'label'		=> 	'Import Settings',
-												'default'	=> 	'Import',
-												'info'		=> 	"Upload &amp; import {$this->pluginName} settings.",
-												'attributes'=> 	['accept'=>'.json,application/json'],
-											),
-				];
+			'_btnImportOptions'		=> array(
+				'type'		=> 	'file',
+				'label'		=> 	'Import Settings',
+				'default'	=> 	'Import',
+				'info'		=> 	"Upload &amp; import {$this->pluginName} settings.",
+				'attributes'=> 	['accept'=>'.json,application/json'],
+			),
+		];
 	}
 
 	/**
@@ -636,5 +585,28 @@ trait standard_options
 		);
 		@unlink($values['file']);
 		return $values;
+	}
+
+
+	/**
+	 * get checkForUpdates - clear update caches and redirect to updates page
+	 *
+	 * @return 	array
+	 */
+	private function stdOptions_checkForUpdates(): array
+	{
+		return [
+			'_btnCheckForUpdates'	=> array(
+				'type'		=> 	'button',
+				'label'		=> 	'Check for Updates',
+				'default'	=> 	'Check Now',
+				'info'		=> 	"Clear WordPress update caches and check for software updates.",
+				'validate'	=> 	function($value) {
+									\wp_clean_update_cache();
+									\wp_redirect(network_admin_url('update-core.php'));
+									die();
+								},
+			),
+		];
 	}
 }

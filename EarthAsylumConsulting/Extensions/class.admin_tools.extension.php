@@ -67,6 +67,13 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 					$this->standard_options(['networkCache','backupNetwork','restoreNetwork'])
 				);
 			}
+
+			if ( !is_multisite() || $this->plugin->is_network_admin() )
+			{
+				$this->registerExtensionOptions( 'software_updates',
+					$this->standard_options(['checkForUpdates'])
+				);
+			}
 		}
 	}
 }

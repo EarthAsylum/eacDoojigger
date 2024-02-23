@@ -1,12 +1,12 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI: 		https://eacDoojigger.earthasylum.com/
 Author: 			[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag: 		2.5.0-RC1
-Last Updated: 		15-Feb-2024
+Stable tag: 		2.5.0-RC2
+Last Updated: 		23-Feb-2024
 Requires at least: 	5.5.0
 Tested up to: 		6.4
 Requires PHP: 		7.4
-Contributors:       kevinburkholder
+Contributors:       earthasylum@github,kevinburkholder
 License: 			EarthAsylum Consulting Proprietary License - {eac}PLv1
 License URI:		https://eacDoojigger.earthasylum.com/end-user-license-agreement/
 Tags: 				plugin development, rapid development, multi-function, security, encryption, debugging, administration, contextual-help, session management, maintenance mode, plugin framework, plugin derivative, plugin extensions, toolkit
@@ -416,8 +416,15 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.5.0 – February 18, 2024 =
+= Version 2.5.0 – February 23, 2024 =
 
++	Streamline standard_options trait, added checkForUpdates (tools).
++	Streamline plugin_update trait including
+	+	Support for new software taxonomy Github hosting plugin.
+	+	Renamed methods in plugin_update trait.
+	+	Delete internal transient when update_plugins transient is deleted.
+	+	Added 'transient_time_test' (1 hour) for non-production sites.
++	Use wp_clean_update_cache() when clearing caches.
 +	Now loads for all (php/non-php) requests.
 	+ 	Extensions are not loaded unless self::ALLOW_NON_PHP is set on construct.
 	+	This allows handling of non-php files and redirects passed through WordPress.

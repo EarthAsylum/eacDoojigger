@@ -1,7 +1,14 @@
 ## Changelog
 
-#### Version 2.5.0 – February 15, 2024
+#### Version 2.5.0 – February 23, 2024
 
++	Streamline standard_options trait, added checkForUpdates (tools).
++	Streamline plugin_update trait including
+	+	Support for new software taxonomy Github hosting plugin.
+	+	Renamed methods in plugin_update trait.
+	+	Delete internal transient when update_plugins transient is deleted.
+	+	Added 'transient_time_test' (1 hour) for non-production sites.
++	Use wp_clean_update_cache() when clearing caches.
 +	Now loads for all (php/non-php) requests.
 	+ 	Extensions are not loaded unless self::ALLOW_NON_PHP is set on construct.
 	+	This allows handling of non-php files and redirects passed through WordPress.

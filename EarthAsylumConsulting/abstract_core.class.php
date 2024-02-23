@@ -1466,11 +1466,11 @@ abstract class abstract_core
 			$this->logDebug('wp_cache_flush',__METHOD__);
 		}
 
-		// WP plugins cache
-		if (function_exists('\wp_clean_plugins_cache')) {
-			\wp_clean_plugins_cache(true);
-			$caches[] = 'WP Plugin Cache';
-			$this->logDebug('wp_clean_plugins_cache',__METHOD__);
+		// WP update cache
+		if (function_exists('\wp_clean_update_cache')) {
+			\wp_clean_update_cache();
+			$caches[] = 'WP Update Cache';
+			$this->logDebug('wp_clean_update_cache',__METHOD__);
 		}
 
 		// Cache_Enabler

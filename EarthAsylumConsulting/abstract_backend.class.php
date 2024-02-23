@@ -732,8 +732,6 @@ abstract class abstract_backend extends abstract_core
 		if (method_exists($this, 'deleteUpdaterTransient')) {
 			$this->deleteUpdaterTransient();
 		}
-		\delete_site_transient('update_plugin_'.strtolower($this->className));
-		\delete_site_transient('update_plugins');
 
 		// delete plugin transient data
 		if ($isNetwork || $this->is_network_admin())

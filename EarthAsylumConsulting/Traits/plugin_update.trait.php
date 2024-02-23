@@ -9,7 +9,7 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		2.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -95,7 +95,6 @@ trait plugin_update
 	 */
 	use \EarthAsylumConsulting\Traits\plugin_update_notice;
 
-
 	/**
 	 * @var array parameters passed to addPluginUpdateHooks()
 	 */
@@ -103,10 +102,10 @@ trait plugin_update
 
 
 	/**
-	 * plugin update hooks - call from class constructor
+	 * plugin update hooks - add hooks using plugin file header values
 	 *
 	 * @param	string	$plugin_file path to plugin file (for get_file_data())
-	 * @param	string $className the self::class name of the loading plugin class.
+	 * @param	string $className the class name of the loading plugin class.
 	 * @return	void
 	 */
 	protected function addPluginUpdateFile(string $plugin_file, string $className=''): void
@@ -127,15 +126,15 @@ trait plugin_update
 
 
 	/**
-	 * plugin update hooks - call from class constructor
+	 * plugin update hooks - add hooks using plugin_info array
 	 *
 	 * @param	array	$plugin_info, ['plugin_slug', 'plugin_uri', 'transient_name', 'disableAutoUpdates']
-	 * @param	string $className the self::class name of the loading plugin class.
+	 * @param	string $className the class name of the loading plugin class.
 	 * @return	void
 	 */
 	protected function addPluginUpdateHooks(array $plugin_info, string $className=''): void
 	{
-	    $className = substr($className, strrpos($className, '\\')+1);
+		$className = basename(str_replace('\\', '/', $className));
 		/**
 		 * filter {className}_plugin_update_parameters - filter plugin update parameters
 		 * @param 	array parameters
@@ -171,7 +170,7 @@ trait plugin_update
 			{
 				$this->update_plugin_info['disableAutoUpdates'] = 'Auto-updates disabled';
 			}
-			add_filter( 'plugin_auto_update_setting_html',array( $this, 'plugin_admin_disable_auto_update'), 10, 3 );
+			add_filter( 'plugin_auto_update_setting_html',array( $this, 'plugin_update_disable_auto_update'), 10, 3 );
 		}
 
 		// display notice on plugins page when upgrade available
@@ -195,26 +194,28 @@ trait plugin_update
 		/*
 		 * add admin hooks for automatic update
 		 */
+		// when 'update_plugins' transient is deleted, delete our transient
+		add_action( 'delete_site_transient_update_plugins', array( $this, 'deleteUpdaterTransient') );
 
-		// Update the plugin version
+		// update the plugin version
 		if ( version_compare( get_bloginfo('version' ), '5.8.0', '>=' ) )
 		{
 			$hostname = wp_parse_url( sanitize_url( $this->update_plugin_info['plugin_uri'] ), PHP_URL_HOST );
-			add_filter( "update_plugins_{$hostname}", 	array( $this, 'plugin_admin_push_hostname_update'), 10, 4 );
+			add_filter( "update_plugins_{$hostname}", 	array( $this, 'plugin_update_update_plugins_hostname'), 10, 4 );
 		}
 		else
 		{
-			add_filter( 'site_transient_update_plugins',array( $this, 'plugin_admin_push_plugin_update') );
+			add_filter( 'site_transient_update_plugins',array( $this, 'plugin_update_update_plugins_transient') );
 		}
 
 		// requests plugin info from remote source
-		add_filter( 'plugins_api',						array( $this, 'plugin_admin_get_plugin_info'), 10, 3 );
+		add_filter( 'plugins_api',						array( $this, 'plugin_update_get_plugin_info'), 10, 3 );
 
 		// when update completes
-		add_action( 'upgrader_process_complete',		array( $this, 'plugin_admin_after_plugin_update'), 10, 2 );
+		add_action( 'upgrader_process_complete',		array( $this, 'plugin_update_after_plugin_update'), 10, 2 );
 
 		// allow external host
-		add_filter( 'http_request_host_is_external',	array( $this, 'plugin_admin_allow_external_host'), 10, 3 );
+		add_filter( 'http_request_host_is_external',	array( $this, 'plugin_update_allow_external_host'), 10, 3 );
 	}
 
 
@@ -224,12 +225,13 @@ trait plugin_update
 	 *
 	 */
 
+
 	/**
 	 * delete updater transient
 	 *
 	 * @return	bool
 	 */
-	protected function deleteUpdaterTransient(): bool
+	public function deleteUpdaterTransient(): bool
 	{
 		if ($this->update_plugin_info['transient_name'])
 		{
@@ -248,7 +250,7 @@ trait plugin_update
 	 * @param	array 	An array of plugin data
 	 * @return	string 	updated html
 	 */
-	public function plugin_admin_disable_auto_update( string $html, string $plugin_file, array $plugin_data ): string
+	public function plugin_update_disable_auto_update( string $html, string $plugin_file, array $plugin_data ): string
 	{
 		if ($this->update_plugin_info['plugin_slug'] == $plugin_file)
 		{
@@ -266,7 +268,7 @@ trait plugin_update
 	 * @param	object 	$args( 'slug' => 'plugin-slug', 'locale' => 'en_US', 'wp_version' => '5.5' )
 	 * @return	object 	plugin information used by WordPress
 	 */
-	public function plugin_admin_get_plugin_info( $result, string $action, object $args )
+	public function plugin_update_get_plugin_info( $result, string $action, object $args )
 	{
 		if ($action !== 'plugin_information') return $result;
 
@@ -310,7 +312,7 @@ trait plugin_update
 	 * @param array       $locales          Installed locales to look translations for.
 	 * @return	object plugin information used by WordPress
 	 */
-	public function plugin_admin_push_hostname_update( $update, $plugin_data, $plugin_file, $locales )
+	public function plugin_update_update_plugins_hostname( $update, $plugin_data, $plugin_file, $locales )
 	{
 		if ($this->update_plugin_info['plugin_slug'] !== $plugin_file) return $update;
 
@@ -319,7 +321,8 @@ trait plugin_update
 
 
 	/**
-	 * check for plugin update on 'site_transient_update_plugins' filter
+	 * check for plugin update on 'site_transient_update_plugins' filter.
+	 * the filter is called often
 	 *
 	 * @param	object $transient plugin_information transient
 	 * 		$transient->last_checked 	= time();
@@ -329,25 +332,14 @@ trait plugin_update
 	 * 		$transient->no_update    	= array();
 	 * @return	object plugin information used by WordPress
 	 */
-	public function plugin_admin_push_plugin_update( $transient )
+	public function plugin_update_update_plugins_transient( $transient )
 	{
-		// the filter is called often, limit our activity as much as possible
-		/*static*/ 	$result = null;
-					$version = null;
-					$update = null;
-
 		if (empty($transient->checked)) return $transient;
 
-		if (empty($result))
+		if ($result = $this->get_plugin_info_cache('update'))
 		{
-			$result = $this->get_plugin_info_cache('update');
-			$version = $transient->checked[ $this->update_plugin_info['plugin_slug'] ] ?? null;
-			$update = ( $version && version_compare($version, $result->version, '<') );
-		}
-
-		// return the plugin info in the transient object
-		if (!empty($result))
-		{
+			$version 	= $transient->checked[ $this->update_plugin_info['plugin_slug'] ] ?? null;
+			$update 	= ( $version && version_compare($version, $result->version, '<') );
 			$transient->checked[$result->plugin] 		= $version;
 			if ( $update ) {
 				$transient->response[$result->plugin]	= $result;
@@ -364,7 +356,7 @@ trait plugin_update
 	 * see: https://developer.wordpress.org/reference/functions/plugins_api/
 	 * see: https://developer.wordpress.org/reference/functions/install_plugin_information/
 	 *
-	 * @param $context 'info' for plugin_info or 'update' for plugin_update
+	 * @param 	string	$context 'info' for plugin_info or 'update' for plugin_update
 	 * @return	object 	info object or update object
 	 */
 	private function get_plugin_info_cache($context='info')
@@ -374,17 +366,13 @@ trait plugin_update
 		{
 			if ($result = \get_site_transient($this->update_plugin_info['transient_name']))
 			{
-				if (is_array($result)) {
-					return $result[$context];
-				} else {
-					$this->deleteUpdaterTransient(); // prior version of this trait
-				}
+				return $result[$context];
 			}
 		}
 
 		// else get the remote upgrade object
-		$update_uri = add_query_arg($this->update_plugin_info['plugin_options'],$this->update_plugin_info['plugin_uri']);
-		$remote = wp_remote_get($update_uri,
+		$result = wp_remote_get(
+			add_query_arg($this->update_plugin_info['plugin_options'],$this->update_plugin_info['plugin_uri']),
 			[
 				'timeout' 	=> intval($this->update_plugin_info['requestTimeout']),
 				'sslverify'	=> $this->update_plugin_info['requestSslVerify'],
@@ -395,106 +383,110 @@ trait plugin_update
 			]
 		);
 
-		if (is_wp_error( $remote ))
+		$result = (wp_remote_retrieve_response_code($result) == '200')
+			? json_decode( wp_remote_retrieve_body($result), true ) : null;
+		if (empty($result)) return null;
+
+		if (isset($result['software_product_github_hosting']))
 		{
-		//	$this->plugin->logError($remote);
-			return null;
+			// updating from expected/trusted source (github hosting extension of {eac}SoftwareRegistry)
+			$result = [ 'info' => (object) $result, 'update' => (object) $result[$this->update_plugin_info['plugin_slug']] ];
+		}
+		else
+		{
+			// updating from unknown source, inspect and format array(s)
+			$result = $this->get_plugin_info_unknown((object) $result);
 		}
 
-		$result = ( isset( $remote['response']['code'] ) && $remote['response']['code'] == 200 && ! empty( $remote['body'] ) )
-			? (object) json_decode( $remote['body'], true )
-			: null;
-
-		// make sure property names exist
-		if ($result)
-		{
-			$update = new \stdclass();
-			$update_properties 	= [
-				'slug','plugin','version','new_version','url','package','requires','tested','requires_php','icons','translations'];
-			foreach (
-				[//	property				default value
-					'slug' 				=> $this->update_plugin_info['plugin_name'],
-					'plugin'			=> $this->update_plugin_info['plugin_slug'],
-					'name'				=> 'slug',
-					'description'		=> 'name',
-					'version'			=> 'new_version',
-					'new_version'		=> 'version',
-					'download_link' 	=> 'package',
-					'package'			=> 'download_link',
-					'requires'			=> '5.5.0',
-					'tested'			=> 'requires',
-					'requires_php'		=> '7.2',
-					'homepage' 			=> 'url',
-					'url'				=> 'homepage',
-					'author'			=> '',
-					'author_uri'		=> '',
-					'author_profile'	=> 'author_uri',
-			//		'last_updated'		=> '',
-			//		'donate_link' 		=> '',
-			//		'contributors' 		=> [/* 'UserName'=>['display_name'=>'', 'profile'=>'', 'avatar'=>''] */],
-					'sections'			=> [/* 'description'=>'','installation'=>'','FAQ'=>'','changelog'=>'', 'reviews'=>'', 'other_notes'=>'' */],
-					'banners'			=> [/* 'low' => '.../772x250.jpg', 'high' => '.../1544x500.jpg' */],
-					'banners_rtl'		=> [/* 'low' => '.../772x250.jpg', 'high' => '.../1544x500.jpg' */],
-					'icons'				=> [/* 'low' => '.../icon-128x128.jpg', 'high' => '.../icon-256x256.jpg' */],
-			//		'tags'				=> [/* 'tag-slug' => 'Tag Name' */],
-			//		'rating'			=> 0,	// percent - 0..100
-			//		'ratings'			=> [/* 5=>n,4=>n,3=>n,2=>n,1=>n */],
-			//		'num_ratings'		=> 0,
-			//		'downloaded'		=> 0, // number of downloads
-			//		'versions'			=> [/* 'M.n.p'=>url_to_zip  */],
-			//		'active_installs'	=> 0,
-			//		'support_threads'	=> 0,
-			//		'support_threads_resolved'	=> 0,
-			//		'translations'		=> [/* [language'=>, 'package'=>] */],
-				] as $property => $value)
-			{
-				if (!isset($result->{$property}))
-				{
-					if (!empty($value) && isset($result->{$value})) {
-						$result->{$property} = $result->{$value};
-					} else {
-						$result->{$property} = $value;
-					}
-				}
-				$value = $result->{$property};
-				switch ($property)
-				{
-					case 'tested':
-						// check version tested to proper length - tested = 6.0 == 6.0.1|6.0.2
-						$blogVersion = get_bloginfo('version');
-						if (version_compare( $value, substr($blogVersion,0,strlen($value)) ) == 0) {
-							$value = $blogVersion;
-						}
-						break;
-					case 'sections':
-						if (array_key_exists('upgrade_notice',$value) && !empty($value['upgrade_notice'])) {
-							$update->upgrade_notice	= trim($value['upgrade_notice']);
-						}
-						break;
-					case 'banners':
-					case 'banners_rtl':
-					case 'icons':
-						if (!empty($value)) {
-							$value['1x'] = $value['low'] ?? null;
-							$value['2x'] = $value['high'] ?? null;
-						}
-						break;
-				}
-				$result->{$property} = $value;
-				if (in_array($property,$update_properties) && !empty($value)) {
-					$update->{$property} = $value;
-				}
-			}
-
-			$result = [ 'info' => $result, 'update' => $update ];
-
-			if ($this->update_plugin_info['transient_name'])
-			{
-				\set_site_transient($this->update_plugin_info['transient_name'], $result, $this->update_plugin_info['transient_time']);
+		// check version tested to proper length - tested = 6.0 == 6.0.1|6.0.2
+		$blogVersion = get_bloginfo('version');
+		if ($result['info']->tested) {
+			if (version_compare( $result['info']->tested, substr($blogVersion,0,strlen($result['info']->tested)) ) == 0) {
+				$result['info']->tested = $blogVersion;
 			}
 		}
-		//$this->plugin->logDebug($result,__METHOD__);
+		if ($result['update']->tested) {
+			if (version_compare( $result['update']->tested, substr($blogVersion,0,strlen($result['update']->tested)) ) == 0) {
+				$result['update']->tested = $blogVersion;
+			}
+		}
+
+		// save to transient
+		if ($this->update_plugin_info['transient_name'] && $this->update_plugin_info['transient_time'])
+		{
+			\set_site_transient($this->update_plugin_info['transient_name'], $result, $this->update_plugin_info['transient_time']);
+		}
+
 		return (is_array($result)) ? $result[$context] : null;
+	}
+
+
+	/**
+	 * process remote result from old or unknown source
+	 *
+	 * @param 	object 	$result from remote request
+	 * @return	array 	info and update objects
+	 */
+	private function get_plugin_info_unknown($result)
+	{
+		$update = new \stdclass();
+		$update_properties 	= [
+			'slug','plugin','version','new_version','url','package','requires','tested','requires_php','icons','translations'];
+		foreach (
+			[//	property				default value
+				'slug' 				=> $this->update_plugin_info['plugin_name'],
+				'plugin'			=> $this->update_plugin_info['plugin_slug'],
+				'name'				=> 'slug',
+				'description'		=> 'name',
+				'version'			=> 'new_version',
+				'new_version'		=> 'version',
+				'download_link' 	=> 'package',
+				'package'			=> 'download_link',
+				'requires'			=> 'tested',
+				'tested'			=> 'requires',
+				'homepage' 			=> 'url',
+				'url'				=> 'homepage',
+				'author_uri'		=> 'author_profile',
+				'author_profile'	=> 'author_uri',
+			//	'sections'			=> [/* 'description'=>'','installation'=>'','FAQ'=>'','changelog'=>'', 'reviews'=>'', 'other_notes'=>'' */],
+			//	'banners'			=> [/* 'low' => '.../772x250.jpg', 'high' => '.../1544x500.jpg' */],
+			//	'banners_rtl'		=> [/* 'low' => '.../772x250.jpg', 'high' => '.../1544x500.jpg' */],
+			//	'icons'				=> [/* 'low' => '.../icon-128x128.jpg', 'high' => '.../icon-256x256.jpg' */],
+			//	'translations'		=> [/* [language'=>, 'package'=>] */],
+			] as $property => $value)
+		{
+			if (!isset($result->{$property}))
+			{
+				if (!empty($value) && isset($result->{$value})) {
+					$result->{$property} = $result->{$value};
+				} else {
+					$result->{$property} = $value;
+				}
+			}
+			$value = $result->{$property};
+			switch ($property)
+			{
+				case 'sections':
+					if (array_key_exists('upgrade_notice',$value) && !empty($value['upgrade_notice'])) {
+						$update->upgrade_notice	= trim($value['upgrade_notice']);
+					}
+					break;
+				case 'banners':
+				case 'banners_rtl':
+				case 'icons':
+					if (!empty($value)) {
+						$value['1x'] = $value['low'] ?? null;
+						$value['2x'] = $value['high'] ?? null;
+					}
+					break;
+			}
+			$result->{$property} = $value;
+			if (in_array($property,$update_properties) && !empty($value)) {
+				$update->{$property} = $value;
+			}
+		}
+
+		return [ 'info' => $result, 'update' => $update ];
 	}
 
 
@@ -506,7 +498,7 @@ trait plugin_update
 	 * @param	array	$hook_extra
 	 * @return	void
 	 */
-	public function plugin_admin_after_plugin_update( object $WP_Upgrader, array $hook_extra ): void
+	public function plugin_update_after_plugin_update( object $WP_Upgrader, array $hook_extra ): void
 	{
 		if ( $hook_extra['action'] == 'update' && $hook_extra['type'] === 'plugin' )
 		{
@@ -526,7 +518,7 @@ trait plugin_update
 	 * @param	string 	$url remote url
 	 * @return	bool
 	 */
-	public function plugin_admin_allow_external_host( bool $allow, string $host, string $url ): bool
+	public function plugin_update_allow_external_host( bool $allow, string $host, string $url ): bool
 	{
 		if (strpos($url,$this->update_plugin_info['plugin_uri']) !== false)
 		{
