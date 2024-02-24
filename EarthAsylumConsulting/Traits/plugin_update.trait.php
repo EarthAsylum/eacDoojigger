@@ -148,7 +148,7 @@ trait plugin_update
 						'environment'		=> wp_get_environment_type(),
 					],
 					'transient_name'		=> true,					// use transient
-					'transient_time'		=> 12 * HOUR_IN_SECONDS,	// transient time
+					'transient_time'		=> HOUR_IN_SECONDS,			// transient time
 					'disableAutoUpdates' 	=> false,					// disable auto updating
 					'requestTimeout'		=> 6,						// timeout
 					'requestHeaders'		=> [],						// optional headers in request

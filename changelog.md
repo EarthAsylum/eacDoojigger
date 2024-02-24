@@ -7,7 +7,7 @@
 	+	Support for new software taxonomy Github hosting plugin.
 	+	Renamed methods in plugin_update trait.
 	+	Delete internal transient when update_plugins transient is deleted.
-	+	Added 'transient_time_test' (1 hour) for non-production sites.
+	+	Changed default transient_time to 1 hour (was 12), letting WP manage update checks.
 +	Use wp_clean_update_cache() when clearing caches.
 +	Now loads for all (php/non-php) requests.
 	+ 	Extensions are not loaded unless self::ALLOW_NON_PHP is set on construct.
