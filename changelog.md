@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.5.0 – February 23, 2024
+#### Version 2.5.0 – February 25, 2024
 
 +	Streamline standard_options trait, added checkForUpdates (tools).
 +	Streamline plugin_update trait including

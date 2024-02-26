@@ -29,17 +29,22 @@ namespace EarthAsylumConsulting\Traits;
  *			[
  *				'plugin_slug'		=> (required) 'directory/pluginfile.php' - plugin_basename( __FILE__ )
  *				'plugin_uri'		=> (required) uri to JSON updater file - from plugin file header : 'Update URI' or 'Plugin URI'
+ *
  *   			'plugin_options'	=> (optional) name=>value array added as query options to plugin_uri.
+ * 										defaults to ['environment' => wp_get_environment_type()]
  *
  *				'transient_name'	=> (optional) the full name of the transient used to cache the external update info (false=no caching)
  *										defaults to 'plugin_update_<directory>' (directory from plugin_slug should be the plugin name)
- *				'transient_time'	=> (optional) time (in seconds) to keep the transient (transient expiration), defaults to 12 hours
+ *				'transient_time'	=> (optional) time (in seconds) to keep the transient (transient expiration), defaults to 1 hour
+ *
  *				'disableAutoUpdates'=> (optional) true or string (message to display), disables automatic updates on plugins page
  *										defaults to false, or when true, 'Auto-updates disabled'
+ *
  *				'requestTimeout'	=> (optional) timeout (in seconds) for remote request (default=6),
  *				'requestHeaders'	=> (optional) array of additional headers to send on remote request [ 'header_name'=>'header_value' ],
  *				'requestSslVerify'	=> (optional) boolean to verify ssl certificate. Default = true.
- *			]
+ *			],
+ * 			__CLASS__
  *		);
  */
 
@@ -48,16 +53,17 @@ namespace EarthAsylumConsulting\Traits;
  *
  *	$plugin_install_info = array
  *	(
- *		"plugin" 			=> "pluginName/pluginName.php",							// main plugin file once installed
+ *		"slug" 				=> "pluginName",							// main plugin directory
+ *		"plugin" 			=> "pluginName/pluginName.php",				// main plugin file once installed
  *		"name" 				=> "Plugin Name",
  *		"description" 		=> "Plugin Description",
  *		"version" 			=> "0.0.0",
- *		"last_updated" 		=> "Y-m-d H:m:s",										// Last update date/time
- *		"homepage" 			=> "url to homepage",									// source page
- *		"download_link" 	=> "{plugin_install_url}/pluginName.zip",				// source zip
- *		"requires" 			=> "5.3.0",												// WordPress version minimum
- *		"tested" 			=> "5.8",												// WordPress version tested
- *		"requires_php" 		=> "7.2",												// PHP version minimum
+ *		"last_updated" 		=> "Y-m-d H:m:s",							// Last update date/time
+ *		"homepage" 			=> "url to homepage",						// source page
+ *		"download_link" 	=> "{plugin_install_url}/pluginName.zip",	// source zip
+ *		"requires" 			=> "5.3.0",									// WordPress version minimum
+ *		"tested" 			=> "5.8",									// WordPress version tested
+ *		"requires_php" 		=> "7.2",									// PHP version minimum
  *		"author"			=> "<a href='author_url'>Author Name</a>",
  *		'contributors' 		=> array
  *		(
@@ -244,7 +250,6 @@ trait plugin_update
 	/**
 	 * disable auto-update for this plugin - plugin_auto_update_setting_html
 	 *
-	 *
 	 * @param	string 	default html for auto-update option
 	 * @param	string 	The path to the main plugin file relative to the plugins directory
 	 * @param	array 	An array of plugin data
@@ -387,10 +392,11 @@ trait plugin_update
 			? json_decode( wp_remote_retrieve_body($result), true ) : null;
 		if (empty($result)) return null;
 
-		if (isset($result['software_product_github_hosting']))
+		if (isset($result['eac_github_hosting']))
 		{
 			// updating from expected/trusted source (github hosting extension of {eac}SoftwareRegistry)
-			$result = [ 'info' => (object) $result, 'update' => (object) $result[$this->update_plugin_info['plugin_slug']] ];
+			unset($info['eac_github_hosting']); 	// extraneous data
+			$result = [ 'info' => (object) $result, 'update' => (object) $result[ $result['slug'] ] ];
 		}
 		else
 		{
@@ -411,8 +417,9 @@ trait plugin_update
 			}
 		}
 
-		// make sure we have a correct slug
-		$result['info']->slug = $result['update']->slug = $this->update_plugin_info['plugin_name'];
+		// make sure we have the correct slug & plugin (case-sensitive)
+		$result['info']->slug 	= $result['update']->slug 	= $this->update_plugin_info['plugin_name'];
+		$result['info']->plugin = $result['update']->plugin = $this->update_plugin_info['plugin_slug'];
 
 		// save to transient
 		if ($this->update_plugin_info['transient_name'] && $this->update_plugin_info['transient_time'])
@@ -420,7 +427,7 @@ trait plugin_update
 			\set_site_transient($this->update_plugin_info['transient_name'], $result, $this->update_plugin_info['transient_time']);
 		}
 
-		return (is_array($result)) ? $result[$context] : null;
+		return $result[$context];
 	}
 
 
@@ -462,8 +469,6 @@ trait plugin_update
 			{
 				if (!empty($value) && isset($result->{$value})) {
 					$result->{$property} = $result->{$value};
-				} else {
-					$result->{$property} = $value;
 				}
 			}
 			$value = $result->{$property};
