@@ -1,16 +1,16 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
-Plugin URI:         https://eacDoojigger.earthasylum.com/
-Author:             [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:         2.5.0-RC2+Feb25
-Last Updated:       25-Feb-2024
-Requires at least:  5.5.0
-Tested up to:       6.4
-Requires PHP:       7.4
-Contributors:       kevinburkholder
-License:            EarthAsylum Consulting Proprietary License - {eac}PLv1
-License URI:        https://eacDoojigger.earthasylum.com/end-user-license-agreement/
-Tags:               plugin development, rapid development, multi-function, security, encryption, debugging, administration, contextual-help, session management, maintenance mode, plugin framework, plugin derivative, plugin extensions, toolkit
-GitHub URI:         https://earthasylum.github.io/docs.eacDoojigger/
+Plugin URI:             https://eacDoojigger.earthasylum.com/
+Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
+Stable tag:             2.5.0-RC2+Feb25
+Last Updated:           25-Feb-2024
+Requires at least:      5.5.0
+Tested up to:           6.4
+Requires PHP:           7.4
+Contributors:           earthasylum@github,kevinburkholder@wordpress
+License:                EarthAsylum Consulting Proprietary License - {eac}PLv1
+License URI:            https://eacDoojigger.earthasylum.com/end-user-license-agreement/
+Tags:                   plugin development, rapid development, multi-function, security, encryption, debugging, administration, contextual-help, session management, maintenance mode, plugin framework, plugin derivative, plugin extensions, toolkit
+GitHub URI:             https://earthasylum.github.io/docs.eacDoojigger/
 
 {eac}Doojigger - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
 
