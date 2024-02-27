@@ -1,8 +1,9 @@
 ## EarthAsylum Consulting {eac}Doojigger for WordPress  
 [![EarthAsylum Consulting](https://img.shields.io/badge/EarthAsylum-Consulting-0?&labelColor=6e9882&color=707070)](https://earthasylum.com/)
 [![WordPress](https://img.shields.io/badge/WordPress-Plugins-grey?logo=wordpress&labelColor=blue)](https://wordpress.org/plugins/search/EarthAsylum/)
-[![eacDoojigger](https://img.shields.io/badge/Requires-{eac}Doojigger-da821d)](https://eacDoojigger.earthasylum.com/)
-<details><summary>Plugin Header</summary><samp>
+[![eacDoojigger](https://img.shields.io/badge/Requires-%7Beac%7DDoojigger-da821d)](https://eacDoojigger.earthasylum.com/)
+
+<details><summary>Plugin Header</summary>
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
@@ -17,11 +18,9 @@ License URI:            https://eacDoojigger.earthasylum.com/end-user-license-ag
 Tags:                   plugin development, rapid development, multi-function, security, encryption, debugging, administration, contextual-help, session management, maintenance mode, plugin framework, plugin derivative, plugin extensions, toolkit  
 GitHub URI:             https://earthasylum.github.io/docs.eacDoojigger/  
 
-</samp></details>
+</details>
 
-{eac}Doojigger - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
-
-{eac}Doojigger streamlines the plugin development process and allows you to create professional-grade plugins in a fraction of the time. Take your WordPress development to the next level with {eac}Doojigger.
+> {eac}Doojigger - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress. {eac}Doojigger streamlines the plugin development process and allows you to create professional-grade plugins in a fraction of the time. Take your WordPress development to the next level with {eac}Doojigger.
 
 ### Description
 
