@@ -395,7 +395,7 @@ trait plugin_update
 		if (isset($result['eac_github_hosting']))
 		{
 			// updating from expected/trusted source (github hosting extension of {eac}SoftwareRegistry)
-			unset($info['eac_github_hosting']); 	// extraneous data
+			unset($result['eac_github_hosting']); 	// extraneous data
 			$result = [ 'info' => (object) $result, 'update' => (object) $result[ $result['slug'] ] ];
 		}
 		else
