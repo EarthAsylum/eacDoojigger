@@ -1,25 +1,29 @@
 == Changelog ==
 
-= Version 2.5.0 – February 25, 2024 =
+= Version 2.5.0 – March 1, 2024 =
 
-+	Streamline standard_options trait, added checkForUpdates (tools).
-+	Streamline plugin_update trait including
-	+	Support for new software taxonomy Github hosting plugin.
-	+	Renamed methods in plugin_update trait.
-	+	Delete internal transient when update_plugins transient is deleted.
-	+	Changed default transient_time to 1 hour (was 12), letting WP manage update checks.
-+	Use wp_clean_update_cache() when clearing caches.
-+	Now loads for all (php/non-php) requests.
-	+ 	Extensions are not loaded unless self::ALLOW_NON_PHP is set on construct.
-	+	This allows handling of non-php files and redirects passed through WordPress.
-	+	Limits loading of unneeded extensions.
-+	Pass authentication header on plugin_update_parameters filter in swRegistrationUI.
-+	Added environment to plugin updater uri - ?environment=wp_get_environment_type().
-+	Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
-+	Fixed error in debugging_extension::capture_deprecated()
-+	Now hosted on and updated from github (private repository).
-	+ 	Using [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/) plugin.
-	+	With [Software Product Taxonomy](https://swregistry.earthasylum.com/software-taxonomy/) extension for github hosting.
++   Updated documentation and examples.
+    +   Removed Extras from distribution package, now available on Github:
+        +   [Download](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)
+        +   [Documentation](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/)
++   Streamline standard_options trait, added checkForUpdates (tools).
++   Streamline plugin_update trait including
+    +   Support for new software taxonomy Github hosting plugin.
+    +   Renamed methods in plugin_update trait.
+    +   Delete internal transient when update_plugins transient is deleted.
+    +   Changed default transient_time to 1 hour (was 12), letting WP manage update checks.
++   Use wp_clean_update_cache() when clearing caches.
++   Now loads for all (php/non-php) requests.
+    +   Extensions are not loaded unless self::ALLOW_NON_PHP is set on construct.
+    +   This allows handling of non-php files and redirects passed through WordPress.
+    +   Limits loading of unneeded extensions.
++   Pass authentication header on plugin_update_parameters filter in swRegistrationUI.
++   Added environment to plugin updater uri - ?environment=wp_get_environment_type().
++   Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
++   Fixed error in debugging_extension::capture_deprecated()
++   Now hosted on and updated from github (private repository).
+    +   Using [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/) plugin.
+    +   With [Software Product Taxonomy](https://swregistry.earthasylum.com/software-taxonomy/) extension for github hosting.
 
 = Version 2.4.1 – December 27, 2023 =
 
