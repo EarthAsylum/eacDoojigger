@@ -7,8 +7,8 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.5.0-RC3+Mar01  
-Last Updated:           01-Mar-2024  
+Stable tag:             2.5.0-RC3+Mar05  
+Last Updated:           05-Mar-2024  
 Requires at least:      5.5.0  
 Tested up to:           6.4  
 Requires PHP:           7.2  
@@ -54,10 +54,10 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 #### Provided With {eac}Doojigger
 
-|   Pre-Loaded Extensions               |                       |
+|   Included Extensions & Traits        |                       |
 |   ---------------------------------   |   ----------------    |
 |   *file system access*                | \*New\* Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
-|   * WPMU Installer*                   | \*New\* Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
+|   *WPMU Installer*                    | \*New\* Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
 |   *security*                          | Adds a number of security options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, block IP addresses, set global cookie flags, and more. |
 |   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
@@ -66,16 +66,16 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *admin tools*                       | Adds cache management and plugin option backup/restore, export/import. |
 |   *ajax action*                       | Adds an easy to use ajax responder that can be used by any extension. |
 |   *material icons*                    | Adds Google's Material Icons to WordPress. |
+|   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
 
 
-|   Extras                              |   [Download](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip) [Documentation](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/) |
+|   Extras & Examples                   |   -[explore on github](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)- -[documentation wiki](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/)- -[download zip](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)- |
 |   ---------------------------------   |   ----------------    |
 |   *myAwesomePlugin*                   | Example, skeleton plugin derivative. |
 |   *myAwesomeExtension*                | Example, skeleton plugin extension. |
 |   *myFunctions*                       | A functional skeleton extension plugin intended to replace (or augment) custom theme `functions.php`, including custom stylesheet and javascript. |
 |   *myOptionsTest*                     | A functional example plugin that produces a settings screen with all input field types. Includes example input field filters and sanitization. |
-|   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
-|   A debugging test api                | Extension that provides testing via url through the debugging extension (not recommended for production sites). |
+|   A debugging test api                | Extension that provides testing via url through the debugging extension (not intended for production sites). |
 
 
 |   {eac}Doojigger Utilities            |                       |
@@ -138,8 +138,7 @@ Since uploading extensions to the plugin or theme folder risks overwriting those
 
 {eac}Doojigger provides many useful methods and hooks which can be accessed from your custom plugins or extensions, as well as from your theme functions or any code in WordPress.
 
->   See:
-    +   [Using {eac}Doojigger](https://eacdoojigger.earthasylum.com/using-doojigger) (found in the *Extras/UsingDoojigger/* folder) for details and examples,
+>   See [Using {eac}Doojigger](https://eacdoojigger.earthasylum.com/using-doojigger) (found in the *Extras/UsingDoojigger/* folder) for details and examples,
     +   [{eac}Doojigger PHP Reference](https://earthasylum.github.io/docs.eacDoojigger/) documentation.
 
 
@@ -295,6 +294,7 @@ __Version 2__ has been meticulously updated to provide not only new features and
 
 The *{eac}Doojigger Extras* (now at this [Github Repository](https://github.com/EarthAsylum/docs.eacDoojigger)) includes examples and documentation:
 
++   [{eac}Doojigger Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)  
 +   [{eac}Doojigger Extras Documentation](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/)
 +   [{eac}Doojigger Extras Download](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)
 
@@ -362,11 +362,15 @@ Some extension may use [wp-config-transformer](https://github.com/wp-cli/wp-conf
 
 #### See Also
 
+*Information on building with and using {eac}Doojigger*
+
 +   [{eac}Doojigger Derivatives](https://eacDoojigger.earthasylum.com/derivatives/)
 +   [{eac}Doojigger Extensions](https://eacDoojigger.earthasylum.com/extensions/)
 +   [{eac}Doojigger Options & Settings](https://eacDoojigger.earthasylum.com/options/)
 +   [{eac}Doojigger Contextual Help](https://eacDoojigger.earthasylum.com/contextual-help/)
 +   [{eac}Doojigger Automatic Updates](https://eacDoojigger.earthasylum.com/automatic-updates/)
+
+*Plugins and Extensions built with {eac}Doojigger*
 
 +   [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/)
 A full-featured Software Registration/Licensing Server built on {eac}Doojigger.
