@@ -169,6 +169,21 @@ trait plugin_update
 		}
 		$this->update_plugin_info['plugin_name'] = dirname($this->update_plugin_info['plugin_slug']);
 
+		// define( 'EACDOOJIGGER_PLUGIN_UPDATE_SOURCE', ['branch','default'] );
+		$plugin_update_source = strtoupper($this->update_plugin_info['plugin_name']).'_PLUGIN_UPDATE_SOURCE';
+		if (defined($plugin_update_source))
+		{
+			$plugin_update_source = constant($plugin_update_source);
+			if (is_string($plugin_update_source)) {
+				$this->update_plugin_info['plugin_options']['route_source'] = $plugin_update_source;
+			}
+			if (is_array($plugin_update_source)) {
+				$this->update_plugin_info['plugin_options']['route_source'] = $plugin_update_source[0];
+				$this->update_plugin_info['plugin_options']['id'] 			= $plugin_update_source[1];
+			}
+			$this->update_plugin_info['plugin_options']['cache']			= 'no';
+		}
+
 		// should we disable automatic updating?
 		if ($this->update_plugin_info['disableAutoUpdates'])
 		{
