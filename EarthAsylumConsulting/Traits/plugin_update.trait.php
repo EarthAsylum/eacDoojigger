@@ -141,6 +141,25 @@ trait plugin_update
 	protected function addPluginUpdateHooks(array $plugin_info, string $className=''): void
 	{
 		$className = basename(str_replace('\\', '/', $className));
+
+		// define( 'EACDOOJIGGER_PLUGIN_UPDATE_SOURCE', ['branch','default'] );
+		$plugin_update_options 	= [
+			'environment' => wp_get_environment_type()
+		];
+		$plugin_update_source 	= strtoupper($className).'_PLUGIN_UPDATE_SOURCE';
+		if (defined($plugin_update_source))
+		{
+			$plugin_update_source = constant($plugin_update_source);
+			if (is_string($plugin_update_source)) {
+				$plugin_update_options['update_source'] = $plugin_update_source;
+			}
+			if (is_array($plugin_update_source)) {
+				$plugin_update_options['update_source'] = $plugin_update_source[0];
+				$plugin_update_options['update_id'] 	= $plugin_update_source[1];
+			}
+			$plugin_update_options['cache']				= 'no';
+		}
+
 		/**
 		 * filter {className}_plugin_update_parameters - filter plugin update parameters
 		 * @param 	array parameters
@@ -150,9 +169,7 @@ trait plugin_update
 			wp_parse_args($plugin_info, [
 					'plugin_slug' 			=> '',						// required
 					'plugin_uri'			=> '',						// required if disableAutoUpdates=false
-					'plugin_options'		=> [ 						// parameters added to uri
-						'environment'		=> wp_get_environment_type(),
-					],
+					'plugin_options'		=> $plugin_update_options,	// parameters added to uri
 					'transient_name'		=> true,					// use transient
 					'transient_time'		=> HOUR_IN_SECONDS,			// transient time
 					'disableAutoUpdates' 	=> false,					// disable auto updating
@@ -168,21 +185,6 @@ trait plugin_update
 			return;
 		}
 		$this->update_plugin_info['plugin_name'] = dirname($this->update_plugin_info['plugin_slug']);
-
-		// define( 'EACDOOJIGGER_PLUGIN_UPDATE_SOURCE', ['branch','default'] );
-		$plugin_update_source = strtoupper($this->update_plugin_info['plugin_name']).'_PLUGIN_UPDATE_SOURCE';
-		if (defined($plugin_update_source))
-		{
-			$plugin_update_source = constant($plugin_update_source);
-			if (is_string($plugin_update_source)) {
-				$this->update_plugin_info['plugin_options']['route_source'] = $plugin_update_source;
-			}
-			if (is_array($plugin_update_source)) {
-				$this->update_plugin_info['plugin_options']['route_source'] = $plugin_update_source[0];
-				$this->update_plugin_info['plugin_options']['id'] 			= $plugin_update_source[1];
-			}
-			$this->update_plugin_info['plugin_options']['cache']			= 'no';
-		}
 
 		// should we disable automatic updating?
 		if ($this->update_plugin_info['disableAutoUpdates'])
