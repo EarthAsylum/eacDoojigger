@@ -1513,6 +1513,7 @@ abstract class abstract_core
 
 		$message 	= sprintf("The %s cleanup action has been triggered.",$message);
 		$more 		= 'Caches cleared: '.implode(', ',$caches);
+		$this->do_action('after_flush_caches');
 		$this->add_admin_notice($message,'success',$more);
 	}
 
