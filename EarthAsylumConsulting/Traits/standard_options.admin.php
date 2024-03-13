@@ -609,7 +609,7 @@ trait standard_options
 				'default'	=> 	'release',
 				'info'		=> 	"Select the channel for updates to this plugin.<br>".
 								"The <em>Current/Latest-Release</em> is the official, stable and supported release channel, ".
-								"whereas the <em>Preview/Release-Candidate</em> represents an early, pre-release channel. ",
+								"whereas the <em>Preview/Release-Candidate</em> provides an early, pre-release channel. ",
 			),
 		];
 	}
