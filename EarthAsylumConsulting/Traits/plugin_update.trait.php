@@ -167,6 +167,9 @@ trait plugin_update
 			if (isset($plugin_update_source[1])) {
 				$plugin_update_options['update_id'] = $plugin_update_source[1];
 			}
+			if ($plugin_update_source != 'release') {
+				$plugin_update_options['cache'] = 'no';
+			}
 		}
 
 		/**
