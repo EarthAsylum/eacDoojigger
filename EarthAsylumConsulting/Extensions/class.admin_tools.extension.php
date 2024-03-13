@@ -68,10 +68,10 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 				);
 			}
 
-			if ( !is_multisite() || $this->plugin->is_network_admin() )
+			if ( $this->isAdvancedMode() && (!is_multisite() || $this->plugin->is_network_admin()) )
 			{
 				$this->registerExtensionOptions( 'software_updates',
-					$this->standard_options(['checkForUpdates'])
+					$this->standard_options(['updateChannel','checkForUpdates'])
 				);
 			}
 		}

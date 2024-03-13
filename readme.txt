@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.5.0-RC3+Mar09
-Last Updated:           09-Mar-2024
+Stable tag:             2.5.0-RC3+Mar13
+Last Updated:           13-Mar-2024
 Requires at least:      5.5.0
 Tested up to:           6.4
 Requires PHP:           7.2
@@ -411,13 +411,15 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.5.0 – March 9, 2024 =
+= Version 2.5.0 – March 13, 2024 =
 
 +   Added action `after_flush_caches` when flushing caches.
-+   Added constant '{pluginname}_PLUGIN_UPDATE_SOURCE' to override plugin update source.
++   Added option `{classname}_selected_update_channel` and stdOptions_updateChannel() in standard_options trait.
+    +   Like {classname}_PLUGIN_UPDATE_CHANNEL.
++   Added constant `{classname}_PLUGIN_UPDATE_CHANNEL` to override plugin update source.
     +   For github hosting, specify branch|release and the tag or id.
-    +   `define( 'EACDOOJIGGER_PLUGIN_UPDATE_SOURCE', 'default_branch' );`
-    +   `define( 'EACDOOJIGGER_PLUGIN_UPDATE_SOURCE', ['branch','default'] );`
+    +   `define( 'EACDOOJIGGER_PLUGIN_UPDATE_CHANNEL', 'branch' );`
+    +   `define( 'EACDOOJIGGER_PLUGIN_UPDATE_CHANNEL', 'branch/default' );`
 +   Updated documentation and examples.
     +   Removed Extras from distribution package, now available on Github:
         +   [Download](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)

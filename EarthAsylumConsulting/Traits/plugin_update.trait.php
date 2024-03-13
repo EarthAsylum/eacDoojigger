@@ -142,22 +142,31 @@ trait plugin_update
 	{
 		$className = basename(str_replace('\\', '/', $className));
 
-		// define( 'EACDOOJIGGER_PLUGIN_UPDATE_SOURCE', ['branch','default'] );
 		$plugin_update_options 	= [
 			'environment' => wp_get_environment_type()
 		];
-		$plugin_update_source 	= strtoupper($className).'_PLUGIN_UPDATE_SOURCE';
+
+		// check for constant ('{classname}_PLUGIN_UPDATE_CHANNEL')
+		// 		 	or option ('{classname}_selected_update_channel')
+		// define( '{classname}_PLUGIN_UPDATE_CHANNEL', ['branch','default'] );
+		// define( '{classname}_PLUGIN_UPDATE_CHANNEL', 'branch/default' );
+		// define( '{classname}_PLUGIN_UPDATE_CHANNEL', 'release/latest' );
+		$plugin_update_source 	= strtoupper($className).'_PLUGIN_UPDATE_CHANNEL';
 		if (defined($plugin_update_source))
 		{
 			$plugin_update_source = constant($plugin_update_source);
-			if (is_string($plugin_update_source)) {
-				$plugin_update_options['update_source'] = $plugin_update_source;
+		}
+		else	// update_option( '{classname}_selected_update_channel', ... );
+		{
+			$plugin_update_source = \get_option($className.'_selected_update_channel');
+		}
+		if (!empty($plugin_update_source) && is_string($plugin_update_source))
+		{
+			$plugin_update_source = explode('/',$plugin_update_source);
+			$plugin_update_options['update_source'] = $plugin_update_source[0];
+			if (isset($plugin_update_source[1])) {
+				$plugin_update_options['update_id'] = $plugin_update_source[1];
 			}
-			if (is_array($plugin_update_source)) {
-				$plugin_update_options['update_source'] = $plugin_update_source[0];
-				$plugin_update_options['update_id'] 	= $plugin_update_source[1];
-			}
-			$plugin_update_options['cache']				= 'no';
 		}
 
 		/**

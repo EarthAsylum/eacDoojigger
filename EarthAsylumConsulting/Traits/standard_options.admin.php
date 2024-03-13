@@ -589,6 +589,33 @@ trait standard_options
 
 
 	/**
+	 * set update source - allows update from default branch or latest release (Github)
+	 * if additional tags (channels) are needed, this code can be copied and modified with additional options.
+	 *
+	 * @return 	array
+	 */
+	private function stdOptions_updateChannel(): array
+	{
+		return [
+			'selected_update_channel'	=> array(
+				'type'		=> 	'select',
+				'label'		=> 	'Auto-Update Channel',
+				'options'	=> 	[
+									'Current/Latest-Release'	=> 	'release',			// github 'latest_release'
+									'Preview/Release-Candidate'	=>	'branch',			// github 'default_branch' (main)
+				//	e.g.			'Beta/test version'			=> 	'branch/beta',		// github 'beta' branch (tag_name=beta)
+				//	e.g.			'Previous Version'			=> 	'release/1.0.0',	// github '1.0.0' release (tag_name=1.0.0)
+								],
+				'default'	=> 	'release',
+				'info'		=> 	"Select the channel for updates to this plugin.<br>".
+								"The <em>Current/Latest-Release</em> is the official, stable and supported release channel, ".
+								"whereas the <em>Preview/Release-Candidate</em> represents an early, pre-release channel. ",
+			),
+		];
+	}
+
+
+	/**
 	 * get checkForUpdates - clear update caches and redirect to updates page
 	 *
 	 * @return 	array

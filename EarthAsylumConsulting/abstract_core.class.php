@@ -229,7 +229,8 @@ abstract class abstract_core
 			}
 		}
 
-		$this->isReservedOption('uninstall_options',true);	// {classname}_uninstall_options for uninstall trait
+		$this->isReservedOption('uninstall_options',true);			// {classname}_uninstall_options for uninstall trait
+		$this->isReservedOption('selected_update_channel',true);	// {classname}_selected_update_channel for plugin_update trait
 
 		$this->load_all_plugin_options();
 		$this->load_all_network_options();
