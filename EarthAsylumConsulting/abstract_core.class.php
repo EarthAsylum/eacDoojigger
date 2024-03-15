@@ -1041,9 +1041,9 @@ abstract class abstract_core
 	{
 		$prev_blog_id = get_current_blog_id();
 		$this->before_switch_blog( $new_blog_id, $prev_blog_id, 'switch' );
-		return \switch_to_blog( $new_blog_id );
+		$result = \switch_to_blog( $new_blog_id );
 		$this->after_switch_blog( $new_blog_id, $prev_blog_id, 'switch');
-		return true;
+		return $result;
 	}
 
 
@@ -1514,8 +1514,8 @@ abstract class abstract_core
 
 		$message 	= sprintf("The %s cleanup action has been triggered.",$message);
 		$more 		= 'Caches cleared: '.implode(', ',$caches);
-		$this->do_action('after_flush_caches');
 		$this->add_admin_notice($message,'success',$more);
+		$this->do_action('after_flush_caches');
 	}
 
 
@@ -1928,6 +1928,21 @@ abstract class abstract_core
 	{
 		ob_start();
 		\get_footer( $name ); // footer-<name>.php
+		return ob_get_clean();
+	}
+
+
+	/**
+	 * get a template page part
+	 *
+	 * @param string $slug template file name {$slug}.php
+	 * @param string $name special name/part {$slug}-{$name}.php
+	 * @return string the template content
+	 */
+	public function get_page_template(string $slug, string $name = null, $args = [])
+	{
+		ob_start();
+		\get_template_part( $slug, $name, $args );
 		return ob_get_clean();
 	}
 
@@ -3088,20 +3103,20 @@ abstract class abstract_core
 		$optionName = basename(sanitize_key(str_replace(' ','_',$className[0])),'_extension'); // sanitized sans '_extension'
 
 		$enabled = $this->get_option( $optionName.'_extension_enabled' );		// (<classname>_extension_enabled) - as set in abstract_extension
-		if ($enabled !== false) return ($enabled != '');						// 'Enabled' or 'Enabled (admin)'
+		if ($enabled !== false) return ($enabled != '');						// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
 
 		$enabled = $this->get_option( $optionName.'_enabled' );					// (<classname>_enabled)
-		if ($enabled !== false) return ($enabled != '');						// 'Enabled' or 'Enabled (admin)'
+		if ($enabled !== false) return ($enabled != '');						// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
 
 		if ($className[1] != 'extension' && $className[2] == 'extension') 		// check for <something>.<somethingelse>.extension.php and use <somethingelse>
 		{
 			$optionName = basename(sanitize_key(str_replace(' ','_',$className[1])),'_extension'); // sanitized sans '_extension'
 
 			$enabled = $this->get_option( $optionName.'_extension_enabled' );	// (<classname>_extension_enabled) - as set in abstract_extension
-			if ($enabled !== false) return ($enabled != '');					// 'Enabled' or 'Enabled (admin)'
+			if ($enabled !== false) return ($enabled != '');					// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
 
 			$enabled = $this->get_option( $optionName.'_enabled' );				// (<classname>_enabled)
-			if ($enabled !== false) return ($enabled != '');					// 'Enabled' or 'Enabled (admin)'
+			if ($enabled !== false) return ($enabled != '');					// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
 		}
 
 		return true;															// default to enabled when no '_enabled' option found
@@ -3614,6 +3629,7 @@ abstract class abstract_core
 			switch (strtolower($option)) {
 				case 'disabled':
 				case 'disabled (admin)':
+				case 'network disabled':
 				case 'false':
 				case 'no':
 				case 'off':
@@ -3623,6 +3639,7 @@ abstract class abstract_core
 					break;
 				case 'enabled':
 				case 'enabled (admin)':
+				case 'network enabled':
 				case 'true':
 				case 'yes':
 				case 'on':

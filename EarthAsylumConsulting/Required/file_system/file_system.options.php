@@ -81,13 +81,14 @@ $this->registerExtensionOptions( $this->className,
 				'type'		=> 	'button',
 				'label'		=> 	'Erase Credentials',
 				'default' 	=> 	'Erase',
-				'info'		=> 	'Erase  currently stored Filesystem credentials.',
+				'info'		=> 	'Erase currently stored Filesystem credentials.',
 				'validate'	=> 	function($value) {
-								//	\delete_option('ftp_credentials');
-									$this->delete_option('filesystem_credentials');
-									$this->add_option_success('_fs_erase','Your stored filesystem credentials have been erased');
+									if ($value=='Delete') {
+										$this->delete_option('filesystem_credentials');
+										$this->add_option_success('_fs_erase','Your stored filesystem credentials have been erased');
+									}
 								},
-				'attributes'=>	(!$credentials) ? 'disabled="disabled"' : '',
+				'attributes'=>	(!$credentials) ? ['disabled'=>'disabled'] : ['onmouseup'=>'this.value=\'Delete\';'],
 		),
 	]
 );

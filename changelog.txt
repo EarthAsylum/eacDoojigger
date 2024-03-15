@@ -1,7 +1,12 @@
 == Changelog ==
 
-= Version 2.5.0 – March 13, 2024 =
+= Version 2.5.0 – March 15, 2024 =
 
++   Use `this.form.requestSubmit()` instead of `options_form.submit()`.
++   Fixed switch_to_blog() and loading/saving options on switch.
++   Updated maintenance mode, enable using transient with expiration.
++   Recognize 'Network Enabled' as extension enabled option.
++   New get_page_template() to buffer a template part.
 +   Added action `after_flush_caches` when flushing caches.
 +   Added option `{classname}_selected_update_channel` and stdOptions_updateChannel() in standard_options trait.
     +   Like {classname}_PLUGIN_UPDATE_CHANNEL.

@@ -9,7 +9,7 @@
  * @version		1.x
  *
  * included for admin_options_help() method
- * @version 23.1028.1
+ * @version 24.0314.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -31,6 +31,8 @@ ob_start();
 			<li><code>[PageHeader]</code><br>
 				Include the 'scheduled-maintenance' header theme template,
 				if not found the default theme header is used.
+			<li><code>[PageTemplate]{template-name}[/PageTemplate]</code><br>
+				Include the {template-name}.php or 'scheduled-maintenance.php' theme template,
 			<li><code>[PageContent]...html content...[/PageContent]</code><br>
 				Include the 'scheduled-maintenance' post or template content,
 				if not found {html content} is used.

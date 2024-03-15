@@ -599,7 +599,7 @@ trait standard_options
 		return [
 			'selected_update_channel'	=> array(
 				'type'		=> 	'select',
-				'label'		=> 	'Auto-Update Channel',
+				'label'		=> 	'Update Channel',
 				'options'	=> 	[
 									'Current/Latest-Release'	=> 	'release',			// github 'latest_release'
 									'Preview/Release-Candidate'	=>	'branch',			// github 'default_branch' (main)
@@ -608,8 +608,8 @@ trait standard_options
 								],
 				'default'	=> 	'release',
 				'info'		=> 	"Select the channel for updates to this plugin.<br>".
-								"The <em>Current/Latest-Release</em> is the official, stable and supported release channel, ".
-								"whereas the <em>Preview/Release-Candidate</em> provides an early, pre-release channel. ",
+								"The <em>Current/Latest-Release</em> is the stable and supported release channel, ".
+								"whereas the <em>Preview/Release-Candidate</em> provides an early, pre-release channel.",
 			),
 		];
 	}

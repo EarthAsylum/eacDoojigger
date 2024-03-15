@@ -160,7 +160,7 @@ trait eacDoojigger_administration
 							'default'	=>	\wp_get_environment_type(),
 							'info'		=> 	'Sets the WordPress environment type.',
 							'validate'	=>	[$this,'validate_environment_option'],
-							'attributes'=>	['onchange'=>'options_form.submit()'],
+							'attributes'=>	['onchange'=>'this.form.requestSubmit()'],
 					]
 				];
 			}
