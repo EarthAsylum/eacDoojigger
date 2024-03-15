@@ -606,7 +606,6 @@ trait standard_options
 				//	e.g.			'Beta/test version'			=> 	'branch/beta',		// github 'beta' branch (tag_name=beta)
 				//	e.g.			'Previous Version'			=> 	'release/1.0.0',	// github '1.0.0' release (tag_name=1.0.0)
 								],
-				'default'	=> 	'release',
 				'info'		=> 	"Select the channel for updates to this plugin.<br>".
 								"The <em>Current/Latest-Release</em> is the stable and supported release channel, ".
 								"whereas the <em>Preview/Release-Candidate</em> provides an early, pre-release channel.",
