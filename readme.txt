@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.5.0-RC3+Mar15
-Last Updated:           15-Mar-2024
+Stable tag:             2.5.0-RC4+Mar17
+Last Updated:           17-Mar-2024
 Requires at least:      5.5.0
 Tested up to:           6.4
 Requires PHP:           7.2
@@ -411,8 +411,10 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.5.0 – March 15, 2024 =
+= Version 2.5.0 – March 17, 2024 =
 
++   Reworked get_option(),get_network_option() for faster access to non-reserved options.
++   Added support for `$_SERVER['GEOIP_COUNTRY_CODE']` IP Geolocation.
 +   Use `this.form.requestSubmit()` instead of `options_form.submit()`.
 +   Fixed switch_to_blog() and loading/saving options on switch.
 +   Updated maintenance mode, enable using transient with expiration.

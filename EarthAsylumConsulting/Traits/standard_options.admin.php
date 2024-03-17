@@ -609,6 +609,7 @@ trait standard_options
 				'info'		=> 	"Select the channel for updates to this plugin.<br>".
 								"The <em>Current/Latest-Release</em> is the stable and supported release channel, ".
 								"whereas the <em>Preview/Release-Candidate</em> provides an early, pre-release channel.",
+				'attributes'=>	['onchange'=>'this.form.requestSubmit()'],
 			),
 		];
 	}

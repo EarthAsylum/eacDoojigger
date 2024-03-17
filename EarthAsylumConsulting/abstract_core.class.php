@@ -2000,15 +2000,15 @@ abstract class abstract_core
 	/**
 	 * Get the visitor's country from the language header
 	 *
+	 * @param	string	2 character country code default
 	 * @return	string	2 character country code (default=US)
 	 */
 	public function getVisitorCountry(/* $default='US' */): string
 	{
 		if ($country = $this->getVariable('remote_country')) return $country;
-		$country = (func_num_args() > 0) ? func_get_arg(0) : 'US';
 
-		$langs = array();
-		if ($httpLang = $this->varServer('HTTP_ACCEPT_LANGUAGE')) {
+		if ($country = $this->varServer('GEOIP_COUNTRY_CODE')) {
+		} else if ($httpLang = $this->varServer('HTTP_ACCEPT_LANGUAGE')) {
 			// break up string into pieces (languages and q factors)
 			preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $httpLang, $lang_parse);
 
@@ -2027,6 +2027,8 @@ abstract class abstract_core
 					if ($c) $country = strtoupper($c);		// US
 				}
 			}
+		} else {
+			$country = (func_num_args() > 0) ? func_get_arg(0) : 'US';
 		}
 		/**
 		 * filter {classname}_set_visitor_country get the visitor's country
@@ -3673,45 +3675,49 @@ abstract class abstract_core
 			return $this->get_network_option($optionName, $default);
 		}
 
-		// get pre-2.0 record (or orphaned record) and maybe delete it
-		// this causes a db read on all get_option() calls to options not reserved
-		//		$value = \get_option( $this->prefixOptionName($optionName) );
-		// instead, check pre-loaded option cache (only)...
-		$preOption = $this->prefixOptionName( $this->sanitize($optionName) );
-		$alloptions = \wp_load_alloptions();
-		$value = $alloptions[ $preOption ] ?? wp_cache_get( $preOption, 'options' );
-
+		$preOption 	= $this->prefixOptionName($this->standardizeOptionName($optionName, false));
 		$optionName = $this->standardizeOptionName($optionName);
+		$isReserved = $this->isReservedOption($optionName);
 
-		if ( isset( $value ) && $value !== false )
-		{
-			$value = maybe_unserialize($value);
-			if (! $this->isReservedOption($optionName) )
-			{
-				$this->_update_plugin_option_array( $optionName, $value );
-				// delete pre-2.0 record
-				\delete_option( $this->prefixOptionName($optionName) );
-			}
-		}
-		else if (isset($this->pluginOptions[$optionName]))
+		if (isset($this->pluginOptions[$optionName]) && !$isReserved)
 		{
 			$value = $this->pluginOptions[$optionName];
 		}
-		else if ( is_callable($default) )
-		{
-			try {
-				$value = call_user_func($default);
-			} catch (\Throwable $e) {
-				return ! $this->logError($e,__METHOD__);
-			}
-			if (!is_wp_error($value))
-			{
-				$this->update_option($optionName,$value);
-			}
-		}
 		else
 		{
-			$value = $default;
+			// get pre-2.0 record (or orphaned record) and maybe delete it
+			// this causes a db read on all get_option() calls to options not reserved
+			//		$value = \get_option( $this->prefixOptionName($optionName) );
+			// instead, check pre-loaded option cache (only)...
+			$alloptions = \wp_load_alloptions();
+			$value = $alloptions[ $preOption ] ?? wp_cache_get( $preOption, 'options' );
+
+			if ( isset( $value ) && $value !== false )
+			{
+				$value = maybe_unserialize($value);
+				if (!$isReserved )
+				{
+					$this->_update_plugin_option_array( $optionName, $value );
+					// delete pre-2.0 record
+					\delete_option( $preOption );
+				}
+			}
+			else if ( is_callable($default) )
+			{
+				try {
+					$value = call_user_func($default);
+				} catch (\Throwable $e) {
+					return ! $this->logError($e,__METHOD__);
+				}
+				if (!is_wp_error($value))
+				{
+					$this->update_option($optionName,$value);
+				}
+			}
+			else
+			{
+				$value = $default;
+			}
 		}
 		return $value;
 	}
@@ -3896,39 +3902,43 @@ abstract class abstract_core
 	{
 		if (! $this->is_network_enabled()) return $default;
 
+		$preOption 	= $this->prefixOptionName($this->standardizeOptionName($optionName, false));
 		$optionName = $this->standardizeOptionName($optionName);
+		$isReserved = $this->isReservedOption($optionName);
 
-		// get pre-2.0 record (or reserved/orphaned record) and maybe delete it
-		$value = \get_network_option( null, $this->prefixOptionName($optionName) );
-
-		if ( isset( $value ) && $value !== false )
-		{
-			if (! $this->isReservedOption($optionName))
-			{
-				$this->_update_network_option_array( $optionName, $value );
-				// delete pre-2.0 record
-				\delete_network_option( $this->prefixOptionName($optionName) );
-			}
-		}
-		else if (isset($this->networkOptions[$optionName]))
+		if (isset($this->networkOptions[$optionName]) && !$isReserved)
 		{
 			$value = $this->networkOptions[$optionName];
 		}
-		else if ( is_callable($default) )
-		{
-			try {
-				$value = call_user_func($default);
-			} catch (\Throwable $e) {
-				return ! $this->logError($e,__METHOD__);
-			}
-			if (!is_wp_error($value))
-			{
-				$this->update_network_option($optionName,$value);
-			}
-		}
 		else
 		{
-			$value = $default;
+			// get pre-2.0 record (or reserved/orphaned record) and maybe delete it
+			$value = \get_network_option( null, $preOption );
+			if ( isset( $value ) && $value !== false )
+			{
+				if (!$isReserved)
+				{
+					$this->_update_network_option_array( $optionName, $value );
+					// delete pre-2.0 record
+					\delete_network_option( $preOption );
+				}
+			}
+			else if ( is_callable($default) )
+			{
+				try {
+					$value = call_user_func($default);
+				} catch (\Throwable $e) {
+					return ! $this->logError($e,__METHOD__);
+				}
+				if (!is_wp_error($value))
+				{
+					$this->update_network_option($optionName,$value);
+				}
+			}
+			else
+			{
+				$value = $default;
+			}
 		}
 		return $value;
 	}
