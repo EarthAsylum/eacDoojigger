@@ -1451,7 +1451,7 @@ abstract class abstract_core
 	public function flush_caches(bool $fullFlush=false): void
 	{
 		$message = 'cache';
-		if (method_exists($this,'deleteTransients') && $fullFlush)
+		if (method_exists($this,'deleteTransients') && $fullFlush && !wp_using_ext_object_cache())
 		{
 			$this->deleteTransients($this->is_network_admin());
 			$this->logDebug('deleteTransients',__METHOD__);

@@ -165,6 +165,16 @@ trait swRegistrationUI
 	 */
 	private function swRegistrationActionsAndFilters(): void
 	{
+		// when testing...
+		/*
+ 		\add_action(self::SOFTWARE_REGISTRY_PRODUCTID.'_api_remote_response', function( $body, $request, $endpoint )
+ 			{
+ 				$this->logDebug($endpoint,current_action());
+ 				$this->logDebug($body,current_action());
+ 			},
+ 		10,3);
+ 		*/
+
 		if (is_admin())
 		{
 			// when updated, refresh the registration

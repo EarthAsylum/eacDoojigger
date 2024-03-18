@@ -295,7 +295,7 @@ trait standard_options
 				'validate'	=> 	function($value) {
 									$withTrans = (isset($_POST['clear_transients']) && $_POST['clear_transients'] == 'true');
 									$this->plugin->flush_caches( $withTrans );
-									if ($withTrans) $this->page_reload(true);
+									$this->page_reload(true);
 								},
 			),
 		];
@@ -342,7 +342,7 @@ trait standard_options
 		);
 		$message = ($withTrans) ? 'cache & transient' : 'cache';
 		$this->add_option_success('button',"The {$message} cleanup action has been triggered on all sites.");
-		if ($withTrans) $this->page_reload(true);
+		$this->page_reload(true);
 	}
 
 
