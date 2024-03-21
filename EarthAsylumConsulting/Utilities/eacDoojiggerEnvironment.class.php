@@ -17,7 +17,7 @@ namespace EarthAsylumConsulting;
  * Description:			Environment Switcher - set WP_ENVIRONMENT_TYPE from the network or general settings page.
  * Version:				1.0.8
  * Requires at least:	5.5.0
- * Tested up to: 		6.4
+ * Tested up to: 		6.5
  * Requires PHP:		7.2
  * Author:				EarthAsylum Consulting
  * Author URI:			http://www.earthasylum.com
