@@ -148,7 +148,6 @@ trait plugin_update
 
 		// check for constant ('{classname}_PLUGIN_UPDATE_CHANNEL')
 		// 		 	or option ('{classname}_selected_update_channel')
-		// define( '{classname}_PLUGIN_UPDATE_CHANNEL', ['branch','default'] );
 		// define( '{classname}_PLUGIN_UPDATE_CHANNEL', 'branch/default' );
 		// define( '{classname}_PLUGIN_UPDATE_CHANNEL', 'release/latest' );
 		$plugin_update_source 	= strtoupper($className).'_PLUGIN_UPDATE_CHANNEL';

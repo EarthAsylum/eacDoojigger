@@ -287,12 +287,14 @@ trait eacDoojigger_administration
 				{
 					$eacUtilityDir  = str_replace(WP_PLUGIN_DIR,'',$this->pluginHeader('VendorDir'))."/Utilities";
 					$lines	= [
-						"define('EAC_DOOJIGGER_VERSION','".$this->getVersion()."');",
-						"require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojigger_ftp_credentials.class.php';",
-						"eacDoojigger_ftp_credentials::addFilters();",
-						"require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojiggerAutoloader.class.php';",
-						"eacDoojiggerAutoloader::setAutoLoader();",
-						"eacDoojiggerAutoloader::setEmailNotification( '".$this->className."' );",
+						"if (is_plugin_active(".$this->pluginHeader('PluginSlug').") {";
+						"  define('EAC_DOOJIGGER_VERSION','".$this->getVersion()."');",
+						"  require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojigger_ftp_credentials.class.php';",
+						"  eacDoojigger_ftp_credentials::addFilters();",
+						"  require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojiggerAutoloader.class.php';",
+						"  eacDoojiggerAutoloader::setAutoLoader();",
+						"  eacDoojiggerAutoloader::setEmailNotification( '".$this->className."' );",
+						"}";
 					];
 					$marker = $this->pluginHeader('NameSpace').' eacDoojiggerAutoloader '.wp_date('Y-m-d H:i:s');
 					return (bool) $this->insert_with_markers(WPMU_PLUGIN_DIR.'/eacDoojiggerAutoloader.php', $marker, $lines, '/*','*/');

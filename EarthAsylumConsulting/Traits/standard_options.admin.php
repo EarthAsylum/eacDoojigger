@@ -630,7 +630,7 @@ trait standard_options
 				'info'		=> 	"Clear WordPress update caches and check for software updates.",
 				'validate'	=> 	function($value) {
 									\wp_clean_update_cache();
-									\wp_redirect(network_admin_url('update-core.php'));
+									$this->page_redirect(network_admin_url('update-core.php'));
 									die();
 								},
 			),
