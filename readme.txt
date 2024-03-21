@@ -4,7 +4,7 @@ Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             2.5.0-RC5+Mar21
 Last Updated:           21-Mar-2024
 Requires at least:      5.5.0
-Tested up to:           6.4
+Tested up to:           6.5
 Requires PHP:           7.2
 Contributors:           earthasylum@github,kevinburkholder@wordpress
 License:                EarthAsylum Consulting Proprietary License - {eac}PLv1

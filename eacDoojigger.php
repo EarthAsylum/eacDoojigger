@@ -19,7 +19,7 @@
  * Description:			{eac}Doojigger for WordPress - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
  * Version:				2.5.0-RC1+Mar21
  * Requires at least:	5.5.0
- * Tested up to: 		6.4
+ * Tested up to: 		6.5
  * Requires PHP:		7.4
  * Author:				EarthAsylum Consulting
  * Author URI:			http://www.earthasylum.com
