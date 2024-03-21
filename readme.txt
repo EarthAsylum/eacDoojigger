@@ -413,7 +413,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 = Version 2.5.0 – March 21, 2024 =
 
-+   Verify plugin is active before setting constant in autoloader.
++   Remove autoloader when deactivated.
 +   Only flush transients (flush_caches()) if not using an object cache.
 +   Reworked get_option(),get_network_option() for faster access to non-reserved options.
 +   Added support for `$_SERVER['GEOIP_COUNTRY_CODE']` IP Geolocation.

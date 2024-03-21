@@ -58,6 +58,8 @@ trait eacDoojigger_administration
 		//$this->add_action( 'update_registration',	array( $this, 'install_autoloader') );
 		// When the registration is purged
 		$this->add_action( 'purge_registration',	array( $this, 'uninstall_autoloader') );
+		// When the plugin is deactivated
+		register_deactivation_hook($header['PluginFile'],	array( $this, 'uninstall_autoloader') );
 
 
 		// on plugins page, add documentation link
@@ -287,14 +289,12 @@ trait eacDoojigger_administration
 				{
 					$eacUtilityDir  = str_replace(WP_PLUGIN_DIR,'',$this->pluginHeader('VendorDir'))."/Utilities";
 					$lines	= [
-						"if (is_plugin_active(".$this->pluginHeader('PluginSlug').") {";
 						"  define('EAC_DOOJIGGER_VERSION','".$this->getVersion()."');",
 						"  require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojigger_ftp_credentials.class.php';",
 						"  eacDoojigger_ftp_credentials::addFilters();",
 						"  require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojiggerAutoloader.class.php';",
 						"  eacDoojiggerAutoloader::setAutoLoader();",
 						"  eacDoojiggerAutoloader::setEmailNotification( '".$this->className."' );",
-						"}";
 					];
 					$marker = $this->pluginHeader('NameSpace').' eacDoojiggerAutoloader '.wp_date('Y-m-d H:i:s');
 					return (bool) $this->insert_with_markers(WPMU_PLUGIN_DIR.'/eacDoojiggerAutoloader.php', $marker, $lines, '/*','*/');

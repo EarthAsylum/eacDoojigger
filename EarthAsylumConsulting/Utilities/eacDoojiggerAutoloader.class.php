@@ -8,8 +8,8 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger Utilities\{eac}DoojiggerAutoloader
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * Version: 	2.1.0
+ * @copyright	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * Version: 	2.1.1
  * @link		https://eacDoojigger.earthasylum.com/
  */
 
