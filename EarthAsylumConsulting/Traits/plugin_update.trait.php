@@ -157,7 +157,7 @@ trait plugin_update
 		}
 		else	// update_option( '{classname}_selected_update_channel', ... );
 		{
-			$plugin_update_source = \get_option($className.'_selected_update_channel');
+			$plugin_update_source = \get_site_option($className.'_selected_update_channel');
 		}
 		if (!empty($plugin_update_source) && is_string($plugin_update_source))
 		{
