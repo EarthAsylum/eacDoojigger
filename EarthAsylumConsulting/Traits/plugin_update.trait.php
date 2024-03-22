@@ -433,7 +433,8 @@ trait plugin_update
 		}
 
 		// check version tested to proper length - tested = 6.0 == 6.0.1|6.0.2
-		$blogVersion = get_bloginfo('version');
+		$blogVersion = explode('-',get_bloginfo('version')); // strip '-RCx'
+		$blogVersion = $blogVersion[0];
 		if ($result['info']->tested) {
 			if (version_compare( $result['info']->tested, substr($blogVersion,0,strlen($result['info']->tested)) ) == 0) {
 				$result['info']->tested = substr($blogVersion,0,5);
