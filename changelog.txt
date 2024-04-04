@@ -1,7 +1,8 @@
 == Changelog ==
 
-= Version 2.5.0 – March 21, 2024 =
+= Version 2.5.0 – April 4, 2024 =
 
++   Update trait - check 'compatible up to' without '-RCx' in WordPress version.
 +   Compatible with WordPress 6.5.
 +   Remove autoloader when deactivated.
 +   Only flush transients (flush_caches()) if not using an object cache.
