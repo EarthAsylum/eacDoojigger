@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '23.0915.1';
+		const 	VERSION	= '24.0416.1';
 
 		/**
 		 * @var string supported session managers
@@ -231,16 +231,18 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					break;
 
 				case self::SESSION_WOOCOMMERCE:
-					$WC = WC();
-					$WC->initialize_session();
-					if ( ! $WC->session->has_session() ) {
-						$WC->session->set_customer_session_cookie( true );
+					if (function_exists('WC')) {
+						$WC = \WC();
+						$WC->initialize_session();
+						if ( ! $WC->session->has_session() ) {
+							$WC->session->set_customer_session_cookie( true );
+						}
+						if ( ! isset($WC->session->{$this->pluginName}) ) {
+							$WC->session->{$this->pluginName} = new \stdclass();
+						}
+						$this->session_id 			= $WC->session->get_customer_id();
+						$this->session 				= $WC->session->{$this->pluginName};	// copy of object due to __get
 					}
-					if ( ! isset($WC->session->{$this->pluginName}) ) {
-						$WC->session->{$this->pluginName} = new \stdclass();
-					}
-					$this->session_id 			= $WC->session->get_customer_id();
-					$this->session 				= $WC->session->{$this->pluginName};	// copy of object due to __get
 					break;
 
 				case self::SESSION_WPSESSION:
@@ -435,7 +437,9 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					$this->set_transient($this->session_id,$this->session,$exp);
 					break;
 				case self::SESSION_WOOCOMMERCE:
-					WC()->session->{$this->pluginName} = $this->session;
+					if (function_exists('WC')) {
+						WC()->session->{$this->pluginName} = $this->session;
+					}
 					break;
 			}
 		}

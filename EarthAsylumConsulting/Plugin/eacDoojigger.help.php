@@ -69,7 +69,7 @@ if ($this->isSettingsPage('Tools'))
 $this->addPluginSidebarText('<h4>For more information:</h4>');
 
 $this->addPluginSidebarLink(
-	"<span class='dashicons dashicons-info-outline eac-orange'></span>About This Plugin",
+	"<span class='dashicons dashicons-info-outline eac-logo-orange'></span>About This Plugin",
 	( is_multisite()
 		? network_admin_url('plugin-install.php')
 		: admin_url('plugin-install.php')
@@ -78,17 +78,17 @@ $this->addPluginSidebarLink(
 	$this->pluginHeader('Title')." Plugin Information Page"
 );
 $this->addPluginSidebarLink(
-	"<span class='dashicons dashicons-plugins-checked eac-orange'></span>Derivative Plugins",
+	"<span class='dashicons dashicons-plugins-checked eac-logo-orange'></span>Derivative Plugins",
 	$this->getDocumentationURL(true,'/derivatives'),
 	"Custom Plugin Derivatives"
 );
 $this->addPluginSidebarLink(
-	"<span class='dashicons dashicons-admin-generic eac-orange'></span>Custom Extensions",
+	"<span class='dashicons dashicons-admin-generic eac-logo-orange'></span>Custom Extensions",
 	$this->getDocumentationURL(true,'/extensions'),
 	"Custom Plugin Extensions"
 );
 $this->addPluginSidebarLink(
-	"<span class='dashicons dashicons-admin-settings eac-orange'></span>Admin Options",
+	"<span class='dashicons dashicons-admin-settings eac-logo-orange'></span>Admin Options",
 	$this->getDocumentationURL(true,'/options'),
 	"Custom Administrator Options"
 );

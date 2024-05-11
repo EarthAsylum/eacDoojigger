@@ -85,8 +85,8 @@ if (! class_exists(__NAMESPACE__.'\maintenance_mode', false) )
 								'type'		=> 	'number',
 								'label'		=> 	"Maintenance Mode Time",
 								'default'	=> 	0,
-								'info'		=> 	"Number of minutes to remain in maintenance mode. " .
-												"<small>(will reset to 0 once activated)<br>".
+								'info'		=> 	"Number of minutes to remain in maintenance mode.<br>" .
+												"<small>(will reset to 0 once activated) ".
 												"1 Hour = ".(HOUR_IN_SECONDS/60).", " .
 												"1 Day = ". (DAY_IN_SECONDS/60).", " .
 												"1 Week = ".(WEEK_IN_SECONDS/60).".</small>",

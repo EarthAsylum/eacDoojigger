@@ -52,7 +52,7 @@ class wpmu_installer extends \EarthAsylumConsulting\abstract_extension
 	/**
 	 * @var string extension version
 	 */
-	const VERSION				= '23.1103.1';
+	const VERSION				= '24.0416.1';
 
 	/**
 	 * @var string extension alias
@@ -90,6 +90,47 @@ class wpmu_installer extends \EarthAsylumConsulting\abstract_extension
 		}
 		//$this->delete_site_transient(self::INSTALLER_TRANSIENT.'_lock');
 		//$this->delete_site_transient(self::INSTALLER_TRANSIENT);
+	}
+
+
+	/**
+	 * Add extension actions and filter
+	 *
+	 * Called after loading, instantiating, and initializing all extensions
+	 *
+	 * @return	void
+	 */
+	public function addActionsAndFilters()
+	{
+		parent::addActionsAndFilters();
+
+		/*
+		 * invoke allows all arguments passed through to wpmu_invoke()
+		 */
+		$this->add_action( 'installer_invoke', 		array($this,'invoke'), 10, 4 );
+
+		/*
+		 * installer actions only support simple options (no method or callback)
+		 */
+		$this->add_action( 'installer_install', 	function($installOptions)
+		{
+			return $this->install(false,$installOptions);
+		}, 10, 1);
+
+		$this->add_action( 'installer_update', 		function($installOptions)
+		{
+			return $this->install(false,$installOptions);
+		}, 10, 1);
+
+		$this->add_action( 'installer_uninstall', 	function($installOptions)
+		{
+			return $this->install(false,$installOptions);
+		}, 10, 1);
+
+		$this->add_action( 'installer_delete', 		function($installOptions)
+		{
+			return $this->install(false,$installOptions);
+		}, 10, 1);
 	}
 
 

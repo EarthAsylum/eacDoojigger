@@ -2,14 +2,13 @@
 /**
  * Extension: debugging - file logging & debugging - {eac}Doojigger for WordPress
  *
+ * included for admin_options_settings() method
+ *
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2021 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.x
- *
- * included for admin_options_settings() method
- * @version 23.1028.1
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	24.0424.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -98,27 +97,27 @@ $this->registerExtensionOptions( $this->className,
 								'type'		=> 	'range',
 								'label'		=> 	'Backtrace Levels',
 								'default'	=> 	3,
-								'info'		=> 	'When capturing PHP and WP coding errors, show backtracing up to <code>'.
-												'<output name="debug_backtrace_show" for="debug_backtrace" style="color:blue;">n</output>'.
-												'</code> levels.'.
-												'<script>options_form.debug_backtrace_show.value = debug_backtrace.value</script>',
-								'attributes'=> 	['min=0','max=12','step=1','list=debug_backtrace_ticks',
-												'oninput'=>"debug_backtrace_show.value = this.value"],
 								'after'		=>	'<datalist id="debug_backtrace_ticks">'.
-												'<option value="0" label="0"></option>'.
-												'<option value="1"></option>'.
-												'<option value="2" label="2"></option>'.
-												'<option value="3"></option>'.
-												'<option value="4" label="4"></option>'.
-												'<option value="5"></option>'.
-												'<option value="6" label="6"></option>'.
-												'<option value="7"></option>'.
-												'<option value="8" label="8"></option>'.
-												'<option value="9"></option>'.
-												'<option value="10" label="10"></option>'.
-												'<option value="11"></option>'.
-												'<option value="12" label="12"></option>'.
-												'</datalist>',
+													'<option value="0" label="0">0</option>'.
+													'<option value="1"></option>'.
+													'<option value="2" label="2">2</option>'.
+													'<option value="3"></option>'.
+													'<option value="4" label="4">4</option>'.
+													'<option value="5"></option>'.
+													'<option value="6" label="6">6</option>'.
+													'<option value="7"></option>'.
+													'<option value="8" label="8">8</option>'.
+													'<option value="9"></option>'.
+													'<option value="10" label="10">10</option>'.
+													'<option value="11"></option>'.
+													'<option value="12" label="12">12</option>'.
+												'</datalist>'.
+												'When capturing PHP and WP coding errors, show backtracing up to <code>'.
+												'<output name="debug_backtrace_show" for="debug_backtrace">[value]</output>'.
+												'</code> levels.',
+								'attributes'=> 	['list'=>'debug_backtrace_ticks',
+												'min=0','max=12','step=1','list=debug_backtrace_ticks',
+												'oninput'=>"debug_backtrace_show.value = this.value"],
 							),
 		'debug_wp_errors' 	=> array(
 								'type'		=> 	'checkbox',
@@ -151,27 +150,27 @@ $this->registerExtensionOptions( $this->className,
 								'type'		=> 	'range',
 								'label'		=> 	'Purge Log Files After',
 								'default'	=> 	0,
-								'info'		=> 	'Purge '.$this->pluginName.' log files after <code>'.
-												'<output name="debug_purge_time_show" for="debug_purge_time" style="color:blue;">n</output>'.
-												'</code> week(s).'.
-												'<script>options_form.debug_purge_time_show.value = debug_purge_time.value</script>',
-								'attributes'=> 	['min=0','max=12','step=1','list=debug_purge_time_ticks',
-												'oninput'=>"debug_purge_time_show.value = this.value"],
 								'after'		=>	'<datalist id="debug_purge_time_ticks">'.
-												'<option value="0" label="0"></option>'.
-												'<option value="1"></option>'.
-												'<option value="2" label="2"></option>'.
-												'<option value="3"></option>'.
-												'<option value="4" label="4"></option>'.
-												'<option value="5"></option>'.
-												'<option value="6" label="6"></option>'.
-												'<option value="7"></option>'.
-												'<option value="8" label="8"></option>'.
-												'<option value="9"></option>'.
-												'<option value="10" label="10"></option>'.
-												'<option value="11"></option>'.
-												'<option value="12" label="12"></option>'.
-												'</datalist>',
+													'<option value="0" label="0">0</option>'.
+													'<option value="1"></option>'.
+													'<option value="2" label="2">2</option>'.
+													'<option value="3"></option>'.
+													'<option value="4" label="4">4</option>'.
+													'<option value="5"></option>'.
+													'<option value="6" label="6">6</option>'.
+													'<option value="7"></option>'.
+													'<option value="8" label="8">8</option>'.
+													'<option value="9"></option>'.
+													'<option value="10" label="10">10</option>'.
+													'<option value="11"></option>'.
+													'<option value="12" label="12">12</option>'.
+												'</datalist>'.
+											 	'Purge '.$this->pluginName.' log files after <code>'.
+												'<output name="debug_purge_time_show" for="debug_purge_time">[value]</output>'.
+												'</code> week(s).',
+								'attributes'=> 	['list'=>'debug_purge_time_ticks',
+												'min=0','max=12','step=1','list=debug_purge_time_ticks',
+												'oninput'=>"debug_purge_time_show.value = this.value"],
 							),
 		'debug_on_page' 	=> array(
 								'type'		=> 	'checkbox',

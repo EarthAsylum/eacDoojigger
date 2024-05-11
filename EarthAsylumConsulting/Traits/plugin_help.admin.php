@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		24.0510.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/contextual-help/
  * @used-by		abstract_backend.class.php
@@ -76,8 +76,6 @@ trait plugin_help
 	 * Must be called after 'current_screen', before 'admin_print_styles'.
 	 * Called in abstract_backend by the 'current_screen' action.
 	 *
-	 * @internal
-	 *
 	 * @param object $screen current screen
 	 * @return void
 	 */
@@ -86,7 +84,7 @@ trait plugin_help
 		if (!$this->plugin_help_tabs_enabled || empty($this->plugin_help_content)) return;
 		if (empty($screen) && !function_exists('get_current_screen')) return;
 
-		\add_action( 'admin_print_styles', 	array( $this, 'plugin_help_render_css' ) );
+		\add_action( 'admin_print_styles', 	array( $this, 'plugin_help_render_css' ), 999 );
 
 		$screen = $screen ?? get_current_screen();
 
@@ -134,7 +132,7 @@ trait plugin_help
 
 	/**
 	 * Add CSS for help tabs.
-	 * Called in abstract_backend by the 'admin_print_styles' action.
+	 * Called in plugin_help_render by the 'admin_print_styles' action.
 	 *
 	 * @internal
 	 *
@@ -149,30 +147,25 @@ trait plugin_help
 			.eac-help-tab-content details details blockquote {
 				max-height: 20em; overflow: auto;
 			}
-			.eac-help-tab-content details > summary {
+			.eac-help-tab-content details summary {
 				cursor: pointer;  margin: .5em; color: #0073aa; font-weight: 400;
 			}
-			.eac-help-tab-content details[open] > summary {
+			.eac-help-tab-content details[open] summary {
 				border-bottom: solid .5px #aaa;
 			}
 			.eac-help-field-grid {
 				display: grid; grid-template-columns: max-content auto; grid-column-gap: .75em; grid-row-gap: 0;
 				padding: 0; margin: 0.5em 1em; max-height: 20em; overflow: auto;
 			}
-			.eac-help-field-grid details > summary {margin: 0; border-bottom: none !important;}
+			.eac-help-field-grid details summary {margin: 0; border-bottom: none !important;}
 			.eac-help-field-grid div {margin-bottom: 0.5em;}
 			.eac-help-field-grid div:nth-child(odd) {font-style: italic; max-width: 14em;}
-			.eac-help-field-grid small,
-			.eac-help-field-grid mark {
+			.eac-help-field-grid small,.eac-help-field-grid mark {
 				color: #777; background-color: inherit; font-size: 0.9em; font-style: normal; font-weight: normal;
 			};
-			.eac-gray {color: #707070 !important;} .eac-green {color: #6e9882 !important;} .eac-orange {color: #da821d !important;}";
 		<?php
 		$style = ob_get_clean();
-		$styleId = sanitize_title($this->className.'-help');
-		wp_register_style( $styleId, false );
-		wp_enqueue_style( $styleId );
-		wp_add_inline_style( $styleId, str_replace("\t","",trim($style)) );
+		echo "<style id='eac-help-content'>\n".str_replace(["\n","\t"],"",$style)."</style>\n";
 	}
 
 
@@ -207,8 +200,7 @@ trait plugin_help
 
 		$scriptId = sanitize_title($this->className.'-help');
 
-		echo "<script id='{$scriptId}-inline-js' type='text/javascript'>\n".
-				"function move_help_field(t){try{\n".
+		$script="function move_help_field(t){try{\n".
 				"var h = document.getElementById('eac-help-field-'+t)".
 				" || document.querySelector('section.eac-help-fields');\n".
 				"if (h.innerHTML=='') h.innerHTML = '<details><summary>On this page</summary></details>';\n".
@@ -217,9 +209,12 @@ trait plugin_help
 
 		foreach($this->plugin_help_fields as $tab => $helpFields)
 		{
-			echo "move_help_field('$tab')\n";
+			$script .= "move_help_field('$tab')\n";
 		}
-		echo "</script>\n";
+		// add script to footer
+		wp_register_script( $scriptId, false, [], null, true );
+		wp_enqueue_script( $scriptId);
+		wp_add_inline_script( $scriptId, $script );
 	}
 
 
@@ -362,12 +357,12 @@ trait plugin_help
 	{
 		if ($tooltip)
 		{
-			$tooltip = __( $tooltip, $this->PLUGIN_TEXTDOMAIN );
+			$tooltip = esc_attr__( $tooltip, $this->PLUGIN_TEXTDOMAIN );
 		}
 
-		$content = sprintf( '<p><a href="%s" title="%s" target="_blank">%s</a></p>',
+		$content = sprintf( '<p><a href="%1$s" data-tooltip="%2$s" title="%2$s" target="_blank">%3$s</a></p>',
 			esc_url( $link ),
-			esc_attr( $tooltip ),
+			$tooltip,
 			__(  $this->formatPluginHelp($title), $this->PLUGIN_TEXTDOMAIN )
 		);
 

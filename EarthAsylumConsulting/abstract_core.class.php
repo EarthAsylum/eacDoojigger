@@ -11,10 +11,10 @@ use EarthAsylumConsulting\Helpers\LogLevel;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		24.0503.1
  * @link		https://eacDoojigger.earthasylum.com/
- * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
+ * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
  * @used-by		\EarthAsylumConsulting\abstract_backend
  */
@@ -38,7 +38,7 @@ abstract class abstract_core
 	const EXTENSION_BASE_CLASS			= __NAMESPACE__.'\abstract_extension';
 
 	/** @var string environment - live */
-	const ENVIRONMENT_LIVE 				= 'Production (live)';
+	const ENVIRONMENT_LIVE				= 'Production (live)';
 	/** @var string environment - test */
 	const ENVIRONMENT_TEST				= 'Development (test)';
 
@@ -53,18 +53,18 @@ abstract class abstract_core
 	const NETWORK_OPTION_NAME			= 'network_options';
 
 
-    /**
-	 * @var	array plugin header values from the base file headers
+	/**
+	 * @var array plugin header values from the base file headers
 	 */
 	protected $pluginData;
 
 	/**
-	 * @var	string plugin slug name (directory/pluginname.php)
+	 * @var string plugin slug name (directory/pluginname.php)
 	 */
 	public $PLUGIN_SLUG;
 
 	/**
-	 * @var	string Language name of this plugin, must match 'Text Domain' comment
+	 * @var string Language name of this plugin, must match 'Text Domain' comment
 	 */
 	public $PLUGIN_TEXTDOMAIN;
 
@@ -72,7 +72,7 @@ abstract class abstract_core
 	/**
 	 * @var array plugin/extension options/settings array (optionName=>value)
 	 */
-	public $pluginOptions 				= array();
+	public $pluginOptions				= array();
 
 	/**
 	 * @var bool plugin option(s) have been changed
@@ -82,7 +82,7 @@ abstract class abstract_core
 	/**
 	 * @var array network options/settings array (optionName=>value)
 	 */
-	public $networkOptions 				= array();
+	public $networkOptions				= array();
 
 	/**
 	 * @var bool network option(s) have been changed
@@ -93,7 +93,7 @@ abstract class abstract_core
 	 * @var array reserved option keys (typically used outside of the plugin)
 	 * option keys stored individually (true/false)
 	 */
-	public $reservedOptions 			= array();
+	public $reservedOptions				= array();
 
 
 	/**
@@ -101,7 +101,7 @@ abstract class abstract_core
 	 * use setAdvancedMode(bool, what, level) to set,
 	 * use isAdvancedMode(what, level) to check
 	 */
-	public $advanced_mode 				= array(
+	public $advanced_mode				= array(
 		'global'		=> array(
 			'default'	=> false,
 		),
@@ -131,20 +131,20 @@ abstract class abstract_core
 	 * @var array extension objects (class_name=>class_object)
 	 * @used-by loadextensions()
 	 */
-	public $extension_objects 			= array();
+	public $extension_objects			= array();
 
 	/**
 	 * @var array extension aliases (alias_name=>class_object)
 	 */
-	public $extension_aliases 			= array();
+	public $extension_aliases			= array();
 
 	/**
 	 * @var array check that required methods are called
 	 */
-	private $requiredMethods 			=
+	private $requiredMethods			=
 		[
 			'__construct'				=> false,
-			'initialize' 				=> false,
+			'initialize'				=> false,
 			'addActionsAndFilters'		=> false,
 			'addShortcodes'				=> false,
 		];
@@ -152,27 +152,32 @@ abstract class abstract_core
 	/**
 	 * @var bool|string logging filter
 	 */
-	protected $logging_filter 			= null;
+	protected $logging_filter			= null;
 
 	/**
 	 * @var array logging queue
 	 */
-	protected $logging_queue 			= [];
+	protected $logging_queue			= [];
 
 	/**
 	 * @var bool cached (is_admin())
 	 */
-	protected $is_admin 				= null;
+	protected $is_admin					= null;
 
 	/**
 	 * @var bool cached (is_multisite() && is_network_admin())
 	 */
-	protected $is_network_admin 		= null;
+	protected $is_network_admin			= null;
 
 	/**
 	 * @var bool plugin is network enabled
 	 */
 	protected $is_network_enabled		= null;
+
+	/**
+	 * @var bool are we on the settings page
+	 */
+	protected $is_settings_page			= null;
 
 	/**
 	 * @var object WordPress DB
@@ -211,13 +216,13 @@ abstract class abstract_core
 		$this->is_admin( static::CONTEXT_IS_BACKEND );
 		$this->is_network_admin( static::CONTEXT_IS_NETWORK );
 
-		$this->wpdb 			= $GLOBALS['wpdb'];
-		$this->date_format 		= \get_option( 'date_format' );
-		$this->time_format 		= \get_option( 'time_format' );
+		$this->wpdb				= $GLOBALS['wpdb'];
+		$this->date_format		= \get_option( 'date_format' );
+		$this->time_format		= \get_option( 'time_format' );
 		$this->date_time_format = "{$this->date_format}, {$this->time_format}";
 
-		$this->plugin 			= $this;
-		$this->pluginName 		= $this->getClassName();
+		$this->plugin			= $this;
+		$this->pluginName		= $this->getClassName();
 
 		// set default 'advanced mode' based on defined constant
 		$constant = strtoupper($this->pluginName).'_ADVANCED_MODE';
@@ -253,7 +258,7 @@ abstract class abstract_core
 		 */
 		\add_action( 'eacDoojigger_ready',		array($this,'eacDoojigger_ready') );
 
-		\add_action( 'shutdown', 				array($this,'__shutdown') );
+		\add_action( 'shutdown',				array($this,'__shutdown') );
 	}
 
 
@@ -337,14 +342,14 @@ abstract class abstract_core
 	 * @internal
 	 *
 	 * extension directories...
-	 * 	{this directory}/Extensions 		- built-in extensions
-	 * 	{plugin directory}/Extensions 		- global extensions
-	 * 	{plugin directory}/{site-name}		- site extensions
+	 *	{this directory}/Extensions			- built-in extensions
+	 *	{plugin directory}/Extensions		- global extensions
+	 *	{plugin directory}/{site-name}		- site extensions
 	 * sub-directories...
-	 * 	'./frontend'						- only load for front-end
-	 * 	'./backend' or ./admin;				- only load for back-end (admin)
-	 * 	'./network'							- only load for network back-end (admin)
-	 * 	any other sub-directory				- load *.extension.php files
+	 *	'./frontend'						- only load for front-end
+	 *	'./backend' or ./admin;				- only load for back-end (admin)
+	 *	'./network'							- only load for network back-end (admin)
+	 *	any other sub-directory				- load *.extension.php files
 	 *
 	 * @return	void
 	 */
@@ -352,10 +357,10 @@ abstract class abstract_core
 	{
 		/**
 		 * filter {classname}_required_extensions to get required extension directories
-		 * @param 	array	$extensionDirectories array of [plugin_slug => plugin_directory(s)]
+		 * @param	array	$extensionDirectories array of [plugin_slug => plugin_directory(s)]
 		 * @return	array	updated $extensionDirectories
 		*/
-		$dirNames 	= $this->apply_filters( 'required_extensions', [] );
+		$dirNames	= $this->apply_filters( 'required_extensions', [] );
 
 		foreach ($dirNames as $slug => $directories)
 		{
@@ -377,14 +382,14 @@ abstract class abstract_core
 
 		/**
 		 * filter {classname}_allow_extensions to (dis)allow any extensions
-		 * @param 	bool $allow default = true
+		 * @param	bool $allow default = true
 		 * @return	bool $allow
 		 */
 		if ( ! $this->apply_filters( 'allow_extensions', true ) ) return;
 
 		/**
 		 * filter {classname}_allow_internal_extensions to (dis)allow internal extensions
-		 * @param 	bool $allow default = true
+		 * @param	bool $allow default = true
 		 * @return	bool $allow
 		 */
 		if ( $this->apply_filters( 'allow_internal_extensions', true ) )
@@ -394,7 +399,7 @@ abstract class abstract_core
 
 		/**
 		 * filter {classname}_allow_external_extensions to (dis)allow external extensions
-		 * @param 	bool $allow default = true
+		 * @param	bool $allow default = true
 		 * @return	bool $allow
 		 */
 		if ( $this->apply_filters( 'allow_external_extensions', true ) )
@@ -410,10 +415,10 @@ abstract class abstract_core
 
 			/**
 			 * filter {classname}_load_extensions to get additional extension directories
-			 * @param 	array	$extensionDirectories array of [plugin_slug => plugin_directory(s)]
+			 * @param	array	$extensionDirectories array of [plugin_slug => plugin_directory(s)]
 			 * @return	array	updated $extensionDirectories
 			*/
-			$dirNames 	= $this->apply_filters( 'load_extensions', $dirNames );
+			$dirNames	= $this->apply_filters( 'load_extensions', $dirNames );
 
 			foreach ($dirNames as $slug => $directories)
 			{
@@ -429,8 +434,8 @@ abstract class abstract_core
 	 *
 	 * @return	void
 	 */
-    public function initialize(): void
-    {
+	public function initialize(): void
+	{
 		$this->requiredMethods['initialize'] = true;
 
 		$this->logInfo(__FUNCTION__,$this->className);
@@ -454,7 +459,7 @@ abstract class abstract_core
 
 	//	if ( is_multisite() )
 	//	{
-	//		\add_action( 'switch_blog', 	array($this,'switching_blog'), 10, 3);
+	//		\add_action( 'switch_blog',		array($this,'switching_blog'), 10, 3);
 	//	}
 
 		/**
@@ -468,7 +473,7 @@ abstract class abstract_core
 		 * @return	void
 		 */
 		/*
-		$this->add_action( 'daily_event', 	array($this, 'plugin_daily_event') );
+		$this->add_action( 'daily_event',	array($this, 'plugin_daily_event') );
 		*/
 
 		/**
@@ -481,7 +486,7 @@ abstract class abstract_core
 
 		/**
 		 * action {classname}_flush_caches tell others to clear caches/transient data
-		 * @param 	bool 	full cache flush
+		 * @param	bool	full cache flush
 		 * @return	void
 		 */
 		$this->add_action( 'flush_caches',	array($this,'flush_caches') );
@@ -492,7 +497,7 @@ abstract class abstract_core
 		/**
 		 * filter {classname}_reserved_options
 		 * to add option names to reserved array to preserve individual option record
-		 * @param 	array reserved options
+		 * @param	array reserved options
 		 * @return	array
 		 */
 		$this->reservedOptions = $this->apply_filters('reserved_options', $this->reservedOptions);
@@ -598,7 +603,7 @@ abstract class abstract_core
 				$pluginData['PluginSlug']		= plugin_basename( $pluginData['PluginFile'] );						// Plugin slug
 				$pluginData['PluginDir']		= untrailingslashit(plugin_dir_path( $pluginData['PluginFile'] ));	// Plugin directory
 				$pluginData['PluginDirUrl']		= plugin_dir_url( $pluginData['PluginFile'] );						// URL to plugin directory
-				$pluginData['VendorDir'] 		= (is_dir($pluginData['PluginDir'].'/'.__NAMESPACE__))
+				$pluginData['VendorDir']		= (is_dir($pluginData['PluginDir'].'/'.__NAMESPACE__))
 												? $pluginData['PluginDir'].'/'.__NAMESPACE__						// vendor directory default
 												: $pluginData['PluginDir'];
 
@@ -800,8 +805,8 @@ abstract class abstract_core
 	/**
 	 * Get the prefixed version of the hook name
 	 *
-	 * @param	string 	$hookName filter/action name
-	 * @return	string 	hookname with prefix
+	 * @param	string	$hookName filter/action name
+	 * @return	string	hookname with prefix
 	 */
 	public function prefixHookName(string $hookName): string
 	{
@@ -881,9 +886,9 @@ abstract class abstract_core
 	 */
 	public function setAdvancedMode( $is = true, string $what = null,string $level = null): void
 	{
-		$what 	= strtolower($what ?? 'global');
-		$level 	= strtolower($level ?? 'default');
-		$is 	= $this->isTrue($is);
+		$what	= strtolower($what ?? 'global');
+		$level	= strtolower($level ?? 'default');
+		$is		= $this->isTrue($is);
 
 		/**
 		 * filter {classname}_set_advanced_mode to set advanced mode
@@ -912,9 +917,9 @@ abstract class abstract_core
 	 */
 	public function isAdvancedMode(string $what = null, string $level = null): bool
 	{
-		$what 	= strtolower($what ?? 'global');
-		$level 	= strtolower($level ?? 'default');
-		$is 	= true;
+		$what	= strtolower($what ?? 'global');
+		$level	= strtolower($level ?? 'default');
+		$is		= true;
 
 		foreach ([$what,'global'] as $w)
 		{
@@ -995,8 +1000,8 @@ abstract class abstract_core
 				$plugins = \get_site_option( 'active_sitewide_plugins' );
 				if (!empty($plugin)) return (isset( $plugins[ $plugin ] ));
 				$this->is_network_enabled = (isset( $plugins[ $this->PLUGIN_SLUG ] ));
-    		}
-    	}
+			}
+		}
 		return $this->is_network_enabled;
 	}
 
@@ -1034,7 +1039,7 @@ abstract class abstract_core
 	 * switch_to_blog wrapper.
 	 * enables calls to $this->before_switch_blog() and $this->after_switch_blog()
 	 *
-	 * @param	string 	$new_blog_id switching to blog
+	 * @param	string	$new_blog_id switching to blog
 	 * @return	bool always true
 	 */
 	public function switch_to_blog(int $new_blog_id): bool
@@ -1069,9 +1074,9 @@ abstract class abstract_core
 	 * before switching blogs, save internal option array.
 	 * called from $this->switch_to_blog() (not WP).
 	 *
-	 * @param	string 	$new_blog_id switching to blog
-	 * @param	string 	$prev_blog_id switching from blog
-	 * @param	string 	$switch 'switch' or 'restore'
+	 * @param	string	$new_blog_id switching to blog
+	 * @param	string	$prev_blog_id switching from blog
+	 * @param	string	$switch 'switch' or 'restore'
 	 * @return	void
 	 */
 	public function before_switch_blog($new_blog_id, $prev_blog_id, $switch): void
@@ -1088,9 +1093,9 @@ abstract class abstract_core
 	 * after switching blogs, load internal option array.
 	 * called from WP 'switch_blog' action.
 	 *
-	 * @param	string 	$new_blog_id switching to blog
-	 * @param	string 	$prev_blog_id switching from blog
-	 * @param	string 	$switch 'switch' or 'restore'
+	 * @param	string	$new_blog_id switching to blog
+	 * @param	string	$prev_blog_id switching from blog
+	 * @param	string	$switch 'switch' or 'restore'
 	 * @return	void
 	 */
 	public function after_switch_blog($new_blog_id, $prev_blog_id, $switch): void
@@ -1121,7 +1126,7 @@ abstract class abstract_core
 
 
 	/**
-     * Generates a Universally Unique IDentifier (UUID), version 4.
+	 * Generates a Universally Unique IDentifier (UUID), version 4.
 	 *
 	 * @see http://www.ietf.org/rfc/rfc4122.txt (RFC 4122)
 	 *
@@ -1207,10 +1212,10 @@ abstract class abstract_core
 		$namespace = end($namespace);
 		$pathname  = $reflect->getFileName();
 
-		$this->className 		= $reflect->getShortName();
-		$this->pluginName 		= $this->className;
-		$this->classNameSpace 	= $namespace;
-		$this->classFileName 	= pathinfo($pathname,PATHINFO_FILENAME);
+		$this->className		= $reflect->getShortName();
+		$this->pluginName		= $this->className;
+		$this->classNameSpace	= $namespace;
+		$this->classFileName	= pathinfo($pathname,PATHINFO_FILENAME);
 	}
 
 
@@ -1225,7 +1230,7 @@ abstract class abstract_core
 		if ( empty($object) || $object == $this )
 		{
 			if ( empty($this->className) ) {
-				$this->className 	= basename(str_replace('\\', '/', get_class($this)));
+				$this->className	= basename(str_replace('\\', '/', get_class($this)));
 			}
 			return $this->className;
 		}
@@ -1247,7 +1252,7 @@ abstract class abstract_core
 	/**
 	 * version of this code from the plugin header or from given extension
 	 *
-	 * @param 	string 	extension name
+	 * @param	string	extension name
 	 * @return	string	'n.n.n'
 	 */
 	public function getVersion($extension=null,$default=false): string
@@ -1277,25 +1282,25 @@ abstract class abstract_core
 	 *
 	 * @param string $version
 	 * @return object|null
-	 *	   'original' 	=> '1.2.3-Release+Build',
-	 *	   'major' 		=> '1',
-	 *	   'minor' 		=> '2',
-	 *	   'patch' 		=> '3',
-	 *	   'release' 	=> 'Release',
-	 *	   'build' 		=> 'Build',
-	 *	   'version' 	=> '1.2.3-release', (use with version compare)
-	 *	   'primary' 	=> '1.2.3',
+	 *	   'original'	=> '1.2.3-Release+Build',
+	 *	   'major'		=> '1',
+	 *	   'minor'		=> '2',
+	 *	   'patch'		=> '3',
+	 *	   'release'	=> 'Release',
+	 *	   'build'		=> 'Build',
+	 *	   'version'	=> '1.2.3-release', (use with version compare)
+	 *	   'primary'	=> '1.2.3',
 	 *		__toString() = '1.2.3-release+build'
 	 */
 	public function getSemanticVersion(string $version = null): ?object
 	{
-		static $default 	= 	['original'=>'','major'=>'0','minor'=>'0','patch'=>'0','release'=>null,'build'=>null];
+		static $default		=	['original'=>'','major'=>'0','minor'=>'0','patch'=>'0','release'=>null,'build'=>null];
 		// Semantic Version
-		static $pcreSemVer 	= 	'/^(?P<major>0|[1-9]\d*)\.' .
+		static $pcreSemVer	=	'/^(?P<major>0|[1-9]\d*)\.' .
 								'(?P<minor>0|[1-9]\d*)' .
 								'(?:\.(?P<patch>0|[1-9]\d*))?';
 		// Calendar Version - since we use this versioning in extensions
-		static $pcreCalVer 	= 	'/^(?P<major>0|\d{2})\.' .
+		static $pcreCalVer	=	'/^(?P<major>0|\d{2})\.' .
 								'(?P<minor>(1[0-2]|0[1-9])(3[01]|[12][0-9]|0[1-9]))' .
 								'(?:\.(?P<patch>0|[1-9]\d*))?';
 		// common -release+build (should not allow leading 0, but we do [0-9] instead of 0|[1-9])
@@ -1337,6 +1342,34 @@ abstract class abstract_core
 					return $this->version.rtrim('+'.strtolower($this->build),'+');
 				}
 			};
+	}
+
+
+	/**
+	 * customized wp_kses
+	 *
+	 * @param string   $content				Text content to filter.
+	 * @param array[]  $allowed_html		An array of allowed HTML elements and attributes,
+	 * @param string[] $allowed_protocols	An array of allowed URL protocols.
+	 * @return string Filtered content containing only the allowed HTML.
+	 */
+	public function wp_kses( string $content, array $allowed_html = [], $allowed_protocols = [] ): string
+	{
+		static $allowed_tags = null;
+
+		if (is_null($allowed_tags))
+		{
+			$allowed_tags = wp_kses_allowed_html('post');
+			$allowed_tags['datalist']	= _wp_add_global_attributes(true);
+			$allowed_tags['option']		= _wp_add_global_attributes(['name'=>true,'value'=>true,'label'=>true]);
+			$allowed_tags['input']		= _wp_add_global_attributes(['name'=>true,'value'=>true,'type'=>true]);
+			$allowed_tags['output']		= _wp_add_global_attributes(['name'=>true,'form'=>true,'for'=>true]);
+			$allowed_tags['form']		= false;
+		}
+
+		$allowed_html = array_filter(array_merge($allowed_tags,$allowed_html));
+
+		return wp_kses($content,$allowed_html,$allowed_protocols);
 	}
 
 
@@ -1415,7 +1448,7 @@ abstract class abstract_core
 			return $site_is_test;
 		}
 
-	 	$site_is_test = (func_num_args() > 0) ? func_get_arg(0) : null;
+		$site_is_test = (func_num_args() > 0) ? func_get_arg(0) : null;
 		if ( is_bool($site_is_test) )
 		{
 			$getEnv = ($site_is_test) ? 'test' : 'live';
@@ -1427,7 +1460,7 @@ abstract class abstract_core
 
 		/**
 		 * filter {classname}_get_environment to override environment setting (test/live)
-		 * @param	string 	environment (test|live)
+		 * @param	string	environment (test|live)
 		 * @return	string
 		 */
 		$setEnv = strtolower( $this->apply_filters( 'get_environment', $getEnv ) );
@@ -1445,7 +1478,7 @@ abstract class abstract_core
 	/**
 	 * clear cache and transient data
 	 *
-	 * @param 	bool 	full cache flush
+	 * @param	bool	full cache flush
 	 * @return	void
 	 */
 	public function flush_caches(bool $fullFlush=false): void
@@ -1512,8 +1545,8 @@ abstract class abstract_core
 			$this->logDebug('wp_cache_clear_cache',__METHOD__);
 		}
 
-		$message 	= sprintf("The %s cleanup action has been triggered.",$message);
-		$more 		= 'Caches cleared: '.implode(', ',$caches);
+		$message	= sprintf("The %s cleanup action has been triggered.",$message);
+		$more		= 'Caches cleared: '.implode(', ',$caches);
 		$this->add_admin_notice($message,'success',$more);
 		$this->do_action('after_flush_caches');
 	}
@@ -1574,7 +1607,7 @@ abstract class abstract_core
 	 *
 	 * @param int|WP_Post|null $post, if null return uri name
 	 * @param bool $permalink get post permalink name
- 	 * @return string|null the requested page name (sans extension)
+	 * @return string|null the requested page name (sans extension)
 	 */
 	public function getPageName($post=null, $permalink=false)
 	{
@@ -1658,8 +1691,8 @@ abstract class abstract_core
 				$this->getSettingsURL($plugin,$tab),
 				esc_attr( sprintf( __( "%s {$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId ) ),
 				__( $name, $this->PLUGIN_TEXTDOMAIN )
-        );
-	    return $link;
+		);
+		return $link;
 	}
 
 
@@ -1713,7 +1746,7 @@ abstract class abstract_core
 				esc_attr( sprintf( __( "%s {$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId ) ),
 				__( $name, $this->PLUGIN_TEXTDOMAIN )
 		);
-	    return $link;
+		return $link;
 	}
 
 
@@ -1781,7 +1814,7 @@ abstract class abstract_core
 				esc_attr( sprintf( __( "%s {$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId ) ),
 				__( $name, $this->PLUGIN_TEXTDOMAIN )
 		);
-	    return $link;
+		return $link;
 	}
 
 
@@ -1836,25 +1869,28 @@ abstract class abstract_core
 	 */
 	public function isSettingsPage($isTab = null): bool
 	{
-		/*static*/ $is_settings_page = null;
-		if (is_null($is_settings_page) || !empty($isTab))
+		if (is_null($this->is_settings_page) || !empty($isTab))
 		{
-			$is_settings_page = false;
-			//if ($isTab) $isTab = sanitize_title($isTab);
+			$this->is_settings_page = false;
+			if (!is_admin())
+			{
+				return $this->is_settings_page;
+			}
+
 			if ($isTab) $isTab = \sanitize_key(str_replace(' ','_',$isTab));
 			if (wp_doing_ajax())
 			{
 				if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], $this->getSettingsSlug()) !== false)
 				{
-					$is_settings_page = true;
+					$this->is_settings_page = true;
 					if ($isTab) return (strpos($_SERVER['HTTP_REFERER'], "tab={$isTab}") !== false);
 				}
 			}
 			else
 			{
-				if ( $this->is_admin() && $this->varGet('page') == $this->getSettingsSlug() )
+				if ( $this->varGet('page') == $this->getSettingsSlug() )
 				{
-					$is_settings_page = true;
+					$this->is_settings_page = true;
 					if ($isTab)
 					{
 						$thisTab = $this->toKeyString( $this->varGet('tab') ?? current($this->getTabNames()) );
@@ -1863,14 +1899,14 @@ abstract class abstract_core
 				}
 			}
 		}
-		return $is_settings_page;
+		return $this->is_settings_page;
 	}
 
 
 	/**
 	 * get or check the current screen name
 	 *
-	 * @param	string 	name to check for
+	 * @param	string	name to check for
 	 * @return	bool|string
 	 */
 	public function isCurrentScreen($screen = null)
@@ -1886,16 +1922,16 @@ abstract class abstract_core
 	 * get a post (or page) by slug
 	 *
 	 * @param string $slug the name to search for
-	 * @param array $options augment/override query  options
+	 * @param array $options augment/override query	 options
 	 * @return object the first matching post
 	 */
 	public function get_post_by_slug(string $slug, $options=[])
 	{
 		$query = new \WP_Query( array_merge(
 			array(
-				'name' 			=> $slug,
-				'post_type' 	=> 'any',
-				'post_status' 	=> ['publish','private']
+				'name'			=> $slug,
+				'post_type'		=> 'any',
+				'post_status'	=> ['publish','private']
 			), $options )
 		);
 		$result = $query->have_posts() ? reset($query->posts) : null;
@@ -1956,7 +1992,7 @@ abstract class abstract_core
 	{
 		if ($ip = $this->getVariable('remote_ip')) return $ip;
 
-	 	$default = (func_num_args() > 0) ? func_get_arg(0) : null;
+		$default = (func_num_args() > 0) ? func_get_arg(0) : null;
 
 		// look for these headers
 		foreach([	'HTTP_X_FORWARDED_FOR',
@@ -2023,7 +2059,7 @@ abstract class abstract_core
 				arsort($langs, SORT_NUMERIC);
 				// find a country code
 				foreach ($langs as $lang => $val) {
-					list ($l,$c) = explode('-',$lang.'-'); 	// en-us
+					list ($l,$c) = explode('-',$lang.'-');	// en-us
 					if ($c) $country = strtoupper($c);		// US
 				}
 			}
@@ -2063,7 +2099,7 @@ abstract class abstract_core
 		}
 		else
 		{
-			$value = 	get_current_user_id() .
+			$value =	get_current_user_id() .
 						$this->getVisitorIP() .
 						$this->varServer('HTTP_ACCEPT_ENCODING') .
 						$this->varServer('HTTP_ACCEPT_LANGUAGE') .
@@ -2185,17 +2221,17 @@ abstract class abstract_core
 	 * set a stored variable
 	 *
 	 * @param	string	$key stored key
-	 * @param	mixed 	$value stored variable
-	 * @return	string 	stored variable (serialized)
+	 * @param	mixed	$value stored variable
+	 * @return	string	stored variable (serialized)
 	 */
 	public function setVariable( string $key, $value )
 	{
 		$key = \sanitize_key( $key );
 		/**
 		 * filter {classname}_set_variable to set a stored variable
-		 * @param	mixed 	$value stored variable
+		 * @param	mixed	$value stored variable
 		 * @param	string	$key stored key
-		 * @return	string 	stored variable
+		 * @return	string	stored variable
 		 */
 		$value = $this->apply_filters( 'set_variable', $value, $key );
 		return $value;
@@ -2208,8 +2244,8 @@ abstract class abstract_core
 	 * @deprecated use setVariable()
 	 *
 	 * @param	string	$key stored key
-	 * @param	mixed 	$value stored variable
-	 * @return	string 	stored variable (serialized)
+	 * @param	mixed	$value stored variable
+	 * @return	string	stored variable (serialized)
 	 */
 	public function set( string $key, $default=null )
 	{
@@ -2222,10 +2258,10 @@ abstract class abstract_core
 	/**
 	 * implode an associative array into a string
 	 *
-	 * @param 	string 	$separator the glue value
-	 * @param 	array 	$array the associative array to implode
-	 * @param 	string 	$delimiter the key=value delimiter
-	 * @return 	string 	the imploded string
+	 * @param	string	$separator the glue value
+	 * @param	array	$array the associative array to implode
+	 * @param	string	$delimiter the key=value delimiter
+	 * @return	string	the imploded string
 	 */
 	public function implode_with_keys(string $separator, array $array, string $delimiter='='): string
 	{
@@ -2241,10 +2277,10 @@ abstract class abstract_core
 	/**
 	 * explode a string into an associative array
 	 *
-	 * @param 	string 	$separator the glue value
-	 * @param 	string 	$string the string value to explode
-	 * @param 	string 	$delimiter the key=value delimiter
-	 * @return 	array 	the exploded array
+	 * @param	string	$separator the glue value
+	 * @param	string	$string the string value to explode
+	 * @param	string	$delimiter the key=value delimiter
+	 * @return	array	the exploded array
 	 */
 	public function explode_with_keys(string $separator, string $string, string $delimiter='='): array
 	{
@@ -2263,12 +2299,12 @@ abstract class abstract_core
 	/**
 	 * parse options/attributes to a key=value array using SimpleXMLElement
 	 *
-	 * @param	array|string	$attributes 	options/attributes -
-	 * 		single string 		"name name" or "name=value name=value ..."
-	 * 		array of strings 	[ "name", "name" ] or [ "name=value", "name=value", ... ]
-	 * 		associative array 	[ "name"=>"value", "name"=>"value", ... ]
-	 * 		array of arrays 	[ ["name"=>"value"], ["name"=>"value"], ... ]
-	 * @param	bool 			$inArray	true if returning arrays-in-array [ [name=>value],[...] ]
+	 * @param	array|string	$attributes		options/attributes -
+	 *		single string		"name name" or "name=value name=value ..."
+	 *		array of strings	[ "name", "name" ] or [ "name=value", "name=value", ... ]
+	 *		associative array	[ "name"=>"value", "name"=>"value", ... ]
+	 *		array of arrays		[ ["name"=>"value"], ["name"=>"value"], ... ]
+	 * @param	bool			$inArray	true if returning arrays-in-array [ [name=>value],[...] ]
 	 * @return	array			array of [name=>value] or [ [name=>value],[...] ]
 	 */
 	protected function parseAttributes($attributes,$inArray=false): array
@@ -2312,13 +2348,13 @@ abstract class abstract_core
 	/**
 	 * like WordPress insert_with_markers, works with multiple file types
 	 *
-	 * @param 	string 	$filename - path name to file
-	 * @param 	string 	$marker - marker text
-	 * @param 	array 	$insertion - line(s) to be inserted
-	 * @param 	string 	$commentBegin - beginning of a comment (i.e. '#', ';', '//', '/*')
-	 * @param 	string 	$commentEnd - ending of a comment (i.e. '* /')
-	 * @param 	bool 	$insertAtTop - true to insert new block at beginning of file
-	 * @return 	bool
+	 * @param	string	$filename - path name to file
+	 * @param	string	$marker - marker text
+	 * @param	array	$insertion - line(s) to be inserted
+	 * @param	string	$commentBegin - beginning of a comment (i.e. '#', ';', '//', '/*')
+	 * @param	string	$commentEnd - ending of a comment (i.e. '* /')
+	 * @param	bool	$insertAtTop - true to insert new block at beginning of file
+	 * @return	bool
 	 */
 	public function insert_with_markers(string $filename, string $marker, $insertion, string $commentBegin='#', string $commentEnd='', bool $insertAtTop=false): bool
 	{
@@ -2391,12 +2427,15 @@ abstract class abstract_core
 
 
 	/**
-	 * conservative minify for JS or CSS content
+	 * Simple minify for JS or CSS content.
+	 * Strips comments, leading/ttrailing white-space, new-lines.
+	 * Warning: not all js/css strings may succesfully pass through this regex!
 	 *
-	 * @param 	string 	content
-	 * @return 	string	minified content
+	 * @param	string	js/css content
+	 * @param	bool	strip new-line (set false to preserve line-endings)
+	 * @return	string	minified content
 	 */
-	public function minifyString(string $content): string
+	public function minifyString(string $content,$stripNL=true): string
 	{
 		$search =
 			[
@@ -2405,11 +2444,38 @@ abstract class abstract_core
 				'|^\s*|m',						// remove leading whitespace
 				'|\s*$|m',						// remove trailing whitespace
 				'|\t|',							// remove tabs
-				'|^\R|m'						// remove blank lines
 			];
-		return preg_replace( $search, '', $content );
+		$search[] = ($stripNL)
+			?	'|\R|m'							// remove line-endings
+			:	'|^\R|m';						// remove blank lines
+		return preg_replace( $search, '', $this->wp_kses($content,[]) );
 	}
 
+
+	/**
+	 * Increases or decreases the brightness of a color by a percentage of the current brightness.
+	 *
+	 * @param	string	$hexCode		Supported formats: `#FFF`, `#FFFFFF`, `FFF`, `FFFFFF`
+	 * @param	float	$adjustPercent	A number between -1 and 1. E.g. 0.3 = 30% lighter; -0.4 = 40% darker.
+	 *
+	 * @author	maliayas (https://stackoverflow.com/questions/3512311/how-to-generate-lighter-darker-color-with-php)
+	 *
+	 * @return	string
+	 */
+	public function modifyColor($hexCode, $adjustPercent)
+	{
+		$hexCode = ltrim($hexCode, '#');
+		if (strlen($hexCode) == 3) {
+			$hexCode = $hexCode[0] . $hexCode[0] . $hexCode[1] . $hexCode[1] . $hexCode[2] . $hexCode[2];
+		}
+		$hexCode = array_map('hexdec', str_split($hexCode, 2));
+		foreach ($hexCode as & $color) {
+			$adjustableLimit = $adjustPercent < 0 ? $color : 255 - $color;
+			$adjustAmount = ceil($adjustableLimit * $adjustPercent);
+			$color = str_pad(dechex($color + $adjustAmount), 2, '0', STR_PAD_LEFT);
+		}
+		return '#' . implode($hexCode);
+	}
 
 	/*
 	 *
@@ -2508,7 +2574,7 @@ abstract class abstract_core
 	public function varRequest( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
 	{
 		$filter = $this->_parseFilter($filter,$options);
-		if ( $result = filter_input(INPUT_GET, $name, ...$filter) )  return $result;
+		if ( $result = filter_input(INPUT_GET, $name, ...$filter) )	 return $result;
 		if ( $result = filter_input(INPUT_POST, $name, ...$filter) )  return $result;
 		return null;
 	}
@@ -2884,8 +2950,8 @@ abstract class abstract_core
 	/**
 	 * Load a set of extensions
 	 *
-	 * @param 	string	$id - plugin slug (plugindir/pluginfile.php)
-	 * @param 	array	$source - the source directory(s)
+	 * @param	string	$id - plugin slug (plugindir/pluginfile.php)
+	 * @param	array	$source - the source directory(s)
 	 * @return	int		count of extensions loaded
 	 */
 	private function loadExtensions(string $id, array $source): int
@@ -2927,8 +2993,8 @@ abstract class abstract_core
 	/**
 	 * Load a single extension
 	 *
-	 * @param 	string	$extension - full pathname of extension
-	 * @return	int  1=loaded
+	 * @param	string	$extension - full pathname of extension
+	 * @return	int	 1=loaded
 	 */
 	private function loadExtension(string $extension): int
 	{
@@ -2940,10 +3006,10 @@ abstract class abstract_core
 			return 0;
 		}
 
-		$className 	= $this->getClassName($object);					// classname_extension
+		$className	= $this->getClassName($object);					// classname_extension
 		$this->extension_objects[ $className ] = $object;
 
-		$aliasName 	= basename($className,'_extension');			// classname
+		$aliasName	= basename($className,'_extension');			// classname
 		if ($aliasName != $className ) {
 			$this->extension_aliases[ $aliasName ] = $object;
 		}
@@ -2957,7 +3023,7 @@ abstract class abstract_core
 		}
 		$extVersion = 'version '. $extVersion;
 		if (!$object->isEnabled()) {
-			$extVersion .= ' (disabled)'; 							// disabled in constructor
+			$extVersion .= ' (disabled)';							// disabled in constructor
 		}
 		$this->logInfo($extVersion, $className);
 		return 1;
@@ -2968,8 +3034,8 @@ abstract class abstract_core
 	 * get plugin extensions from directory.
 	 * only backend or missing transient.
 	 *
-	 * @param 	string	$id - default' - used in transient array
-	 * @param 	array	$source - the source directory(s)
+	 * @param	string	$id - default' - used in transient array
+	 * @param	array	$source - the source directory(s)
 	 * @return	array	slug => [dir => [extensions]]
 	 */
 	private function loadExtensions_fromDisk(string $id, array $source): array
@@ -2979,7 +3045,7 @@ abstract class abstract_core
 			$source = $this->defaultExtensionDirectories();
 		}
 
-		$dirNames 	= $this->addExtensionSubDirectories( [ $id => $source ] );
+		$dirNames	= $this->addExtensionSubDirectories( [ $id => $source ] );
 
 		$fileTypes	= array("extension");						// <something>.extension.php
 
@@ -3053,7 +3119,7 @@ abstract class abstract_core
 	/**
 	 * get sub-directories of $dirNames
 	 *
-	 * @param 	array	$extensionDirectories array of [plugin_slug => plugin_directory(s)]
+	 * @param	array	$extensionDirectories array of [plugin_slug => plugin_directory(s)]
 	 * @return	array	slug => [directories]
 	 */
 	private function addExtensionSubDirectories(array $dirNames): array
@@ -3075,7 +3141,7 @@ abstract class abstract_core
 					if ($base == 'backend' && !$this->is_backend()) continue;		// back-end only
 					if ($base == 'public' && !$this->is_frontend()) continue;		// front-end only
 					if ($base == 'frontend' && !$this->is_frontend()) continue;		// front-end only
-					if ($base == 'network' && !$this->is_network_admin()) continue;	// network admin only
+					if ($base == 'network' && !$this->is_network_admin()) continue; // network admin only
 					$result[ $slug ][] = trailingslashit($subDir);
 				}
 			}
@@ -3087,7 +3153,7 @@ abstract class abstract_core
 	/**
 	 * should we load this extension
 	 *
-	 * @param 	string	$extension extension path name
+	 * @param	string	$extension extension path name
 	 * @return	bool
 	 */
 	private function isLoadableExtension(string $extension): bool
@@ -3110,7 +3176,7 @@ abstract class abstract_core
 		$enabled = $this->get_option( $optionName.'_enabled' );					// (<classname>_enabled)
 		if ($enabled !== false) return ($enabled != '');						// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
 
-		if ($className[1] != 'extension' && $className[2] == 'extension') 		// check for <something>.<somethingelse>.extension.php and use <somethingelse>
+		if ($className[1] != 'extension' && $className[2] == 'extension')		// check for <something>.<somethingelse>.extension.php and use <somethingelse>
 		{
 			$optionName = basename(sanitize_key(str_replace(' ','_',$className[1])),'_extension'); // sanitized sans '_extension'
 
@@ -3128,8 +3194,8 @@ abstract class abstract_core
 	/**
 	 * is this an updated extension
 	 *
-	 * @param 	string	$className extension name
-	 * @param 	string	$extVersion extension version loaded
+	 * @param	string	$className extension name
+	 * @param	string	$extVersion extension version loaded
 	 * @return	void
 	 */
 	private function checkExtensionUpgrade(string $className, string $extVersion): void
@@ -3163,8 +3229,8 @@ abstract class abstract_core
 	/**
 	 * Recursive Directory Iterator
 	 *
-	 * @param 	string	$folder - starting directory
-	 * @param 	string	$pattern - RegEx pattern to match
+	 * @param	string	$folder - starting directory
+	 * @param	string	$pattern - RegEx pattern to match
 	 * @return	array
 	 */
 /*
@@ -3172,7 +3238,7 @@ abstract class abstract_core
 	{
 		$result = array();
 
-		$fileList =	new \RegexIterator(
+		$fileList = new \RegexIterator(
 						new \RecursiveIteratorIterator(
 							new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS)
 						),
@@ -3211,8 +3277,8 @@ abstract class abstract_core
 	/**
 	 * call an internal plugin or extension method
 	 *
-	 * @param	string|array 	$method	the method name or [extension,method]
-	 * @param	mixed 			$arguments the arguments to method name
+	 * @param	string|array	$method the method name or [extension,method]
+	 * @param	mixed			$arguments the arguments to method name
 	 * @return	mixed			result of call
 	 */
 	public function callMethod($method, ...$arguments)
@@ -3235,8 +3301,8 @@ abstract class abstract_core
 	/**
 	 * call an internal plugin or extension method - from a filter (ignore unknown failure)
 	 *
-	 * @param	string|array 	$method	the method name or [extension,method]
-	 * @param	mixed 			$arguments the arguments to method name
+	 * @param	string|array	$method the method name or [extension,method]
+	 * @param	mixed			$arguments the arguments to method name
 	 * @return	mixed			result of call
 	 */
 	protected function callMethodIgnore($method, ...$arguments)
@@ -3260,9 +3326,9 @@ abstract class abstract_core
 	/**
 	 * call a specific extension method
 	 *
-	 * @param	string 	$extension the extension name
-	 * @param	string 	$method the method name
-	 * @param	mixed 	$arguments the arguments to method name
+	 * @param	string	$extension the extension name
+	 * @param	string	$method the method name
+	 * @param	mixed	$arguments the arguments to method name
 	 * @return	mixed	result of extension method called
 	 */
 	public function callExtension($extension, $method, ...$arguments)
@@ -3285,8 +3351,8 @@ abstract class abstract_core
 	/**
 	 * Execute a method in each/all loaded extension class
 	 *
-	 * @param	string 	$method	the method name
-	 * @param	mixed 	$arguments the arguments to method name
+	 * @param	string	$method the method name
+	 * @param	mixed	$arguments the arguments to method name
 	 * @return	array	results from each call
 	 */
 	public function callAllExtensions($method, ...$arguments): array
@@ -3306,7 +3372,7 @@ abstract class abstract_core
 	/**
 	 * get class or extension object
 	 *
-	 * @param	string 	$className	class/extension name
+	 * @param	string	$className	class/extension name
 	 * @return	object	class object or null
 	 */
 	public function getClassObject(string $className=null): ?object
@@ -3335,8 +3401,8 @@ abstract class abstract_core
 	/**
 	 * is extension loaded and enabled
 	 *
-	 * @param 	object|string	$extension extension class or name
-	 * @param 	bool			$checkEnabled check isEnabled()
+	 * @param	object|string	$extension extension class or name
+	 * @param	bool			$checkEnabled check isEnabled()
 	 * @return	bool|object		false or extension object
 	 */
 	public function isExtension($extension, bool $checkEnabled=true)
@@ -3354,8 +3420,8 @@ abstract class abstract_core
 	/**
 	 * alias to isExtension - get enabled extension object
 	 *
-	 * @param 	object|string	$extension extension class or name
-	 * @param 	bool			$checkEnabled check isEnabled()
+	 * @param	object|string	$extension extension class or name
+	 * @param	bool			$checkEnabled check isEnabled()
 	 * @return	bool|object		false or extension object
 	 */
 	public function getExtension($extension, bool $checkEnabled=true)
@@ -3381,8 +3447,8 @@ abstract class abstract_core
 	/**
 	 * standardize the options group display name
 	 *
-	 * @param	string|array 	$optionGroup group name or [groupname, tabname]]
-	 * @return	string|array 	standardized option group name
+	 * @param	string|array	$optionGroup group name or [groupname, tabname]]
+	 * @return	string|array	standardized option group name
 	 */
 	public function standardizeOptionGroup($optionGroup)
 	{
@@ -3400,9 +3466,9 @@ abstract class abstract_core
 	/**
 	 * standardize the option name
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	bool 	$toLC convert to lower case
-	 * @return	string 	standardized option name
+	 * @param	string	$optionName option name
+	 * @param	bool	$toLC convert to lower case
+	 * @return	string	standardized option name
 	 */
 	public function standardizeOptionName(string $optionName, $toLC=true): string
 	{
@@ -3417,8 +3483,8 @@ abstract class abstract_core
 	/**
 	 * add additional options (values) for the plugin (or extension)
 	 *
-	 * @param	string|array 	$optionGroup group name or [groupname, tabname]]
-	 * @param	array 			$optionMeta group option meta
+	 * @param	string|array	$optionGroup group name or [groupname, tabname]]
+	 * @param	array			$optionMeta group option meta
 	 * @return	void
 	 */
 	public function registerPluginOptions($optionGroup, array $optionMeta = []): void
@@ -3429,8 +3495,8 @@ abstract class abstract_core
 	/**
 	 * add network options (values) for the plugin
 	 *
-	 * @param	string|array 	$optionGroup group name or [groupname, tabname]]
-	 * @param	array 			$optionMeta group option meta
+	 * @param	string|array	$optionGroup group name or [groupname, tabname]]
+	 * @param	array			$optionMeta group option meta
 	 * @return	void
 	 */
 	public function registerNetworkOptions($optionGroup, array $optionMeta = []): void
@@ -3511,8 +3577,8 @@ abstract class abstract_core
 	 *
 	 * @internal
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value saved (null gets removed)
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value saved (null gets removed)
 	 * @return	mixed	$value
 	 */
 	private function _update_plugin_option_array(string $optionName, $value)
@@ -3532,8 +3598,8 @@ abstract class abstract_core
 	 *
 	 * @internal
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value saved (null gets removed)
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value saved (null gets removed)
 	 * @return	mixed	$value
 	 */
 	private function _update_network_option_array(string $optionName, $value)
@@ -3554,13 +3620,13 @@ abstract class abstract_core
 	 * @example $this->isReservedOption('my_option',true);
 	 * @example if ($this->isReservedOption('my_option')) {...}
 	 *
-	 * @param	string 	$optionName option name
-	 * @param 	bool 	$set set as reserved or not
-	 * @return 	bool
+	 * @param	string	$optionName option name
+	 * @param	bool	$set set as reserved or not
+	 * @return	bool
 	 */
 	public function isReservedOption(string $optionName, $set = null): bool
 	{
-		$original 	= $this->standardizeOptionName($optionName, false);
+		$original	= $this->standardizeOptionName($optionName, false);
 		$optionName = $this->standardizeOptionName($optionName);
 
 		if (is_bool($set))
@@ -3596,10 +3662,10 @@ abstract class abstract_core
 	 * @example $this->is_option('my_option','this_value') - returns 'this_value' or false
 	 * @example $this->is_option('my_option',['this_value','that_value']) - returns 'this_value' or 'that_value' or false
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value check for this value (optional)
-	 * @param	bool 	$network using network options (internal)
-	 * @return	bool|mixed 	null or option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value check for this value (optional)
+	 * @param	bool	$network using network options (internal)
+	 * @return	bool|mixed	null or option value
 	 */
 	public function is_option($optionName, $value = null, $network = false)
 	{
@@ -3665,9 +3731,9 @@ abstract class abstract_core
 	 * @example $this->get_option('my_option',[]) - returns my_option value or []
 	 * @example $this->get_option('my_option','setMyOption') - returns my_option value or value returned by setMyOption()
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$default default value or callable function to set value
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$default default value or callable function to set value
+	 * @return	mixed	option value
 	 */
 	public function get_option($optionName, $default = false)
 	{
@@ -3675,7 +3741,7 @@ abstract class abstract_core
 			return $this->get_network_option($optionName, $default);
 		}
 
-		$preOption 	= $this->prefixOptionName($this->standardizeOptionName($optionName, false));
+		$preOption	= $this->prefixOptionName($this->standardizeOptionName($optionName, false));
 		$optionName = $this->standardizeOptionName($optionName);
 		$isReserved = $this->isReservedOption($optionName);
 
@@ -3726,9 +3792,9 @@ abstract class abstract_core
 	/**
 	 * get_option() and decrypt with prefixed option name, optional callback default
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$default default value or callable function
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$default default value or callable function
+	 * @return	mixed	option value
 	 */
 	public function get_option_decrypt($optionName, $default = false)
 	{
@@ -3749,9 +3815,9 @@ abstract class abstract_core
 	 *
 	 * @deprecated use update_option()
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value value to set
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value value to set
+	 * @return	mixed	option value
 	 */
 	public function set_option($optionName, $value)
 	{
@@ -3767,7 +3833,7 @@ abstract class abstract_core
 	/**
 	 * delete_option() with prefixed option name
 	 *
-	 * @param	string 	$optionName option name
+	 * @param	string	$optionName option name
 	 * @return	bool	returned from delete_option
 	 */
 	public function delete_option($optionName)
@@ -3786,10 +3852,10 @@ abstract class abstract_core
 	/**
 	 * add_option() with prefixed option name
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
-	 * @param	bool 	$autoload WordPress autoload/cache
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
+	 * @param	bool	$autoload WordPress autoload/cache
+	 * @return	mixed	option value
 	 */
 	public function add_option($optionName, $value, $autoload = true)
 	{
@@ -3809,10 +3875,10 @@ abstract class abstract_core
 	/**
 	 * update_option() with prefixed option name
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
-	 * @param	bool 	$autoload WordPress autoload/cache
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
+	 * @param	bool	$autoload WordPress autoload/cache
+	 * @return	mixed	option value
 	 */
 	public function update_option($optionName, $value, $autoload = true)
 	{
@@ -3832,9 +3898,9 @@ abstract class abstract_core
 	/**
 	 * encrypt and update_option() with prefixed option name
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
-	 * @param	bool 	$autoload WordPress autoload/cache
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
+	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
 	public function update_option_encrypt($optionName, $value, $autoload = true)
@@ -3849,9 +3915,9 @@ abstract class abstract_core
 	/**
 	 * rename an option
 	 *
-	 * @param	string 	$oldOptionName old (current) option name
-	 * @param	string 	$newOptionName new option name
-	 * @param	bool 	$autoload WordPress autoload/cache
+	 * @param	string	$oldOptionName old (current) option name
+	 * @param	string	$newOptionName new option name
+	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
 	public function rename_option($oldOptionName, $newOptionName, $autoload = true)
@@ -3876,9 +3942,9 @@ abstract class abstract_core
 	 * @example $this->is_network_option('my_option','this_value') - returns 'this_value' or false
 	 * @example $this->is_network_option('my_option',['this_value','that_value']) - returns 'this_value' or 'that_value' or false
 	 *
-	 * @param	string 		$optionName option name
-	 * @param	mixed 		$value check this value
-	 * @return	bool|mixed 	option is set and has value
+	 * @param	string		$optionName option name
+	 * @param	mixed		$value check this value
+	 * @return	bool|mixed	option is set and has value
 	 */
 	public function is_network_option($optionName, $value = null)
 	{
@@ -3894,15 +3960,15 @@ abstract class abstract_core
 	 * @example $this->get_network_option('my_option',[]) - returns my_option value or []
 	 * @example $this->get_network_option('my_option','setMyOption') - returns my_option value or value returned by setMyOption()
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$default default value or callable function to set value
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$default default value or callable function to set value
+	 * @return	mixed	option value
 	 */
 	public function get_network_option($optionName, $default = false)
 	{
 		if (! $this->is_network_enabled()) return $default;
 
-		$preOption 	= $this->prefixOptionName($this->standardizeOptionName($optionName, false));
+		$preOption	= $this->prefixOptionName($this->standardizeOptionName($optionName, false));
 		$optionName = $this->standardizeOptionName($optionName);
 		$isReserved = $this->isReservedOption($optionName);
 
@@ -3947,9 +4013,9 @@ abstract class abstract_core
 	/**
 	 * get_network_option() and decrypt with prefixed option name, optional callback default
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$default default value or callable function
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$default default value or callable function
+	 * @return	mixed	option value
 	 */
 	public function get_network_option_decrypt($optionName, $default = false)
 	{
@@ -3970,9 +4036,9 @@ abstract class abstract_core
 	 *
 	 * @deprecated use update_network_option()
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value value to set
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value value to set
+	 * @return	mixed	option value
 	 */
 	public function set_network_option($optionName, $value)
 	{
@@ -3986,7 +4052,7 @@ abstract class abstract_core
 	/**
 	 * delete_network_option() with prefixed option name (only network enabled)
 	 *
-	 * @param	string 	$optionName option name
+	 * @param	string	$optionName option name
 	 * @return	bool	returned from delete_option
 	 */
 	public function delete_network_option($optionName)
@@ -4003,9 +4069,9 @@ abstract class abstract_core
 	/**
 	 * add_network_option() with prefixed option name (only network enabled)
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
+	 * @return	mixed	option value
 	 */
 	public function add_network_option($optionName, $value)
 	{
@@ -4023,9 +4089,9 @@ abstract class abstract_core
 	/**
 	 * update_network_option() with prefixed option name (only network enabled)
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
+	 * @return	mixed	option value
 	 */
 	public function update_network_option($optionName, $value)
 	{
@@ -4043,8 +4109,8 @@ abstract class abstract_core
 	/**
 	 * encrypt and update_network_option() with prefixed option name
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
 	 * @return	mixed	returned from update_option
 	 */
 	public function update_network_option_encrypt($optionName, $value)
@@ -4058,8 +4124,8 @@ abstract class abstract_core
 	/**
 	 * rename a network option (only network enabled)
 	 *
-	 * @param	string 	$oldOptionName old (current) option name
-	 * @param	string 	$newOptionName new option name
+	 * @param	string	$oldOptionName old (current) option name
+	 * @param	string	$newOptionName new option name
 	 * @return	mixed	returned from update_option
 	 */
 	public function rename_network_option($oldOptionName, $newOptionName)
@@ -4082,9 +4148,9 @@ abstract class abstract_core
 	 * @example $this->is_site_option('my_option','this_value')
 	 * @example $this->is_site_option('my_option',['this_value','that_value'])
 	 *
-	 * @param	string 		$optionName option name
-	 * @param	mixed 		$value check this value
-	 * @return	bool|mixed 	option is set and has value
+	 * @param	string		$optionName option name
+	 * @param	mixed		$value check this value
+	 * @return	bool|mixed	option is set and has value
 	 */
 	public function is_site_option($optionName, $value = null)
 	{
@@ -4097,9 +4163,9 @@ abstract class abstract_core
 	/**
 	 * get_option() with prefixed option name, optional callback default (single site or network enabled)
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$default default value or callable function
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$default default value or callable function
+	 * @return	mixed	option value
 	 */
 	public function get_site_option($optionName, $default = false)
 	{
@@ -4112,9 +4178,9 @@ abstract class abstract_core
 	/**
 	 * get_site_option() and decrypt with prefixed option name, optional callback default
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$default default value or callable function
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$default default value or callable function
+	 * @return	mixed	option value
 	 */
 	public function get_site_option_decrypt($optionName, $default = false)
 	{
@@ -4129,9 +4195,9 @@ abstract class abstract_core
 	 *
 	 * @deprecated use update_site_option()
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value value to set
-	 * @return	mixed 	option value
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value value to set
+	 * @return	mixed	option value
 	 */
 	public function set_site_option($optionName, $value)
 	{
@@ -4145,7 +4211,7 @@ abstract class abstract_core
 	/**
 	 * delete_option() with prefixed option name (single site or network enabled)
 	 *
-	 * @param	string 	$optionName option name
+	 * @param	string	$optionName option name
 	 * @return	bool	returned from delete_option
 	 */
 	public function delete_site_option($optionName)
@@ -4159,9 +4225,9 @@ abstract class abstract_core
 	/**
 	 * add_option() with prefixed option name (single site or network enabled)
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
-	 * @param	bool 	$autoload WordPress autoload/cache
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
+	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from add_option
 	 */
 	public function add_site_option($optionName, $value, $autoload = true)
@@ -4175,9 +4241,9 @@ abstract class abstract_core
 	/**
 	 * update_site_option() with prefixed option name (single site or network enabled)
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
-	 * @param	bool 	$autoload WordPress autoload/cache
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
+	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
 	public function update_site_option($optionName, $value, $autoload = true)
@@ -4191,9 +4257,9 @@ abstract class abstract_core
 	/**
 	 * encrypt and update_site_option() with prefixed option name (single site or network enabled)
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	mixed 	$value option value
-	 * @param	bool 	$autoload WordPress autoload/cache
+	 * @param	string	$optionName option name
+	 * @param	mixed	$value option value
+	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
 	public function update_site_option_encrypt($optionName, $value, $autoload = true)
@@ -4207,9 +4273,9 @@ abstract class abstract_core
 	/**
 	 * rename an option (single site or network enabled)
 	 *
-	 * @param	string 	$oldOptionName old (current) option name
-	 * @param	string 	$newOptionName new option name
-	 * @param	bool 	$autoload WordPress autoload/cache
+	 * @param	string	$oldOptionName old (current) option name
+	 * @param	string	$newOptionName new option name
+	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
 	public function rename_site_option($oldOptionName, $newOptionName, $autoload = true)
@@ -4223,8 +4289,8 @@ abstract class abstract_core
 	/**
 	 * get the option prefix
 	 *
-	 * @param	string 	$prefix override default prefix
-	 * @return	string 	short_classname_
+	 * @param	string	$prefix override default prefix
+	 * @return	string	short_classname_
 	 */
 	public function getOptionNamePrefix($prefix=null): string
 	{
@@ -4235,9 +4301,9 @@ abstract class abstract_core
 	/**
 	 * Get the prefixed version input $name suitable for storing in WP options
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	string 	$prefix override default prefix
-	 * @return	string 	option name with prefix
+	 * @param	string	$optionName option name
+	 * @param	string	$prefix override default prefix
+	 * @return	string	option name with prefix
 	 */
 	public function prefixOptionName(string $name, $prefix=null): string
 	{
@@ -4252,9 +4318,9 @@ abstract class abstract_core
 	/**
 	 * Remove the prefix from the input $name
 	 *
-	 * @param	string 	$optionName option name
-	 * @param	string 	$prefix override default prefix
-	 * @return	string 	option name without prefix
+	 * @param	string	$optionName option name
+	 * @param	string	$prefix override default prefix
+	 * @return	string	option name without prefix
 	 */
 	public function unprefixOptionName(string $name, $prefix=null): string
 	{
@@ -4269,9 +4335,9 @@ abstract class abstract_core
 	/**
 	 * Prefix the table name with wpdb prefix and our class prefix (wpdb_classname_tablename)
 	 *
-	 * @param	string 	name of a database table
-	 * @param	string 	$prefix override default prefix
-	 * @return	string 	full table name
+	 * @param	string	name of a database table
+	 * @param	string	$prefix override default prefix
+	 * @return	string	full table name
 	 */
 	public function prefixTableName(string $name, $prefix=null): string
 	{
@@ -4291,10 +4357,10 @@ abstract class abstract_core
 	 *
 	 * @example $this->get_transient(name, function, nnn) to call function if transient is not set or has expired
 	 *
-	 * @param	string 	$transientName transient name
-	 * @param	mixed 	$default default value or callable function
-	 * @param 	int		$expiration time until expiration in seconds. Default 0 (no expiration)
-	 * @return	mixed 	transient value
+	 * @param	string	$transientName transient name
+	 * @param	mixed	$default default value or callable function
+	 * @param	int		$expiration time until expiration in seconds. Default 0 (no expiration)
+	 * @return	mixed	transient value
 	 */
 	public function get_transient(string $transientName, $default = false, $expiration = 0 )
 	{
@@ -4328,9 +4394,9 @@ abstract class abstract_core
 	/**
 	 * A wrapper function to WP set_transient() with prefixed transient name
 	 *
-	 * @param	string 	$transientName transient name
-	 * @param	mixed 	$value value to save
-	 * @param 	int		$expiration time until expiration in seconds. Default 0 (no expiration)
+	 * @param	string	$transientName transient name
+	 * @param	mixed	$value value to save
+	 * @param	int		$expiration time until expiration in seconds. Default 0 (no expiration)
 	 * @return	bool
 	 */
 	public function set_transient(string $transientName, $value, $expiration = 0 )
@@ -4346,7 +4412,7 @@ abstract class abstract_core
 	/**
 	 * A wrapper function to WP delete_transient() with prefixed transient name
 	 *
-	 * @param	string 	$transientName transient name
+	 * @param	string	$transientName transient name
 	 * @return	bool
 	 */
 	public function delete_transient(string $transientName)
@@ -4369,10 +4435,10 @@ abstract class abstract_core
 	 *
 	 * @example $this->get_site_transient(name, function, nnn) to call function if transient is not set or has expired
 	 *
-	 * @param	string 	$transientName transient name
-	 * @param	mixed 	$default default value or callable function
-	 * @param 	int		$expiration time until expiration in seconds. Default 0 (no expiration)
-	 * @return	mixed 	transient value
+	 * @param	string	$transientName transient name
+	 * @param	mixed	$default default value or callable function
+	 * @param	int		$expiration time until expiration in seconds. Default 0 (no expiration)
+	 * @return	mixed	transient value
 	 */
 	public function get_site_transient(string $transientName, $default = false, $expiration = 0 )
 	{
@@ -4406,9 +4472,9 @@ abstract class abstract_core
 	/**
 	 * A wrapper function to WP set_site_transient() with prefixed transient name
 	 *
-	 * @param	string 	$transientName transient name
-	 * @param	mixed 	$value value to save
-	 * @param 	int		$expiration time until expiration in seconds. Default 0 (no expiration)
+	 * @param	string	$transientName transient name
+	 * @param	mixed	$value value to save
+	 * @param	int		$expiration time until expiration in seconds. Default 0 (no expiration)
 	 * @return	bool
 	 */
 	public function set_site_transient(string $transientName, $value, $expiration = 0 )
@@ -4424,7 +4490,7 @@ abstract class abstract_core
 	/**
 	 * A wrapper function to WP delete_site_transient() with prefixed transient name
 	 *
-	 * @param	string 	$transientName transient name
+	 * @param	string	$transientName transient name
 	 * @return	bool
 	 */
 	public function delete_site_transient(string $transientName)
@@ -4438,9 +4504,9 @@ abstract class abstract_core
 	/**
 	 * Get the prefixed version of the transient name
 	 *
-	 * @param	string 	$transientName transient name
-	 * @param	string 	$prefix override default prefix
-	 * @return	string 	transient name with prefix
+	 * @param	string	$transientName transient name
+	 * @param	string	$prefix override default prefix
+	 * @return	string	transient name with prefix
 	 */
 	public function prefixTransientName(string $transientName, $prefix=null): string
 	{

@@ -9,7 +9,7 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2022 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @version		1.x
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -20,12 +20,12 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '23.0603.1';
+		const VERSION	= '24.0509.1';
 
 		/**
 		 * @var string additional styling
 		 */
-		private $addStyles	= "
+		const MD_STYLE	= "
 /* Rules for sizing the icon. */
 .material-icons.md-18 { font-size: 18px; }
 .material-icons.md-24 { font-size: 24px; }
@@ -73,13 +73,13 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 					'_materialicons'		=> array(
 									'type'		=> 	'display',
 									'label'		=> 	'Google\'s Material Icons',
-									'default'	=> 	"To use Google's Material Icons, add the class name 'material-icons' to an element enclosing the icon name.<br/>".
-													"<span class='material-icons'>settings_accessibility</span> ".
-													"<code>&lt;span class='material-icons'&gt;settings_accessibility&lt;/span&gt;</code><br/>".
-													"<span class='material-icons md-dark' style='background: lightblue;'>settings_accessibility</span> ".
-													"<code>&lt;span class='material-icons md-dark' style='background: lightblue;'&gt;...&lt;/span&gt;</code><br/>".
-													"<span class='material-icons md-light' style='background: darkblue;'>settings_accessibility</span> ".
-													"<code>&lt;span class='material-icons md-light' style='background: darkblue;'&gt;...&lt;/span&gt;</code> <br/>",
+									'default'	=> 	"To use Google's Material Icons, add the class name 'material-icons' to an element enclosing the icon name.",
+									'tooltip'	=>	"&lt;span class='material-icons'&gt;face&lt;/span&gt;<br/>".
+													"<span class='material-icons'>face</span><br/>".
+													"&lt;span class='material-icons md-dark'<br/> style='background: lightblue;'&gt;face&lt;/span&gt;<br/>".
+													"<span class='material-icons md-dark' style='background: lightblue;'>face</span><br/>".
+													"&lt;span class='material-icons md-light'<br/> style='background: darkblue;'&gt;face&lt;/span&gt;<br/>".
+													"<span class='material-icons md-light' style='background: darkblue;'>face</span>",
 									'info'		=>	"See <a href='https://google.github.io/material-design-icons/' target='_blank'>Material Icons Guide</a>".
 													" and the icon library at <a href='https://fonts.google.com/icons?selected=Material+Icons' target='_blank'>https://fonts.google.com/icons?selected=Material+Icons</a>",
 									'help'		=> 	"<details><summary>What are material icons?</summary>".
@@ -88,7 +88,7 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 													"Ensuring readability and clarity at both large and small sizes, these icons have been optimized for beautiful display on all common platforms and display resolutions. ".
 													"</q> -- <cite><a href='https://google.github.io/material-design-icons/' target='_blank'>Material Icons Guide</a></cite></details>".
 													"<details><summary>Additional styling can be achieved using these included class rules...</summary>".
-													"<pre><code>".trim($this->addStyles)."</code></pre></details>".
+													"<pre><code>".trim(self::MD_STYLE)."</code></pre></details>".
 													"[info]",
 					),
 				]
@@ -107,22 +107,14 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 		{
 			parent::addActionsAndFilters();
 
-			$addStyle = trim($this->addStyles);
+			$addStyle = $this->plugin->minifyString(self::MD_STYLE);
 
-			if ($this->is_admin())
-			{
-				\add_action('admin_print_styles', 	function() use($addStyle) {
+			\add_action( ($this->is_admin() ? 'admin' : 'wp').'_print_styles', 	function() use($addStyle)
+				{
 					wp_enqueue_style('material-icons', '//fonts.googleapis.com/icon?family=Material+Icons' );
 					wp_add_inline_style('material-icons', $addStyle);
-				});
-			}
-			else
-			{
-				\add_action('wp_enqueue_scripts', 	function() use($addStyle) {
-					wp_enqueue_style('material-icons', '//fonts.googleapis.com/icon?family=Material+Icons' );
-					wp_add_inline_style('material-icons', $addStyle);
-				});
-			}
+				}
+			);
 		}
 	}
 }

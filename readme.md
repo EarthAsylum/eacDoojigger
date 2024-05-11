@@ -7,11 +7,11 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.5.0  
-Last Updated:           04-Apr-2024  
-Requires at least:      5.5.0  
+Stable tag:             2.6.0-RC1+May10  
+Last Updated:           10-May-2024  
+Requires at least:      5.8  
 Tested up to:           6.5  
-Requires PHP:           7.2  
+Requires PHP:           7.4  
 Contributors:           [earthasylum](https://github.com/earthasylum),[kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
 License:                EarthAsylum Consulting Proprietary License - {eac}PLv1  
 License URI:            https://eacDoojigger.earthasylum.com/end-user-license-agreement/  
@@ -20,7 +20,7 @@ GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki
 
 </details>
 
-> {eac}Doojigger - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress. {eac}Doojigger streamlines the plugin development process and allows you to create professional-grade plugins in a fraction of the time. Take your WordPress development to the next level with {eac}Doojigger.
+> {eac}Doojigger - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress. {eac}Doojigger streamlines the plugin development process and allows you to create professional-grade plugins in a fraction of the time.
 
 ### Description
 
@@ -28,14 +28,14 @@ GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki
 
 **{eac}Doojigger** by {EarthAsylum Consulting} is a multi functional and highly extensible WordPress plugin that provides existing extensions covering file access, security, debugging, encryption, session management, maintenance mode, administration tools, and more.
 
-_{eac}Doojigger_ is not only a fully functional plugin, but more so, an architectural framework (using shared/abstract code) enabling the easy creation of full featured...
+_{eac}Doojigger_ is not only a fully functional plugin, but more so, an architectural development platform (using shared/abstract code) enabling the effortless creation of full featured...
 
 1.  [Custom *Derivative* plugins](#custom-derivative-plugins).
-    +   Build your own plugin using a robust, efficient, and clean foundation.
+    +   Create your own plugin using a robust, efficient, and clean foundation.
 2.  [Custom {eac}Doojigger *Extensions*](#custom-eacdoojigger-extensions).
-    +   Add easy-to-code, task-oriented extensions to {eac}Doojigger or your own derivative plugins
+    +   Add easy-to-code, task-oriented extensions to your plugin or to {eac}Doojigger.
 3.  [Custom *Extension Plugins*](#custom-extension-plugins).
-    +   Load your custom extensions (for {eac}Doojigger or your derivative) as their own WordPress plugins.
+    +   Load your custom extensions as their own WordPress plugins.
 
 Rather than updating or customizing themes and functions, it is often best to isolate your custom code in a plugin or plugin extension so that code is not lost when the theme is changed or updated. Themes should only be used and customized with code pertinent to the look and feel of your site. Any code that should be retained after changing a theme belongs in a plugin or plugin extension. This keeps your code reusable and theme independent.
 
@@ -56,23 +56,23 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 |   Included Extensions & Traits        |                       |
 |   ---------------------------------   |   ----------------    |
-|   *file system access*                | \*New\* Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
-|   *WPMU Installer*                    | \*New\* Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
+|   *file system access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
+|   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
 |   *security*                          | Adds a number of security options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, block IP addresses, set global cookie flags, and more. |
 |   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
 |   *session*                           | Manages PHP sessions using well-known session managers or through WordPress transients. |
 |   *maintenance mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
 |   *admin tools*                       | Adds cache management and plugin option backup/restore, export/import. |
-|   *ajax action*                       | Adds an easy to use ajax responder that can be used by any extension. |
+|   *ajax action*                       | Adds an easy to use ajax responder (accessable from any extension) as well as a purely asynchronous device fingerprint action. |
 |   *material icons*                    | Adds Google's Material Icons to WordPress. |
 |   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
 
 
-|   Extras & Examples                   |   -[explore on github](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)- -[documentation wiki](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/)- -[download zip](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)- |
+|   Extras & Examples                   |   { [explore on github](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras) } { [documentation wiki](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/) } { [download zip](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip) } |
 |   ---------------------------------   |   ----------------    |
-|   *myAwesomePlugin*                   | Example, skeleton plugin derivative. |
-|   *myAwesomeExtension*                | Example, skeleton plugin extension. |
+|   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first plugin.* |
+|   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first extension.* |
 |   *myFunctions*                       | A functional skeleton extension plugin intended to replace (or augment) custom theme `functions.php`, including custom stylesheet and javascript. |
 |   *myOptionsTest*                     | A functional example plugin that produces a settings screen with all input field types. Includes example input field filters and sanitization. |
 |   A debugging test api                | Extension that provides testing via url through the debugging extension (not intended for production sites). |
@@ -114,7 +114,7 @@ Once {eac}Doojigger is installed and registered, you, the developer, can create 
 
 Your plugin code need only focus on your particular requirements. The WordPress code and many utility functions have been taken care of for you.
 
->   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/derivatives/) (found in the *Extras/Plugins/* folder).
+>   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/derivatives/) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/Plugins/* folder).
 
 
 #### Custom {eac}Doojigger Extensions
@@ -126,7 +126,7 @@ An extension is a PHP program class that adds functionality to the base plugin. 
 
 *Custom extensions may also be uploaded to your theme folder (preferable a [child theme](https://developer.wordpress.org/themes/advanced-topics/child-themes/)), in the ../eacDoojigger/Extensions folder.*
 
->   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/extensions/) (found in the *Extras/Extensions/* folder).
+>   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/extensions/) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/Extensions/* folder).
 
 
 #### Custom Extension Plugins
@@ -138,7 +138,7 @@ Since uploading extensions to the plugin or theme folder risks overwriting those
 
 {eac}Doojigger provides many useful methods and hooks which can be accessed from your custom plugins or extensions, as well as from your theme functions or any code in WordPress.
 
->   See [Using {eac}Doojigger](https://eacdoojigger.earthasylum.com/using-doojigger) (found in the *Extras/UsingDoojigger/* folder) for details and examples,
+>   See [Using {eac}Doojigger](https://eacdoojigger.earthasylum.com/using-doojigger) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/UsingDoojigger/* folder) for details and examples,
     +   [{eac}Doojigger PHP Reference](https://earthasylum.github.io/docs.eacDoojigger/) documentation.
 
 
@@ -148,7 +148,7 @@ WordPress hosted plugins provide updating functionality automatically. Whenever 
 
 You can provide the same functionality with your externally or self hosted plugin with a few easy changes.
 
->   See [Automatic Updates](https://eacdoojigger.earthasylum.com/automatic-updates/) (found in the *Extras/AutoUpdate/* folder) for more information.
+>   See [Automatic Updates](https://eacdoojigger.earthasylum.com/automatic-updates/) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/AutoUpdate/* folder) for more information.
 
 
 #### Contextual Help
@@ -157,7 +157,7 @@ To complete your plugin and improve support, provide contextual help using the {
 
 Adding contextual help to your plugin and extension is easy using the methods built into {eac}Doojigger... and when using the proper filter, you can ensure that your help content only shows on your plugin page or extension tab.
 
->   See the [Contextual Help](https://eacdoojigger.earthasylum.com/contextual-help/) page (found in the *Extras/ContextualHelp/* folder) for complete details and examples.
+>   See the [Contextual Help](https://eacdoojigger.earthasylum.com/contextual-help/) page (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/ContextualHelp/* folder) for complete details and examples.
 
 
 ### Multi-Site Network

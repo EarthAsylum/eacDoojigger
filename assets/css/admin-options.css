@@ -1,102 +1,254 @@
 /**
  * {eac}Doojigger for WordPress - Administrator options screen stylesheet
- * @version 23.1007.1
+ * @version 24.0507.1
  */
 
+/* https://make.wordpress.org/core/2021/02/23/standardization-of-wp-admin-colors-in-wordpress-5-7/ */
+:root {
+	--eac-admin-gray-0: #f6f7f7;
+	--eac-admin-gray-20: #a7aaad;
+	--eac-admin-gray-60: #50575e;
+	--eac-admin-yellow-0: #fcf9e8;
+	--eac-logo-gray: #8c8f94;
+	--eac-logo-green: #6e9882;
+	--eac-logo-orange: #da821d;
+}
+
+@keyframes settings-easeIn {
+	from {opacity: 0;} to {opacity: 1;}
+}
+@keyframes settings-easeOut {
+	from {opacity: 1;} to {opacity: 0;}
+}
+
+/* settings page tabs (overriden with .wp-core-ui theme) */
 .nav-tab {
 	border-top-left-radius: .5em .5em;
 	border-top-right-radius: .5em .5em;
 	padding: 2px .75em;
-	color: #007cba; background: #e4f1fb;
+	color: white; background: var(--eac-admin-base);
 	margin-left: 0;
 	/* override primary button class */
+	margin-top: 5px !important;
 	margin-right: 2px !important;
 	border-bottom-left-radius: 0 !important;
-	border-bottom-right-radius: 0  !important;
+	border-bottom-right-radius: 0 !important;
 	border-bottom: none !important;
 }
 .nav-tab-active {
-	color: white; background: #3baae3;
+	color: white; background: var(--eac-admin-highlight);
 }
-
 .tab-content {
-	border: 1px solid #ccc; padding: 1em; background: #f2f5f7; border-top: none;
+	padding: 1em;
+	border: 1px solid var(--eac-admin-gray-20);
+	background: var(--eac-admin-subtle); border-top: none;
 }
 
-/*section*/
+/*
+	<section class='settings-grid'>
+		<heacer class="settings-grid-container'>
+			-- may be converted to nav-tab structure on custom pages --
+			<details class="settings-grid-head settings-grid-head-label'>
+			<div class="settings-grid-head settings-grid-head-enable'>
+		</header>
+		<fieldset class="settings-grid-container'>
+			<div class="settings-grid-item settings-grid-item-label'>
+			<div class="settings-grid-item settings-grid-item-input-{type}'>
+			--- repeated for each field ---
+		</header>
+	</section>
+*/
+
+/* section */
 .settings-grid {}
 
-/*header|fieldset*/
+/* header|fieldset */
 .settings-grid-container {
-	display: grid; grid-template-columns: 17em minmax(0, 1fr); grid-column-gap: 0; grid-row-gap: .25em;
+	display: grid;
+	grid-template-columns: minmax(8ch, 25%) minmax(60%, auto);
+	grid-template-columns: minmax(8ch, 30ch) minmax(25ch, auto);
+	grid-column-gap: 0; grid-row-gap: .25em;
 	padding: .25em; position: relative;
 	transition: all 750ms ease-in-out;
 	overflow: hidden; /* fix Safari crap */
 }
 
-/*header details|div*/
-.settings-grid-head {
-	color: #007cba; padding: .5em; background: #fff; font-weight: bold;
+/* header details|div (overriden with .wp-core-ui theme) */
+.settings-grid-head:not(.nav-tab) {
+	color: var(--eac-admin-highlight) !important; background: white !important;
+	font-weight: bold;
+	padding: .5em;
 }
+details.settings-grid-head summary {cursor: pointer;}
+details.settings-grid-head summary > * {display: inline;}
 
-/*fieldset div*/
+/* fieldset div */
 .settings-grid-item {
-	color: #000; background: #fff;
-	padding: .5em 1.5em;
+	color: black; background: var(--eac-admin-gray-0);
+	padding: 1em 1.5em;
+	position: relative;
+}
+/* label div */
+.settings-grid-item.settings-grid-item-label {
+	font-weight: 500;
+}
+/* input field */
+.settings-grid-item:not(.settings-grid-item-label) {
+	padding-left: .5em;
+	padding-right: 1.25em;
 }
 
+/* [label] */
+.settings-grid-container label.settings-grid-label {
+	position: relative;
+	display: inline-block;
+	width: 100%;
+	margin: 3px 0;
+}
+
+/* [tooltip] (either help or info) icon */
+.settings-tooltip.dashicons-editor-help,
+.settings-tooltip.dashicons-info-outline {
+	position: absolute; top: 2px;
+	visibility: hidden; overflow: hidden;
+	font-size: 1.25em;
+	color: var(--eac-admin-icon);
+	cursor: help;
+	opacity: .5;
+}
+/* -- handled in tooltip js --
+.settings-tooltip.dashicons:before {visibility: visible;}
+ */
+.settings-tooltip.dashicons:hover {
+	opacity: 1;
+}
+/* [tooltip] popup */
+.ui-tooltip {
+	position: absolute; z-index: 9999;
+	font-size: .9em;
+	max-width: 400px; padding: .5em;
+	color: var(--eac-admin-gray-60); background: var(--eac-admin-yellow-0);
+	border: 1px solid var(--eac-admin-icon); border-radius: 4px;
+	box-shadow: 2px 2px 4px var(--eac-admin-gray-20);
+}
+
+/* [title] */
 .settings-grid-item blockquote {
 	color: inherit; display: block; margin: 0 0 .5em 0
 }
+/* [info] */
 .settings-grid-item cite {
-	color: #555; padding-left: 1.5em; display: block;
+	color: var(--eac-admin-gray-60); padding-left: 1em; display: block;
 }
-.settings-grid-item blockquote em,
-.settings-grid-item cite em {
-	color: inherit; font-style: normal; font-weight: normal;
-}
+
+/* within [title] or [info] */
 .settings-grid-item blockquote small,
 .settings-grid-item blockquote mark,
+.settings-grid-item cite em,
+.settings-grid-item cite code,
 .settings-grid-item cite small,
 .settings-grid-item cite mark {
-	color: #555; background-color: inherit; font-size: .9em; font-style: normal;  font-weight: normal;
-}
-.settings-grid-item cite em,
-.settings-grid-item cite code {
-	color: #555; font-style: normal;
+	color: inherit; background-color: inherit;
+	font-size: .9em; font-style: normal; font-weight: normal;
 }
 .settings-grid-item table {
 	font-size: 1em;
 }
-.settings-grid-item input,.settings-grid-item textarea,.settings-grid-item select {
-	max-width: 100%;
+
+/* input fields */
+.settings-grid-item input:not(.button),
+.settings-grid-item textarea,.settings-grid-item select {
+	max-width: calc(100% - 1ch);
+	margin: 5px .3em .25em 0;
+	border-color: var(--eac-admin-base) !important;
 }
 .settings-grid-item input[readonly] {
-	color: rgba(51,51,51,.5); background-color: #fff;
+	color: rgba(51,51,51,.5); background-color: white;
 }
-
+/* textarea, --text-width set in field html, style='--text-width: 50ch;' */
+.settings-grid-item textarea {
+	field-sizing: content;
+	width: calc(var(--text-width,50ch) * .9);
+	min-height: 3em; max-height: 20em;
+}
 .settings-grid-item input::placeholder,
 .settings-grid-item textarea::placeholder {
 	font-style: italic; opacity: .6;
 }
-
 .settings-grid-item input[type='checkbox'] + label,
 .settings-grid-item input[type='radio'] + label {
 	padding-right: 1em;
 }
-
-@media (max-width: 782px) {
-	.settings-grid-item input[type='checkbox'] + label,
-	.settings-grid-item input[type='radio'] + label {
-		line-height: 2.25;
-	}
+.settings-grid-item input[type='range'] {
+	accent-color: var(--eac-admin-notify);
+	filter: brightness(100%);
+	cursor: ew-resize;
+}
+.settings-grid-item input[type='range']:focus,
+.settings-grid-item input[type='range']:hover {
+	filter: brightness(80%) !important;
+}
+/* range field w/datalist */
+.settings-grid-item-input-range datalist {
+	color: var(--eac-admin-highlight);
+}
+/* output for range field (use with <code><output ...</output></code>) */
+.settings-grid-item-input-range code output {
+	color: var(--eac-admin-highlight);
+	font-weight: 500;
 }
 
+/* input type = switch (checkbox) */
+.settings-grid-container .input-switch-wrap {
+	position: relative;
+	display: inline-block;
+	margin: 1px 0;
+	height: 20px;
+	font-weight: normal;
+	color: black;
+	opacity: .5;
+}
+.settings-grid-container .input-switch-wrap label {margin-right: .75em;}
+.settings-grid-container .input-switch-slider {
+	position: absolute; top: 0; bottom: 0; left: 0; right: 0;
+	background-color: var(--eac-admin-gray-20);
+	width: 3em;
+	cursor: pointer;
+	border: .5px solid var(--eac-admin-gray-60); border-radius: 4px;
+	transition: .4s;
+}
+.settings-grid-container .input-switch-slider:before {
+	content: "";
+	position: absolute; top: .2em; bottom: .2em; left: .23em;
+	background-color: white;
+	width: 1em;
+	border: .5px solid var(--eac-admin-gray-60); border-radius: 4px;
+	transition: .4s;
+}
+/* push original input down and over (including label text) */
+.settings-grid-container input.input-switch {
+	margin: 5px 1rem; opacity: 0;
+}
+/* when checked */
+.settings-grid-head input.input-switch:checked + .input-switch-slider {
+	background-color: var(--eac-admin-highlight);
+}
+.settings-grid-item input.input-switch:checked + .input-switch-slider {
+	background-color: var(--eac-admin-notify);
+}
+.settings-grid-container input.input-switch:checked + .input-switch-slider:before {
+	transform: translateX(1.46em);
+}
+.settings-grid-container .input-switch-wrap:has(input.input-switch:checked) {
+	font-weight: revert; color: revert; opacity: 1;
+}
+
+/* file input */
 .settings-grid-item .input-file-wrap input[type='submit'] {
 	margin-right: 1em;
 }
 .settings-grid-item .input-file-wrap input[type='file'] {
-	font-size: smaller; color: #555;
+	font-size: smaller; color: var(--eac-admin-gray-60);
 }
 .settings-grid-item .input-file-wrap input[type='file']::-webkit-file-upload-button,
 .settings-grid-item .input-file-wrap input[type='file']::file-selector-button {
@@ -106,36 +258,26 @@
 .settings-grid-item .button-small {min-width: 7em; text-align: center;}
 .settings-grid-item .button-large {min-width: 9em; text-align: center;}
 
-fieldset.settings-closed {
-	display: none;
-/*
-	transform-origin: top;
-	transform: scaleY(0);
-	max-height: 0;
- */
+/* details/summary closed - see js animation */
+.settings-grid fieldset.settings-closed {
+	display: none; /* prevents animation but hides when loaded */
+    animation: settings-easeOut 0.75s ease-out;
 }
-fieldset.settings-opened {
-/*
-	transform-origin: top;
-	transform: scaleY(1);
-	max-height: 500em;
- */
+/* details/summary opened  - see js animation */
+.settings-grid fieldset.settings-opened {
+	display: grid !important;
+    animation: settings-easeIn 0.75s ease-in;
 }
-
-.CodeMirror {height: auto; min-height: 3em; width: 85% !important;}
-.CodeMirror,
-.wp-editor-container {border: 1px solid #8c8f94 !important; border-radius: 4px !important;}
-.wp-editor-wrap {width:85%;}
-.wp-editor-wrap .ed_button {min-width:auto;}
-.wp-editor-wrap iframe {width: 99% !important;}
 
 /* for banner and nag-notice (if present) */
 .wp-header-end {clear: both; visibility: visible;}
 
+/* system info */
 table#settings_system_info {border-spacing: 0.5em 0;}
 table#settings_system_info tbody {font-size:.9em;}
 table#settings_system_info tbody td {min-width: 12em;}
 
+/* banner */
 #settings_banner {
 	z-index: 99; /* stay below the admin sidebar on small screens */
 	position: fixed; left: 160px; right: 0; padding: 0; opacity: 0.9; background: white;
@@ -165,23 +307,43 @@ table#settings_system_info tbody td {min-width: 12em;}
 	box-shadow: 0 8px 16px 0 rgb(85 93 102 / 30%);
 }
 
-.folded #settings_banner {left: 36px; /* width: calc(100% - 36px); */}
+/* grow radio & checkbox on small screens */
+@media (max-width: 782px) {
+	.settings-grid-item input[type='checkbox'] + label,
+	.settings-grid-item input[type='radio'] + label {
+		line-height: 2.25;
+	}
+	.settings-grid-container .input-switch-wrap  {height: 26px; margin: 5px 0;}
+	.settings-grid-container input.input-switch {margin: 5px 1ch;}
+}
 
+/* when sidebar is folded */
+.folded #settings_banner {left: 36px;}
 @media screen and (min-width: 783px) and (max-width: 960px) {
 	.auto-fold #settings_banner {left: 36px;}
 }
 @media screen and (max-width: 782px) {
-	#settings_banner {left: 0; /* width: calc(100% + 1.5em); */}
+	#settings_banner {left: 0;}
+	.settings-grid-container {grid-template-columns: minmax(6ch, 25%) minmax(25ch, auto);}
+	/* when admin menu is open */
+	.wp-responsive-open #wpbody {width: calc(100% - 206px); overflow-y: auto;}
 	.wp-responsive-open #settings_banner {left: 190px;}
 	.wp-responsive-open #settings_info {display: none;}
 	.wp-responsive-open .settings-grid-container {grid-template-columns: none; grid-row-gap: 0}
+	.wp-responsive-open .settings-grid-item.settings-grid-item-label {padding-left: .5em;}
 }
 @media screen and (max-width: 650px) {
 	#settings_info {display: none;}
-	#wpadminbar {position: fixed};
+	#wpadminbar {position: fixed;}
 }
 
 .dashicons {text-decoration: none; padding: 0 2px;}
-.eac-gray {color: #707070 !important;} .eac-green {color: #6e9882 !important;} .eac-orange {color: #da821d !important;}
-#settings_info .eac-orange {border-color: #6e9882;}
-#settings_info .eac-green {border-color: #da821d;}
+
+.eac-logo-gray {color: var(--eac-logo-gray) !important;}
+.eac-logo-green {color: var(--eac-logo-green) !important;}
+.eac-logo-orange {color: var(--eac-logo-orange) !important;}
+#settings_info .eac-logo-green {border-color: var(--eac-logo-orange);}
+#settings_info .eac-logo-orange {border-color: var(--eac-logo-green);}
+/* deprecated */
+.eac-gray {color: var(--eac-logo-gray) !important;} .eac-green {color: var(--eac-logo-green) !important;} .eac-orange {color: var(--eac-logo-orange) !important;}
+#settings_info .eac-green {border-color: var(--eac-logo-orange);} #settings_info .eac-orange {border-color: var(--eac-logo-green);}

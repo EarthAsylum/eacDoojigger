@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '23.1109.1';
+		const VERSION 			= '24.0419.1';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -171,39 +171,36 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		public function addActionsAndFilters()
 		{
 			// add additional css when our settings stylesheet loads.
-			$this->add_action('admin_enqueue_styles', function($styleId)
+			if (!$this->plugin->isSettingsPage('Security')) return;
 			{
-				$style =
-					'#secPassLock {width: 85%; max-width: 30em;}'.
-					'#secPassLockTicks {'.
-						'display: flex; width: 86%; max-width: 38em;'.
-						'justify-content: space-between;'.
-						'font-size: 0.85em; color:blue;'.
-						'padding: 0 0 0 0.2em;'.
-					'}'.
-					'#secPassLockTicks option {text-align: right;}'.
-					'#secPassTime {width: 85%;}'.
-					'#secPassTimeTicks {'.
-						'display: flex; width: 86%; padding: 0;'.
-						'font-size: 0.85em; color: blue;'.
-					'}'.
-					'#secPassTimeTicks option {text-align: right;}'.
-					'#secHeartbeat {width: 85%;}'.
-					'#secHeartbeatTicks {'.
-						'display: flex; width: 86%; padding: 0;'.
-						'justify-content: space-between;'.
-						'font-size: 0.85em; color:blue;'.
-					'}'.
-					'#secHeartbeatTicks option {width:4%}'.
-					'.security_extension .dashicons-networking:before {'.
-						'font-size:.8em; color:#777;'.
-						'vertical-align: top;'.
-						'opacity: .5;'.
-						'margin-left: -2em;'.
-					'}'.
-					'.security_extension .dashicons-networking {width:0;}';
-				wp_add_inline_style( $styleId, $style );
-			});
+				$this->add_action('admin_enqueue_styles', function($styleId)
+				{
+					$style =
+						'.dashicons-networking {position: absolute; top: 1px; right: 2px; font-size: 16px; opacity: .5;}'.
+						'#secPassLock {width: 85%; max-width: 30em;}'.
+						'#secPassLockTicks {'.
+							'display: flex; width: 86%; max-width: 38em;'.
+							'justify-content: space-between;'.
+							'font-size: 0.85em;'.
+							'padding: 0 0 0 0.2em;'.
+						'}'.
+						'#secPassLockTicks option {text-align: right;}'.
+						'#secPassTime {width: 85%;}'.
+						'#secPassTimeTicks {'.
+							'display: flex; width: 86%; padding: 0;'.
+							'font-size: 0.85em;'.
+						'}'.
+						'#secPassTimeTicks option {text-align: right;}'.
+						'#secHeartbeat {width: 85%;}'.
+						'#secHeartbeatTicks {'.
+							'display: flex; width: 86%; padding: 0;'.
+							'justify-content: space-between;'.
+							'font-size: 0.85em;'.
+						'}'.
+						'#secHeartbeatTicks option {width:4%;}';
+					wp_add_inline_style( $styleId, $style );
+				});
+			}
 
 			if ($this->login_uri = $this->get_site_option('secLoginUri'))
 			{

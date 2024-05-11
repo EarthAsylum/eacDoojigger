@@ -9,8 +9,8 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		24.0507.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -23,6 +23,11 @@ abstract class abstract_backend extends abstract_core
 	 * @trait methods for version compare
 	 */
 	use \EarthAsylumConsulting\Traits\version_compare;
+
+	/**
+	 * @trait methods for codemirrir & wp_editor
+	 */
+	use \EarthAsylumConsulting\Traits\code_editor;
 
 	/**
 	 * @trait methods for html fields used externally
@@ -51,8 +56,14 @@ abstract class abstract_backend extends abstract_core
 			'default'		=> '',
 			'after'			=> '',
 			'info'			=> '',
+			'tooltip'		=> '',
 			'attributes'	=> []
 	];
+
+	/**
+	 * @var bool automatically set tooltip to info when not set
+	 */
+	protected $automatic_tooltips 		= true;
 
 	/*
 	 * Define options meta data as a group of arrays,
@@ -73,6 +84,7 @@ abstract class abstract_backend extends abstract_core
 	 *			'default'		=> default field value
 	 *			'after'			=> information text/html to be displayed after the field
 	 *			'info'			=> additional information text/html to be displayed below the field (<cite>)
+	 *			'tooltip'		=> additional information presented as a tool-top on hover
 	 *			'attributes'	=> html attributes array ["name='value'", "name='value'"]
 	 *			'class'			=> css class name(s) (added to attributes)
 	 *			'style'			=> css style declaration(s) (added to attributes)
@@ -243,8 +255,11 @@ abstract class abstract_backend extends abstract_core
 		// settings errors / admin notices - on all pages, triggered in admin_footer
 		add_action( 'all_admin_notices',				array( $this, 'plugin_admin_notices'), 50 );
 
+		// get admin colors
+		add_action('admin_init', 						array( $this, 'admin_color_scheme'), 10);
+
 		/*
-		 * add filters and enqueue scripts for code editor on options page
+		 * add contextual help and settings page style & javascript
 		 */
 
 		if ($this->isSettingsPage() && current_user_can('manage_options'))
@@ -256,17 +271,8 @@ abstract class abstract_backend extends abstract_core
 			// code editor
 			add_action('admin_enqueue_scripts', function ()
 				{
-					$cm_options =[
-						'lineWrapping' 	=> false,
-						'gutters'		=> ["CodeMirror-lint-markers"]
-					];
-    				$cm_settings = [
-						'html' 	=> wp_enqueue_code_editor(['codemirror'=>$cm_options, 'type' => 'text/html']),
-						'css' 	=> wp_enqueue_code_editor(['codemirror'=>$cm_options, 'type' => 'text/css']),
-						'js' 	=> wp_enqueue_code_editor(['codemirror'=>$cm_options, 'type' => 'text/javascript']),
-						'php' 	=> wp_enqueue_code_editor(['codemirror'=>$cm_options, 'type' => 'text/x-php']),
-					];
-					wp_localize_script('jquery', 'cm_settings', $cm_settings);
+					// only needed if overridong styles/options */
+					// $this->codeedit_enqueue(/* $styles = '', $options = [] */);
 
 					$this->options_settings_page_style();
 					$this->options_settings_page_script();
@@ -445,9 +451,6 @@ abstract class abstract_backend extends abstract_core
 
 		$this->logData($this->className.sprintf(' %s install version %s',\get_option('blogname'),$version),__METHOD__);
 
-		// Initialize Plugin Options
-	//	$this->set_option_defaults();
-
 		if (!$this->is_network_admin())
 		{
 			// install/update tables used by the plugin
@@ -491,8 +494,6 @@ abstract class abstract_backend extends abstract_core
 
 		// delete (old) transients
 		$this->deleteTransients();
-		// ensure defaults for options
-	//	$this->set_option_defaults();
 
 		if (!$this->is_network_admin())
 		{
@@ -759,6 +760,34 @@ abstract class abstract_backend extends abstract_core
 	}
 
 
+	/**
+	 * Get the selected admin color scheme
+	 *
+	 * @return	array
+	 */
+	public function admin_color_scheme(): array
+	{
+		static $admin_colors = null;
+		global $_wp_admin_css_colors;
+
+		if (empty($admin_colors))
+		{
+			if ($colors = $_wp_admin_css_colors[ get_user_option( 'admin_color' ) ])
+			{
+				$colors = $colors->colors;
+				$admin_colors['base'] 		= array_shift($colors);	// 1st color
+				$admin_colors['notify'] 	= array_pop($colors); 	// 4th or 3rd color
+				$admin_colors['highlight']	= array_pop($colors);	// 3rd or 2nd color
+				$admin_colors['icon'] 		= $colors[0] ??			// remaining color or
+						$this->modifyColor($admin_colors['base'],-0.10);	// darken base
+				$admin_colors['subtle'] 	=						// lighten icon color
+						$this->modifyColor($admin_colors['icon'],0.85);
+			}
+		}
+		return $admin_colors;
+	}
+
+
 	/*
 	 *
 	 * admin notifications/settings errors
@@ -836,7 +865,7 @@ abstract class abstract_backend extends abstract_core
 			]);
 		}
 		$output .= "</div>\n";
-		echo wp_kses_post($output);
+		echo $this->wp_kses($output);
 		$this->delete_transient('settings_errors'); // we only think it was displayed
 	}
 
@@ -989,7 +1018,7 @@ abstract class abstract_backend extends abstract_core
 	 */
 	public function print_admin_notice(string $message, string $errorType='info', string $moreInfo=''): void
 	{
-		echo wp_kses_post(
+		echo $this->wp_kses(
 			$this->get_admin_notice(
 				$this->admin_notice_msg($message, $moreInfo),
 				[ 'type' => $errorType, 'dismissible' => true ]
@@ -1189,7 +1218,7 @@ abstract class abstract_backend extends abstract_core
 					{
 						$this->addPluginSidebarLink(
 							"<span class='dashicons dashicons-admin-plugins eac-gray'></span>".
-								"<span class='eac-orange'>{<span class='eac-green'>eac</span>}Doojigger</span>",
+								"<span class='eac-logo-orange'>{<span class='eac-logo-green'>eac</span>}Doojigger</span>",
 							"https://eacdoojigger.earthasylum.com/",
 							"This plugin is an {eac}Doojigger Derivative"
 						);
@@ -1279,7 +1308,9 @@ abstract class abstract_backend extends abstract_core
 	public function get_option_backup()
 	{
 		$optionName = $this->option_backup_name();
-		return ($this->is_network_admin()) ? \get_network_option(null,$optionName) : \get_option($optionName);
+		return ($this->is_network_admin())
+			? \get_network_option(null,$optionName)
+			: \get_option($optionName);
 	}
 
 
@@ -1599,7 +1630,6 @@ abstract class abstract_backend extends abstract_core
 	 */
 	private function getSettingsGroup($tab=''): string
 	{
-		//return $this->getSettingsSlug();
 		return $this->toKeyString( $this->prefixOptionName($tab.'_settings') );
 	}
 
@@ -1645,6 +1675,7 @@ abstract class abstract_backend extends abstract_core
 		$currentTab 	= $tabName = current($tabName); // tab display value
 		$settingsGroup 	= $this->getSettingsGroup($currentTab);
 
+
 		if ($_SERVER['REQUEST_METHOD'] == 'GET')
 		{
 			// set default values for non-existing options
@@ -1660,7 +1691,8 @@ abstract class abstract_backend extends abstract_core
 
 		// HTML for the page
 
-		echo "<div class='wrap'>\n";
+		$pluginClass = $this->toKeyString( $this->prefixOptionName($this->className.'_settings') );
+		echo "<div class='wrap {$pluginClass} {$settingsGroup}'>\n";
 
 		$h1 = 	"<h1 id='settings_h1'>".
 				__( $this->pluginHeader('Title') . ($this->is_network_admin() ? ' Network' : ' Site') . ' Settings', $this->PLUGIN_TEXTDOMAIN ).
@@ -1715,11 +1747,12 @@ abstract class abstract_backend extends abstract_core
 
 			$foundSubmit = false; // add '_btnSubmitOptions' to override default submit button
 
+			// navigation tabs
 			echo "\n<nav class='nav-tab-wrapper'>\n";
 			foreach ($tabGroups as $tabName => $optionGroup)
 			{
 				if (empty($optionGroup)) continue;
-				echo "\t<a href='".add_query_arg(['tab'=>$this->toKeyString($tabName)],$settingsTab)."' class='nav-tab";
+				echo "\t<a href='".add_query_arg(['tab'=>$this->toKeyString($tabName)],$settingsTab)."' class='wp-ui-highlight nav-tab";
 				if ($currentTab == $tabName) echo " nav-tab-active active";
 				echo " button-primary'>$tabName</a>\n";
 			}
@@ -1728,10 +1761,10 @@ abstract class abstract_backend extends abstract_core
 			$optionGroup	= $tabGroups[$currentTab];
 
 			echo "<div id='{$settingsGroup}' class='tab-content ".$this->unprefixOptionName($settingsGroup)."'>\n";
-			echo "<nav class='tab-container'></nav>\n"; // placeholder to convert groups to tabs
+			echo "<nav class='tab-container'><!-- placeholder to convert groups to tabs --></nav>\n";
 			foreach ($optionGroup as $groupName => $optionMeta)
 			{
-				// show plugin/extension group <section>, <header>s and <fieldset>
+				// show plugin/extension group <section>, <header> and <fieldset>
 				$this->options_settings_page_section($groupName, $optionMeta);
 
 				// show all group/extension options
@@ -1745,9 +1778,12 @@ abstract class abstract_backend extends abstract_core
 					}
 
 					if (substr($optionKey,1) == 'btnSubmitOptions') $foundSubmit = true;
+
+					// get option value
 					$optionValue = (isset($optionData['encrypt']) && $optionData['encrypt'])
 						? $this->get_option_decrypt($optionKey,$optionData['default'] ?: false)
 						: $this->get_option($optionKey,$optionData['default'] ?: false);
+
 					// add label and field with grid <div>s
 					$this->options_settings_page_block($optionKey, $optionData, $optionValue);
 
@@ -1758,7 +1794,8 @@ abstract class abstract_backend extends abstract_core
 				echo "</section>\n";
 			}
 
-			echo "</div>\n";	// tab
+			echo "</div>\n"; // this tab
+
 			// primary submit button
 			if (!$foundSubmit)
 			{
@@ -1780,7 +1817,6 @@ abstract class abstract_backend extends abstract_core
 	private function options_settings_page_info($asHelp = false): void
 	{
 		static $done = null;
-
 		if ($done) return;
 
 		$phpUser = (function_exists('posix_getpwuid')) ? posix_getpwuid(posix_geteuid())['name'] : getenv('USERNAME');
@@ -1904,21 +1940,23 @@ abstract class abstract_backend extends abstract_core
 		{
 			if ( ! array_key_exists($optionKey,$_POST) ) continue;
 
-			if (isset($optionMeta['encrypt']) && $optionMeta['encrypt']) {
-				$savedOptionValue = $this->get_option_decrypt($optionKey);
-			} else {
-				$savedOptionValue = $this->get_option($optionKey);
-			}
+			// get currently saved value
+			$savedOptionValue = (isset($optionData['encrypt']) && $optionData['encrypt'])
+				? $this->get_option_decrypt($optionKey,$optionData['default'] ?: false)
+				: $this->get_option($optionKey,$optionData['default'] ?: false);
 
+			// clean POST value
 			$_POST[$optionKey] = (!is_array($_POST[$optionKey]))
 				? wp_unslash(trim($_POST[$optionKey]))
 				: wp_unslash($_POST[$optionKey]);
 
+			// sanitize value
 			$values = $this->options_settings_page_sanitize(
 				$_POST[$optionKey],
 				$optionKey,$optionMeta,$savedOptionValue
 			);
 
+			// sanitize mustn't change value
 			if ($_POST[$optionKey] != $values)
 			{
 				$this->add_option_error($optionKey,
@@ -1928,7 +1966,6 @@ abstract class abstract_backend extends abstract_core
 				$values = $savedOptionValue;
 			}
 
-			// pass through a common sanitize filter
 			/**
 			 * filter {classname}_sanitize_option sanitize option value when posted from admin page
 			 * @param	mixed	$values posted option value(s)
@@ -1952,7 +1989,6 @@ abstract class abstract_backend extends abstract_core
 						: \filter_var($values,$filter[0],$filter[1]);
 			}
 
-			// process custom fields and/or specific validation
 			/**
 			 * filter {classname}_options_form_post_{optionKey} capture option value when posted from admin page
 			 * @param	mixed	$values posted option value(s)
@@ -1963,6 +1999,7 @@ abstract class abstract_backend extends abstract_core
 			 */
 			$values = $this->apply_filters( "options_form_post_{$optionKey}", $values, $optionKey, $optionMeta, $savedOptionValue );
 
+			// update the option value
 			if (!in_array($optionKey[0],['_','-','.']) && ($savedOptionValue !== $values))
 			{
 				if (isset($optionMeta['encrypt']) && $optionMeta['encrypt']) {
@@ -1978,9 +2015,8 @@ abstract class abstract_backend extends abstract_core
 			}
 		}
 
-		// action after processing posted fields
 		/**
-		 * action {classname}_options_form_post
+		 * action {classname}_options_form_post after processing all fields
 		 * @param	array	$optionMetaPosted posted fields [fieldName => fieldMetaData]
 		 * @return	void
 		 */
@@ -2027,6 +2063,7 @@ abstract class abstract_backend extends abstract_core
 			case 'select':
 			case 'radio':
 			case 'checkbox':
+			case 'switch':
 				// submitted value must be in the option values
 				$valid = array_column($this->getOptionChoiceArray($optionMeta['options']),'value');
 				if (is_array($values)) {
@@ -2083,7 +2120,7 @@ abstract class abstract_backend extends abstract_core
 			case 'codeedit-html':
 			case 'codeedit-php':
 			case 'html':
-				$values = wp_kses_post( $values );
+				$values = $this->wp_kses( $values );
 				break;
 			case 'file':
 				$values = wp_handle_upload( $_FILES["{$optionKey}_file"], ['test_form' => false] );
@@ -2091,7 +2128,7 @@ abstract class abstract_backend extends abstract_core
 				{
 					$this->add_option_error(
 						$optionKey,
-						sprintf('%s : <pre>%s</pre>',$optionMeta['label'],$values['error'])
+						sprintf('%s : %s',$optionMeta['label'],$values['error'])
 					);
 				}
 				$_POST[$optionKey] = $values;
@@ -2136,6 +2173,15 @@ abstract class abstract_backend extends abstract_core
 	 */
 	protected function options_settings_page_section(string $groupName, array &$optionMeta): void
 	{
+		$groupName = esc_attr($groupName);
+
+		/**
+		 * filter {classname}_options_group_meta_{optionKey} customize field input arrays
+		 * @param	array	$optionMeta option meta data
+		 * @return	array	updated meta
+		 */
+		$optionMeta = $this->apply_filters( "options_group_meta_{$groupName}", $optionMeta );
+
 		// show plugin/extension group
 		$groupClass 	= $this->toKeyString($groupName);
 		echo "<!-- [ {$groupName} ] -->\n";
@@ -2148,18 +2194,19 @@ abstract class abstract_backend extends abstract_core
 			? ($optionData['value'] ?? $this->get_option($optionKey))
 			: false;
 
-		echo "<header class='settings-grid-container wp-core-ui {$groupClass}' data-name='{$groupClass}'>\n";
+		echo "<header class='settings-grid-container {$groupClass}' data-name='{$groupClass}'>\n";
 
 		// data-toggle is clickable and toggles the $groupClass fieldset
 		echo "\t<details ".($optionValue===''?'':'open').
-			 " class='settings-grid-head wp-ui-highlight' data-toggle='{$groupClass}'>";
+			 " class='settings-grid-head settings-grid-head-label wp-ui-highlight' data-toggle='{$groupClass}'>";
 		echo "<summary>{$groupName}</summary>";
 		echo "</details>\n";
 
-		echo "\t<div class='settings-grid-head wp-ui-highlight'>";
+		echo "\t<div class='settings-grid-head settings-grid-head-enable wp-ui-highlight'>";
 		if ($optionData)
 		{
-			$optionData['attributes']['onclick'] = "eacDoojigger.toggle_settings('{$groupClass}',this.firstChild.checked);";
+			$optionData['type'] = 'switch';
+			$optionData['attributes']['onclick'] = "eacDoojigger.toggle_settings('{$groupClass}',this.firstElementChild.checked);";
 			$this->options_settings_page_field($optionKey, $optionData, $optionValue);
 			unset($optionMeta[$optionKey]);
 		}
@@ -2170,7 +2217,16 @@ abstract class abstract_backend extends abstract_core
 			? "{$groupClass} settings-closed"
 			: "{$groupClass} settings-opened";
 
-		echo "<fieldset class='settings-grid-container wp-core-ui {$optionClass}' data-name='{$groupClass}'>\n";
+		echo "<fieldset class='settings-grid-container {$optionClass}' data-name='{$groupClass}'>\n";
+
+		/**
+		 * filter {classname}_automatic_tooltip convert info to tooltip when true
+		 * @param	bool
+		 * @param	string	$groupName group name
+		 * @param	array	$optionData option meta data
+		 * @return	bool
+		 */
+		$this->automatic_tooltips = $this->apply_filters("automatic_tooltips",$this->automatic_tooltips,$groupName,$optionData);
 	}
 
 
@@ -2189,14 +2245,60 @@ abstract class abstract_backend extends abstract_core
 		if (! is_array($optionMeta) || count($optionMeta) < 2) return;
 		if ($optionMeta['type'] == 'help') return;
 
-		$displayName = __(wp_kses_post($optionMeta['label'] ?? ''),$this->PLUGIN_TEXTDOMAIN);
+		$optionMeta = array_merge(self::OPTION_META_KEYS,$optionMeta);
+		$optionMeta['value'] =  $optionValue;
+
+		$displayName = __($this->wp_kses($optionMeta['label'] ?? ''),$this->PLUGIN_TEXTDOMAIN);
 		$style = ($optionMeta['type'] == 'hidden') ? " style='display:none;'" : "";
 
-		echo "\t<!-- {$displayName} -->\n";
-		echo "\t<div class='settings-grid-item'{$style}>\n\t\t".
-				"<label for='{$optionKey}' title='{$optionKey}'>{$displayName}</label>\n\t</div>\n";
+		// process string replacement [meta name] with meta value
+		$meta 	= array_filter($optionMeta,function($v,$k){
+			return in_array($k,['type','label','default','title','before','after','info','tooltip','help','value']) && is_string($v);
+		},ARRAY_FILTER_USE_BOTH);
+		$keys 	= array_map(function($k){return "[{$k}]";},array_keys($meta));
+		$values = array_values($meta);
 
-		echo "\t<div class='settings-grid-item'{$style}>\n\t\t";
+		foreach ($optionMeta as $k => $v)
+		{
+			if (array_key_exists($k, $meta)) {
+				$optionMeta[$k] = trim(str_replace($keys,$values,$v));
+			}
+		}
+
+		echo "\t<!-- ".trim(strip_tags($displayName))." -->\n";
+		echo "\t<div class='settings-grid-item settings-grid-item-label'{$style}>\n\t\t".
+				"<label class='settings-grid-label' for='{$optionKey}'>{$displayName}</label>";
+
+		// maybe move [info] to [tooltip]
+		if ( $this->automatic_tooltips && !empty($optionMeta['info']) && ($optionMeta['tooltip'] === '' || $optionMeta['tooltip'] === true) )
+		{
+			$info 	= str_replace(['<br>','<br/>'],'<br />',$optionMeta['info']);
+			$tooltip= $this->wp_kses($info,['a'=>false,'details'=>false]);
+			if ($info == $tooltip) {
+				$tooltip = str_replace(['<mark>','</mark>'],['<small><em>','</em></small>'],$optionMeta['info']);
+				$optionMeta['tooltip'] = str_replace(['"',"\n"],['&quot;',"<br>"],trim($tooltip));
+				$optionMeta['info'] = '';
+			}
+		}
+		else if (is_string($optionMeta['tooltip']) && !empty($optionMeta['tooltip']))
+		{
+			$optionMeta['tooltip'] = $this->wp_kses($optionMeta['tooltip'],['a'=>false,'details'=>false]);
+		}
+
+		// add tooltip
+		if (is_string($optionMeta['tooltip']) && !empty($optionMeta['tooltip']))
+		{
+			echo "\n\t\t<span class='settings-tooltip dashicons dashicons-info-outline' title=\"".trim(strip_tags($displayName))."\">".
+				 __($optionMeta['tooltip'],$this->PLUGIN_TEXTDOMAIN)."</span>";
+		}
+
+		echo "\n\t</div>\n";
+
+		$inputClass = explode('-',esc_attr($optionMeta['type']));
+		$inputClass = "input-{$inputClass[0]}";
+
+		// add the input field
+		echo "\t<div class='settings-grid-item settings-grid-item-{$inputClass}'{$style}>";
 		$this->options_settings_page_field($optionKey, $optionMeta, $optionValue, $width, $height);
 		echo "\n\t</div>\n";
 	}
@@ -2218,14 +2320,32 @@ abstract class abstract_backend extends abstract_core
 		if ($optionMeta['type'] == 'help') return;
 
 		$optionKey = esc_attr($optionKey);
+		$displayName = __($this->wp_kses($optionMeta['label'] ?? ''),$this->PLUGIN_TEXTDOMAIN);
+
+		// maybe convert single checkbox to switch
+		if ($optionMeta['type'] == 'checkbox')
+		{
+			if (count($optionMeta['options']) == 1 && $optionMeta['options'][0] == 'Enabled') {
+				$optionMeta['type'] = 'switch';
+			}
+		}
+
+		/**
+		 * filter {classname}_options_field_meta_{optionKey} customize field input array
+		 * @param	array	$optionMeta option meta data
+		 * @param	mixed	$optionValue current option value
+		 * @return	array	updated meta
+		 */
+		$optionMeta = $this->apply_filters( "options_field_meta_{$optionKey}", $optionMeta, $savedOptionValue );
 
 		// parse field attributes
 		$attributes = (! empty($optionMeta['attributes']))
 			? $this->parseAttributes($optionMeta['attributes'])
 			: [];
 
-		// class on <input> tag
-		$inputClass = "input-{$optionMeta['type']}";
+		// class on <input> tag (full type required)
+		$inputClass = "input-".esc_attr($optionMeta['type']);
+
 		if (isset($optionMeta['encrypt']) && $optionMeta['encrypt'])
 		{
 			$inputClass .= ' input-encrypted';
@@ -2244,54 +2364,56 @@ abstract class abstract_backend extends abstract_core
 		}
 		unset($attributes['class']);
 
-		// check/add 'style'
-		if (isset($optionMeta['style']))
-		{
-			$attributes['style'] = esc_attr($optionMeta['style']);
-		}
-		if (in_array($optionMeta['type'],['radio','checkbox']))
-		{
-			if (!isset($attributes['style'])) {
-				$attributes['style'] = 'white-space: nowrap';
-			}
-		}
-
 		// override default width for number field
 		if ($optionMeta['type'] == 'number' && $width == '50')
 		{
 			$width = (isset($attributes['max'])) ? strlen($attributes['max']) : 10;
 		}
 
+		$maxWidth 	= $optionMeta['width'] = esc_attr( $optionMeta['width'] ?? $width );
+		$maxHeight 	= $optionMeta['height']= esc_attr( $optionMeta['height'] ?? $height );
+
+		// check/add 'style'
+		$attributes['style'] = "--text-width:{$maxWidth}ch;";
+		if (in_array($optionMeta['type'],['radio','checkbox','switch']))
+		{
+			$attributes['style'] .= 'white-space:nowrap;';
+		}
+		if (isset($optionMeta['style']))
+		{
+			$attributes['style'] .= esc_attr($optionMeta['style']);
+		}
+
 		// implode attributes to a valid html string
-		$attForElem = '';
-		array_walk($attributes, function(&$value,$key) use (&$attForElem)
+		$parentAtts = '';
+		array_walk($attributes, function(&$value,$key) use (&$parentAtts)
 			{
 				$value = esc_attr($key) . '=' . '"'.str_replace(['"',"\\'"],"'",trim($value,"'\"")).'"';
-				if (in_array($key,['disabled','required'])) $attForElem .= ' '.$value;
+				if (in_array($key,['disabled','required'])) $parentAtts .= ' '.$value;
 			}
 		);
 		$attributes = ' '.implode(' ', $attributes);
 
 		$optionMeta['attributes'] = $attributes; // formatted when passed through filters
 
-		$maxWidth 	= $optionMeta['width'] = esc_attr( $optionMeta['width'] ?? $width );
-		$maxHeight 	= $optionMeta['height']= esc_attr( $optionMeta['height'] ?? $height );
-
 		// build the html for the input field
 		$html = '';
+		$tab  = "\n\t\t";
 
-		if (!empty($optionMeta['title'])) {
-			$html .= "<blockquote>".__(wp_kses_post($optionMeta['title']),$this->PLUGIN_TEXTDOMAIN)."</blockquote>";
+		if (!empty($optionMeta['title']))
+		{
+			$html .= $tab."<blockquote>".__($this->wp_kses($optionMeta['title']),$this->PLUGIN_TEXTDOMAIN)."</blockquote>";
 		}
-		if (!empty($optionMeta['before'])) {
-			$html .= __($optionMeta['before'],$this->PLUGIN_TEXTDOMAIN);
+		if (!empty($optionMeta['before']))
+		{
+			$html .= $tab.__($this->wp_kses($optionMeta['before']),$this->PLUGIN_TEXTDOMAIN);
 		}
 
 		switch ($optionMeta['type'])
 		{
 			case 'select':
 				$choices = $this->getOptionChoiceArray($optionMeta['options']); // uses esc_attr()
-				$html 	.= "<select class='{$inputClass}' name='{$optionKey}' id='{$optionKey}'{$attributes}>";
+				$html 	.= $tab."<select class='{$inputClass}' name='{$optionKey}' id='{$optionKey}'{$attributes}>";
 				$current = (is_array($savedOptionValue)) ? reset($savedOptionValue) : $savedOptionValue;
 				foreach ($choices as $choice) {
 					if (is_null($choice)) continue;
@@ -2303,12 +2425,13 @@ abstract class abstract_backend extends abstract_core
 
 			case 'radio':
 				$choices = $this->getOptionChoiceArray($optionMeta['options']); // uses esc_attr()
+				$html 	.= $tab;
 				$current = (is_array($savedOptionValue)) ? reset($savedOptionValue) : $savedOptionValue;
 				foreach ($choices as $id=>$choice) {
 					if (is_null($choice)) continue;
 					$selected = ($choice['value'] == $current) ? " checked='checked'" : "";
-					$html .= "<span{$attributes}>".
-							 "<input class='{$inputClass}' type='radio' name='{$optionKey}' id='{$optionKey}_{$id}'{$attForElem} ".
+					$html .= "<span class='{$inputClass}-wrap'{$attributes}>".
+							 "<input class='{$inputClass}' type='radio' name='{$optionKey}' id='{$optionKey}_{$id}'{$parentAtts} ".
 							 "value='{$choice['value']}'{$selected} />".
 							 "<label for='{$optionKey}_{$id}'>{$choice['option']}</label></span> ";
 				}
@@ -2317,15 +2440,33 @@ abstract class abstract_backend extends abstract_core
 			case 'checkbox':
 				$choices = $this->getOptionChoiceArray($optionMeta['options']); // uses esc_attr()
 				$name 	 = (count($choices) == 1) ? $optionKey : $optionKey.'[]';
-				$html 	.= "<input type='hidden' name='{$optionKey}' value='' />";
+				$html 	.= $tab."<input type='hidden' name='{$optionKey}' value='' />";
 				$current = (!is_array($savedOptionValue)) ? array($savedOptionValue) : $savedOptionValue;
 				foreach ($choices as $id=>$choice) {
 					if (is_null($choice)) continue;
 					$selected = (in_array($choice['value'],$current)) ? " checked='checked'" : "";
-					$html .= "<span{$attributes}>".
-							 "<input class='{$inputClass}' type='checkbox' name='{$name}' id='{$optionKey}_{$id}'{$attForElem} ".
+					$html .= "<span class='{$inputClass}-wrap'{$attributes}>".
+							 "<input class='{$inputClass}' type='checkbox' name='{$name}' id='{$optionKey}_{$id}'{$parentAtts} ".
 							 "value='{$choice['value']}'{$selected} />".
 							 "<label for='{$optionKey}_{$id}'>{$choice['option']}</label></span> ";
+				}
+				break;
+
+			case 'switch':
+				$choices = $this->getOptionChoiceArray($optionMeta['options']); // uses esc_attr()
+				$name 	 = (count($choices) == 1) ? $optionKey : $optionKey.'[]';
+				$html 	.= $tab."<input type='hidden' name='{$optionKey}' value='' />";
+				$current = (!is_array($savedOptionValue)) ? array($savedOptionValue) : $savedOptionValue;
+				foreach ($choices as $id=>$choice) {
+					if (is_null($choice)) continue;
+					$selected = (in_array($choice['value'],$current)) ? " checked='checked'" : "";
+					$html .= "<span class='{$inputClass}-wrap'>".
+							 "<label for='{$optionKey}_{$id}'{$attributes}>".
+							 "<input class='{$inputClass}' type='checkbox' name='{$name}' id='{$optionKey}_{$id}'{$parentAtts} ".
+							 "value='{$choice['value']}'{$selected} />".
+							 "{$choice['option']}".
+							 "<div class='{$inputClass}-slider'></div>".
+							 "</label></span> ";
 				}
 				break;
 
@@ -2333,71 +2474,42 @@ abstract class abstract_backend extends abstract_core
 			case 'submit':
 				// attributes should include "onclick='doSomething();return false;'"
 				$value = esc_attr($savedOptionValue);
-				$html .= "<input class='{$inputClass}' type='submit' name='{$optionKey}' id='{$optionKey}'".
+				$html .= $tab."<input class='{$inputClass}' type='submit' name='{$optionKey}' id='{$optionKey}'".
 						 "value='{$value}'{$attributes} />";
 				break;
 
 			case 'reset':
 			case 'image':
 				$value = esc_attr($savedOptionValue);
-				$html .= "<input class='{$inputClass}' type='{$optionMeta['type']}' name='{$optionKey}' id='{$optionKey}'".
+				$html .= $tab."<input class='{$inputClass}' type='{$optionMeta['type']}' name='{$optionKey}' id='{$optionKey}'".
 						 "value='{$value}'{$attributes} />";
 				break;
 
 			case 'textarea':
 				// allow multiple values to be stored but show/enter 1st value
 				$value = esc_textarea(wp_unslash( (is_array($savedOptionValue)) ? $savedOptionValue[0] : $savedOptionValue ));
-				$html .= "<textarea class='{$inputClass}' name='{$optionKey}' id='{$optionKey}' ".
-						 "rows='{$maxHeight}' cols='{$maxWidth}'{$attributes}>{$value}</textarea>";
+				$html .= $tab."<textarea class='{$inputClass}' name='{$optionKey}' id='{$optionKey}' ".
+						 "cols='{$maxWidth}' rows='{$maxHeight}'{$attributes}>{$value}</textarea>";
 				break;
 
 			case 'codeedit-js':
-				$value = wp_unslash( (is_array($savedOptionValue)) ? $savedOptionValue[0] : $savedOptionValue );
-				$html .= "<textarea class='{$inputClass} code-editor' name='{$optionKey}' id='{$optionKey}' ".
-						 "rows='{$maxHeight}' cols='{$maxWidth}'{$attributes}>{$value}</textarea>";
-				break;
-
 			case 'codeedit-css':
-				$value = wp_unslash( (is_array($savedOptionValue)) ? $savedOptionValue[0] : $savedOptionValue );
-				$html .= "<textarea class='{$inputClass} code-editor' name='{$optionKey}' id='{$optionKey}' ".
-						 "rows='{$maxHeight}' cols='{$maxWidth}'{$attributes}>{$value}</textarea>";
-				break;
-
 			case 'codeedit-html':
-				$value = wp_unslash( (is_array($savedOptionValue)) ? $savedOptionValue[0] : $savedOptionValue );
-				$html .= "<textarea class='{$inputClass} code-editor' name='{$optionKey}' id='{$optionKey}' ".
-						 "rows='{$maxHeight}' cols='{$maxWidth}'{$attributes}>{$value}</textarea>";
-				break;
-
 			case 'codeedit-php':
+				$type 	= explode('-',$optionMeta['type']);
+				$type 	= end($type);
 				$value = wp_unslash( (is_array($savedOptionValue)) ? $savedOptionValue[0] : $savedOptionValue );
-				$html .= "<textarea class='{$inputClass} code-editor' name='{$optionKey}' id='{$optionKey}' ".
-						 "rows='{$maxHeight}' cols='{$maxWidth}'{$attributes}>{$value}</textarea>";
+				$html .= $tab . $this->codeedit_get_codemirror($optionKey,$value,$type,$inputClass,$attributes);
 				break;
 
 			case 'html':
-				$html .= wp_editor(
-					wp_unslash( (is_array($savedOptionValue)) ? $savedOptionValue[0] : $savedOptionValue ),
-					$optionKey,
-					array_merge(
-						[
-						//	'editor_height' => ($maxHeight * 10),
-							'wpautop'		=> false,
-							'textarea_rows' => $maxHeight,
-							'media_buttons' => true,
-							'tinymce'		=> true,
-							'quicktags'		=> ['buttons'=>'strong,em,link,block,del,ins,img,ul,ol,li,code'],
-						//	'editor_css'	=>"<style>...</style>",
-							'editor_class'	=> "{$inputClass} wp-editor",
-						],
-						$optionMeta['wp_editor'] ?? []
-					)
-				);
+				$value = wp_unslash( (is_array($savedOptionValue)) ? $savedOptionValue[0] : $savedOptionValue );
+				$html .= $tab . $this->codeedit_get_wpeditor($optionKey,$value,$inputClass);
 				break;
 
 			case 'display':
 				$value = $savedOptionValue;
-				$html .= "<div class='{$inputClass}' id='{$optionKey}'{$attributes}>";
+				$html .= $tab."<div class='{$inputClass}' id='{$optionKey}'{$attributes}>";
 				switch (true) {
 					case is_bool($value):
 						$html .= ($value) ? 'True' : 'False';
@@ -2406,7 +2518,7 @@ abstract class abstract_backend extends abstract_core
 						$html .= 'Null';
 						break;
 					case is_scalar($value):
-						$html .= wp_kses_post( wp_unslash($value) );
+						$html .= $this->wp_kses( wp_unslash($value) );
 						break;
 					default:
 						try {
@@ -2421,13 +2533,13 @@ abstract class abstract_backend extends abstract_core
 
 			case 'custom':
 				// custom fields must be handled by the '{classname}_options_form_input_{fieldname}' filter
-				$html .= "<code type='custom'>".__("requires",$this->PLUGIN_TEXTDOMAIN).": add_filter('{$this->className}_options_form_input_{$optionKey}','custom_input_function',10,4)</code>";
+				$html .= $tab."<code type='custom'>".__("requires",$this->PLUGIN_TEXTDOMAIN).": add_filter('{$this->className}_options_form_input_{$optionKey}','custom_input_function',10,4)</code>";
 				break;
 
 			case 'file':
 				// file upload
 				$value = esc_attr($optionMeta['default'] ?? 'Upload');
-				$html .= "<div class='input-file-wrap'>".
+				$html .= $tab."<div class='{$inputClass}-wrap'>".
 						 "<input type='submit' name='{$optionKey}' id='{$optionKey}' value='{$value}' class='button button-large' />".
 						 "<label for='{$optionKey}_file' class='button button-small input-file-label'>Choose File</label>".
 						 "<input class='{$inputClass}' type='{$optionMeta['type']}' name='{$optionKey}_file' id='{$optionKey}_file'{$attributes} />".
@@ -2445,17 +2557,21 @@ abstract class abstract_backend extends abstract_core
 			default:
 				// allow multiple values to be stored but show/enter 1st value
 				$value = esc_attr(wp_unslash( (is_array($savedOptionValue)) ? $savedOptionValue[0] ?? '' : $savedOptionValue ));
-				$html .= "<input class='{$inputClass}' type='{$optionMeta['type']}' name='{$optionKey}' id='{$optionKey}' ".
+				$html .= $tab."<input class='{$inputClass}' type='{$optionMeta['type']}' name='{$optionKey}' id='{$optionKey}' ".
 						 "value='{$value}' size='{$maxWidth}'{$attributes} />";
 				break;
 		}
 
-		if (!empty($optionMeta['after'])) {
-			$html .= __($optionMeta['after'],$this->PLUGIN_TEXTDOMAIN);
+		if (!empty($optionMeta['after']))
+		{
+			$html .= $tab.__($this->wp_kses($optionMeta['after']),$this->PLUGIN_TEXTDOMAIN);
 		}
-		if (!empty($optionMeta['info'])) {
-			$html .= "<cite>".__($optionMeta['info'],$this->PLUGIN_TEXTDOMAIN)."</cite>";
+
+		if (!empty($optionMeta['info']))
+		{
+			$html .= $tab."<cite>".__($this->wp_kses($optionMeta['info']),$this->PLUGIN_TEXTDOMAIN)."</cite>";
 		}
+
 		/**
 		 * filter {classname}_options_form_input_{optionKey} customize field input html
 		 * @param	string	$html current html for field
@@ -2465,7 +2581,13 @@ abstract class abstract_backend extends abstract_core
 		 * @return	string	new html for field
 		 */
 		$html = $this->apply_filters( "options_form_input_{$optionKey}", $html, $optionKey, $optionMeta, $savedOptionValue );
-		echo $html;
+
+		if (isset($optionMeta['script']) && !empty($optionMeta['script']))
+		{
+			$html .= $tab.wp_get_inline_script_tag(trim(wp_kses($optionMeta['script'],[])));
+		}
+
+		echo trim($html);
 	}
 
 
@@ -2489,26 +2611,21 @@ abstract class abstract_backend extends abstract_core
 				? $optionMeta['help'] ?? '[default] [info]' 	// help field
 				: $optionMeta['help'] ?? '[title] [info]'; 		// field help
 
-			$optionMeta = array_filter($optionMeta,function($v,$k){return is_scalar($v);},ARRAY_FILTER_USE_BOTH);
+			$meta 	= array_filter($optionMeta,function($v,$k){
+				return in_array($k,['type','label','default','title','before','after','info','tooltip','help']) && is_scalar($v);
+			},ARRAY_FILTER_USE_BOTH);
+			$keys 	= array_map(function($k){return "[{$k}]";},array_keys($meta));
+			$values = array_values($meta);
 
 			if (is_array($help))	// ['help_tab' => 'help text']
 			{
-				foreach ($help as &$h)
-				{
-					$h = trim(str_replace(
-						array_map(function($k){return "[{$k}]";},array_keys($optionMeta)),
-						array_values($optionMeta),
-						$h
-					));
+				foreach ($help as &$h) {
+					$h = trim(str_replace($keys,$values,$h));
 				}
 			}
 			else					// 'help text'
 			{
-				$help = trim(str_replace(
-					array_map(function($k){return "[{$k}]";},array_keys($optionMeta)),
-					array_values($optionMeta),
-					$help
-				));
+				$help = trim(str_replace($keys,$values,$help));
 			}
 
 			/**
@@ -2543,8 +2660,17 @@ abstract class abstract_backend extends abstract_core
 	{
 		// CSS for the page
 		$styleId = sanitize_title($this->className.'-settings');
-		wp_register_style( $styleId, plugins_url( 'eacDoojigger/assets/css/admin-options.css' ) , [], EAC_DOOJIGGER_VERSION);
-		wp_enqueue_style( $styleId );
+		wp_enqueue_style( $styleId,
+			plugins_url( 'eacDoojigger/assets/css/admin-options.css' ),
+			[],
+			EAC_DOOJIGGER_VERSION
+		);
+		$style = ":root {";
+		foreach ($this->admin_color_scheme() as $id => $code) {
+			$style .= "--eac-admin-{$id}:{$code};";
+		}
+		$style .= "}";
+		wp_add_inline_style( $styleId,$style );
 
 		/**
 		 * action {classname}_admin_enqueue_styles when stylesheet is loaded.
@@ -2564,9 +2690,14 @@ abstract class abstract_backend extends abstract_core
 	protected function options_settings_page_script(): string
 	{
 		// Script for the page
+		$this->options_settings_page_jquery();
 		$scriptId = sanitize_title($this->className.'-settings');
-		wp_register_script( $scriptId, plugins_url( 'eacDoojigger/assets/js/admin-options.js' ) , [], EAC_DOOJIGGER_VERSION);
-		wp_enqueue_script( $scriptId );
+		wp_enqueue_script( $scriptId,
+			plugins_url( 'eacDoojigger/assets/js/admin-options.js' ),
+			['jquery'],
+			EAC_DOOJIGGER_VERSION,
+			['strategy' => 'defer']
+		);
 
 		/**
 		 * action {classname}_admin_enqueue_scripts when javascript is loaded.
@@ -2575,6 +2706,43 @@ abstract class abstract_backend extends abstract_core
 		 */
 		$this->do_action( 'admin_enqueue_scripts', $scriptId );
 		return $scriptId;
+	}
+
+
+	/**
+	 * Creates Script tag for the jQuery/jQuery-ui.
+	 *
+	 * @return void
+	 */
+	protected function options_settings_page_jquery(): void
+	{
+		// Script for the page
+		wp_enqueue_script('jquery');
+		wp_enqueue_script('jquery-ui-core');
+		wp_enqueue_script('jquery-ui-tooltip');
+		ob_start();
+		?>
+		jQuery(function($) {
+			$( '.settings-tooltip.dashicons' ).tooltip({
+				content: function() {
+					var e = $( this );
+					var v = e.data( 'tooltip' ) || e.html();
+					var t = e.attr( 'title' );
+					return (v)
+						? ( (t) ? '<div><strong>'+t+'</strong></div> '+v : v ) : t;
+				}
+			});
+			$('.tooltip.dashicons,[data-tooltip]:not(.settings-tooltip)' ).tooltip({
+				content: function() {
+					var e = $( this );
+					return e.data( 'tooltip' ) || e.attr( 'title' );
+				}
+			});
+			$('style').last().append(".settings-tooltip.dashicons::before { visibility: visible; }");
+		});
+		<?php
+		$script = ob_get_clean();
+		wp_add_inline_script( 'jquery-ui-tooltip',$this->plugin->minifyString($script) );
 	}
 
 

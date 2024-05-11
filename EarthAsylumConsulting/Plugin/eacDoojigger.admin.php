@@ -99,18 +99,20 @@ trait eacDoojigger_administration
 						$this->formatPluginHelp($h1).
 						"<div id='settings_info'>".
 
-						$this->getDocumentationLink(true,'/eacdoojigger',"<span class='dashicons dashicons-editor-help button eac-orange'></span>").
+						$this->getDocumentationLink(true,'/eacdoojigger',
+						"<span class='tooltip dashicons dashicons-editor-help button eac-logo-orange' title='{eac}Doojigger Documentation'></span>").
 						"&nbsp;&nbsp;&nbsp;".
 
-						$this->getDocumentationLink(true,'/phpdoc',"<span class='dashicons dashicons-editor-code button eac-orange'></span>",'PHP Reference').
+						$this->getDocumentationLink(true,'/phpdoc',
+						"<span class='tooltip dashicons dashicons-editor-code button eac-logo-orange' title='{eac}Doojigger PHP Reference'></span>",'PHP Reference').
 						"&nbsp;&nbsp;&nbsp;".
 
-						"<a href='".network_admin_url('/plugin-install.php?s=earthasylum&tab=search&type=term')."' title='Plugins from EarthAsylum Consulting'>".
-						"<span class='dashicons dashicons-admin-plugins button eac-orange'></span></a>".
+						"<a href='".network_admin_url('/plugin-install.php?s=earthasylum&tab=search&type=term')."'>".
+						"<span class='tooltip dashicons dashicons-admin-plugins button eac-logo-orange' title='Plugins from EarthAsylum Consulting'></span></a>".
 						"&nbsp;&nbsp;&nbsp;".
 
-						"<a href='https://earthasylum.com' title='About EarthAsylum Consulting'>".
-						"<span class='dashicons dashicons-admin-site-alt3 button eac-orange'></span></a>".
+						"<a href='https://earthasylum.com'>".
+						"<span class='tooltip dashicons dashicons-admin-site-alt3 button eac-logo-orange' title='About EarthAsylum Consulting'></span></a>".
 
 						"</div></div>";
 			}
@@ -213,7 +215,7 @@ trait eacDoojigger_administration
 	{
 		return preg_replace(
 			"/{eac}(\w+)/",
-			"<span class='eac-orange'>{<span class='eac-green'>eac</span>}$1</span>",
+			"<span class='eac-logo-orange'>{<span class='eac-logo-green'>eac</span>}$1</span>",
 			$content
 		);
 	}

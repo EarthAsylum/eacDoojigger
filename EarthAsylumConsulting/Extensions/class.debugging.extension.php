@@ -22,7 +22,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0123.1';
+		const VERSION	= '24.0422.1';
 
 		/**
 		 * @var array PHP to print string
@@ -151,19 +151,22 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
-			// add additional css when our settings stylesheet loads.
-			$this->add_action('admin_enqueue_styles', function($styleId)
+			if ($this->plugin->isSettingsPage('Debugging'))
 			{
-				$style =
-					'#debug_backtrace,#debug_purge_time {width: 85%; max-width: 25em;}'.
-					'#debug_backtrace_ticks,#debug_purge_time_ticks {'.
-						'display: flex; width: 86%; max-width: 32em;'.
-						'justify-content: space-between;'.
-						'font-size: 0.85em; color:blue;'.
-						'padding: 0 0 0 0.2em;'.
-					'}';
-				wp_add_inline_style( $styleId, $style );
-			});
+				// add additional css when our settings stylesheet loads.
+				$this->add_action('admin_enqueue_styles', function($styleId)
+				{
+					$style =
+						'#debug_backtrace,#debug_purge_time {width: 85%; max-width: 25em;}'.
+						'#debug_backtrace_ticks,#debug_purge_time_ticks {'.
+							'display: flex; width: 86%; max-width: 32em;'.
+							'justify-content: space-between;'.
+							'font-size: 0.85em;'.
+							'padding: 0 0 0 0.2em;'.
+						'}';
+					wp_add_inline_style( $styleId, $style );
+				});
+			}
 
 			/**
 			 * action {pluginname}_log_write to log debug data

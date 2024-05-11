@@ -1,5 +1,42 @@
 == Changelog ==
 
+= Version 2.6.0 – May 8, 2024 =
+
++   New code-editor trait, loads code-mirror and wp_editor with consistant options/styling.
++   Change to tiny-mce parameters and toolbars for html fields.
++   Improved ajaxAction extension.
+    +   Added fingerprint option (using https://github.com/thumbmarkjs/thumbmarkjs).
+    +   Added `{pluginName}_{className}_{methodName}` filter in dispatcher.
+        +   e.g. `eacDoojigger_ajaxAction_deviceFingerprint`
++   Added 'settings-grid-item-label' and 'settings-grid-item-input-{type}' class to settings divs.
++   Change 'Requires at least' to WordPress 5.8.
++   Several improvements to admin screen styling/layout.
+    +   Improved admin theme support using admin colors (from $_wp_admin_css_colors).
++   Changes to some javascript loading code (inc. defer admin script).
++   Support replaceable meta in options attributes, Ex. 'Title' => '[label] [info]'.
+    +   label, default, title, before, after, info, tooltip, help
++   Added $this->wp_kses() custom wp_kses method with extended tags.
+    +   Now processes all (string) admin field option attributes through $this->wp_kses().
+    +   New 'script' field attribute since <script> tags no longer allowed in other attributes.
+    +   $this->minifyString() (used for inline scripts/css) now uses $this->wp_kses().
++   Added 'tooltip' attribute to settings fields with jQuery hover tooltip.
+    +    Automatically populated with field 'info' when not set or set to true.
++   added tooltip filter to disable auto-populate.
+    +   `$this->add_filter("automatic_tooltips", function($bool, $groupName, $groupMeta){...});`
++   Added input field filters before rendering fields.
+    +   `$this->add_filter("options_group_meta_{$groupName}", function($groupMeta){...});`
+    +   `$this->add_filter("options_field_meta_{$fieldName}", function($fieldMeta, $fieldValue){...});`
++   Added actions to wpmu_installer extension.
+    +   `do_action('eacDoojigger_installer_invoke', $installAction, $installMethod, $installOptions, $onSuccess)`
+    +   `do_action('eacDoojigger_installer_install', $installOptions)`
+    +   `do_action('eacDoojigger_installer_update', $installOptions)`
+    +   `do_action('eacDoojigger_installer_uninstall', $installOptions)`
+    +   `do_action('eacDoojigger_installer_delete', $installOptions)`
++   Added filters to file_system extension.
+    +   `$fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem,true,'file system required',[]);`
+    +   `$fs = apply_filters('eacDoojigger_link_filesystem',$wp_filesystem,true,'file system required',[]);`
++   Fix call/use of WC() in session_manager to prevent erros if woocommerce has been disabled.
+
 = Version 2.5.0 – April 4, 2024 =
 
 +   Update trait - check 'compatible up to' without '-RCx' in WordPress version.

@@ -10,8 +10,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		24.0502.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -145,16 +145,32 @@ trait html_input_fields
 	 *
 	 * @param 	bool 	$asTabs true to include html_input_as_tabs()
 	 * @param 	string 	$makeVisible css selector to make hidden visible after convert to tabs
+	 * @param 	bool 	$jquery true to load jQuery/jQuery-ui
 	 * @return 	string 	the stylesheet id
 	 */
-	public function html_input_style($asTabs=false,$makeVisible=''): string
+	public function html_input_style($asTabs=false,$makeVisible='',$jquery=true): string
 	{
 		$styleId = $this->plugin->options_settings_page_style();
+		if ($jquery)
+		{
+			$this->html_input_jquery();
+		}
 		if ($asTabs)
 		{
 			$this->html_input_as_tabs($makeVisible);
 		}
 		return $styleId;
+	}
+
+
+	/**
+	 * enques/loads jQuery/jQuery-ui
+	 *
+	 * @return 	void
+	 */
+	public function html_input_jquery(): void
+	{
+		$this->options_settings_page_jquery();
 	}
 
 
@@ -226,7 +242,7 @@ trait html_input_fields
 		<?php
 		$script = ob_get_clean();
 		$scriptId = sanitize_title($this->plugin->className.'-astabs');
-		wp_register_script( $scriptId, false );
+		wp_register_script( $scriptId, false, [], null, true  );
 		wp_enqueue_script( $scriptId );
 		wp_add_inline_script( $scriptId, $this->plugin->minifyString($script) );
 		return $scriptId;

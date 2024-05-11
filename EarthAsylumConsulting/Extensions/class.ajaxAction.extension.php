@@ -24,7 +24,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @version		1.x
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -35,7 +35,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '23.0421.1';
+		const VERSION	= '24.0510.1';
 
 		/**
 		 * @var string action (script) id
@@ -52,9 +52,36 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		public function __construct($plugin)
 		{
 			parent::__construct($plugin, (self::ALLOW_ADMIN | self::ALLOW_NETWORK) );
-			/* register this extension with no options */
-			$this->registerExtension( false );
+
+			if ($this->is_admin())
+			{
+				$this->registerExtension( false );
+				// Register plugin options when needed
+				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
+			}
+
 			$this->actionId = sanitize_title($this->pluginName.'-'.$this->className);
+		}
+
+
+		/**
+		 * register options on options_settings_page
+		 *
+		 * @access public
+		 * @return void
+		 */
+		public function admin_options_settings()
+		{
+			$this->registerExtensionOptions( 'plugin_settings',
+				[
+					'ajax_device_id' 	=> array(
+							'type'		=> 	'checkbox',
+							'label'		=> 	'Device Fingerprint',
+							'options'	=> 	['Enabled'],
+							'info'		=>	'The fingerprint uses JavaScript to capture browser &amp; devices details.',
+						),
+				]
+			);
 		}
 
 
@@ -65,12 +92,11 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		 */
 		public function addActionsAndFilters()
 		{
-			add_action( ($this->is_admin() ? 'admin_' : 'wp_') .'enqueue_scripts',
+			add_action( ($this->is_admin() ? 'admin' : 'wp').'_enqueue_scripts',
 															array($this, 'enqueue_javascript' ) );
 			add_action( 'wp_ajax_'.$this->actionId, 		array($this, 'ajax_dispatcher') );
 			add_action( 'wp_ajax_nopriv_'.$this->actionId,	array($this, 'ajax_dispatcher') );
 		}
-
 
 
 		/**
@@ -80,22 +106,21 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		 */
 		public function enqueue_javascript()
 		{
+			wp_enqueue_script('jquery');
+
 			$url 		= admin_url('admin-ajax.php');
 			$nonce 		= wp_create_nonce($this->actionId);
 			$javascript = "
 				if (typeof {$this->pluginName} == 'undefined') {$this->pluginName} = {};
-
 				{$this->pluginName}.AjaxRequest = function (method,params,callback) {
-					var ajaxRequest = {
+					return jQuery.post('{$url}', {
 						nonce	: '{$nonce}',
 						action	: '{$this->actionId}',
 						method	: method,
 						params	: params || {}
-					}
-					return jQuery.post('{$url}', ajaxRequest, callback||null)";
+					}, callback||null)";
 			$javascript .= ($this->plugin->is_frontend())
-				? ";
-				}"
+				? ";}"
 				: ".done(function( data ) {
 						try {
 							if (data.adminNotice) {
@@ -111,9 +136,31 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 					});
 				}";
 
-			wp_register_script( $this->actionId, false );
-			wp_enqueue_script( $this->actionId );
-			wp_add_inline_script( $this->actionId, $this->minifyString($javascript) );
+			$scriptId = sanitize_key( $this->actionId.'-'.$this->getVersion() );
+			wp_register_script( $scriptId, false, ['jquery'] );
+			wp_enqueue_script( $scriptId );
+			wp_add_inline_script( $scriptId, $this->minifyString($javascript) );
+
+			if ($this->is_option('ajax_device_id') && !$this->plugin->getVariable('fingerprint_hash'))
+			{
+				// https://github.com/thumbmarkjs/thumbmarkjs
+				$scriptId = sanitize_key($this->className.'-fingerprint');
+				wp_register_script( $scriptId,
+					"https://cdn.jsdelivr.net/npm/@thumbmarkjs/thumbmarkjs/dist/thumbmark.umd.js",
+					['jquery'],
+					EAC_DOOJIGGER_VERSION,
+				//	['strategy' => 'defer']
+				);
+				wp_enqueue_script( $scriptId );
+
+				$javascript =
+					"(function(){".
+					"ThumbmarkJS.getFingerprint(true).then(function(fp){".
+					"{$this->pluginName}.AjaxRequest( 'ajaxAction.deviceFingerprint', fp );".
+					"});".
+					"}());";
+				wp_add_inline_script( $scriptId, $javascript );
+			}
 		}
 
 
@@ -126,20 +173,38 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		{
 			check_ajax_referer( $this->actionId, 'nonce' );
 
-			list($className,$methodName) = explode('.',$_POST['method']);
+			list($className,$methodName) = explode('.',sanitize_text_field($_POST['method']));
 
-			if ($className == $this->className) {
-				$class = $this;
-			} else {
-				$class = $this->plugin->getClassObject($className);
+			/**
+			 * filter: {pluginname}_{classname}_{methodname}
+			 *
+			 * @param params from ajax request (un-sanitized)
+			 */
+			$params = $this->apply_filters($className.'_'.$methodName,$_POST['params'] ?: []);
+
+			$class = ($className == $this->className)
+				? $this
+				: $this->plugin->getClassObject($className);
+
+			if (is_object($class))
+			{
+				if (method_exists($class, $methodName))
+				{
+					wp_send_json(call_user_func( [$class,$methodName], $params ));
+					return;
+				}
 			}
 
-			if (is_object($class) && method_exists($class, $methodName)) {
-				wp_send_json(
-					call_user_func( [$class,$methodName], $_POST['params'] ?: [] )
-				);
+			if ($this->has_action($className.'_'.$methodName))
+			{
+				wp_send_json($params);
+				return;
 			}
-			wp_send_json_error("From ".$this->className." - unknown method: '{$className}::{$methodName}'",400);
+
+			wp_send_json_error(
+				"From ".$this->className." - unknown method: '{$className}::{$methodName}'",
+				400
+			);
 		}
 
 
@@ -148,6 +213,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		 * eacDoojigger.AjaxRequest('ajaxAction.saveObject',{object});
 		 *
 		 * @param array - parameters passed from the browser
+		 *
 		 * @return void
 		 */
 		public function saveObject($params)
@@ -156,6 +222,35 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 			{
 				$this->plugin->setVariable($name,$value);
 			}
+		}
+
+
+		/**
+		 * get device fingerprint
+		 * eacDoojigger.AjaxRequest('ajaxAction.saveObject',{object});
+		 *
+		 * @param array - parameters passed from the browser
+		 * 		'hash' => '1ea7vd2',
+		 *		'data' => array (
+		 *			'audio' => array(...)
+		 *			'canvas' => array(...)
+		 *			'fonts' => array(...)
+		 *			'hardware' => array(...)
+		 *			'locales' => array(...)
+		 *			'permissions' => array(...)
+		 *			'plugins' => array(...)
+		 *			'screen' => array(...)
+		 *			'system' => array(...)
+		 *			'webgl' => array(...)
+		 *			'math' => array(...)
+		 *		)
+		 * @return void
+		 */
+		public function deviceFingerprint($params)
+		{
+			$this->plugin->setVariable('fingerprint_hash',$params['hash']);
+			$this->plugin->setVariable('fingerprint_data',$params['data']);
+			$this->logDebug($params['hash'],__METHOD__);
 		}
 
 

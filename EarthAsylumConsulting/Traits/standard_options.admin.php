@@ -10,8 +10,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		24.0424.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -215,11 +215,13 @@ trait standard_options
 			'_btnRestoreOptions'.( ($backupTime) ? '' : '_hidden' ) => array(
 				'type'		=> 	($backupTime) ? 'button' : 'hidden',
 				'label'		=> 	'Restore Settings',
-				'default'	=> 	'Restore',
+				'default'	=> 	($backupTime) ? 'Restore' : '',
 				'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings from the backup created on {$backupTime}." : "No backup to restore from.",
 				'validate'	=> 	function($value) {
-									$this->plugin->do_option_restore();
-									$this->add_option_success('button',"Your settings have been restored and are reflected below.");
+									if ($value == 'Restore') {
+										$this->plugin->do_option_restore();
+										$this->add_option_success('button',"Your settings have been restored and are reflected below.");
+									}
 								},
 			),
 		];
@@ -265,11 +267,13 @@ trait standard_options
 			'_btnRestoreNetwork'.( ($backupTime) ? '' : '_hidden' )	=> array(
 				'type'		=> 	($backupTime) ? 'button' : 'hidden',
 				'label'		=> 	'Restore Network Settings',
-				'default'	=> 	'Restore All',
+				'default'	=> 	($backupTime) ? 'Restore' : '',
 				'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings for all network sites from the backup created on {$backupTime}." : "No backup to restore from.",
 				'validate'	=> 	function($value) {
-									$this->plugin->do_network_restore();
-									$this->add_option_success('button',"Your settings for all sites have been restored. Network settings are reflected below.");
+									if ($value == 'Restore') {
+										$this->plugin->do_network_restore();
+										$this->add_option_success('button',"Your settings for all sites have been restored. Network settings are reflected below.");
+									}
 								},
 			),
 		];

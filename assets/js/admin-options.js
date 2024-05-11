@@ -1,6 +1,6 @@
 /**
  * {eac}Doojigger for WordPress - Administrator options screen javascript
- * @version 23.0613.1
+ * @version 24.0430.1
  */
 
 /*
@@ -88,16 +88,25 @@ document.addEventListener('DOMContentLoaded',function()
             });
         });
     }
-    // togglers - a <details> tag toggling a fieldset
+    // togglers - a <details> tag toggling a sibling fieldset
+/*
+	document.querySelectorAll('fieldset.settings-grid-container').forEach(function(fieldset)
+	{
+		fieldset.addEventListener('animationend',function(e) {
+		//	e.target.style.display = (e.animationName=='settings-easeOut') ? 'none' : '';
+		//	e.target.style.height = (e.animationName=='settings-easeOut') ? '0' : 'auto';
+		});
+	});
+ */
     document.querySelectorAll('details[data-toggle]').forEach(function(details)
     {
-        details.addEventListener('toggle', function(e) {
+        details.addEventListener('toggle', function() {
             document.querySelectorAll('fieldset[data-name="'+details.dataset.toggle+'"]').forEach(function(fieldset) {
                 if (details.open) {
                     fieldset.classList.replace('settings-closed','settings-opened');
-                    fieldset.querySelectorAll('textarea.code-editor').forEach(function(textarea) {
-                        if (textarea.cmEditor) textarea.cmEditor.codemirror.refresh();
-                    });
+                //    fieldset.querySelectorAll('textarea.code-editor').forEach(function(textarea) {
+                //        if (textarea.cmEditor) textarea.cmEditor.codemirror.refresh();
+                //    });
                 } else {
                     fieldset.classList.replace('settings-opened','settings-closed');
                 }
@@ -105,12 +114,14 @@ document.addEventListener('DOMContentLoaded',function()
         });
     });
     // Code editor
+/*
     ['js','css','html','php'].forEach(function(type)
     {
         document.querySelectorAll('textarea.input-codeedit-'+type).forEach(function(textarea) {
             textarea.cmEditor = wp.codeEditor.initialize(textarea, cm_settings[type]);
         });
     });
+ */
     // read-only input type
     document.querySelectorAll('input.input-readonly').forEach(function(input)
     {
@@ -119,12 +130,6 @@ document.addEventListener('DOMContentLoaded',function()
         input.addEventListener('touchend',(e) => {input.readOnly=false;input.type='text';});
         input.addEventListener('blur',(e) => {input.readOnly=true;});
     });
-    // quicktags editor buttons
-    if (typeof QTags != 'undefined')
-    {
-        QTags.addButton( 'eg_paragraph', 'p', '<p>', '</p>', 'p', '', 1 );
-        QTags.addButton( 'eg_var', 'var', '<var>', '</var>', 'var' );
-    }
     // options form submit
     if (options_form = document.getElementById('options_form')) {
         options_form.addEventListener('submit',(e) => {options_form.style.opacity = .5;});

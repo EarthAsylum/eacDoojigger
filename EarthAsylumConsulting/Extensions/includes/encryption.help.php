@@ -2,14 +2,13 @@
 /**
  * Extension: encryption - string encryption/decryption - {eac}Doojigger for WordPress
  *
+ * included for admin_options_help() method
+ *
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2021 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.x
- *
- * included for admin_options_help() method
- * @version 23.1028.1
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	23.1028.1
  */
 
 defined( 'ABSPATH' ) or exit;
