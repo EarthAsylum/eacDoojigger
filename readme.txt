@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.6.0-RC1+May10
-Last Updated:           10-May-2024
+Stable tag:             2.6.0-RC2+May14
+Last Updated:           14-May-2024
 Requires at least:      5.8
 Tested up to:           6.5
 Requires PHP:           7.4
@@ -411,8 +411,9 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.0 – May 10, 2024 =
+= Version 2.6.0 – May 14, 2024 =
 
++   Made (most) options_settings_page_* methods public so html_input trait can access them.
 +   New code-editor trait, loads code-mirror and wp_editor with consistant options/styling.
 +   Change to tiny-mce parameters and toolbars for html fields.
 +   Improved ajaxAction extension.

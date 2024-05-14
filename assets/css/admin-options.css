@@ -3,17 +3,6 @@
  * @version 24.0507.1
  */
 
-/* https://make.wordpress.org/core/2021/02/23/standardization-of-wp-admin-colors-in-wordpress-5-7/ */
-:root {
-	--eac-admin-gray-0: #f6f7f7;
-	--eac-admin-gray-20: #a7aaad;
-	--eac-admin-gray-60: #50575e;
-	--eac-admin-yellow-0: #fcf9e8;
-	--eac-logo-gray: #8c8f94;
-	--eac-logo-green: #6e9882;
-	--eac-logo-orange: #da821d;
-}
-
 @keyframes settings-easeIn {
 	from {opacity: 0;} to {opacity: 1;}
 }

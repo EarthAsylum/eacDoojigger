@@ -164,6 +164,17 @@ trait html_input_fields
 
 
 	/**
+	 * Get admin color variables
+	 *
+	 * @return	string the root style variables
+	 */
+	public function html_input_admin_style(): string
+	{
+		return $this->plugin->options_settings_page_admin_style();
+	}
+
+
+	/**
 	 * enques/loads jQuery/jQuery-ui
 	 *
 	 * @return 	void

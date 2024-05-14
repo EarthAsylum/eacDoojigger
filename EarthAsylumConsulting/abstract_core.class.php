@@ -2432,7 +2432,7 @@ abstract class abstract_core
 	 * Warning: not all js/css strings may succesfully pass through this regex!
 	 *
 	 * @param	string	js/css content
-	 * @param	bool	strip new-line (set false to preserve line-endings)
+	 * @param	bool|string	strip new-line (set false to preserve line-endings)
 	 * @return	string	minified content
 	 */
 	public function minifyString(string $content,$stripNL=true): string
@@ -2448,7 +2448,7 @@ abstract class abstract_core
 		$search[] = ($stripNL)
 			?	'|\R|m'							// remove line-endings
 			:	'|^\R|m';						// remove blank lines
-		return preg_replace( $search, '', $this->wp_kses($content,[]) );
+		return preg_replace( $search, '', str_replace('&amp;&amp;','&&',$this->wp_kses($content,[])) );
 	}
 
 

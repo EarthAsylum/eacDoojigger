@@ -2047,7 +2047,7 @@ abstract class abstract_backend extends abstract_core
 	 * @param	mixed 	$savedOptionValue current value for $optionKey
 	 * @return	mixed	sanitized option value(s)
 	 */
-	protected function options_settings_page_sanitize($values,$optionKey,$optionMeta,$savedOptionValue=null)
+	public function options_settings_page_sanitize($values,$optionKey,$optionMeta,$savedOptionValue=null)
 	{
 		if (empty($values)) return $values;
 
@@ -2152,7 +2152,7 @@ abstract class abstract_backend extends abstract_core
 	 * @param	mixed 	$savedOptionValue current value for $optionKey
 	 * @return	mixed	sanitized option value(s)
 	 */
-	protected function options_settings_page_validate($values,$optionKey,$optionMeta,$savedOptionValue=null)
+	public function options_settings_page_validate($values,$optionKey,$optionMeta,$savedOptionValue=null)
 	{
 		if (isset($optionMeta['validate']))
 		{
@@ -2171,7 +2171,7 @@ abstract class abstract_backend extends abstract_core
 	 * @param	array 	$optionMeta meta-data for $group
 	 * @return	void
 	 */
-	protected function options_settings_page_section(string $groupName, array &$optionMeta): void
+	public function options_settings_page_section(string $groupName, array &$optionMeta): void
 	{
 		$groupName = esc_attr($groupName);
 
@@ -2240,7 +2240,7 @@ abstract class abstract_backend extends abstract_core
 	 * @param	string	$height optional, override default field height (rows)
 	 * @return	void
 	 */
-	protected function options_settings_page_block(string $optionKey, array $optionMeta, $optionValue, $width='50', $height='4'): void
+	public function options_settings_page_block(string $optionKey, array $optionMeta, $optionValue, $width='50', $height='4'): void
 	{
 		if (! is_array($optionMeta) || count($optionMeta) < 2) return;
 		if ($optionMeta['type'] == 'help') return;
@@ -2314,7 +2314,7 @@ abstract class abstract_backend extends abstract_core
 	 * @param	string	$height optional, override default field height (rows)
 	 * @return	void
 	 */
-	protected function options_settings_page_field(string $optionKey, array $optionMeta, $savedOptionValue, $width='50', $height='4'): void
+	public function options_settings_page_field(string $optionKey, array $optionMeta, $savedOptionValue, $width='50', $height='4'): void
 	{
 		if (! is_array($optionMeta) || count($optionMeta) < 2) return;
 		if ($optionMeta['type'] == 'help') return;
@@ -2599,7 +2599,7 @@ abstract class abstract_backend extends abstract_core
 	 * @param	array			$optionMeta option meta data
 	 * @return	void
 	 */
-	protected function options_settings_page_help($helpTabs,$optionKey,$optionMeta): void
+	public function options_settings_page_help($helpTabs,$optionKey,$optionMeta): void
 	{
 		if ( !$this->pluginHelpEnabled() ) return;
 
@@ -2656,7 +2656,7 @@ abstract class abstract_backend extends abstract_core
 	 *
 	 * @return	string the stylesheet id
 	 */
-	protected function options_settings_page_style(): string
+	public function options_settings_page_style(): string
 	{
 		// CSS for the page
 		$styleId = sanitize_title($this->className.'-settings');
@@ -2665,12 +2665,7 @@ abstract class abstract_backend extends abstract_core
 			[],
 			EAC_DOOJIGGER_VERSION
 		);
-		$style = ":root {";
-		foreach ($this->admin_color_scheme() as $id => $code) {
-			$style .= "--eac-admin-{$id}:{$code};";
-		}
-		$style .= "}";
-		wp_add_inline_style( $styleId,$style );
+		wp_add_inline_style( $styleId, $this->options_settings_page_admin_style() );
 
 		/**
 		 * action {classname}_admin_enqueue_styles when stylesheet is loaded.
@@ -2683,11 +2678,42 @@ abstract class abstract_backend extends abstract_core
 
 
 	/**
+	 * Get admin color variables
+	 *
+	 * @see https://make.wordpress.org/core/2021/02/23/standardization-of-wp-admin-colors-in-wordpress-5-7/
+	 *
+	 * @return	string the root style variables
+	 */
+	public function options_settings_page_admin_style(): string
+	{
+		$style = ":root {\n";
+		$style .= "\t--eac-wp-blue:#0073AA;".
+					"--eac-wp-medium:#00A0D2;";
+		$style .= "\n\t";
+		foreach ($this->admin_color_scheme() as $id => $code) {
+			$style .= "--eac-admin-{$id}:{$code};";
+		}
+		$style .= "\n";
+		$style .= "\t--eac-admin-gray-0:#f6f7f7;".
+					"--eac-admin-gray-20:#a7aaad;".
+					"--eac-admin-gray-60:#50575e;\n";
+		$style .= "\t--eac-admin-blue-30:#4f94d4;".
+					"--eac-admin-blue-50:#2271b1;".
+					"--eac-admin-yellow-0:#fcf9e8;\n";
+		$style .= "\t--eac-logo-gray:#8c8f94;".
+					"--eac-logo-green:#6e9882;".
+					"--eac-logo-orange:#da821d;\n";
+		$style .= "}\n";
+		return $style;
+	}
+
+
+	/**
 	 * Creates Script tag for the Administration page to set options for this plugin.
 	 *
 	 * @return string the javascript id
 	 */
-	protected function options_settings_page_script(): string
+	private function options_settings_page_script(): string
 	{
 		// Script for the page
 		$this->options_settings_page_jquery();
@@ -2714,7 +2740,7 @@ abstract class abstract_backend extends abstract_core
 	 *
 	 * @return void
 	 */
-	protected function options_settings_page_jquery(): void
+	public function options_settings_page_jquery(): void
 	{
 		// Script for the page
 		wp_enqueue_script('jquery');
@@ -2723,6 +2749,7 @@ abstract class abstract_backend extends abstract_core
 		ob_start();
 		?>
 		jQuery(function($) {
+			// for our options-settings page fields
 			$( '.settings-tooltip.dashicons' ).tooltip({
 				content: function() {
 					var e = $( this );
@@ -2732,13 +2759,16 @@ abstract class abstract_backend extends abstract_core
 						? ( (t) ? '<div><strong>'+t+'</strong></div> '+v : v ) : t;
 				}
 			});
+			// make tooltip icon visible
+			$('style').last().append(".settings-tooltip.dashicons::before { visibility: visible; }");
+
+			// for other pages/sections/fields
 			$('.tooltip.dashicons,[data-tooltip]:not(.settings-tooltip)' ).tooltip({
 				content: function() {
 					var e = $( this );
 					return e.data( 'tooltip' ) || e.attr( 'title' );
 				}
 			});
-			$('style').last().append(".settings-tooltip.dashicons::before { visibility: visible; }");
 		});
 		<?php
 		$script = ob_get_clean();
