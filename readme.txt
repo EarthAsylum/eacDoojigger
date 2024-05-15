@@ -413,6 +413,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 = Version 2.6.0 – May 14, 2024 =
 
++   Changed plugin update to load on 'pre_site_transient_update_plugins' instead of 'pre_set_site_transient_update_plugins'.
 +   Made (most) options_settings_page_* methods public so html_input trait can access them.
 +   New code-editor trait, loads code-mirror and wp_editor with consistant options/styling.
 +   Change to tiny-mce parameters and toolbars for html fields.

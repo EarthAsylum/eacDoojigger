@@ -179,7 +179,7 @@ namespace EarthAsylumConsulting\Traits
 
 		/**
 		 * Load object (once) for automatic updates.
-		 * Uses 'pre_set_site_transient_update_plugins' and 'plugins_api_args' filter so we only do this when needed.
+		 * Uses 'pre_site_transient_update_plugins' and 'plugins_api_args' filter so we only do this when needed.
 		 *
 		 * @param string $pluginFile plugin file pathname ($plugin_detail['PluginFile'])
 		 * @param string $updateType auto-update type ('self' | 'wp') ($plugin_detail['AutoUpdate'])
@@ -189,7 +189,7 @@ namespace EarthAsylumConsulting\Traits
 		{
 			if (! is_admin()) return; // if called directly (by extensions)
 
-			add_filter( 'pre_set_site_transient_update_plugins', function($transient) use ($pluginFile,$updateType)
+			add_filter( 'pre_site_transient_update_plugins', function($transient) use ($pluginFile,$updateType)
 				{
 					call_user_func([self::class,'plugin_updater_filter'], $pluginFile, $updateType);
 					return $transient;
