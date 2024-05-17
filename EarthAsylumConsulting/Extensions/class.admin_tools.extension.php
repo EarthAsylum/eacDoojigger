@@ -58,8 +58,15 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 		public function admin_options_settings()
 		{
 			$this->registerExtensionOptions( 'administration_tools',
-				$this->standard_options(['clearCache','backupOptions','restoreOptions','optionExport','optionImport','noSubmit'])
+				$this->standard_options(['clearCache','backupOptions','restoreOptions','noSubmit'])
 			);
+
+			if ( $this->isAdvancedMode('settings'))
+			{
+				$this->registerExtensionOptions( 'administration_tools',
+					$this->standard_options(['optionExport','optionImport'])
+				);
+			}
 
 			if ( $this->plugin->is_network_admin() )
 			{

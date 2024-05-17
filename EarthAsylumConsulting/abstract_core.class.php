@@ -111,6 +111,12 @@ abstract class abstract_core
 	);
 
 	/**
+	 * @var bool Advanced Mode allowed.
+	 */
+	public $advanced_mode_allowed		= false;
+
+
+	/**
 	 * @var string The name of this plugin class (sans namespace) aka $pluginName
 	 * @used-by getClassName()
 	 */
@@ -501,6 +507,9 @@ abstract class abstract_core
 		 * @return	array
 		 */
 		$this->reservedOptions = $this->apply_filters('reserved_options', $this->reservedOptions);
+
+		// admin action link(s)
+		add_action( 'admin_bar_init', 		array( $this, 'do_admin_action_links'), 20 );
 	}
 
 
@@ -876,7 +885,30 @@ abstract class abstract_core
 
 
 	/**
-	 * set advanced mode - aids in complexity and/or licensing limits
+	 * allow advanced mode - aids in complexity and/or licensing limits.
+	 * @example $this->allowAdvancedMode(false);
+	 *
+	 * @param bool $allow - allow or not
+	 * @return bool - allowed or not
+	 */
+	public function allowAdvancedMode(bool $allow = null): bool
+	{
+		if (is_bool($allow))
+		{
+			$this->advanced_mode_allowed = $allow;
+		}
+		/**
+		 * filter {classname}_allow_advanced_mode to set advanced mode
+		 * @param string $allow - allow or not
+		 * @return	bool
+		 */
+		$this->advanced_mode_allowed = $this->apply_filters('allow_advanced_mode',$this->advanced_mode_allowed);
+		return $this->advanced_mode_allowed;
+	}
+
+
+	/**
+	 * set advanced mode - aids in complexity and/or licensing limits.
 	 * @example: $this->setAdvancedMode(true,'settings');
 	 *
 	 * @param bool $is - is or is not
@@ -890,14 +922,6 @@ abstract class abstract_core
 		$level	= strtolower($level ?? 'default');
 		$is		= $this->isTrue($is);
 
-		/**
-		 * filter {classname}_set_advanced_mode to set advanced mode
-		 * @param bool $is - is or is not
-		 * @param string $what - what is in advanced mode
-		 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
-		 * @return	bool
-		 */
-	//	$this->advanced_mode[$what][$level] = $this->apply_filters('set_advanced_mode',$is,$what,$level);
 		$this->advanced_mode[$what][$level] = $is;
 
 		if (! isset( $this->advanced_mode[$what]['default'] ))
@@ -908,7 +932,7 @@ abstract class abstract_core
 
 
 	/**
-	 * is advanced mode - aids in complexity and/or licensing limits
+	 * is advanced mode - aids in complexity and/or licensing limits.
 	 * @example $this->isAdvancedMode('settings');
 	 *
 	 * @param string $what - what is in advanced mode
@@ -927,19 +951,68 @@ abstract class abstract_core
 			{
 				if (isset( $this->advanced_mode[$w], $this->advanced_mode[$w][$l] ))
 				{
-					/**
-					 * filter {classname}_is_advanced_mode to get advanced mode
-					 * @param bool $is - is or is not
-					 * @param string $what - what is in advanced mode
-					 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
-					 * @return	bool
-					 */
-				//	return $this->apply_filters('is_advanced_mode',($is && $this->advanced_mode[$w][$l]),$w,$l);
-					return $this->advanced_mode[$w][$l];
+					return $this->advanced_mode[$w][$l] && $this->allowAdvancedMode();
 				}
 			}
 		}
 		return false;
+	}
+
+
+	/**
+	 * add an action link (for menu and/or clickable actions)
+	 *
+	 * @param string $action action name
+	 * 				advanced_mode_enable, advanced_mode_disable, or custom action name
+	 * @return string href
+	 */
+	public function add_admin_action_link(string $action): string
+	{
+		$action = esc_attr($action);
+		$actionKey = sanitize_key('_'.$this->pluginName.'FN'); // _eacdoojiggerfn
+		return wp_nonce_url( add_query_arg( [$actionKey=>$action] ),$this->className );
+	}
+
+
+	/**
+	 * process action links from admin page.
+	 * additional/custom actions may be added by adding an action for the function name:
+	 * 		$this->add_action('my_action_name',function(){...});
+	 *
+	 * @param object $admin_bar wp_admin_bar
+	 * @return void
+	 */
+	public function do_admin_action_links($admin_bar)
+	{
+		$actionKey = sanitize_key('_'.$this->pluginName.'FN'); // _eacdoojiggerfn
+		if (!isset($_GET[$actionKey]) || !isset($_GET['_wpnonce'])) return;
+
+		$menuFN 	= $this->varGet($actionKey);
+		$wpnonce 	= $this->varGet('_wpnonce');
+		if (wp_verify_nonce($wpnonce,$this->className))
+		{
+			switch ($menuFN)
+			{
+				case 'enable_advanced_mode':
+					if ($this->is_admin() && $this->allowAdvancedMode() && $wpConfig = $this->wpconfig_handle()) {
+						$constant = strtoupper($this->pluginName).'_ADVANCED_MODE';
+						$wpConfig->update( 'constant', $constant, 'TRUE', ['raw'=>true] );
+					}
+					break;
+				case 'disable_advanced_mode':
+					if ($this->is_admin() && $this->allowAdvancedMode() && $wpConfig = $this->wpconfig_handle()) {
+						$constant = strtoupper($this->pluginName).'_ADVANCED_MODE';
+						$wpConfig->update( 'constant', $constant, 'FALSE', ['raw'=>true] );
+					}
+					break;
+				default:
+					$this->do_action($menuFN);
+					break;
+			}
+		}
+		// so a reload doesn't initiate again
+		wp_safe_redirect( remove_query_arg([$actionKey,'_wpnonce']) );
+		exit;
 	}
 
 

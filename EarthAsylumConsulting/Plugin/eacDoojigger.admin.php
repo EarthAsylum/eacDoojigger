@@ -9,7 +9,7 @@ namespace EarthAsylumConsulting\Plugin;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
  */
 
 trait eacDoojigger_administration
@@ -119,7 +119,7 @@ trait eacDoojigger_administration
 		);
 
 		// from standard_options
-		$options = $this->standard_options(['adminSettingsMenu','uninstallOptions','emailFatalNotice']);
+		$options = $this->standard_options(['adminSettingsMenu','uninstallOptions'/*,'emailFatalNotice'*/]);
 		$options['adminSettingsMenu']['options'][] = 'Menu Bar';
 
 		// WP Environment setting
@@ -140,6 +140,7 @@ trait eacDoojigger_administration
 							'default'	=>	$default,
 							'info'		=>	$default." the Environment Switcher in the 'mu_plugins' folder.",
 							'validate'	=>	[$this, 'install_environment'],
+							'advanced'	=> 	true,
 					]
 				];
 			}
@@ -165,6 +166,7 @@ trait eacDoojigger_administration
 							'info'		=> 	'Sets the WordPress environment type.',
 							'validate'	=>	[$this,'validate_environment_option'],
 							'attributes'=>	['onchange'=>'this.form.requestSubmit()'],
+							'advanced'	=> 	true,
 					]
 				];
 			}

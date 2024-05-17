@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '23.1025.1';
+		const VERSION	= '24.0515.1';
 
 		/**
 		 * @var array key(s)
@@ -104,6 +104,7 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 							'class'		=> 	'input-readonly', // like readonly field
 							'sanitize'	=> 	false,
 							'validate'	=> 	[$this,'validate_encryption_key'],
+							'advanced'	=> 	true,
 					),
 					'encryption_salt'	=> array(
 					//		'type'		=> 	'readonly',
@@ -113,6 +114,7 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 							'sanitize'	=> 	false,
 					//		'info'		=> 	'Once in use, this key should not be changed as previously encrypted values will be lost.',
 					//		'attributes'=> 	['autocomplete'=>'new-password'],
+							'advanced'	=> 	true,
 					),
 					'encryption_cipher'	=> array(
 							'type'		=> 	'select',
@@ -121,6 +123,7 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 							'default'	=> 	'128',
 							'info'		=> 	'AES-256 is the most secure and most resource intensive. '.
 											'AES-128 is less resource intensive yet highly secure and suitable for most environments.',
+							'advanced'	=> 	true,
 					),
 				]
 			);

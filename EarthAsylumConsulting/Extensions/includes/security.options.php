@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0424.1
+ * @version 	24.0515.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -123,6 +123,7 @@ $this->registerExtensionOptions( $this->className,
 									: ''),
 				'info'		=>	"RSS/ATOM URLs may be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if RSS/ATOM feeds are not needed.",
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableRSS')) ? 'disabled="disabled"' : '',
+				'advanced'	=> 	true,
 		),
 		'secUnAuthRest' 	=> array(
 				'type'		=>	'radio',
@@ -134,6 +135,7 @@ $this->registerExtensionOptions( $this->className,
 									: ''),
 				'info'		=>	"Not all WordPress REST APIs require authentication. This option disables un-authenticated requests or all REST API requests.",
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')) ? 'disabled="disabled"' : '',
+				'advanced'	=> 	true,
 		),
 		'secDisableXML' 	=> array(
 				'type'		=>	'radio',
@@ -142,6 +144,7 @@ $this->registerExtensionOptions( $this->className,
 				'default'	=>	$this->is_network_option('secDisableXML'),
 				'info'		=>	"XML-RPC (Remote Procedure Call) may also be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if XML-RPC is not needed.",
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')) ? 'disabled="disabled"' : '',
+				'advanced'	=> 	true,
 		),
 		'secCodeEditor' 	=> array(
 				'type'		=>	'radio',
@@ -185,7 +188,8 @@ $this->registerExtensionOptions( $this->className,
 									: ''),
 				'info'		=>	"Block specific IP addresses or host/referrer names. ".
 								"Enter addresses 1 per line. For example '192.168.100.1', '2001:0db8:85a3:08d3:1319:8a2e:0370:7334', or 'maliciousdomain.com'".
-								(($this->htaccess) ? '<br/><small>* These addresses will be blocked in the Apache .htaccess file using deny from rules OR through internal code to ensure functionality.</small>' : '')
+								(($this->htaccess) ? '<br/><small>* These addresses will be blocked in the Apache .htaccess file using deny from rules OR through internal code to ensure functionality.</small>' : ''),
+				'advanced'	=> 	true,
 		),
 		'secCookies' 		=> array(
 				'type'		=>	'checkbox',
@@ -247,6 +251,7 @@ $this->registerExtensionOptions( $this->className,
 								'</code> seconds (0 = unrestricted).',
 				'attributes'=>	['min="0"', 'max="300"','step="15"','list="secHeartbeatTicks"',
 								'oninput'=>"secHeartbeatShow.value = this.value"],
+				'advanced'	=> 	true,
 		),
 		'secHeartbeatFE' 	=> array(
 				'type'		=>	'switch',
@@ -258,7 +263,8 @@ $this->registerExtensionOptions( $this->className,
 									: ''),
 				'info'		=>	"Often the WordPress heartbeat ping is not needed on the site's public front-end. It can be disabled here but may be required by certain plugins or themes.",
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secHeartbeatFE')) ? 'disabled="disabled"' : '',
-						),
+				'advanced'	=> 	true,
+		),
 	]
 );
 

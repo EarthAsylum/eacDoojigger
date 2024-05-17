@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0509.1';
+		const VERSION	= '24.0517.1';
 
 		/**
 		 * @var string additional styling
@@ -80,8 +80,8 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 													"<span class='material-icons md-dark' style='background: lightblue;'>face</span><br/>".
 													"&lt;span class='material-icons md-light'<br/> style='background: darkblue;'&gt;face&lt;/span&gt;<br/>".
 													"<span class='material-icons md-light' style='background: darkblue;'>face</span>",
-									'info'		=>	"See <a href='https://google.github.io/material-design-icons/' target='_blank'>Material Icons Guide</a>".
-													" and the icon library at <a href='https://fonts.google.com/icons?selected=Material+Icons' target='_blank'>https://fonts.google.com/icons?selected=Material+Icons</a>",
+									'info'		=>	"See the <a href='https://google.github.io/material-design-icons/' target='_blank'>Material Icons Guide</a>".
+													" and the <a href='https://fonts.google.com/icons?selected=Material+Icons' target='_blank'>Material Icons Library</a>",
 									'help'		=> 	"<details><summary>What are material icons?</summary>".
 													"<q>Material design system icons are simple, modern, friendly, and sometimes quirky. ".
 													"Each icon is created using our design guidelines to depict in simple and minimal forms the universal concepts used commonly throughout a UI. ".

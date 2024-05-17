@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0424.1
+ * @version 	24.0517.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -92,6 +92,7 @@ $this->registerExtensionOptions( $this->className,
 												],
 								'info'		=>	'Messages often occure when invalid functions are called or invalid parameters are passed. '.
 												'This option makes it easier to debug these errors.',
+								'advanced'	=> 	true,
 							),
 		'debug_backtrace' 	=> array(
 								'type'		=> 	'range',
@@ -115,9 +116,10 @@ $this->registerExtensionOptions( $this->className,
 												'When capturing PHP and WP coding errors, show backtracing up to <code>'.
 												'<output name="debug_backtrace_show" for="debug_backtrace">[value]</output>'.
 												'</code> levels.',
-								'attributes'=> 	['list'=>'debug_backtrace_ticks',
-												'min=0','max=12','step=1','list=debug_backtrace_ticks',
+								'attributes'=> 	['list=debug_backtrace_ticks',
+												'min=0','max=12','step=1',
 												'oninput'=>"debug_backtrace_show.value = this.value"],
+								'advanced'	=> 	true,
 							),
 		'debug_wp_errors' 	=> array(
 								'type'		=> 	'checkbox',
@@ -127,6 +129,7 @@ $this->registerExtensionOptions( $this->className,
 												],
 								'info'		=>	'<small>* Not all WP_Error messages are actually errors but may  be pre-loaded in anticipation of possible error conditions.</small>',
 								'help'		=>	'Captures and logs errors when added to a WP_Error object.',
+								'advanced'	=> 	true,
 							),
 		'debug_heartbeat' 	=> array(
 								'type'		=> 	'checkbox',
@@ -136,6 +139,7 @@ $this->registerExtensionOptions( $this->className,
 												],
 								'info'		=>	'The WordPress Heartbeat API pings the server every 15 to 60 (or more) seconds. '.
 												'This option logs those request so you can determine the use, effectivness, and overhead.',
+								'advanced'	=> 	true,
 							),
 /*
 		'debug_purge_time' 	=> array(
@@ -168,8 +172,8 @@ $this->registerExtensionOptions( $this->className,
 											 	'Purge '.$this->pluginName.' log files after <code>'.
 												'<output name="debug_purge_time_show" for="debug_purge_time">[value]</output>'.
 												'</code> week(s).',
-								'attributes'=> 	['list'=>'debug_purge_time_ticks',
-												'min=0','max=12','step=1','list=debug_purge_time_ticks',
+								'attributes'=> 	['list=debug_purge_time_ticks',
+												'min=0','max=12','step=1',
 												'oninput'=>"debug_purge_time_show.value = this.value"],
 							),
 		'debug_on_page' 	=> array(
@@ -218,6 +222,7 @@ if ( (! is_multisite() || $this->plugin->is_network_admin()) &&
 												'Results can be seen in debugging logs under \'WordPress Timing\'',
 								'validate'	=>	[$this, 'install_actiontimer'],
 								'attributes'=>	(!$fs) ? 'disabled="disabled"' : '',
+								'advanced'	=> 	true,
 							),
 		]
 	);

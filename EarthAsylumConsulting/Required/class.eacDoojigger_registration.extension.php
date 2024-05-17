@@ -24,7 +24,7 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 	/**
 	 * @var string extension version
 	 */
-	const VERSION	= '23.0602.1';
+	const VERSION	= '24.0516.1';
 
 	/**
 	 * @var ALIAS constant ($this->Registration->...)
@@ -41,7 +41,7 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 	public function __construct($plugin)
 	{
 		$this->enable_option = false;
-		parent::__construct($plugin, self::ALLOW_ALL);
+		parent::__construct($plugin, self::ALLOW_ALL|self::ALLOW_NON_PHP);
 
 		if ($this->is_admin())
 		{

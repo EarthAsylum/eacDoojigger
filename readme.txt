@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.6.0-RC2+May14
-Last Updated:           14-May-2024
+Stable tag:             2.6.0-RC3+May17
+Last Updated:           17-May-2024
 Requires at least:      5.8
 Tested up to:           6.5
 Requires PHP:           7.4
@@ -43,6 +43,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 +   [Using {eac}Doojigger](#using-eacdoojigger)
 +   [Automatic Updates](#automatic-updates)
 +   [Contextual Help](#contextual-help)
++   [Advanced Mode](#advanced-mode)
 
 = Provided With {eac}Doojigger =
 
@@ -150,6 +151,12 @@ To complete your plugin and improve support, provide contextual help using the {
 Adding contextual help to your plugin and extension is easy using the methods built into {eac}Doojigger... and when using the proper filter, you can ensure that your help content only shows on your plugin page or extension tab.
 
 >   See the [Contextual Help](https://eacdoojigger.earthasylum.com/contextual-help/) page (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/ContextualHelp/* folder) for complete details and examples.
+
+
+= Advanced Mode =
+
+Advanced Mode gives developers a method to implement options or features based on an advanced mode setting (or combination of settings). {eac}Doojigger uses a menu selection and license level to enable advanced mode, but custom derivatives may use other methods to implement advanced mode.
+>   See [Implementing and Using Advanced Mode](https://eacdoojigger.earthasylum.com/how-to/#implementing-and-using-advanced-mode) for details.
 
 
 == Multi-Site Network ==
@@ -315,26 +322,17 @@ _Kevin Burkholder_
 1. General settings
 ![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-1.png)
 
-2. General settings - Maintenance Mode
-![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-2.png)
+2. Tools settings
+![Tools](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-2.png)
 
-3. General settings - Material Icons
-![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-3.png)
+3. Debugging settings
+![Debugging](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-3.png)
 
-4. General settings - Session Extension
-![General](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-4.png)
+4. Security settings
+![Security](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-4.png)
 
-5. Tools settings
-![Tools](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-5.png)
-
-6. Debugging settings
-![Debugging](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-6.png)
-
-7. Security settings (1)
-![Security](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-7.png)
-
-8. Security settings (2)
-![Security](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-8.png)
+5. Advanced Mode Menu
+![Advanced Mode](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/advanced-menu.png)
 
 9. My Awesome Plugin with My Awesome Extension
 ![myAwesomePlugin](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-9.png)
@@ -411,8 +409,11 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.0 – May 14, 2024 =
+= Version 2.6.0 – May 17, 2024 =
 
++   Improved "Advance Mode" with isAdvancedMode(), setAdvancedMode(), and allowAdvancedMode().
+    +   derivative plugins must call allowAdvancedMode(true) to enable, and may overload functions or use 'allow_advanced_mode' filter to implement.
++   Added 'advanced' attribute to settings fields to suppress field when not isAdvancedMode().
 +   Changed plugin update to load on 'pre_site_transient_update_plugins' instead of 'pre_set_site_transient_update_plugins'.
 +   Made (most) options_settings_page_* methods public so html_input trait can access them.
 +   New code-editor trait, loads code-mirror and wp_editor with consistant options/styling.

@@ -57,7 +57,8 @@ abstract class abstract_backend extends abstract_core
 			'after'			=> '',
 			'info'			=> '',
 			'tooltip'		=> '',
-			'attributes'	=> []
+			'tooltip'		=> '',
+			'advanced'		=> false,
 	];
 
 	/**
@@ -772,17 +773,17 @@ abstract class abstract_backend extends abstract_core
 
 		if (empty($admin_colors))
 		{
-			if ($colors = $_wp_admin_css_colors[ get_user_option( 'admin_color' ) ])
-			{
-				$colors = $colors->colors;
-				$admin_colors['base'] 		= array_shift($colors);	// 1st color
-				$admin_colors['notify'] 	= array_pop($colors); 	// 4th or 3rd color
-				$admin_colors['highlight']	= array_pop($colors);	// 3rd or 2nd color
-				$admin_colors['icon'] 		= $colors[0] ??			// remaining color or
-						$this->modifyColor($admin_colors['base'],-0.10);	// darken base
-				$admin_colors['subtle'] 	=						// lighten icon color
-						$this->modifyColor($admin_colors['icon'],0.85);
-			}
+			$colors = $_wp_admin_css_colors[ get_user_option( 'admin_color' ) ]
+				?? 	array_shift($_wp_admin_css_colors);			// default
+
+			$colors = $colors->colors;
+			$admin_colors['base'] 		= array_shift($colors);	// 1st color
+			$admin_colors['notify'] 	= array_pop($colors); 	// 4th or 3rd color
+			$admin_colors['highlight']	= array_pop($colors);	// 3rd or 2nd color
+			$admin_colors['icon'] 		= $colors[0] ??			// remaining color or
+					$this->modifyColor($admin_colors['base'],-0.10);	// darken base
+			$admin_colors['subtle'] 	=						// lighten icon color
+					$this->modifyColor($admin_colors['icon'],0.85);
 		}
 		return $admin_colors;
 	}
@@ -1472,6 +1473,15 @@ abstract class abstract_backend extends abstract_core
 			{
 				$optionName = $this->standardizeOptionName($optionName,false); // retain case of option name
 				$optionMetaData[$optionName] = array_merge(self::OPTION_META_KEYS,$optionMeta);
+
+				if ($optionMetaData[$optionName]['advanced']) {
+					$level = ($this->isTrue($optionMetaData[$optionName]['advanced']))
+						? 'default'
+						: $optionMetaData[$optionName]['advanced'];
+					if (!$this->isAdvancedMode('settings',$level)) {
+						unset($optionMetaData[$optionName]);
+					}
+				}
 			}
 		}
 		return $optionMetaData;
@@ -1704,18 +1714,33 @@ abstract class abstract_backend extends abstract_core
 		 */
 		$h1 = $this->apply_filters( "options_form_h1_html", $h1 );
 
-		$h2 =	"<h2 id='settings_h2'>".
+		$h2  =
+		$h2a =	"<h2 id='settings_h2'>".
 				"<span class='dashicons dashicons-admin-settings'></span>".
 				__( $this->pluginHeader('Name'), $this->PLUGIN_TEXTDOMAIN ).
 				' <small>(v'.$this->getVersion().')</small> - '.
 				__( $currentTab, $this->PLUGIN_TEXTDOMAIN ).
 				"</h2>\n";
+		// add clickable link to enable/disable advanced mode
+		if ($this->allowAdvancedMode())
+		{
+			$switchTo = ($this->isAdvancedMode()) ? 'disable' : 'enable';
+			$href = $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' );
+			$h2a = preg_replace("|<span.*></span>|",
+					"<a href='{$href}'>".
+					"(<span class='tooltip dashicons dashicons-admin-settings' ".
+					"title='Click to {$switchTo} advanced mode'>".
+					"</span>)</a>&nbsp;",
+					$h2a
+			);
+		}
 		/**
 		 * filter {classname}_options_form_h2_html
+		 * @param	string	$h2a current html for h2 header with advanced-mooode link
 		 * @param	string	$h2 current html for h2 header
 		 * @return	string	html for h2 header
 		 */
-		$h2 = $this->apply_filters( "options_form_h2_html", $h2 );
+		$h2 = $this->apply_filters( "options_form_h2_html", $h2a, $h2 );
 
 		/*
 		 * Wrap headers in 'settings_heading' div.
