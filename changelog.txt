@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 2.6.0 – May 17, 2024 =
+= Version 2.6.0 – May 18, 2024 =
 
 +   Improved "Advance Mode" with isAdvancedMode(), setAdvancedMode(), and allowAdvancedMode().
     +   derivative plugins must call allowAdvancedMode(true) to enable, and may overload functions or use 'allow_advanced_mode' filter to implement.

@@ -187,6 +187,7 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 			}
 		}
 
+		// place holder for actors to add items
 		$admin_bar->add_group(
 			[
 				'id'     	=> $this->className.'-menu',
@@ -194,14 +195,21 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 			]
 		);
 
+		$admin_bar->add_group(
+			[
+				'id'     	=> $this->className.'-util',
+				'parent'    => $this->className,
+			]
+		);
+
 		// $actionKey functions built in to abstract class
-		if ($this->is_admin() && $this->allowAdvancedMode())
+		if ($this->is_admin() && $this->isSettingsPage() && $this->allowAdvancedMode())
 		{
 			$switchTo = $this->isAdvancedMode() ? 'Disable' : 'Enable';
 			$admin_bar->add_menu(
 				[
 					'id'     	=> 'advanced-mode',
-					'parent'   	=> $this->className.'-menu',
+					'parent'   	=> $this->className.'-util',
 					'title' 	=> "{$switchTo} Advanced Mode",
 					'href'   	=> $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' ),
 				]
@@ -211,7 +219,7 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 		$admin_bar->add_menu(
 			[
 				'id'     	=> $this->className.'-flush',
-				'parent'   	=> $this->className.'-menu',
+				'parent'   	=> $this->className.'-util',
 				'title' 	=> "Flush Caches",
 				'href'   	=> $this->add_admin_action_link( 'flush_caches' ),
 			]

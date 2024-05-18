@@ -12,7 +12,7 @@ use EarthAsylumConsulting\Helpers\LogLevel;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0503.1
+ * @version		24.0518.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -230,16 +230,6 @@ abstract class abstract_core
 		$this->plugin			= $this;
 		$this->pluginName		= $this->getClassName();
 
-		// set default 'advanced mode' based on defined constant
-		$constant = strtoupper($this->pluginName).'_ADVANCED_MODE';
-		if ( defined( $constant ) ) {
-			$constant = constant($constant);
-			if (is_bool( $constant )) {
-				$this->setAdvancedMode($constant,'global');
-				$this->setAdvancedMode($constant,'settings');
-			}
-		}
-
 		$this->isReservedOption('uninstall_options',true);			// {classname}_uninstall_options for uninstall trait
 		$this->isReservedOption('selected_update_channel',true);	// {classname}_selected_update_channel for plugin_update trait
 
@@ -257,6 +247,9 @@ abstract class abstract_core
 
 		$this->setPluginHeaderValues($header);
 		$this->setSiteEnvironment();
+
+		// set 'advanced mode'
+		add_action( 'set_current_user', 		array ($this, 'config_advanced_mode' ));
 
 		/**
 		 * action eacDoojigger_ready, fired in plugin_loader for eacDoojigger
@@ -509,7 +502,7 @@ abstract class abstract_core
 		$this->reservedOptions = $this->apply_filters('reserved_options', $this->reservedOptions);
 
 		// admin action link(s)
-		add_action( 'admin_bar_init', 		array( $this, 'do_admin_action_links'), 20 );
+		add_action( 'admin_bar_init', 		array( $this, 'do_admin_action_links' ), 20 );
 	}
 
 
@@ -885,6 +878,31 @@ abstract class abstract_core
 
 
 	/**
+	 * config advanced mode - aids in complexity and/or licensing limits.
+	 * set 'advanced mode' based on defined constant or user meta
+	 *
+	 * @return void
+	 */
+	public function config_advanced_mode(): void
+	{
+		// user preference
+		$option = $this->prefixOptionName('advanced_mode');
+		if (($user = \get_current_user_id()) && ($option = \get_user_meta($user,$option,true))) {
+			$this->setAdvancedMode($option,'global');
+			$this->setAdvancedMode($option,'settings');
+		}
+		// wp-config constant allows and overrides advanced mode
+		$option = strtoupper($this->pluginName).'_ADVANCED_MODE';
+		if ( defined( $option ) ) {
+			$option = constant($option);
+			$this->allowAdvancedMode(true);
+			$this->setAdvancedMode($option,'global');
+			$this->setAdvancedMode($option,'settings');
+		}
+	}
+
+
+	/**
 	 * allow advanced mode - aids in complexity and/or licensing limits.
 	 * @example $this->allowAdvancedMode(false);
 	 *
@@ -994,15 +1012,15 @@ abstract class abstract_core
 			switch ($menuFN)
 			{
 				case 'enable_advanced_mode':
-					if ($this->is_admin() && $this->allowAdvancedMode() && $wpConfig = $this->wpconfig_handle()) {
-						$constant = strtoupper($this->pluginName).'_ADVANCED_MODE';
-						$wpConfig->update( 'constant', $constant, 'TRUE', ['raw'=>true] );
+					if ($this->is_admin() && $this->allowAdvancedMode() && $user = get_current_user_id()) {
+						$option = $this->prefixOptionName('advanced_mode');
+						\update_user_meta($user,$option,'true');
 					}
 					break;
 				case 'disable_advanced_mode':
-					if ($this->is_admin() && $this->allowAdvancedMode() && $wpConfig = $this->wpconfig_handle()) {
-						$constant = strtoupper($this->pluginName).'_ADVANCED_MODE';
-						$wpConfig->update( 'constant', $constant, 'FALSE', ['raw'=>true] );
+					if ($this->is_admin() && $this->allowAdvancedMode() && $user = get_current_user_id()) {
+						$option = $this->prefixOptionName('advanced_mode');
+						\delete_user_meta($user,$option);
 					}
 					break;
 				default:
@@ -2431,7 +2449,7 @@ abstract class abstract_core
 	 */
 	public function insert_with_markers(string $filename, string $marker, $insertion, string $commentBegin='#', string $commentEnd='', bool $insertAtTop=false): bool
 	{
-		if ($fs = $this->fs->load_wp_filesystem())
+		if ($fs = apply_filters('eacDoojigger_load_filesystem',false))
 		{
 			if ( ! $fs->exists( $filename ) ) {
 				if ( ! $fs->is_writable( dirname( $filename ) ) ) {

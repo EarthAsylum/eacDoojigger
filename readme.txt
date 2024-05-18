@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.6.0-RC3+May17
-Last Updated:           17-May-2024
+Stable tag:             2.6.0-RC3+May18
+Last Updated:           18-May-2024
 Requires at least:      5.8
 Tested up to:           6.5
 Requires PHP:           7.4
@@ -409,7 +409,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.0 – May 17, 2024 =
+= Version 2.6.0 – May 18, 2024 =
 
 +   Improved "Advance Mode" with isAdvancedMode(), setAdvancedMode(), and allowAdvancedMode().
     +   derivative plugins must call allowAdvancedMode(true) to enable, and may overload functions or use 'allow_advanced_mode' filter to implement.

@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0507.1
+ * @version		24.0517.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -647,7 +647,7 @@ abstract class abstract_backend extends abstract_core
 			 */
 			if ($filePath = $this->apply_filters("{$fileId}_path}",$filePath))
 			{
-				if ($useWPfs && ($fs = $this->fs->load_wp_filesystem()))
+				if ($useWPfs && ($fs = apply_filters('eacDoojigger_load_filesystem',false)))
 				{
 					$fsFilePath = $filePath;
 					if (! $fs->exists($filePath)) {
@@ -1966,9 +1966,9 @@ abstract class abstract_backend extends abstract_core
 			if ( ! array_key_exists($optionKey,$_POST) ) continue;
 
 			// get currently saved value
-			$savedOptionValue = (isset($optionData['encrypt']) && $optionData['encrypt'])
-				? $this->get_option_decrypt($optionKey,$optionData['default'] ?: false)
-				: $this->get_option($optionKey,$optionData['default'] ?: false);
+			$savedOptionValue = (isset($optionMeta['encrypt']) && $optionMeta['encrypt'])
+				? $this->get_option_decrypt($optionKey,$optionMeta['default'] ?: false)
+				: $this->get_option($optionKey,$optionMeta['default'] ?: false);
 
 			// clean POST value
 			$_POST[$optionKey] = (!is_array($_POST[$optionKey]))
@@ -2350,7 +2350,7 @@ abstract class abstract_backend extends abstract_core
 		// maybe convert single checkbox to switch
 		if ($optionMeta['type'] == 'checkbox')
 		{
-			if (count($optionMeta['options']) == 1 && $optionMeta['options'][0] == 'Enabled') {
+			if (count($optionMeta['options']) == 1 && isset($optionMeta['options'][0]) && $optionMeta['options'][0] == 'Enabled') {
 				$optionMeta['type'] = 'switch';
 			}
 		}

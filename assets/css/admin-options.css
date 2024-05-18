@@ -296,33 +296,44 @@ table#settings_system_info tbody td {min-width: 12em;}
 	box-shadow: 0 8px 16px 0 rgb(85 93 102 / 30%);
 }
 
-/* grow radio & checkbox on small screens */
-@media (max-width: 782px) {
+/* when sidebar is folded */
+.folded #settings_banner {left: 36px;}
+
+@media screen and (min-width: 782px) and (max-width: 960px) {
+	.auto-fold #settings_banner {left: 36px;}
+}
+@media screen and (max-width: 782px) {
+	/* grow radio & checkbox on small screens */
 	.settings-grid-item input[type='checkbox'] + label,
 	.settings-grid-item input[type='radio'] + label {
 		line-height: 2.25;
 	}
 	.settings-grid-container .input-switch-wrap  {height: 26px; margin: 5px 0;}
-	.settings-grid-container input.input-switch {margin: 5px 1ch;}
-}
+	.settings-grid-container input.input-switch {margin: 5px 1.25ch;}
 
-/* when sidebar is folded */
-.folded #settings_banner {left: 36px;}
-@media screen and (min-width: 783px) and (max-width: 960px) {
-	.auto-fold #settings_banner {left: 36px;}
-}
-@media screen and (max-width: 782px) {
+    input, textarea {font-size: revert;}
 	#settings_banner {left: 0;}
-	.settings-grid-container {grid-template-columns: minmax(6ch, 25%) minmax(25ch, auto);}
+	.settings-grid-container {grid-template-columns: minmax(6ch, 28%) minmax(25ch, auto);}
 	/* when admin menu is open */
 	.wp-responsive-open #wpbody {width: calc(100% - 206px); overflow-y: auto;}
 	.wp-responsive-open #settings_banner {left: 190px;}
 	.wp-responsive-open #settings_info {display: none;}
-	.wp-responsive-open .settings-grid-container {grid-template-columns: none; grid-row-gap: 0}
-	.wp-responsive-open .settings-grid-item.settings-grid-item-label {padding-left: .5em;}
+	.wp-responsive-open header.settings-grid-container {grid-template-columns: 65% 35%;}
+	.wp-responsive-open fieldset.settings-grid-container {grid-template-columns: none; grid-row-gap: 0}
+	.wp-responsive-open .settings-grid-item {padding-top: 0;}
+	.wp-responsive-open .settings-grid-item-label {padding: .5em;}
 }
 @media screen and (max-width: 650px) {
+	input[type=email], input[type=password], input[type=search], input[type=tel], input[type=text], input[type=url], textarea {
+		width: 90%
+	}
 	#settings_info {display: none;}
+	header.settings-grid-container {grid-template-columns: 65% 35%;}
+	fieldset.settings-grid-container {grid-template-columns: none; grid-row-gap: 0;}
+	.settings-grid-item {padding-top: 0;}
+	.settings-grid-item-label {padding: .5em;}
+	.settings-tooltip.dashicons-editor-help,
+	.settings-tooltip.dashicons-info-outline {right: 0;}
 	#wpadminbar {position: fixed;}
 }
 
