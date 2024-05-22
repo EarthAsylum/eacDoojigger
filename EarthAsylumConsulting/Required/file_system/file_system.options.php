@@ -24,6 +24,7 @@ $this->registerExtensionOptions( $this->className,
 					'This system provides access to the web server files using FTP, FTPS, or SSH. '.
 					'These protocols create files and folders using your ftp user name (rather than the web '.
 					'server user name) to maintain proper and secure file permissions.',
+				'advanced'	=>	true,
 		),
 	]
 );
@@ -37,6 +38,7 @@ if ($this->is_network_admin())
 				'options' 	=> 	['Enabled'],
 				'default' 	=> 	['Enabled'],
 				'info'		=> 	'Share your Filesystem API credentials with all sites in your network.',
+				'advanced'	=>	true,
 		),
 	]);
 }
@@ -67,6 +69,7 @@ else if (is_multisite())
 										}
 										return $value;
 									},
+					'advanced'	=>	true,
 			),
 		]);
 	}
@@ -89,6 +92,7 @@ $this->registerExtensionOptions( $this->className,
 									}
 								},
 				'attributes'=>	(!$credentials) ? ['disabled'=>'disabled'] : ['onmouseup'=>'this.value=\'Delete\';'],
+				'advanced'	=>	true,
 		),
 	]
 );
