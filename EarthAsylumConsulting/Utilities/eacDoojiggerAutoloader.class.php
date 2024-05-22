@@ -9,7 +9,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger Utilities\{eac}DoojiggerAutoloader
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * Version: 	2.1.1
+ * Version: 	2.2.0
  * @link		https://eacDoojigger.earthasylum.com/
  */
 
@@ -203,61 +203,5 @@ class eacDoojiggerAutoloader
 				return $email;
 			} );
 		}
-
-	/*
-		add_filter( 'wp_php_error_message',self::class.'::php_fatal_error_email', 10, 2 );
-		add_action( 'php_fatal_email_reset', function($emailOption)
-			{
-				if ($email = \get_option( $emailOption )) {
-					$email = ltrim($email,'/');
-					\update_option( $emailOption, $email );
-				}
-			}
-		);
-	*/
 	}
-
-
-	/**
-	 * email_fatal_error on shutdown with wp_php_error_message filter.
-	 * no longer  used in  lue of WordPress recover mode email
-	 *
-	 * @params string $wpMessage WordPress message
-	 * @params array $error PHP error array
-	 * @return string $wpMessage
-	 */
-/*
-	public static function php_fatal_error_email(string $wpMessage='', array $error=[]): string
-	{
-		if (function_exists('\wp_mail'))
-		{
-			$emailOption = self::$loaderClassName .'_emailFatalNotice';
-			$sendTo = \get_option( $emailOption );
-			if (empty($sendTo)) return $wpMessage;
-			// so we don't keep sending email. Must reset.
-			if (substr($sendTo,0,2) == '//') {
-				return $wpMessage;
-			} else {
-				\update_option( $emailOption, '//'.$sendTo );
-			}
-			$sendFrom = get_bloginfo('admin_email');
-			$message = 	'<h4>Requested URL '.$_SERVER['REQUEST_METHOD'].' '.home_url($_SERVER['REQUEST_URI']).'</h4>'.
-						(isset($_SERVER['HTTP_REFERER']) ? '<h4>Referring URL '.$_SERVER['HTTP_REFERER'].'</h4>' : '').
-						'<div>'.$wpMessage.'</div>'.
-						'<pre>'.var_export($error,true).'</pre>'.
-						'<p><em>* Notifications temporarily disabled. Reset \'Email Fatal Errors\' option in <a href=\''.
-							admin_url('/admin.php?page='.self::$loaderClassName.'SiteSettings').
-						'\'>'.self::$loaderClassName.' settings</a> to receive further notifications.</em></p>';
-			\wp_mail(
-				$sendTo,
-				'WordPress PHP Error Notification',
-				$message,
-				array('From: '.$sendFrom, 'Content-type: text/html')
-			);
-			// reset the email notification in x minutes from now
-			wp_schedule_single_event( time()+(MINUTE_IN_SECONDS * 5), 'php_fatal_email_reset', [$emailOption] );
-		}
-		return $wpMessage;
-	}
-*/
 }

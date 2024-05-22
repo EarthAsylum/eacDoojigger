@@ -148,24 +148,6 @@ abstract class abstract_backend extends abstract_core
 		parent::__construct($header);
 
 		/*
-		 * add admin hooks for automatic update
-		 * from plugin_update trait loaded by abstract_context
-		 */
-		if (method_exists($this,'addPluginUpdateHooks'))
-		{
-			$this->addPluginUpdateHooks(
-				[
-					'plugin_slug'			=> $this->PLUGIN_SLUG,
-					'plugin_uri'			=> $this->pluginHeader('UpdateURI'),
-				]
-			);
-		}
-		else if (method_exists($this,'addPluginUpdateNotice'))
-		{
-			$this->addPluginUpdateNotice($this->PLUGIN_SLUG);
-		}
-
-		/*
 		 * add admin hooks for plugin updates/activation
 		 */
 

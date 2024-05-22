@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.6.0-RC3+May18
-Last Updated:           18-May-2024
+Stable tag:             2.6.0-RC3+May21
+Last Updated:           21-May-2024
 Requires at least:      5.8
 Tested up to:           6.5
 Requires PHP:           7.4
@@ -409,12 +409,16 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.0 – May 18, 2024 =
+= Version 2.6.0 – May 21, 2024 =
 
-+   Improved "Advance Mode" with isAdvancedMode(), setAdvancedMode(), and allowAdvancedMode().
++   Moved plugin updater actions from plugin loader to new `eacDoojiggerPluginUpdater` class.
+    +   Loaded once in eacDoojiggerAutoloader.
+    +   Handles all derivative and extension plugins.
+    +   Reduces individual plugin footprint and redundancy.
+    +   Allows updating even when plugin is disabled or not network enabled on multi-site.
++   Improved "Advanced Mode" with isAdvancedMode(), setAdvancedMode(), and allowAdvancedMode().
     +   derivative plugins must call allowAdvancedMode(true) to enable, and may overload functions or use 'allow_advanced_mode' filter to implement.
 +   Added 'advanced' attribute to settings fields to suppress field when not isAdvancedMode().
-+   Changed plugin update to load on 'pre_site_transient_update_plugins' instead of 'pre_set_site_transient_update_plugins'.
 +   Made (most) options_settings_page_* methods public so html_input trait can access them.
 +   New code-editor trait, loads code-mirror and wp_editor with consistant options/styling.
 +   Change to tiny-mce parameters and toolbars for html fields.

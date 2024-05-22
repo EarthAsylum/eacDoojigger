@@ -165,16 +165,6 @@ trait swRegistrationUI
 	 */
 	private function swRegistrationActionsAndFilters(): void
 	{
-		// when testing...
-		/*
- 		\add_action(self::SOFTWARE_REGISTRY_PRODUCTID.'_api_remote_response', function( $body, $request, $endpoint )
- 			{
- 				$this->logDebug($endpoint,current_action());
- 				$this->logDebug($body,current_action());
- 			},
- 		10,3);
- 		*/
-
 		if (is_admin())
 		{
 			// when updated, refresh the registration
@@ -192,7 +182,6 @@ trait swRegistrationUI
 			// pass registration key in plugin updater request (from plugin_update.trait)
 			$this->add_filter( 'plugin_update_parameters', function($parameters)
 				{
-				//	$parameters['plugin_options']['registration'] 	= $this->getRegistrationKey();
 					$parameters['requestHeaders']['Authorization'] 	= "token ".base64_encode($this->getRegistrationKey());
 					return $parameters;
 				}

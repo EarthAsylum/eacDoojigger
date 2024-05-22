@@ -15,10 +15,10 @@
  * @wordpress-plugin
  * Plugin Name: 		{eac}Doojigger Auto-Loader
  * Description: 		Autoloader for {eac}Doojigger and derivative plugin classes and traits.
- * Version: 			2.1.1
- * Requires at least: 	5.4.0
+ * Version: 			2.2.0
+ * Requires at least: 	5.8
  * Tested up to: 		6.5
- * Requires PHP: 		7.2
+ * Requires PHP: 		7.4
  * Author:				EarthAsylum Consulting
  * Author URI: 			http://www.earthasylum.com
  */
@@ -26,7 +26,7 @@
 namespace EarthAsylumConsulting;
 
 /*
- * This section, when installed via the {eac}Doojigger plugin,
- * contains the proper include(s) and class method(s) for the autoloader.
+ * This section, when installed via the {eac}Doojigger plugin, contains the
+ * proper include(s) and class method(s) for the autoloader and utilities.
  */
 

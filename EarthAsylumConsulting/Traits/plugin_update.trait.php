@@ -177,7 +177,7 @@ trait plugin_update
 		 * @return 	array parameters
 		 */
 		$this->update_plugin_info = \apply_filters( $className.'_plugin_update_parameters',
-			wp_parse_args($plugin_info, [
+			array_replace_recursive([
 					'plugin_slug' 			=> '',						// required
 					'plugin_uri'			=> '',						// required if disableAutoUpdates=false
 					'plugin_options'		=> $plugin_update_options,	// parameters added to uri
@@ -187,7 +187,7 @@ trait plugin_update
 					'requestTimeout'		=> 6,						// timeout
 					'requestHeaders'		=> [],						// optional headers in request
 					'requestSslVerify'		=> true,					// verify valid ssl cert
-			])
+			],$plugin_info)
 		);
 
 		// we must know the slug name to do anything

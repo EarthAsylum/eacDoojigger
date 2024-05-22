@@ -174,7 +174,8 @@ trait standard_options
 				'type'		=> 	'email',
 				'label'		=> 	'Email Fatal Errors',
 				'default'	=> 	get_bloginfo('admin_email'),
-				'info'		=> 	'Attempt to send fatal PHP error notifications to this email address.'
+				'info'		=> 	'Attempt to send fatal PHP error notifications to this email address.',
+				'advanced'	=>	true,
 			),
 		];
 	}
@@ -216,6 +217,7 @@ trait standard_options
 				'type'		=> 	($backupTime) ? 'button' : 'hidden',
 				'label'		=> 	'Restore Settings',
 				'default'	=> 	($backupTime) ? 'Restore' : '',
+				'after'		=> 	($backupTime) ? '&nbsp;<small>Last backup: '.$backupTime.'</small>' : '',
 				'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings from the backup created on {$backupTime}." : "No backup to restore from.",
 				'validate'	=> 	function($value) {
 									if ($value == 'Restore') {
@@ -268,6 +270,7 @@ trait standard_options
 				'type'		=> 	($backupTime) ? 'button' : 'hidden',
 				'label'		=> 	'Restore Network Settings',
 				'default'	=> 	($backupTime) ? 'Restore' : '',
+				'after'		=> 	($backupTime) ? '&nbsp;<small>Last backup: '.$backupTime.'</small>' : '',
 				'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings for all network sites from the backup created on {$backupTime}." : "No backup to restore from.",
 				'validate'	=> 	function($value) {
 									if ($value == 'Restore') {

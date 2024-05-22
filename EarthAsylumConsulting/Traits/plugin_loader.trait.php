@@ -95,22 +95,14 @@ namespace EarthAsylumConsulting\Traits
 			}
 			load_plugin_textdomain(self::$plugin_detail['TextDomain'], false, dirname(plugin_basename( $_pluginfile )) . '/languages');
 
+			/*
+			 * run the version check (if trait was USEd)
+			 */
 			if (is_admin())
 			{
-				/*
-				 * run the version check (if trait was USEd)
-				 */
 				if (method_exists(self::class,'check_loader_environment') && !self::check_loader_environment())
 				{
 					return;
-				}
-
-				/*
-				 * load updater object when needed
-				 */
-				if (isset(self::$plugin_detail['AutoUpdate']))
-				{
-					self::loadPluginUpdater($_pluginfile, strtolower(self::$plugin_detail['AutoUpdate']));
 				}
 			}
 
@@ -171,15 +163,27 @@ namespace EarthAsylumConsulting\Traits
 					 * action {classname}_ready
 					 */
 					$plugin->do_action( 'ready' );
+
+					/*
+					 * register plugin updater
+					 */
+					if (is_admin())
+					{
+						if (isset(self::$plugin_detail['AutoUpdate']))
+						{
+							\do_action('eacDoojigger_register_plugin_updater',self::$plugin_detail);
+						}
+					}
 				}
 			);
+
 			return $plugin;
 		}
 
 
 		/**
 		 * Load object (once) for automatic updates.
-		 * Uses 'pre_site_transient_update_plugins' and 'plugins_api_args' filter so we only do this when needed.
+		 * Now (as of v2.6) only used by extensions.
 		 *
 		 * @param string $pluginFile plugin file pathname ($plugin_detail['PluginFile'])
 		 * @param string $updateType auto-update type ('self' | 'wp') ($plugin_detail['AutoUpdate'])
@@ -189,18 +193,15 @@ namespace EarthAsylumConsulting\Traits
 		{
 			if (! is_admin()) return; // if called directly (by extensions)
 
-			add_filter( 'pre_site_transient_update_plugins', function($transient) use ($pluginFile,$updateType)
-				{
-					call_user_func([self::class,'plugin_updater_filter'], $pluginFile, $updateType);
-					return $transient;
-				}
+			$plugin_slug = plugin_basename($pluginFile);
+			$plugin_detail = array_merge(self::$plugin_detail,
+				[
+					'PluginFile'	=> $pluginFile,
+					'PluginClass'	=> basename($plugin_slug,'.php'),
+					'AutoUpdate'	=> $updateType,
+				]
 			);
-			add_filter( 'plugins_api_args', function($args, $action='') use ($pluginFile,$updateType)
-				{
-					call_user_func([self::class,'plugin_updater_filter'], $pluginFile, $updateType);
-					return $args;
-				}
-			);
+			\do_action('eacDoojigger_register_plugin_updater',$plugin_detail);
 		}
 
 
@@ -211,6 +212,7 @@ namespace EarthAsylumConsulting\Traits
 		 * @param string $updateType auto-update type ('self' | 'wp') ($plugin_detail['AutoUpdate'])
 		 * @return void
 		 */
+/*
 		public static function plugin_updater_filter(string $pluginFile, string $updateType): void
 		{
 			static $updater = [];
@@ -242,6 +244,7 @@ namespace EarthAsylumConsulting\Traits
 			}
 			$updater[$pluginFile] = true;
 		}
+*/
 
 
 		/**
