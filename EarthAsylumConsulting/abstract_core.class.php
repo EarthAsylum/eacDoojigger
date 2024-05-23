@@ -604,11 +604,19 @@ abstract class abstract_core
 					'Network'		=> 'Network',				// Whether the plugin can be activated network-wide.
 					'PluginURI'		=> 'Plugin URI',			// The home page or update link of the plugin.
 					'UpdateURI'		=> 'Update URI',			// Allows third-party plugins to avoid accidentally being overwritten with an update of a plugin of a similar name from the WordPress.org Plugin Directory.
+					'StableTag'		=> 'Stable Tag',			// From readme.txt
+					'LastUpdated'	=> 'Last Updated',			// From readme.txt
 				);
 				if (empty($header)) {
 					$header['PluginFile'] = WP_PLUGIN_DIR . '/' . $this->PLUGIN_SLUG;
 				}
-				$pluginData = array_merge( $header, get_file_data($header['PluginFile'], $default_headers, 'plugin') );
+				$readme = dirname($header['PluginFile']).'/readme.txt';
+				$readme = array_filter(get_file_data($readme, $default_headers, 'readme'));
+				$pluginData = array_replace(
+					$header,
+					$readme,
+					array_filter(get_file_data($header['PluginFile'], $default_headers, 'plugin') )
+				);
 
 				$pluginData['Name']				= dirname(plugin_basename( $pluginData['PluginFile'] ));			// Plugin base name
 				$pluginData['PluginSlug']		= plugin_basename( $pluginData['PluginFile'] );						// Plugin slug
@@ -672,6 +680,8 @@ abstract class abstract_core
      *      'Network'       => 'Network',                Whether the plugin can be activated network-wide.
      *      'PluginURI'     => 'Plugin URI',             The home page or update link of the plugin.
      *      'UpdateURI'     => 'Update URI',             Allows third-party plugins to avoid accidentally being overwritten with an update of a plugin of a similar name from the WordPress.org Plugin Directory.
+	 *		'StableTag'		=> 'Stable Tag',		 	 From readme.txt.
+	 *		'LastUpdated'	=> 'Last Updated',			 From readme.txt.
      *      'Name'                                       The directory name within plugins.
      *      'PluginSlug'                                 The plugin_basename() slug.
      *      'PluginDir'                                  The directory name plugin_dir_path().

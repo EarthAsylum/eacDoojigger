@@ -235,6 +235,9 @@ abstract class abstract_backend extends abstract_core
 														array( $this, 'plugin_admin_add_settings_link'), 30, 3 );
 		}
 
+		// when stable tag <> versiion, show in meta row on plugins page
+		add_action( 'after_plugin_row_meta',			array( $this, 'plugin_admin_add_plugin_meta'), 10, 2 );
+
 		// settings errors / admin notices - on all pages, triggered in admin_footer
 		add_action( 'all_admin_notices',				array( $this, 'plugin_admin_notices'), 50 );
 
@@ -1162,15 +1165,37 @@ abstract class abstract_backend extends abstract_core
 	/**
 	 * Add Setting link on Plugins page - on 'plugin_action_links_{plugin}' action
 	 *
-	 * @return	void
+	 * @return	array
 	 */
 	public function plugin_admin_add_settings_link(array $links, string $plugin_file, $plugin_data = []): array
 	{
 		if (empty($plugin_data)) return $links;
-		$newLinks = [];
-		$newLinks['settings'] = $this->getSettingsLink();
+		$newLinks = [
+			'settings' 	=> $this->getSettingsLink(),
+		];
 
 		return array_merge($newLinks,$links);
+	}
+
+
+	/**
+	 * Add meta value to plugin row - on after_plugin_row_meta action
+	 *
+	 * @return	void
+	 */
+	public function plugin_admin_add_plugin_meta(string $plugin_file, $plugin_data = []): void
+	{
+		if ($plugin_file != $this->PLUGIN_SLUG) return;
+		if ($stable = $this->pluginHeader('StableTag'))
+		{
+			if ($stable != $this->getVersion())
+			{
+				if ($update = $this->pluginHeader('LastUpdated')) {
+					$stable .= ' ('.$update.')';
+				}
+				printf( '<p>Release %s</p>', esc_attr($stable) );
+			}
+		}
 	}
 
 
