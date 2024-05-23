@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0218.1
+ * @version 	24.0523.1
  */
 
 trait swRegistrationUI
@@ -127,7 +127,7 @@ trait swRegistrationUI
 								);
 		}
 
-		$title = $this->plugin->getPluginValue('Title');
+		$title = $this->plugin->pluginHeader('Title');
 		if ($this->plugin->is_network_enabled())
 		{
 			// only register from network administration
@@ -202,7 +202,7 @@ trait swRegistrationUI
 					"You may check your %2\$s on the settings page."
 				);
 				$notice = sprintf(__($notice, $this->plugin->PLUGIN_TEXTDOMAIN),
-					'<em>'.$this->plugin->getPluginValue('Title').'</em>', $registrationLink );
+					'<em>'.$this->plugin->pluginHeader('Title').'</em>', $registrationLink );
 
 				if (! $this->isSettingsPage('registration'))
 				{
@@ -255,8 +255,8 @@ trait swRegistrationUI
 			'registry_address'		=> sanitize_textarea_field($_POST['_registry_address']),
 			'registry_product'		=> self::SOFTWARE_REGISTRY_PRODUCTID,
 			'registry_version'		=> $this->plugin->getVersion(),
-			'registry_title'		=> $this->plugin->getPluginValue('Title'),
-			'registry_description'	=> $this->plugin->getPluginValue('Description'),
+			'registry_title'		=> $this->plugin->pluginHeader('Title'),
+			'registry_description'	=> $this->plugin->pluginHeader('Description'),
 			'registry_timezone'		=> wp_timezone_string(),
 		];
 		$apiParams = array_merge($apiParams,$this->getRegistryCustomValues());
@@ -456,7 +456,7 @@ trait swRegistrationUI
 
 		if (empty($currentRegistry))
 		{
-			return $this->plugin->getPluginValue('Title').' is currently unregistered';
+			return $this->plugin->pluginHeader('Title').' is currently unregistered';
 		}
 		// if we have 'help', use it
 		if (!empty($currentRegistry->registrar->help))
@@ -496,7 +496,7 @@ trait swRegistrationUI
 
 		if (empty($currentRegistry))
 		{
-			return $this->plugin->getPluginValue('Title').' is currently unregistered';
+			return $this->plugin->pluginHeader('Title').' is currently unregistered';
 		}
 		$html .= "<div class='hidden' style='display:none'>";
 		foreach ((array)$currentRegistry->registrar->notices as $type=>$notice)

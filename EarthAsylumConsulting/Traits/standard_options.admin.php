@@ -113,7 +113,7 @@ trait standard_options
 				'label'		=> 	'Settings Admin Menu',
 				'options'	=> 	['Main Sidebar','Plugins Menu','Tools Menu','Settings Menu'],
 				'default'	=> 	['Main Sidebar'],
-				'info'		=> 	'Add "'.$this->plugin->getPluginValue('Title').'" settings menu for easy access'
+				'info'		=> 	'Add "'.$this->plugin->pluginHeader('Title').'" settings menu for easy access'
 			),
 		];
 	}

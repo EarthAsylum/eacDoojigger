@@ -25,7 +25,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
+	 * @version		24.0522.1
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -35,7 +35,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0510.1';
+		const VERSION	= '24.0524.1';
 
 		/**
 		 * @var string action (script) id
@@ -72,16 +72,19 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		 */
 		public function admin_options_settings()
 		{
-			$this->registerExtensionOptions( 'plugin_settings',
-				[
-					'ajax_device_id' 	=> array(
-							'type'		=> 	'checkbox',
-							'label'		=> 	'Device Fingerprint',
-							'options'	=> 	['Enabled'],
-							'info'		=>	'The fingerprint uses JavaScript to capture browser &amp; devices details.',
-						),
-				]
-			);
+			if ( ! $this->plugin->is_network_admin() )
+			{
+				$this->registerExtensionOptions( 'plugin_settings',
+					[
+						'ajax_device_id' 	=> array(
+								'type'		=> 	'checkbox',
+								'label'		=> 	'Device Fingerprint',
+								'options'	=> 	['Enabled'],
+								'info'		=>	'The fingerprint uses JavaScript to capture browser &amp; devices details.',
+							),
+					]
+				);
+			}
 		}
 
 

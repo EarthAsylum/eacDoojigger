@@ -122,6 +122,7 @@ trait eacDoojigger_administration
 		// from standard_options
 		$options = $this->standard_options(['adminSettingsMenu','uninstallOptions'/*,'emailFatalNotice'*/]);
 		$options['adminSettingsMenu']['options'][] = 'Menu Bar';
+		$options['adminSettingsMenu']['default'][] = 'Menu Bar';
 
 		// WP Environment setting
 		if ( $this->isAdvancedMode('settings') && function_exists('\wp_get_environment_type') )

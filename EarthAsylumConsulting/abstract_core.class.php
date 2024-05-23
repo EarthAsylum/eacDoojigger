@@ -12,7 +12,7 @@ use EarthAsylumConsulting\Helpers\LogLevel;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0518.1
+ * @version		24.0523.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -458,21 +458,21 @@ abstract class abstract_core
 
 	//	if ( is_multisite() )
 	//	{
-	//		\add_action( 'switch_blog',		array($this,'switching_blog'), 10, 3);
+	//		\add_action( 'switch_blog',			array($this,'switching_blog'), 10, 3);
 	//	}
 
 		/**
 		 * action {classname}_ready, fired in plugin_loader
 		 * @return	void
 		 */
-		$this->add_action( 'ready',			array($this,'plugin_ready') );
+		$this->add_action( 'ready',				array($this,'plugin_ready') );
 
 		/**
 		 * action {classname}_daily_event to run daily
 		 * @return	void
 		 */
 		/*
-		$this->add_action( 'daily_event',	array($this, 'plugin_daily_event') );
+		$this->add_action( 'daily_event',		array($this, 'plugin_daily_event') );
 		*/
 
 		/**
@@ -480,7 +480,7 @@ abstract class abstract_core
 		 * @return	void
 		 */
 		/*
-		$this->add_action( 'hourly_event', array($this, 'plugin_hourly_event') );
+		$this->add_action( 'hourly_event', 		array($this, 'plugin_hourly_event') );
 		*/
 
 		/**
@@ -488,7 +488,16 @@ abstract class abstract_core
 		 * @param	bool	full cache flush
 		 * @return	void
 		 */
-		$this->add_action( 'flush_caches',	array($this,'flush_caches') );
+		$this->add_action( 'flush_caches',		array($this,'flush_caches') );
+
+		/**
+		 * filter {classname}_is_advanced_mode check for advanced mode
+		 * @param bool 		$bool 	ignored
+		 * @param string 	$what 	what is in advanced mode
+		 * @param string 	$level	what level is in advanced mode (default, basic, standard, pro)
+		 * @return	bool
+		 */
+		$this->add_filter('is_advanced_mode', 	array($this,'is_advanced_mode'),10,3);
 
 		// load extension actions & filters
 		$this->callAllExtensions('addActionsAndFilters');
@@ -502,7 +511,7 @@ abstract class abstract_core
 		$this->reservedOptions = $this->apply_filters('reserved_options', $this->reservedOptions);
 
 		// admin action link(s)
-		add_action( 'admin_bar_init', 		array( $this, 'do_admin_action_links' ), 20 );
+		add_action( 'admin_bar_init', 			array( $this, 'do_admin_action_links' ), 20 );
 	}
 
 
@@ -610,7 +619,8 @@ abstract class abstract_core
 												: $pluginData['PluginDir'];
 
 				return $pluginData;
-			}
+			},
+			HOUR_IN_SECONDS
 		);
 		$this->pluginData['RequestTime'] = WP_START_TIMESTAMP; //$this->varServer("REQUEST_TIME_FLOAT")3 ?: microtime(true);
 		$this->PLUGIN_TEXTDOMAIN = $this->pluginData['TextDomain'];
@@ -645,7 +655,28 @@ abstract class abstract_core
 	/**
 	 * get plugin value from pluginData (base file header)
 	 *
-	 * @param	string	$name name of plugin data value
+     * @param   string  $name name of plugin data value
+     *      'Title'         => 'Plugin Name',            The name of your plugin, which will be displayed in the Plugins list in the WordPress Admin.
+     *      'Description'   => 'Description',            A short description of the plugin, as displayed in the Plugins section in the WordPress Admin
+     *      'Version'       => 'Version',                The current version number of the plugin.
+     *      'RequiresWP'    => 'Requires at least',      The lowest WordPress version that the plugin will work on.
+     *      'RequiresPHP'   => 'Requires PHP',           The minimum required PHP version.
+     *      'RequiresEAC'   => 'Requires EAC',           The minimum required eacDoojigger version.
+     *      'RequiresWC'    => 'WC requires at least',   The lowest WooCommerce version that the plugin will work on.
+     *      'Author'        => 'Author',                 The name of the plugin author.
+     *      'AuthorURI'     => 'Author URI',             The author’s website or profile on another website, such as WordPress.org.
+     *      'License'       => 'License',                The short name (slug) of the plugin’s license (e.g. GPLv2).
+     *      'LicenseURI'    => 'License URI',            A link to the full text of the license (e.g. https://www.gnu.org/licenses/gpl-2.0.html).
+     *      'TextDomain'    => 'Text Domain',            The gettext text domain of the plugin.
+     *      'DomainPath'    => 'Domain Path',            The domain path lets WordPress know where to find the translations.
+     *      'Network'       => 'Network',                Whether the plugin can be activated network-wide.
+     *      'PluginURI'     => 'Plugin URI',             The home page or update link of the plugin.
+     *      'UpdateURI'     => 'Update URI',             Allows third-party plugins to avoid accidentally being overwritten with an update of a plugin of a similar name from the WordPress.org Plugin Directory.
+     *      'Name'                                       The directory name within plugins.
+     *      'PluginSlug'                                 The plugin_basename() slug.
+     *      'PluginDir'                                  The directory name plugin_dir_path().
+     *      'PluginDirUrl'                               The plugin url plugin_dir_url()
+     *      'VendorDir'                                  The namespace directory within plugin directory.
 	 * @return	string	data value from plugin header
 	 */
 	public function pluginHeader(string $name = null): string
@@ -665,6 +696,7 @@ abstract class abstract_core
 	 */
 	public function getPluginValue(string $name = null): string
 	{
+	//	\_deprecated_function( __FUNCTION__, '2.6.0', 'pluginHeader()');
 		return $this->pluginHeader($name);
 	}
 
@@ -978,6 +1010,21 @@ abstract class abstract_core
 
 
 	/**
+	 * is advanced mode filter - aids in complexity and/or licensing limits.
+	 * @example $this->apply_filters('is_advanced_mode',false,'settings');
+	 *
+	 * @param bool $bool - ignored
+	 * @param string $what - what is in advanced mode
+	 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
+	 * @return	bool - is or is not
+	 */
+	public function is_advanced_mode(bool $bool = false, string $what = null, string $level = null): bool
+	{
+		return $this->isAdvancedMode($what, $level);
+	}
+
+
+	/**
 	 * add an action link (for menu and/or clickable actions)
 	 *
 	 * @param string $action action name
@@ -987,7 +1034,7 @@ abstract class abstract_core
 	public function add_admin_action_link(string $action): string
 	{
 		$action = esc_attr($action);
-		$actionKey = sanitize_key('_'.$this->pluginName.'FN'); // _eacdoojiggerfn
+		$actionKey = '_'.sanitize_key($this->className).'_action'; // _eacdoojiggerFN
 		return wp_nonce_url( add_query_arg( [$actionKey=>$action] ),$this->className );
 	}
 
@@ -1002,7 +1049,7 @@ abstract class abstract_core
 	 */
 	public function do_admin_action_links($admin_bar)
 	{
-		$actionKey = sanitize_key('_'.$this->pluginName.'FN'); // _eacdoojiggerfn
+		$actionKey = '_'.sanitize_key($this->className).'_action'; // _eacdoojiggerFN
 		if (!isset($_GET[$actionKey]) || !isset($_GET['_wpnonce'])) return;
 
 		$menuFN 	= $this->varGet($actionKey);

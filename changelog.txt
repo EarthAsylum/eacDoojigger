@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 2.6.0 – May 21, 2024 =
+= Version 2.6.0 – May 23, 2024 =
 
 +   Moved plugin updater actions from plugin loader to new `eacDoojiggerPluginUpdater` class.
     +   Loaded once in eacDoojiggerAutoloader.
@@ -9,6 +9,7 @@
     +   Allows updating even when plugin is disabled or not network enabled on multi-site.
 +   Improved "Advanced Mode" with isAdvancedMode(), setAdvancedMode(), and allowAdvancedMode().
     +   derivative plugins must call allowAdvancedMode(true) to enable, and may overload functions or use 'allow_advanced_mode' filter to implement.
+    +   filter `$this->apply_filters('is_advanced_mode',false,'settings');`
 +   Added 'advanced' attribute to settings fields to suppress field when not isAdvancedMode().
 +   Made (most) options_settings_page_* methods public so html_input trait can access them.
 +   New code-editor trait, loads code-mirror and wp_editor with consistant options/styling.
