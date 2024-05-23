@@ -1,7 +1,7 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.6.0-RC4+24.0523.2
+Stable tag:             2.6.0-RC4+24.0523.3
 Last Updated:           23-May-2024
 Requires at least:      5.8
 Tested up to:           6.5
@@ -411,6 +411,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 = Version 2.6.0 – May 23, 2024 =
 
++   New getRelease() method returns 'Stable Tag' and 'Last Updated' from readme.
 +   Include header values from readme.txt in pluginData.
 +   Add stable release on plugins page when different than version.
 +   Moved plugin updater actions from plugin loader to new `eacDoojiggerPluginUpdater` class.

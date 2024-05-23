@@ -2,6 +2,7 @@
 
 = Version 2.6.0 – May 23, 2024 =
 
++   New getRelease() method returns 'Stable Tag' and 'Last Updated' from readme.
 +   Include header values from readme.txt in pluginData.
 +   Add stable release on plugins page when different than version.
 +   Moved plugin updater actions from plugin loader to new `eacDoojiggerPluginUpdater` class.

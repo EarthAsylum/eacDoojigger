@@ -1190,10 +1190,7 @@ abstract class abstract_backend extends abstract_core
 		{
 			if ($stable != $this->getVersion())
 			{
-				if ($update = $this->pluginHeader('LastUpdated')) {
-					$stable .= ' ('.$update.')';
-				}
-				printf( '<p>Release %s</p>', esc_attr($stable) );
+				echo '<p>'.$this->getRelease(),'</p>';
 			}
 		}
 	}
@@ -1721,11 +1718,15 @@ abstract class abstract_backend extends abstract_core
 		 */
 		$h1 = $this->apply_filters( "options_form_h1_html", $h1 );
 
+		$h2Version = ($stable = $this->pluginHeader('StableTag'))
+			? " <small data-tooltip title='".$this->getRelease()."'>".
+				"(v".$this->getVersion().")</small>"
+			: " <small>(v".$this->getVersion().")</small>";
 		$h2  =
 		$h2a =	"<h2 id='settings_h2'>".
 				"<span class='dashicons dashicons-admin-settings'></span>".
 				__( $this->pluginHeader('Name'), $this->PLUGIN_TEXTDOMAIN ).
-				' <small>(v'.$this->getVersion().')</small> - '.
+				$h2Version.' - '.
 				__( $currentTab, $this->PLUGIN_TEXTDOMAIN ).
 				"</h2>\n";
 		// add clickable link to enable/disable advanced mode
@@ -1743,7 +1744,7 @@ abstract class abstract_backend extends abstract_core
 		}
 		/**
 		 * filter {classname}_options_form_h2_html
-		 * @param	string	$h2a current html for h2 header with advanced-mooode link
+		 * @param	string	$h2a current html for h2 header with advanced-mode link
 		 * @param	string	$h2 current html for h2 header
 		 * @return	string	html for h2 header
 		 */
@@ -2795,7 +2796,7 @@ abstract class abstract_backend extends abstract_core
 			$('style').last().append(".settings-tooltip.dashicons::before { visibility: visible; }");
 
 			// for other pages/sections/fields
-			$('.tooltip.dashicons,[data-tooltip]:not(.settings-tooltip)' ).tooltip({
+			$( '.tooltip.dashicons,[data-tooltip]:not(.settings-tooltip)' ).tooltip({
 				content: function() {
 					var e = $( this );
 					return e.data( 'tooltip' ) || e.attr( 'title' );

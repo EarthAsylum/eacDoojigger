@@ -1401,9 +1401,10 @@ abstract class abstract_core
 	 * version of this code from the plugin header or from given extension
 	 *
 	 * @param	string	extension name
+	 * @param 	string 	default value
 	 * @return	string	'n.n.n'
 	 */
-	public function getVersion($extension=null,$default=false): string
+	public function getVersion($extension=null,$default=''): string
 	{
 		if (!empty($extension))
 		{
@@ -1415,6 +1416,25 @@ abstract class abstract_core
 		}
 
 		return $this->pluginHeader('Version');
+	}
+
+
+	/**
+	 * get release (stable tag/Last Updated) from the readme header
+	 *
+	 * @param 	string 	default value
+	 * @return	string	'Release __ (__)'
+	 */
+	public function getRelease($default=''): string
+	{
+		if ($stable = $this->pluginHeader('StableTag'))
+		{
+			if ($update = $this->pluginHeader('LastUpdated')) {
+				$stable .= ' ('.$update.')';
+			}
+			 return sprintf( 'Release %s', esc_attr($stable) );
+		}
+		return $default;
 	}
 
 
