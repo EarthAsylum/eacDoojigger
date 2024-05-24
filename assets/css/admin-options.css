@@ -56,12 +56,16 @@
 	display: grid;
 	grid-template-columns: minmax(8ch, 25%) minmax(60%, auto);
 	grid-template-columns: minmax(8ch, 30ch) minmax(25ch, auto);
-	grid-column-gap: 0; grid-row-gap: .25em;
+	grid-column-gap: 0; grid-row-gap: 1px;
 	padding: .25em; position: relative;
 	transition: all 750ms ease-in-out;
 	overflow: hidden; /* fix Safari crap */
 }
-
+header.settings-grid-container {
+}
+fieldset.settings-grid-container {
+	padding: 0 .25em .5em .25em;
+}
 /* header details|div (overriden with .wp-core-ui theme) */
 .settings-grid-head:not(.nav-tab) {
 	color: var(--eac-admin-highlight) !important; background: white !important;
