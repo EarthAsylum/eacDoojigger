@@ -440,7 +440,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
     +   label, default, title, before, after, info, tooltip, help
 +   Added $this->wp_kses() custom wp_kses method with extended tags.
     +   Now processes all (string) admin field option attributes through $this->wp_kses().
-    +   New 'script' field attribute since <script> tags no longer allowed in other attributes.
+    +   New 'script' field attribute since script tags no longer allowed in other attributes.
     +   $this->minifyString() (used for inline scripts/css) now uses $this->wp_kses().
 +   Added 'tooltip' attribute to settings fields with jQuery hover tooltip.
     +    Automatically populated with field 'info' when not set or set to true.
