@@ -1,7 +1,8 @@
 == Changelog ==
 
-= Version 2.6.0 – May 23, 2024 =
+= Version 2.6.0 – May 24, 2024 =
 
++   Fixed upgrade notice in plugin update notice trait.
 +   New getRelease() method returns 'Stable Tag' and 'Last Updated' from readme.
 +   Include header values from readme.txt in pluginData.
 +   Add stable release on plugins page when different than version.

@@ -72,7 +72,10 @@ trait plugin_update_notice
 	 */
 	public function plugin_admin_upgrade_notice( $plugin, $response )
 	{
-		$upgrade_notice = $plugin['upgrade_notice'] ?? $response->upgrade_notice ?? null;
+		$upgrade_notice = $plugin['upgrade_notice']
+						?? $response->upgrade_notice
+						?? $response->sections->upgrade_notice
+						?? null;
 		if ( $upgrade_notice )
 		{
 			printf( '</p>'. // inserted inside an opening <p>aragraph
