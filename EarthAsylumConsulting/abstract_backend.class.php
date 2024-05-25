@@ -633,6 +633,7 @@ abstract class abstract_backend extends abstract_core
 			if ($filePath = $this->apply_filters("{$fileId}_path}",$filePath))
 			{
 				if ($useWPfs && ($fs = apply_filters('eacDoojigger_load_filesystem',false)))
+			//	if ($useWPfs && ($fs = \eacDoojigger()->fs->load_wp_filesystem()))
 				{
 					$fsFilePath = $filePath;
 					if (! $fs->exists($filePath)) {

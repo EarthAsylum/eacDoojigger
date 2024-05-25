@@ -249,6 +249,7 @@ abstract class abstract_core
 		$this->setSiteEnvironment();
 
 		// set 'advanced mode'
+		$this->config_advanced_mode(); // before user loaded - backward compatible with define(plugin_ADVANCED_MODE)
 		add_action( 'set_current_user', 		array ($this, 'config_advanced_mode' ));
 
 		/**

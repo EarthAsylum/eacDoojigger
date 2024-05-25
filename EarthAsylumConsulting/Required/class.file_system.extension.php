@@ -73,19 +73,6 @@ class file_system_extension extends \EarthAsylumConsulting\abstract_extension
 			// Add contextual help
 			$this->add_action( 'options_settings_help', 		array( $this, 'admin_options_help') );
 		}
-	}
-
-
-	/**
-	 * Add extension actions and filter
-	 *
-	 * Called after loading, instantiating, and initializing all extensions
-	 *
-	 * @return	void
-	 */
-	public function addActionsAndFilters()
-	{
-		parent::addActionsAndFilters();
 
 		$this->add_filter( 'load_filesystem', function($wpfs, $useForm = false, string $notice = '', array $args = [])
 		{
@@ -100,6 +87,19 @@ class file_system_extension extends \EarthAsylumConsulting\abstract_extension
 				? $wpfs
 				: $this->link_wp_filesystem($useForm,$notice,$args);
 		}, 10, 4 );
+	}
+
+
+	/**
+	 * Add extension actions and filter
+	 *
+	 * Called after loading, instantiating, and initializing all extensions
+	 *
+	 * @return	void
+	 */
+	public function addActionsAndFilters()
+	{
+		parent::addActionsAndFilters();
 	}
 
 
