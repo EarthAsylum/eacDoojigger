@@ -104,7 +104,7 @@ details.settings-grid-head summary > * {display: inline;}
 .settings-tooltip.dashicons-info-outline {
 	position: absolute; top: 2px;
 	visibility: hidden; overflow: hidden;
-	font-size: 1.25em;
+	font-size: 19px;
 	color: var(--eac-admin-icon);
 	cursor: help;
 	opacity: .5;

@@ -151,7 +151,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 				wp_register_script( $scriptId,
 					"https://cdn.jsdelivr.net/npm/@thumbmarkjs/thumbmarkjs/dist/thumbmark.umd.js",
 					['jquery'],
-					EAC_DOOJIGGER_VERSION,
+					EACDOOJIGGER_VERSION,
 				//	['strategy' => 'defer']
 				);
 				wp_enqueue_script( $scriptId );

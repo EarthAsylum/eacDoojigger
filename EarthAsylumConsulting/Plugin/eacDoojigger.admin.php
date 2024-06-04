@@ -295,7 +295,8 @@ trait eacDoojigger_administration
 				{
 					$eacUtilityDir  = str_replace(WP_PLUGIN_DIR,'',$this->pluginHeader('VendorDir'))."/Utilities";
 					$lines	= [
-						"  define('EAC_DOOJIGGER_VERSION','".$this->getVersion()."');",
+						"  define('EACDOOJIGGER_VERSION','".$this->getVersion()."');",
+						"  define('EAC_DOOJIGGER_VERSION',EACDOOJIGGER_VERSION);",
 
 						"  require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojigger_ftp_credentials.class.php';",
 						"  eacDoojigger_ftp_credentials::addFilters();",

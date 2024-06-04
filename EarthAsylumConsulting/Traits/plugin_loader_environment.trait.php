@@ -140,11 +140,11 @@ trait plugin_loader_environment
 		 */
 		if (isset(self::$plugin_detail['RequiresEAC']))		// check eacDoojigger version
 		{
-			if (! defined('EAC_DOOJIGGER_VERSION') || version_compare(EAC_DOOJIGGER_VERSION, self::$plugin_detail['RequiresEAC'], '<') )
+			if (! defined('EACDOOJIGGER_VERSION') || version_compare(EACDOOJIGGER_VERSION, self::$plugin_detail['RequiresEAC'], '<') )
 			{
 				\add_action( (is_network_admin() ? 'network_' : '').'admin_notices', function()
 					{
-						$eacVersion = defined('EAC_DOOJIGGER_VERSION') ? EAC_DOOJIGGER_VERSION : false;
+						$eacVersion = defined('EACDOOJIGGER_VERSION') ? EACDOOJIGGER_VERSION : false;
 						self::output_version_notice('{eac}Doojigger', self::$plugin_detail['RequiresEAC'], $eacVersion);
 					}
 				);

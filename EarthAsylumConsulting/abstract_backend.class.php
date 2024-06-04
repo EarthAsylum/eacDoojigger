@@ -57,7 +57,6 @@ abstract class abstract_backend extends abstract_core
 			'after'			=> '',
 			'info'			=> '',
 			'tooltip'		=> '',
-			'tooltip'		=> '',
 			'advanced'		=> false,
 	];
 
@@ -1904,9 +1903,9 @@ abstract class abstract_backend extends abstract_core
 			$info .= "<td>". WC_VERSION ."</td></tr>\n";
 		}
 
-		if (defined('EAC_DOOJIGGER_VERSION')) {
+		if (defined('EACDOOJIGGER_VERSION')) {
 			$info .= "<tr><td>". __('eacDoojigger Version', $this->PLUGIN_TEXTDOMAIN) ."</td>";
-			$info .= "<td>". EAC_DOOJIGGER_VERSION ."</td></tr>\n";
+			$info .= "<td>". EACDOOJIGGER_VERSION ."</td></tr>\n";
 		}
 
 		$info .= "<tr><td>". __('Plugin Base', $this->PLUGIN_TEXTDOMAIN) ."</td>";
@@ -2322,7 +2321,7 @@ abstract class abstract_backend extends abstract_core
 		// add tooltip
 		if (is_string($optionMeta['tooltip']) && !empty($optionMeta['tooltip']))
 		{
-			echo "\n\t\t<span class='settings-tooltip dashicons dashicons-info-outline' title=\"".trim(strip_tags($displayName))."\">".
+			echo "\n\t\t<span class='settings-tooltip dashicons dashicons-editor-help' title=\"".trim(strip_tags($displayName))."\">".
 				 __($optionMeta['tooltip'],$this->PLUGIN_TEXTDOMAIN)."</span>";
 		}
 
@@ -2697,7 +2696,7 @@ abstract class abstract_backend extends abstract_core
 		wp_enqueue_style( $styleId,
 			plugins_url( 'eacDoojigger/assets/css/admin-options.css' ),
 			[],
-			EAC_DOOJIGGER_VERSION
+			EACDOOJIGGER_VERSION
 		);
 		wp_add_inline_style( $styleId, $this->options_settings_page_admin_style() );
 
@@ -2755,7 +2754,7 @@ abstract class abstract_backend extends abstract_core
 		wp_enqueue_script( $scriptId,
 			plugins_url( 'eacDoojigger/assets/js/admin-options.js' ),
 			['jquery'],
-			EAC_DOOJIGGER_VERSION,
+			EACDOOJIGGER_VERSION,
 			['strategy' => 'defer']
 		);
 
@@ -2794,8 +2793,8 @@ abstract class abstract_backend extends abstract_core
 				}
 			});
 			// make tooltip icon visible
-			$('style').last().append(".settings-tooltip.dashicons::before { visibility: visible; }");
-
+			document.head.appendChild( document.createElement("style") )
+					.innerHTML = ".settings-tooltip.dashicons::before { visibility: visible; }";
 			// for other pages/sections/fields
 			$( '.tooltip.dashicons,[data-tooltip]:not(.settings-tooltip)' ).tooltip({
 				content: function() {

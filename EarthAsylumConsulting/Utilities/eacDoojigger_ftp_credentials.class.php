@@ -6,7 +6,7 @@ use \EarthAsylumConsulting\Extensions\encryption_extension as encryption;
  * Extension: file_system - expands on the WordPress WP_filesystem - {eac}Doojigger for WordPress
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger\Extensions
+ * @package		{eac}Doojigger Utilities\{eac}Doojigger_ftp_credentials
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
  * Version: 	1.2.0

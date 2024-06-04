@@ -34,7 +34,7 @@ namespace EarthAsylumConsulting;
  *
  * When installed by {eac}Doojigger, the following is used in the mu-plugin:
  *
- *		define('EAC_DOOJIGGER_VERSION','2.3.4');
+ *		define('EACDOOJIGGER_VERSION','2.3.4');
  *		require_once WP_PLUGIN_DIR.'/eacDoojigger/EarthAsylumConsulting/Utilities/eacDoojiggerAutoloader.class.php';
  *		eacDoojiggerAutoloader::setAutoLoader();
  *		eacDoojiggerAutoloader::setEmailNotification( 'eacDoojigger' );

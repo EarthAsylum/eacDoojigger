@@ -17,7 +17,7 @@
  * Plugin URI:			https://eacDoojigger.earthasylum.com/
  * Update URI: 			https://swregistry.earthasylum.com/software-updates/eacdoojigger.json
  * Description:			{eac}Doojigger for WordPress - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
- * Version:				2.6.0-RC
+ * Version:				2.6.0
  * Requires at least:	5.8
  * Tested up to: 		6.5
  * Requires PHP:		7.4
@@ -53,7 +53,10 @@ namespace EarthAsylumConsulting
 		require __NAMESPACE__.'/Traits/plugin_environment.trait.php';
 	}
 
+	/* deprecated (may be referenced in derivatives and extensions) */
 	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION','2.6.0');
+	/* prefered (as of 2.6.0) */
+	if (!defined('EACDOOJIGGER_VERSION')) define('EACDOOJIGGER_VERSION','2.6.0');
 
 	/**
 	 * loader/initialization class

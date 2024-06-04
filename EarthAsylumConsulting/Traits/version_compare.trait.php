@@ -45,7 +45,7 @@ trait version_compare
 			case 'eacdoojigger':
 			case '{eac}doojigger':
 			case 'eac':
-				return (defined('EAC_DOOJIGGER_VERSION') && version_compare(EAC_DOOJIGGER_VERSION, $version, 'ge')) ? true : false;
+				return (defined('EACDOOJIGGER_VERSION') && version_compare(EACDOOJIGGER_VERSION, $version, 'ge')) ? true : false;
 		}
 		return version_compare($version, $required, 'ge');
 	}
