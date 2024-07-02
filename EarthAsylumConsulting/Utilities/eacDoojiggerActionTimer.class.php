@@ -1,13 +1,12 @@
 <?php
 /**
- * {eac}DoojiggerActionTimer - {eac}Doojigger for WordPress,
- * Track the time to load (include) each plugin; Track duration of specific WP actions; Ability to time custom functions execution
+ * {eac}DoojiggerActionTimer - Track the time to load (include) each plugin; Track duration of specific WP actions; Ability to time custom functions execution
  *
  * @category	WordPress Plugin
  * @package		{eac}Doojigger Utilities\{eac}DoojiggerActionTimer
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		1.1.9
  * @link		https://eacDoojigger.earthasylum.com/
  *
  * @wordpress-plugin

@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.6.0
-Last Updated:           04-Jun-2024
+Stable tag:             2.6.1
+Last Updated:           16-Jun-2024
 Requires at least:      5.8
 Tested up to:           6.5
 Requires PHP:           7.4
@@ -408,6 +408,23 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 
 == Changelog ==
+
+= Version 2.6.1 – June 16, 2024 =
+
++   Session manager extension:
+    +   Use session_set_cookie_params if session_start().
+    +   uses WC->session getters and setters.
+    +   Start session on demand not on 'init'.
+    +   Adjust session_save_data (shutdown) priority (8).
+    +   Added generic session manager using external plugin (or not).
+    +   Removed (outdated) 'WP Session Manager' support.
++   Option input field type allow 'toggle' as alias for 'switch'.
++   For option validation ('validate'=>...), false value triggers generic error notice.
++   doing_ajax() checks wp_doing_ajax (admin-ajax.php) and 'XMLHttpRequest' (other).
++   $this->isAjaxRequest() method deprecated for $this->doing_ajax().
++   Removed user id from visitorId().
++   Save visitorId using setVariable() (maybe session).
+    +   isNewVisitor() checks variable.
 
 = Version 2.6.0 – June 4, 2024 =
 

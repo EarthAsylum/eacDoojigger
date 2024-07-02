@@ -1750,9 +1750,26 @@ abstract class abstract_core
 	 *
 	 * @return	bool
 	 */
+	public function doing_ajax(): bool
+	{
+		static $doing_ajax = null;
+		if (is_null($doing_ajax)) {
+			$doing_ajax = (wp_doing_ajax() || $this->varServer("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest");
+		}
+		return $doing_ajax;
+	}
+
+
+	/**
+	 * now an alias to $tthis->doing_ajax()
+	 * @deprecated use $this->doing_ajax()
+	 *
+	 * @return	bool
+	 */
 	public function isAjaxRequest(): bool
 	{
-		return (wp_doing_ajax()); // || strtolower($this->varServer("HTTP_X_REQUESTED_WITH")) == "xmlhttprequest");
+	//	\_deprecated_function( __FUNCTION__, '2.6.1', 'doing_ajax()');
+		return $this->doing_ajax();
 	}
 
 
@@ -2014,7 +2031,7 @@ abstract class abstract_core
 	public function isPluginsPage(): bool
 	{
 		global $pagenow;
-		/*static*/ $is_plugins_page = null;
+		static $is_plugins_page = null;
 		if (is_null($is_plugins_page))
 		{
 			if (wp_doing_ajax() && defined('WP_PLUGIN_URL'))
@@ -2076,7 +2093,7 @@ abstract class abstract_core
 	 * get or check the current screen name
 	 *
 	 * @param	string	name to check for
-	 * @return	bool|string
+	 * @return	null|bool|string
 	 */
 	public function isCurrentScreen($screen = null)
 	{
@@ -2262,13 +2279,13 @@ abstract class abstract_core
 		 */
 		$cookieName = $this->apply_filters( 'visitor_cookie_name', $cookieName );
 
-		if (!$forRequest && isset($_COOKIE[$cookieName]))
+		$value = (!$forRequest)
+			? $this->varCookie($cookieName) ?: $this->getVariable($cookieName)
+			: null;
+
+		if (!$value)
 		{
-			$value = $this->varCookie($cookieName);
-		}
-		else
-		{
-			$value =	get_current_user_id() .
+			$value =	/*get_current_user_id() .*/
 						$this->getVisitorIP() .
 						$this->varServer('HTTP_ACCEPT_ENCODING') .
 						$this->varServer('HTTP_ACCEPT_LANGUAGE') .
@@ -2297,6 +2314,7 @@ abstract class abstract_core
 			if (!is_int($setCookie)) $setCookie = 30;
 			setcookie( $cookieName, $value, time() + ($setCookie * DAY_IN_SECONDS), COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
 		}
+		$this->setVariable($cookieName,$value);
 		return $value;
 	}
 
@@ -2317,7 +2335,8 @@ abstract class abstract_core
 		$cookieName = $this->apply_filters( 'visitor_cookie_name', $cookieName );
 
 		// get/set per-session (if session manager active)
-		$isNew	= $this->getVariable('_new_visitor') ?? !isset($_COOKIE[$cookieName]);
+		$isNew	= $this->getVariable('_new_visitor')
+					?? (!isset($_COOKIE[$cookieName]) && !$this->getVariable($cookieName));
 		$this->setVariable('_new_visitor',$isNew);
 		/**
 		 * filter {classname}_is_new_visitor is this a new visitor
@@ -2419,7 +2438,6 @@ abstract class abstract_core
 	public function set( string $key, $default=null )
 	{
 		\_deprecated_function( __FUNCTION__, '0.0.5', 'setVariable()');
-		$this->logWarning($key,'depreciated function '.__FUNCTION__);
 		return $this->setVariable( $key, $default );
 	}
 
@@ -2662,9 +2680,9 @@ abstract class abstract_core
 	 * @param	int|array|callable	$options passed to the filter
 	 * @return	mixed				the filtered value, false if filter failed, null if not found
 	 */
-	public function varCookie( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function varCookie( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
-		$filter = $this->_parseFilter($filter,$options);
+		$filter = $this->getFilterCallback($filter,$options);
 		return filter_input(INPUT_COOKIE, $name, ...$filter);
 	}
 
@@ -2672,7 +2690,7 @@ abstract class abstract_core
 	 * Safely get $_COOKIE data using PHP filter.
 	 * @deprecated - use $this->varCookie(...)
 	 */
-	public function _COOKIE( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function _COOKIE( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
 		return $this->varCookie( $name, $filter, $options );
 	}
@@ -2688,9 +2706,9 @@ abstract class abstract_core
 	 * @param	int|array|callable	$options passed to the filter
 	 * @return	mixed				the filtered value, false if filter failed, null if not found
 	 */
-	public function varGet( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function varGet( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
-		$filter = $this->_parseFilter($filter,$options);
+		$filter = $this->getFilterCallback($filter,$options);
 		return filter_input(INPUT_GET, $name, ...$filter);
 	}
 
@@ -2698,7 +2716,7 @@ abstract class abstract_core
 	 * Safely get $_GET data using PHP filter.
 	 * @deprecated - use $this->varGet(...)
 	 */
-	public function _GET( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function _GET( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
 		return $this->varGet( $name, $filter, $options );
 	}
@@ -2714,9 +2732,9 @@ abstract class abstract_core
 	 * @param	int|array|callable	$options passed to the filter
 	 * @return	mixed				the filtered value, false if filter failed, null if not found
 	 */
-	public function varPost( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function varPost( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
-		$filter = $this->_parseFilter($filter,$options);
+		$filter = $this->getFilterCallback($filter,$options);
 		return filter_input(INPUT_POST, $name, ...$filter);
 	}
 
@@ -2724,7 +2742,7 @@ abstract class abstract_core
 	 * Safely get $_POST data using PHP filter.
 	 * @deprecated - use $this->varPost(...)
 	 */
-	public function _POST( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function _POST( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
 		return $this->varPost( $name, $filter, $options );
 	}
@@ -2740,9 +2758,9 @@ abstract class abstract_core
 	 * @param	int|array|callable	$options passed to the filter
 	 * @return	mixed				the filtered value, false if filter failed, null if not found
 	 */
-	public function varRequest( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function varRequest( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
-		$filter = $this->_parseFilter($filter,$options);
+		$filter = $this->getFilterCallback($filter,$options);
 		if ( $result = filter_input(INPUT_GET, $name, ...$filter) )	 return $result;
 		if ( $result = filter_input(INPUT_POST, $name, ...$filter) )  return $result;
 		return null;
@@ -2752,7 +2770,7 @@ abstract class abstract_core
 	 * Safely get $_REQUEST data using PHP filter.
 	 * @deprecated - use $this->varRequest(...)
 	 */
-	public function _REQUEST( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function _REQUEST( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
 		return $this->varRequest( $name, $filter, $options );
 	}
@@ -2768,9 +2786,9 @@ abstract class abstract_core
 	 * @param	int|array|callable	$options passed to the filter
 	 * @return	mixed				the filtered value, false if filter failed, null if not found
 	 */
-	public function varServer( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function varServer( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
-		$filter = $this->_parseFilter($filter,$options);
+		$filter = $this->getFilterCallback($filter,$options);
 		$name = strtoupper($name);
 		if ( $result = filter_input(INPUT_SERVER, $name, ...$filter) ) return $result;
 		$httpname = 'HTTP_'.$name;
@@ -2783,7 +2801,7 @@ abstract class abstract_core
 	 * Safely get $_SERVER data using PHP filter.
 	 * @deprecated - use $this->varServer(...)
 	 */
-	public function _SERVER( string $name, $filter = FILTER_CALLBACK, $options = 'sanitize_textarea_field' )
+	public function _SERVER( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
 		return $this->varServer( $name, $filter, $options );
 	}
@@ -2811,8 +2829,24 @@ abstract class abstract_core
 			return $input;
 		}
 
-		$filter = $this->_parseFilter($filter,$options);
+		$filter = $this->getFilterCallback($filter,$options);
 		return \filter_var($input, ...$filter);
+	}
+
+
+	/**
+	 * to filter/escape a variable
+	 *
+	 * @example $data = $this->escape($variable);
+	 * @example $data = $this->escape($variable, 'esc_attr');
+	 *
+	 * @param	scalar|array	$input the value to be filtered
+	 * @param	callable		$callback optional callback function
+	 * @return	mixed			the filtered value, false if filter failed
+	 */
+	public function escape( $input, $callback = 'esc_attr' )
+	{
+		return $this->sanitize($input,FILTER_CALLBACK,$callback);
 	}
 
 
@@ -2824,7 +2858,7 @@ abstract class abstract_core
 	 * @param	array				$args additional arguments passed to callable
 	 * @return	array				[filter, options]
 	 */
-	protected function _parseFilter($filter = FILTER_CALLBACK, $options = null, $args = null )
+	public function getFilterCallback($filter = FILTER_CALLBACK, $options = null, $args = null )
 	{
 		// i.e. $this->sanitize('something', FILTER_CALLBACK, 'my_sanitizer');
 		if ($filter == FILTER_CALLBACK)
@@ -2847,6 +2881,7 @@ abstract class abstract_core
 			$filter = FILTER_CALLBACK;
 		}
 
+		// a callable function that calls the specified function passing value and arguments
 		if (is_array($args) && $filter == FILTER_CALLBACK)
 		{
 			$options['options'] = call_user_func(function($fn,$args)
@@ -2861,6 +2896,22 @@ abstract class abstract_core
 		}
 
 		return [ $filter, $options ];
+	}
+
+
+	/**
+	 * alias to getFilterCallback()
+	 * @deprecated use getFilterCallback()
+	 *
+	 * @param	int|callable		$filter the filter to use
+	 * @param	int|array|callable	$options passed to the filter
+	 * @param	array				$args additional arguments passed to callable
+	 * @return	array				[filter, options]
+	 */
+	protected function _parseFilter($filter = FILTER_CALLBACK, $options = null, $args = null )
+	{
+		\_deprecated_function( __FUNCTION__, '2.6.1', 'getFilterCallback()');
+		return $this->getFilterCallback($filter,$options,$args);
 	}
 
 

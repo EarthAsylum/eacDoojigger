@@ -2010,13 +2010,25 @@ abstract class abstract_backend extends abstract_core
 			$values = $this->apply_filters( "sanitize_option", $values, $optionKey, $optionMeta, $savedOptionValue );
 
 			// optional validate callback, unlike sanitize, may change value
-			$values = $this->options_settings_page_validate($values,$optionKey,$optionMeta,$savedOptionValue);
+			$values = $this->options_settings_page_validate(
+				$values,
+				$optionKey,$optionMeta,$savedOptionValue
+			);
+
+			if ($values === false)
+			{
+				$this->add_option_error($optionKey,
+					sprintf('%s : The value entered does not meet the criteria for this field.',$optionMeta['label'])
+				);
+				// revert to prior value;
+				$values = $savedOptionValue;
+			}
 
 			// apply optional PHP filter
 			if ($filter = (isset($optionMeta['filter'])) ? $optionMeta['filter'] : false)
 			{
 				if (!is_array($filter)) $filter = [$filter,null];
-				$filter = $this->_parseFilter($filter[0],$filter[1],[$optionKey, $optionMeta, $savedOptionValue]);
+				$filter = $this->getFilterCallback($filter[0],$filter[1],[$optionKey, $optionMeta, $savedOptionValue]);
 				$values = (is_array($values) && empty($filter[1]))
 						? \filter_var($values,$filter[0],FILTER_REQUIRE_ARRAY)
 						: \filter_var($values,$filter[0],$filter[1]);
@@ -2096,6 +2108,7 @@ abstract class abstract_backend extends abstract_core
 			case 'select':
 			case 'radio':
 			case 'checkbox':
+			case 'toggle':
 			case 'switch':
 				// submitted value must be in the option values
 				$valid = array_column($this->getOptionChoiceArray($optionMeta['options']),'value');
@@ -2408,7 +2421,7 @@ abstract class abstract_backend extends abstract_core
 
 		// check/add 'style'
 		$attributes['style'] = "--text-width:{$maxWidth}ch;";
-		if (in_array($optionMeta['type'],['radio','checkbox','switch']))
+		if (in_array($optionMeta['type'],['radio','checkbox','switch','toggle']))
 		{
 			$attributes['style'] .= 'white-space:nowrap;';
 		}
@@ -2485,6 +2498,7 @@ abstract class abstract_backend extends abstract_core
 				}
 				break;
 
+			case 'toggle':
 			case 'switch':
 				$choices = $this->getOptionChoiceArray($optionMeta['options']); // uses esc_attr()
 				$name 	 = (count($choices) == 1) ? $optionKey : $optionKey.'[]';
@@ -2493,12 +2507,12 @@ abstract class abstract_backend extends abstract_core
 				foreach ($choices as $id=>$choice) {
 					if (is_null($choice)) continue;
 					$selected = (in_array($choice['value'],$current)) ? " checked='checked'" : "";
-					$html .= "<span class='{$inputClass}-wrap'>".
+					$html .= "<span class='input-switch-wrap'>".
 							 "<label for='{$optionKey}_{$id}'{$attributes}>".
-							 "<input class='{$inputClass}' type='checkbox' name='{$name}' id='{$optionKey}_{$id}'{$parentAtts} ".
+							 "<input class='input-switch' type='checkbox' name='{$name}' id='{$optionKey}_{$id}'{$parentAtts} ".
 							 "value='{$choice['value']}'{$selected} />".
 							 "{$choice['option']}".
-							 "<div class='{$inputClass}-slider'></div>".
+							 "<div class='input-switch-slider'></div>".
 							 "</label></span> ";
 				}
 				break;

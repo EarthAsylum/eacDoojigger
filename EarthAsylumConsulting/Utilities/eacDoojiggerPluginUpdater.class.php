@@ -2,15 +2,13 @@
 namespace EarthAsylumConsulting;
 
 /**
- * {eac}DoojiggerPluginUpdater class - {eac}Doojigger for WordPress,
- * Manage {eac}Doojigger, derivative and extensioon software updates
+ * {eac}DoojiggerPluginUpdater class - Manage {eac}Doojigger, derivative and extensioon software updates
  *
  * @category	WordPress Plugin
  * @package		{eac}Doojigger Utilities\{eac}DoojiggerPluginUpdater
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  * Version: 	1.0.0
- * @link		https://eacDoojigger.earthasylum.com/
  */
 
 /*

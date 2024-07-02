@@ -1,5 +1,22 @@
 == Changelog ==
 
+= Version 2.6.1 – June 16, 2024 =
+
++   Session manager extension:
+    +   Use session_set_cookie_params if session_start().
+    +   uses WC->session getters and setters.
+    +   Start session on demand not on 'init'.
+    +   Adjust session_save_data (shutdown) priority (8).
+    +   Added generic session manager using external plugin (or not).
+    +   Removed (outdated) 'WP Session Manager' support.
++   Option input field type allow 'toggle' as alias for 'switch'.
++   For option validation ('validate'=>...), false value triggers generic error notice.
++   doing_ajax() checks wp_doing_ajax (admin-ajax.php) and 'XMLHttpRequest' (other).
++   $this->isAjaxRequest() method deprecated for $this->doing_ajax().
++   Removed user id from visitorId().
++   Save visitorId using setVariable() (maybe session).
+    +   isNewVisitor() checks variable.
+
 = Version 2.6.0 – June 4, 2024 =
 
 +   EAC_DOOJIGGER_VERSION constant deprecated in favor of EACDOOJIGGER_VERSION.

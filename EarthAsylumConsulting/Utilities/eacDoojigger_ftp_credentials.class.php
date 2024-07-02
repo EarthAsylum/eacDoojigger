@@ -8,8 +8,8 @@ use \EarthAsylumConsulting\Extensions\encryption_extension as encryption;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger Utilities\{eac}Doojigger_ftp_credentials
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * Version: 	1.2.0
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version: 	1.2.0
  */
 
 /*

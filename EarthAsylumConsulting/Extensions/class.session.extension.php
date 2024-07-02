@@ -9,7 +9,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @version		1.x
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -20,16 +20,16 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.0416.1';
+		const 	VERSION	= '24.0616.1';
 
 		/**
 		 * @var string supported session managers
 		 */
 		const 	SESSION_DISABLED 	= 'disabled',
+				SESSION_GENERIC		= 'generic PHP session',
 				SESSION_TRANSIENT	= 'transient storage',
 				SESSION_PANTHION	= 'wp-native-php-sessions/pantheon-sessions.php',
-				SESSION_WOOCOMMERCE = 'woocommerce/woocommerce.php',
-				SESSION_WPSESSION	= 'wp-session-manager/wp-session-manager.php';
+				SESSION_WOOCOMMERCE = 'woocommerce/woocommerce.php';
 
 		/**
 		 * @var session object
@@ -44,6 +44,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		 */
 		protected $session_cookie 	= null;
 
+
 		/**
 		 * constructor method
 		 *
@@ -52,8 +53,8 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin);
-			$this->session_cookie 	= 'wp_'.$this->pluginName.'_session';
+			parent::__construct($plugin, self::DEFAULT_DISABLED | self::ALLOW_ADMIN);
+			$this->session_cookie 	= sanitize_key('wp_'.$this->pluginName.'_session');
 
 			if ($this->is_admin())
 			{
@@ -72,34 +73,41 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		 */
 		public function admin_options_settings()
 		{
-		//	$sessionManagers = [self::SESSION_DISABLED];
-			$sessionManagers = [self::SESSION_TRANSIENT];
-
+			$sessionManagers = [];
 			if (session_status() !== PHP_SESSION_DISABLED ) {
 				require_once(ABSPATH . 'wp-admin/includes/plugin.php');
-				if ( is_plugin_active(self::SESSION_WOOCOMMERCE) ) 	$sessionManagers[] = self::SESSION_WOOCOMMERCE;
-				if ( is_plugin_active(self::SESSION_PANTHION) ) 	$sessionManagers[] = self::SESSION_PANTHION;
-				if ( is_plugin_active(self::SESSION_WPSESSION) ) 	$sessionManagers[] = self::SESSION_WPSESSION;
+				$sessionManagers[self::SESSION_TRANSIENT]			= ucwords(self::SESSION_TRANSIENT);
+				$sessionManagers[self::SESSION_GENERIC]				= ucwords(self::SESSION_GENERIC);
+				if ( is_plugin_active(self::SESSION_WOOCOMMERCE) ) {
+					$sessionManagers[self::SESSION_WOOCOMMERCE] 	= 'WooCommerce Session Manager';
+				}
+				if ( is_plugin_active(self::SESSION_PANTHION) ) {
+					$sessionManagers[self::SESSION_PANTHION] 		= 'Panthion Native PHP Sessions';
+				}
+			} else {
+				$sessionManagers[self::SESSION_DISABLED]			= self::SESSION_DISABLED;
 			}
 
-			$this->plugin->rename_option('sessionManager',		'session_manager');
-			$this->plugin->rename_option('sessionExpiration',	'session_expiration');
 			/* register this extension with group name on default tab, and settings fields */
+			$max_session_time = (MONTH_IN_SECONDS / HOUR_IN_SECONDS);
 			$this->registerExtensionOptions( $this->className,
 				[
 					'session_manager'		=> array(
-											'type'		=> 'select',
-											'label'		=> 'Session Manager',
-											'options'	=> $sessionManagers,
-											'info'		=> 'Select available method/plugin for managing sessions',
-											'default'	=> (count($sessionManagers) > 1) ? $sessionManagers[1] : $sessionManagers[0]
+											'type'		=> 	'select',
+											'label'		=> 	'Session Manager',
+											'options'	=> 	array_flip($sessionManagers),
+											'default'	=> 	(count($sessionManagers) > 2) ? $sessionManagers[2] : $sessionManagers[0],
+											'info'		=> 	'Select available method or plugin for managing sessions.',
+											'help'		=> 	'[info] <em>'.ucwords(self::SESSION_TRANSIENT).'</em> uses WordPress transients to store session data. '.
+															'<em>'.ucwords(self::SESSION_GENERIC).'</em> should work with any plugin that provides session storage via standard PHP methods. '.
+															'Other supported plugins: <em>WooCommerce</em> and <em>Panthion</em>.',
 										),
 					'session_expiration'	=> array(
 											'type'		=> 'number',
 											'label'		=> 'Session Expiration',
 											'default'	=> '1',
-											'info'		=> 'In hours, the time to keep a session open with no activity',
-											'attributes'=> ['min=".5"', 'max="72"','step=".5"']
+											'info'		=> 'In hours (from 0.5 to '.$max_session_time.'), the time to retain a session with no activity.',
+											'attributes'=> ['min=".5"', 'max="'.$max_session_time.'"','step=".5"']
 										),
 				]
 			);
@@ -120,8 +128,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			switch ($this->get_option('session_manager'))
 			{
 				case self::SESSION_DISABLED:
-					return;
-
+				case self::SESSION_GENERIC:
 				case self::SESSION_TRANSIENT:
 					break;
 
@@ -135,21 +142,12 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					add_filter( 'pantheon_session_expiration',	array( $this, 'session_set_expiring' ) );
 					break;
 
-				case self::SESSION_WPSESSION:
-					// wp_session
-					if ( ! defined( 'WP_SESSION_COOKIE' ) ) 	define( 'WP_SESSION_COOKIE', $this->session_cookie ); 	// 'wp_' prefix prevents caching
-					add_filter( 'wp_session_expiration_variant',array( $this, 'session_set_expiring' ) );
-					add_filter( 'wp_session_expiration',		array( $this, 'session_set_expiration' ) );
-					add_filter( 'wp_session_cookie_secure',		function() {return is_ssl();} );
-					add_filter( 'wp_session_cookie_httponly',	function() {return true;} );
-					break;
-
 				default:
 					return;
 			}
 
-			add_action( 'init', 								array( $this, 'session_start'), -1 );
-			add_action( 'shutdown', 							array( $this, 'session_save_data'), -1 );						// save the session data (before WC_Session)
+			//add_action( 'init', 								array( $this, 'session_start'), -1 );
+			add_action( 'shutdown', 							array( $this, 'session_save_data'), 8 );				// save the session data (before WC_Session @20)
 
 			/*
 			 * filter {classname}_get_session get the session array
@@ -221,8 +219,20 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					setcookie( $this->session_cookie, $this->session_id, $exp, '/', COOKIE_DOMAIN, is_ssl(), true );
 					break;
 
+				case self::SESSION_GENERIC:
 				case self::SESSION_PANTHION:
-					if ( session_status() === PHP_SESSION_NONE ) session_start();
+					if ( session_status() === PHP_SESSION_NONE ) {
+						session_name($this->session_cookie);
+						session_set_cookie_params($this->apply_filters('session_cookie_params',[
+							'lifetime' 	=> $this->get_session_expiration(),
+							'path' 		=> '/',
+							'domain' 	=> $this->varServer('HTTP_HOST'),
+							'secure' 	=> is_ssl(),
+							'httponly' 	=> true,
+							'samesite' 	=> 'strict'
+						]));
+						session_start();
+					}
 					if ( ! isset($_SESSION[$this->pluginName]) ) {
 						$_SESSION[$this->pluginName] = new \stdclass();
 					}
@@ -238,25 +248,11 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 							$WC->session->set_customer_session_cookie( true );
 						}
 						if ( ! isset($WC->session->{$this->pluginName}) ) {
-							$WC->session->{$this->pluginName} = new \stdclass();
+							$WC->session->set($this->pluginName,new \stdclass());
 						}
-						$this->session_id 			= $WC->session->get_customer_id();
-						$this->session 				= $WC->session->{$this->pluginName};	// copy of object due to __get
+						$this->session_id 		= $WC->session->get_customer_id();
+						$this->session 			= $WC->session->get($this->pluginName);	// copy of object due to __get
 					}
-					break;
-
-				case self::SESSION_WPSESSION:
-					$cookie_crumbs = array('');
-					if ( isset( $_COOKIE[WP_SESSION_COOKIE] ) ) {
-						$cookie = stripslashes( $_COOKIE[WP_SESSION_COOKIE] );
-						$cookie_crumbs = explode( '||', $cookie );
-						$this->session_id 		= $cookie_crumbs[0];
-					}
-					$this->session = WP_Session::get_instance();
-					if ( ! isset($this->session[$this->pluginName]) ) {
-						$this->session[$this->pluginName] = new \stdclass();
-					}
-					$this->session 				= $this->session[$this->pluginName];	// direct access, no __get
 					break;
 			}
 
@@ -265,15 +261,17 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 				$this->session->session_id		= $this->session_id;
 				$this->session->session_manager	= $this->get_option('session_manager');
 				$this->session->session_is_new	= (!isset($this->session->session_is_new));
+
+				/*
+				 * action {classname}_session_start start the session
+				 * @return	void
+				 */
+				$this->do_action( 'session_start' );
+
+				return true;
 			}
 
-			/*
-			 * action {classname}_session_start start the session
-			 * @return	void
-			 */
-			$this->do_action( 'session_start' );
-
-			return true;
+			return false;
 		}
 
 
@@ -438,7 +436,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					break;
 				case self::SESSION_WOOCOMMERCE:
 					if (function_exists('WC')) {
-						WC()->session->{$this->pluginName} = $this->session;
+						WC()->session->set($this->pluginName,$this->session);
 					}
 					break;
 			}
@@ -459,7 +457,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			 * @return	float	$exp in hours
 			 */
 			$exp = floatval( $this->apply_filters( 'session_expiration', $exp ) );
-			return ( max( HOUR_IN_SECONDS * $exp, 3600 ) );
+			return (HOUR_IN_SECONDS * $exp);
 		}
 
 

@@ -2,21 +2,19 @@
 namespace EarthAsylumConsulting;
 
 /**
- * {eac}Doojigger Environment - {eac}Doojigger for WordPress,
- * Set WP_ENVIRONMENT_TYPE used by wp_get_environment_type()
+ * {eac}Doojigger Environment - Set WP_ENVIRONMENT_TYPE used by wp_get_environment_type()
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger Utilities\{eac}Doojigger_environment
+ * @package		{eac}Doojigger Utilities\{eac}DoojiggerEnvironment
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.x
- * @link		https://eacDoojigger.earthasylum.com/
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		1.0.8
  *
  * @wordpress-plugin
  * Plugin Name: 		{eac}Doojigger Environment
  * Description:			Environment Switcher - set WP_ENVIRONMENT_TYPE from the network or general settings page.
  * Version:				1.0.8
- * Requires at least:	5.5.0
+ * Requires at least:	5.8.0
  * Tested up to: 		6.5
  * Requires PHP:		7.2
  * Author:				EarthAsylum Consulting

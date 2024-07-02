@@ -1,7 +1,6 @@
 <?php
 /**
- * {eac}DoojiggerAutoloader Plugin - {eac}Doojigger for WordPress,
- * Autoloader plugin for EarthAsylum Consulting Doojigger for WordPress classes and traits
+ * {eac}DoojiggerAutoloader Plugin - Autoloader plugin for {eac}Doojigger and derivatives
  *
  * Installed in the "must use" plugins folder (.../wp-content/mu-plugins)
  *
@@ -9,7 +8,7 @@
  * @package 	{eac}Doojigger Utilities\{eac}DoojiggerAutoloader
  * @author 		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright 	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	2.x
+ * @version 	2.2.0
  * @link		https://eacDoojigger.earthasylum.com/
  *
  * @wordpress-plugin
