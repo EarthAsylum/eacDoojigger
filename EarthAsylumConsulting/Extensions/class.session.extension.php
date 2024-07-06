@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.0616.1';
+		const 	VERSION	= '24.0706.1';
 
 		/**
 		 * @var string supported session managers
@@ -96,7 +96,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 											'type'		=> 	'select',
 											'label'		=> 	'Session Manager',
 											'options'	=> 	array_flip($sessionManagers),
-											'default'	=> 	(count($sessionManagers) > 2) ? $sessionManagers[2] : $sessionManagers[0],
+											'default'	=> 	(count($sessionManagers) > 2) ? array_keys($sessionManagers)[2] : array_keys($sessionManagers)[0],
 											'info'		=> 	'Select available method or plugin for managing sessions.',
 											'help'		=> 	'[info] <em>'.ucwords(self::SESSION_TRANSIENT).'</em> uses WordPress transients to store session data. '.
 															'<em>'.ucwords(self::SESSION_GENERIC).'</em> should work with any plugin that provides session storage via standard PHP methods. '.
