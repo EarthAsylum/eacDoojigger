@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 2.6.1 – June 16, 2024 =
+= Version 2.6.1 – July 6, 2024 =
 
 +   Session manager extension:
     +   Use session_set_cookie_params if session_start().
