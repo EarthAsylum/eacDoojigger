@@ -21,7 +21,7 @@ namespace EarthAsylumConsulting\Traits
 	 * @package		{eac}Doojigger
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
-	 * @version		2.x
+	 * @version		24.0817.1
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -129,6 +129,11 @@ namespace EarthAsylumConsulting\Traits
 			 */
 			add_action( 'plugins_loaded', function() use ($plugin)
 				{
+					/*
+					 * action {classname}_startup
+					 */
+					$plugin->do_action( 'startup' );
+
 					/*
 					 * instantiate extension classes
 					 */

@@ -1,10 +1,10 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.6.1
-Last Updated:           06-Jul-2024
+Stable tag:             2.6.2
+Last Updated:           30-Aug-2024
 Requires at least:      5.8
-Tested up to:           6.5
+Tested up to:           6.6
 Requires PHP:           7.4
 Contributors:           earthasylum@github,kevinburkholder@wordpress
 License:                EarthAsylum Consulting Proprietary License - {eac}PLv1
@@ -238,6 +238,55 @@ In short,
 *Using `$this->switch_to_blog()` and `$this->restore_current_blog()` over the corresponding WordPress functions ensures that options are correctly saved and loaded for the switched-from/to blogs.*
 
 
+== More Information ==
+
+{eac}Doojigger should be Network Activated on multi-site installations. Individual extensions and options may be configured on each site.
+
+Some extension may use [wp-config-transformer](https://github.com/wp-cli/wp-config-transformer/contributors) to update wp-config. Copyright 2011-2018 WP-CLI Development Group .
+
+
+= See Also =
+
+*Information on building with and using {eac}Doojigger*
+
++   [{eac}Doojigger Derivatives](https://eacDoojigger.earthasylum.com/derivatives/)
++   [{eac}Doojigger Extensions](https://eacDoojigger.earthasylum.com/extensions/)
++   [{eac}Doojigger Options & Settings](https://eacDoojigger.earthasylum.com/options/)
++   [{eac}Doojigger Automatic Updates](https://eacDoojigger.earthasylum.com/automatic-updates/)
++   [{eac}Doojigger Contextual Help](https://eacDoojigger.earthasylum.com/contextual-help/)
+
+
+*{eac}Doojigger Information and Examples*
+
++   [{eac}Doojigger How-To...](https://eacDoojigger.earthasylum.com/how-to/)
+
+*Plugins and Extensions built with {eac}Doojigger*
+
++   [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/)
+A full-featured Software Registration/Licensing Server built on {eac}Doojigger.
+
++   [{eac}SimpleGTM](https://eacDoojigger.earthasylum.com/eacsimplegtm/)
+Installs and configures the Google Tag Manager (GTM) or Google Analytics (GA4) script with optional tracking events.
+
++   [{eac}SimpleSMTP](https://eacDoojigger.earthasylum.com/eacsimplesmtp/)
+An {eac}Doojigger extension to configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email.
+
++   [{eac}SimpleAWS](https://eacDoojigger.earthasylum.com/eacsimpleaws/)
+An {eac}Doojigger extension to include and enable use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK).
+
++   [{eac}SimpleCDN](https://eacDoojigger.earthasylum.com/eacsimplecdn/)
+An {eac}Doojigger extension to enable the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience.
+
++   [{eac}ObjectCache](https://eacDoojigger.earthasylum.com/objectcache/)
+A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects.
+
++   [{eac}Readme](https://eacDoojigger.earthasylum.com/eacreadme/)
+An {eac}Doojigger extension to translate a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document.
+
++   [{eac}MetaPixel](https://eacDoojigger.earthasylum.com/eacmetapixel/)
+An {eac}Doojigger extension to install the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events.
+
+
 == Installation ==
 
 = Automatic Plugin Installation =
@@ -285,11 +334,12 @@ __Version 2__ has been meticulously updated to provide not only new features and
 
 = Where can I find more information about ... =
 
-+   creating a derivative plugin
-+   creating a custom extension
-+   defining and using options in my plugin or extension
-+   providing automatic updates for my plugin
-+   providing contextual help for my plugin or extension
++   creating a [derivative plugin](https://eacDoojigger.earthasylum.com/derivatives/)
++   creating a [custom extension](https://eacDoojigger.earthasylum.com/extensions/)
++   defining and using [options & settings](https://eacDoojigger.earthasylum.com/options/) in my plugin or extension
++   providing [automatic updates](https://eacDoojigger.earthasylum.com/automatic-updates/) for my plugin
++   providing [contextual help](https://eacDoojigger.earthasylum.com/contextual-help/) for my plugin or extension
++   [using features](https://eacDoojigger.earthasylum.com/how-to/) of {eac}Doojigger
 
 The *{eac}Doojigger Extras* (now at this [Github Repository](https://github.com/EarthAsylum/docs.eacDoojigger)) includes examples and documentation:
 
@@ -341,49 +391,6 @@ _Kevin Burkholder_
 ![ContextualHelp](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-10.png)
 
 
-== Other Notes ==
-
-= Additional Information =
-
-{eac}Doojigger should be Network Activated on multi-site installations. Individual extensions and options may be configured on each site.
-
-Some extension may use [wp-config-transformer](https://github.com/wp-cli/wp-config-transformer/contributors) to update wp-config. Copyright 2011-2018 WP-CLI Development Group .
-
-
-= See Also =
-
-*Information on building with and using {eac}Doojigger*
-
-+   [{eac}Doojigger Derivatives](https://eacDoojigger.earthasylum.com/derivatives/)
-+   [{eac}Doojigger Extensions](https://eacDoojigger.earthasylum.com/extensions/)
-+   [{eac}Doojigger Options & Settings](https://eacDoojigger.earthasylum.com/options/)
-+   [{eac}Doojigger Contextual Help](https://eacDoojigger.earthasylum.com/contextual-help/)
-+   [{eac}Doojigger Automatic Updates](https://eacDoojigger.earthasylum.com/automatic-updates/)
-
-*Plugins and Extensions built with {eac}Doojigger*
-
-+   [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/)
-A full-featured Software Registration/Licensing Server built on {eac}Doojigger.
-
-+   [{eac}SimpleSMTP](https://eacDoojigger.earthasylum.com/eacsimplesmtp/)
-An {eac}Doojigger extension to configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email.
-
-+   [{eac}SimpleAWS](https://eacDoojigger.earthasylum.com/eacsimpleaws/)
-An {eac}Doojigger extension to include and enable use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK).
-
-+   [{eac}SimpleCDN](https://eacDoojigger.earthasylum.com/eacsimplecdn/)
-An {eac}Doojigger extension to enable the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience.
-
-+   [{eac}ObjectCache](https://eacDoojigger.earthasylum.com/objectcache/)
-A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects.
-
-+   [{eac}Readme](https://eacDoojigger.earthasylum.com/eacreadme/)
-An {eac}Doojigger extension to translate a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document.
-
-+   [{eac}MetaPixel](https://eacDoojigger.earthasylum.com/eacmetapixel/)
-An {eac}Doojigger extension to install the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events.
-
-
 == Copyright ==
 
 = Copyright © 2019-2024, *EarthAsylum Consulting*, All rights reserved. =
@@ -408,6 +415,20 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 
 == Changelog ==
+
+= Version 2.6.2 – August 30, 2024 =
+
++   Reworked debugging extension and logging with new logger helper compatible with PSR-3 logging.
+    +   See : https://eacdoojigger.earthasylum.com/how-to/#use-debugging-logger-methods
+    +   New PSR-3 logging method : `$this->log( $level, $message, $context )`
+    +   Or e.g. : `eacDoojigger->log('error', $message, $context )`
++   Support/compliant with WP Consent API.
++   New cookie methods supporting WP Consent API (if active).
+    +   See: https://eacdoojigger.earthasylum.com/how-to/#wp-consent-api-and-cookies
+    +   `set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[])`
++   Allow/default session access from derivative plugins when using `setVariable()` and `getVariable()`.
++   Added action `{pluginname}_startup` after `plugins_loaded`, before loading extensions.
++   Session debugging filter for `eacDoojigger_debugging`.
 
 = Version 2.6.1 – July 6, 2024 =
 
@@ -478,47 +499,5 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
     +   `$fs = apply_filters('eacDoojigger_link_filesystem',$wp_filesystem,true,'file system required',[]);`
 +   Fix call/use of WC() in session_manager to prevent erros if woocommerce has been disabled.
 
-= Version 2.5.0 – April 4, 2024 =
 
-+   Update trait - check 'compatible up to' without '-RCx' in WordPress version.
-+   Compatible with WordPress 6.5.
-+   Remove autoloader when deactivated.
-+   Only flush transients (flush_caches()) if not using an object cache.
-+   Reworked get_option(),get_network_option() for faster access to non-reserved options.
-+   Added support for `$_SERVER['GEOIP_COUNTRY_CODE']` IP Geolocation.
-+   Use `this.form.requestSubmit()` instead of `options_form.submit()`.
-+   Fixed switch_to_blog() and loading/saving options on switch.
-+   Updated maintenance mode, enable using transient with expiration.
-+   Recognize 'Network Enabled' as extension enabled option.
-+   New get_page_template() to buffer a template part.
-+   Added action `after_flush_caches` when flushing caches.
-+   Added option `{classname}_selected_update_channel` and stdOptions_updateChannel() in standard_options trait.
-    +   Like {classname}_PLUGIN_UPDATE_CHANNEL.
-+   Added constant `{classname}_PLUGIN_UPDATE_CHANNEL` to override plugin update source.
-    +   For github hosting, specify branch|release and the tag or id.
-    +   `define( 'EACDOOJIGGER_PLUGIN_UPDATE_CHANNEL', 'branch' );`
-    +   `define( 'EACDOOJIGGER_PLUGIN_UPDATE_CHANNEL', 'branch/default' );`
-+   Updated documentation and examples.
-    +   Removed Extras from distribution package, now available on Github:
-        +   [Download](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)
-        +   [Documentation](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/)
-+   Streamline standard_options trait, added checkForUpdates (tools).
-+   Streamline plugin_update trait including
-    +   Support for new software taxonomy Github hosting plugin.
-    +   Renamed methods in plugin_update trait.
-    +   Delete internal transient when update_plugins transient is deleted.
-    +   Changed default transient_time to 1 hour (was 12), letting WP manage update checks.
-+   Use wp_clean_update_cache() when clearing caches.
-+   Now loads for all (php/non-php) requests.
-    +   Extensions are not loaded unless self::ALLOW_NON_PHP is set on construct.
-    +   This allows handling of non-php files and redirects passed through WordPress.
-    +   Limits loading of unneeded extensions.
-+   Pass authentication header on plugin_update_parameters filter in swRegistrationUI.
-+   Added environment to plugin updater uri - ?environment=wp_get_environment_type().
-+   Fixed dynamic properties (no longer supported in PHP 8.2+) in anonymous class in abstract_core.
-+   Fixed error in debugging_extension::capture_deprecated()
-+   Now hosted on and updated from github (private repository).
-    +   Using [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/) plugin.
-    +   With [Software Product Taxonomy](https://swregistry.earthasylum.com/software-taxonomy/) extension for github hosting.
-
-= See changelog.txt for more =
+= See changelog.md for more =

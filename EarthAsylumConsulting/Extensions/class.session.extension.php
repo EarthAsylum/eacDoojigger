@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.0706.1';
+		const 	VERSION	= '24.0817.1';
 
 		/**
 		 * @var string supported session managers
@@ -106,8 +106,10 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 											'type'		=> 'number',
 											'label'		=> 'Session Expiration',
 											'default'	=> '1',
-											'info'		=> 'In hours (from 0.5 to '.$max_session_time.'), the time to retain a session with no activity.',
-											'attributes'=> ['min=".5"', 'max="'.$max_session_time.'"','step=".5"']
+											'after'		=> 'Hours',
+											'info'		=> 'In hours (from 0.5 to '.$max_session_time.'), the time to retain a session with no activity.'.
+															' Set to 0 to retain for the current browser session.',
+											'attributes'=> ['min="0"', 'max="'.$max_session_time.'"','step=".5"']
 										),
 				]
 			);
@@ -188,7 +190,8 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			 * filter {classname}_debugging add the session array to debugging array (see debugging extension)
 			 * @return	array	extended array with [ extension_name => [key=>value array] ]
 			 */
-			$this->add_filter( 'debugging', 					array($this, 'session_debugging'));
+			//$this->add_filter( 'debugging', 					array($this, 'session_debugging'));
+			add_filter( 'eacDoojigger_debugging', 				array($this, 'session_debugging'));
 		}
 
 
@@ -215,8 +218,12 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 						$this->session_id 		= bin2hex(random_bytes(16));
 						$this->session 			= new \stdclass();
 					}
-					$exp = time() + $this->get_session_expiration();
-					setcookie( $this->session_cookie, $this->session_id, $exp, '/', COOKIE_DOMAIN, is_ssl(), true );
+					$this->set_cookie( $this->session_cookie, $this->session_id, $this->get_session_expiration(), [/* default options */],
+						[
+							'category' => 'necessary',
+							'function' => __( '%s sets this cookie to store a unique session ID', $this->plugin->PLUGIN_TEXTDOMAIN )
+						]
+					);
 					break;
 
 				case self::SESSION_GENERIC:
@@ -421,12 +428,12 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		 */
 		public function session_save_data()
 		{
+			if ( empty( $this->session_id ) ) return;
 			/*
 			 * action {classname}_session_stop stop the session
 			 * @return	void
 			 */
 			$this->do_action( 'session_stop' );
-			if ( empty( $this->session_id ) ) return;
 
 			switch ($this->session->session_manager)
 			{
@@ -450,14 +457,14 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		 */
 		private function get_session_expiration( )
 		{
-			$exp = ($this->get_option('session_expiration') ?: 1);
+			$exp = intval($this->get_option('session_expiration',1));
 			/*
 			 * filter {classname}_session_expiration set the session expiration time
 			 * @param	float	$exp in hours
-			 * @return	float	$exp in hours
+			 * @return	int		$exp in hours
 			 */
 			$exp = floatval( $this->apply_filters( 'session_expiration', $exp ) );
-			return (HOUR_IN_SECONDS * $exp);
+			return intval(HOUR_IN_SECONDS * $exp);
 		}
 
 
@@ -470,7 +477,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		public function session_debugging($debugging_array)
 		{
 			if ( !empty( $this->session_id ) ) {
-				$debugging_array[$this->className] = (array)$this->session;
+				$debugging_array[$this->pluginName.' Session'] = (array)$this->session;
 			}
 			return $debugging_array;
 		}

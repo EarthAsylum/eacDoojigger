@@ -9,7 +9,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger Utilities\{eac}DoojiggerAutoloader
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * Version: 	2.2.0
+ * Version: 	2.2.1
  * @link		https://eacDoojigger.earthasylum.com/
  */
 
@@ -47,11 +47,11 @@ class eacDoojiggerAutoloader
 	 * @var array map object namespace to file type
 	 */
 	const AUTOLOAD_TYPES = [
-		'Plugin'		=>'plugin',
-		'Helpers'		=>'class',
-		'Traits'		=>'trait',
-		'Interfaces'	=>'interface',
-		'Extensions'	=>'extension'
+		'Plugin'		=>'plugin',		// 'Plugin' folder, 	<name>.php or <name>.plugin.php
+		'Helpers'		=>'class',		// 'Helpers' folder, 	<name>.php or <name>.class.php
+		'Traits'		=>'trait',		// 'Traits' folder, 	<name>.php or <name>.trait.php
+		'Interfaces'	=>'interface',	// 'Interfaces' folder, <name>.php or <name>.interface.php
+		'Extensions'	=>'extension'	// 'Extensions' folder, <name>.php or <name>.extension.php
 	];
 
 	/**

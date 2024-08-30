@@ -17,9 +17,9 @@
  * Plugin URI:			https://eacDoojigger.earthasylum.com/
  * Update URI: 			https://swregistry.earthasylum.com/software-updates/eacdoojigger.json
  * Description:			{eac}Doojigger for WordPress - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
- * Version:				2.6.1
+ * Version:				2.6.2-RC2
  * Requires at least:	5.8
- * Tested up to: 		6.5
+ * Tested up to: 		6.6
  * Requires PHP:		7.4
  * Author:				EarthAsylum Consulting
  * Author URI:			http://www.earthasylum.com
@@ -39,9 +39,9 @@
 
 /*
 	See http://rachievee.com/the-wordpress-hooks-firing-sequence/
-	We trigger loading/initializing/hooks on 'plugins_loaded' action
-	Extensions should use 'init' or 'wp_loaded' (headers are sent before wp_loaded)
-	or {classname}_extensions_loaded or {classname}_ready
+	We trigger loading/initializing/hooks on 'plugins_loaded' action.
+	Derrivatives & Extensions should use 'init' or 'wp_loaded' (headers are sent before wp_loaded)
+	or {classname}_startup, {classname}_extensions_loaded, or {classname}_ready
 */
 
 
@@ -54,9 +54,9 @@ namespace EarthAsylumConsulting
 	}
 
 	/* deprecated (may be referenced in derivatives and extensions) */
-	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION','2.6.0');
+	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION','2.6.2');
 	/* prefered (as of 2.6.0) */
-	if (!defined('EACDOOJIGGER_VERSION')) define('EACDOOJIGGER_VERSION','2.6.0');
+	if (!defined('EACDOOJIGGER_VERSION')) define('EACDOOJIGGER_VERSION','2.6.2');
 
 	/**
 	 * loader/initialization class

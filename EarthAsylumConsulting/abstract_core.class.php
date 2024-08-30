@@ -1,8 +1,6 @@
 <?php
 namespace EarthAsylumConsulting;
 
-use EarthAsylumConsulting\Helpers\LogLevel;
-
 /**
  * {eac}Doojigger for WordPress - Plugin core methods, hooks, and settings.
  *
@@ -12,7 +10,7 @@ use EarthAsylumConsulting\Helpers\LogLevel;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0523.1
+ * @version		24.0829.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -21,6 +19,16 @@ use EarthAsylumConsulting\Helpers\LogLevel;
 
 abstract class abstract_core
 {
+	/**
+	 * @trait methods for logging using Logger helper
+	 */
+	use \EarthAsylumConsulting\Traits\logging;
+
+	/**
+	 * @trait methods for cookie consent using WP Consent API
+	 */
+	use \EarthAsylumConsulting\Traits\cookie_consent;
+
 	/**
 	 * @var string transient name for plugin header info
 	 * @see EarthAsylumConsulting\abstract_core\setPluginHeaderValues()
@@ -156,16 +164,6 @@ abstract class abstract_core
 		];
 
 	/**
-	 * @var bool|string logging filter
-	 */
-	protected $logging_filter			= null;
-
-	/**
-	 * @var array logging queue
-	 */
-	protected $logging_queue			= [];
-
-	/**
 	 * @var bool cached (is_admin())
 	 */
 	protected $is_admin					= null;
@@ -250,7 +248,10 @@ abstract class abstract_core
 
 		// set 'advanced mode'
 		$this->config_advanced_mode(); // before user loaded - backward compatible with define(plugin_ADVANCED_MODE)
-		add_action( 'set_current_user', 		array ($this, 'config_advanced_mode' ));
+		add_action( 'set_current_user', 		array ($this, 'config_advanced_mode' ) );
+
+
+		$this->add_action( 'startup',			array($this, '_plugin_startup') );
 
 		/**
 		 * action eacDoojigger_ready, fired in plugin_loader for eacDoojigger
@@ -258,7 +259,7 @@ abstract class abstract_core
 		 */
 		\add_action( 'eacDoojigger_ready',		array($this,'eacDoojigger_ready') );
 
-		\add_action( 'shutdown',				array($this,'__shutdown') );
+		\add_action( 'shutdown',				array($this,'_plugin_shutdown') );
 	}
 
 
@@ -275,6 +276,19 @@ abstract class abstract_core
 
 
 	/**
+	 * Plugin startup (after plugins_loaded, before loading extensions)
+	 *
+	 * @internal
+	 *
+	 * @return	void
+	 */
+	public function _plugin_startup()
+	{
+		$this->cookie_consent_init( $this->pluginHeader( 'PluginSlug' ), $this->pluginName );
+	}
+
+
+	/**
 	 * Plugin shutdown.
 	 * Save option array(s) and verify that we called required parent methods
 	 *
@@ -282,7 +296,7 @@ abstract class abstract_core
 	 *
 	 * @return	void
 	 */
-	public function __shutdown()
+	public function _plugin_shutdown()
 	{
 		// saving on shutdown may be unreliable,
 		// updates now applied when array is changed so this should do nothing (v2.4.0)
@@ -423,6 +437,16 @@ abstract class abstract_core
 			foreach ($dirNames as $slug => $directories)
 			{
 				$this->loadExtensions( $slug, $directories );
+				// should we assume that all extension plugins are consent compliant?
+				if ( class_exists( '\WP_CONSENT_API' ) )
+				{
+					if (is_file( WP_PLUGIN_DIR . '/' . $slug )
+					&& !has_filter("wp_consent_api_registered_{$slug}"))
+					{
+						// declare compliance with WP Consent API
+						add_filter( "wp_consent_api_registered_{$slug}", '__return_true' );
+					}
+				}
 			}
 		}
 	}
@@ -438,10 +462,23 @@ abstract class abstract_core
 	{
 		$this->requiredMethods['initialize'] = true;
 
-		$this->logInfo(__FUNCTION__,$this->className);
 		// initialize extensions
 		$this->callAllExtensions('initialize');
 
+		/*
+		\add_action('init', function() {
+			$version = $this->getVersion();
+			\_doing_it_wrong( 'thisFunction', 'thisFunction is wrong', $version );
+			\_deprecated_function( __FUNCTION__, $version, 'plugin_ready()');
+			\_deprecated_class( get_class($this), $version, __CLASS__ );
+			\_deprecated_constructor( get_class($this), $version, __CLASS__ );
+			\_deprecated_argument( __FUNCTION__, $version, 'test _deprecated_argument');
+			\_deprecated_file( __FILE__, $version, __FILE__, 'test _deprecated_file' );
+			\_deprecated_hook( current_action(), $version, 'new_'.current_action(), 'test _deprecated_hook' );
+			trigger_error('a php triggered warning', E_USER_WARNING);
+		//	throw new \ErrorException('a php error exception', 0, E_USER_ERROR);
+		});
+		*/
 	}
 
 
@@ -553,24 +590,6 @@ abstract class abstract_core
 	 */
 	public function eacDoojigger_ready(): void
 	{
-		// after extensions load, set logging filter
-		if ($this->has_action( 'log_write' ))
-		{
-			// this plugin filter
-			$this->logging_filter = $this->prefixHookName('log_write');
-		}
-		else if (\has_action( 'eacDoojigger_log_write' ))
-		{
-			// base plugin filter
-			$this->logging_filter = 'eacDoojigger_log_write';
-		}
-		else
-		{
-			// no logging
-			$this->logging_filter = false;
-		}
-
-		$this->log_write(0); // de-spools the logging queue
 	}
 
 
@@ -597,8 +616,8 @@ abstract class abstract_core
 					'RequiresEAC'	=> 'Requires EAC',			// The minimum required eacDoojigger version.
 					'RequiresWC'	=> 'WC requires at least',	// The lowest WooCommerce version that the plugin will work on.
 					'Author'		=> 'Author',				// The name of the plugin author.
-					'AuthorURI'		=> 'Author URI',			// The authorâ€™s website or profile on another website, such as WordPress.org.
-					'License'		=> 'License',				// The short name (slug) of the pluginâ€™s license (e.g. GPLv2).
+					'AuthorURI'		=> 'Author URI',			// The authorÕs website or profile on another website, such as WordPress.org.
+					'License'		=> 'License',				// The short name (slug) of the pluginÕs license (e.g. GPLv2).
 					'LicenseURI'	=> 'License URI',			// A link to the full text of the license (e.g. https://www.gnu.org/licenses/gpl-2.0.html).
 					'TextDomain'	=> 'Text Domain',			// The gettext text domain of the plugin.
 					'DomainPath'	=> 'Domain Path',			// The domain path lets WordPress know where to find the translations.
@@ -619,13 +638,13 @@ abstract class abstract_core
 					array_filter(get_file_data($header['PluginFile'], $default_headers, 'plugin') )
 				);
 
-				$pluginData['Name']				= dirname(plugin_basename( $pluginData['PluginFile'] ));			// Plugin base name
 				$pluginData['PluginSlug']		= plugin_basename( $pluginData['PluginFile'] );						// Plugin slug
 				$pluginData['PluginDir']		= untrailingslashit(plugin_dir_path( $pluginData['PluginFile'] ));	// Plugin directory
 				$pluginData['PluginDirUrl']		= plugin_dir_url( $pluginData['PluginFile'] );						// URL to plugin directory
 				$pluginData['VendorDir']		= (is_dir($pluginData['PluginDir'].'/'.__NAMESPACE__))
 												? $pluginData['PluginDir'].'/'.__NAMESPACE__						// vendor directory default
 												: $pluginData['PluginDir'];
+				$pluginData['Name']				= dirname($pluginData['PluginSlug']);
 
 				return $pluginData;
 			},
@@ -673,8 +692,8 @@ abstract class abstract_core
      *      'RequiresEAC'   => 'Requires EAC',           The minimum required eacDoojigger version.
      *      'RequiresWC'    => 'WC requires at least',   The lowest WooCommerce version that the plugin will work on.
      *      'Author'        => 'Author',                 The name of the plugin author.
-     *      'AuthorURI'     => 'Author URI',             The authorâ€™s website or profile on another website, such as WordPress.org.
-     *      'License'       => 'License',                The short name (slug) of the pluginâ€™s license (e.g. GPLv2).
+     *      'AuthorURI'     => 'Author URI',             The authorÕs website or profile on another website, such as WordPress.org.
+     *      'License'       => 'License',                The short name (slug) of the pluginÕs license (e.g. GPLv2).
      *      'LicenseURI'    => 'License URI',            A link to the full text of the license (e.g. https://www.gnu.org/licenses/gpl-2.0.html).
      *      'TextDomain'    => 'Text Domain',            The gettext text domain of the plugin.
      *      'DomainPath'    => 'Domain Path',            The domain path lets WordPress know where to find the translations.
@@ -2312,7 +2331,12 @@ abstract class abstract_core
 		if ($setCookie && !headers_sent())
 		{
 			if (!is_int($setCookie)) $setCookie = 30;
-			setcookie( $cookieName, $value, time() + ($setCookie * DAY_IN_SECONDS), COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
+			$this->set_cookie($cookieName, $value, "{$setCookie} Days", [/* default options */],
+				[
+					'category' => 'preferences',
+					'function' => __( '%s sets this cookie to assign a unique visitor ID to track preferences and activity.', $this->PLUGIN_TEXTDOMAIN )
+				]
+			);
 		}
 		$this->setVariable($cookieName,$value);
 		return $value;
@@ -2384,7 +2408,11 @@ abstract class abstract_core
 		 * @param	string	$key stored key
 		 * @return	mixed	stored variable (unserialized)
 		 */
-		$value = $this->apply_filters( 'get_variable', $default, $key );
+		if ($this->has_filter( 'get_variable' )) {
+			$value = $this->apply_filters( 'get_variable', $default, $key );
+		} else {
+			$value = \apply_filters( 'eacDoojigger_get_variable', $default, $key );
+		}
 		return maybe_unserialize($value);
 	}
 
@@ -2421,7 +2449,11 @@ abstract class abstract_core
 		 * @param	string	$key stored key
 		 * @return	string	stored variable
 		 */
-		$value = $this->apply_filters( 'set_variable', $value, $key );
+		if ($this->has_filter( 'set_variable' )) {
+			$value = $this->apply_filters( 'set_variable', $value, $key );
+		} else {
+			$value = \apply_filters( 'eacDoojigger_set_variable', $value, $key );
+		}
 		return $value;
 	}
 
@@ -2674,6 +2706,7 @@ abstract class abstract_core
 	 * Safely get $_COOKIE data using PHP filter.
 	 *
 	 * @example $data = $this->varCookie('cookie_name');
+	 * @example $data = $this->get_cookie('cookie_name','default value');
 	 *
 	 * @param	string				$name the name of the cookie
 	 * @param	int|callable		$filter the filter to use
@@ -2688,6 +2721,7 @@ abstract class abstract_core
 
 	/**
 	 * Safely get $_COOKIE data using PHP filter.
+	 *
 	 * @deprecated - use $this->varCookie(...)
 	 */
 	public function _COOKIE( string $name, $filter = FILTER_CALLBACK, $options = null )
@@ -2714,6 +2748,7 @@ abstract class abstract_core
 
 	/**
 	 * Safely get $_GET data using PHP filter.
+	 *
 	 * @deprecated - use $this->varGet(...)
 	 */
 	public function _GET( string $name, $filter = FILTER_CALLBACK, $options = null )
@@ -2740,6 +2775,7 @@ abstract class abstract_core
 
 	/**
 	 * Safely get $_POST data using PHP filter.
+	 *
 	 * @deprecated - use $this->varPost(...)
 	 */
 	public function _POST( string $name, $filter = FILTER_CALLBACK, $options = null )
@@ -2768,6 +2804,7 @@ abstract class abstract_core
 
 	/**
 	 * Safely get $_REQUEST data using PHP filter.
+	 *
 	 * @deprecated - use $this->varRequest(...)
 	 */
 	public function _REQUEST( string $name, $filter = FILTER_CALLBACK, $options = null )
@@ -2799,6 +2836,7 @@ abstract class abstract_core
 
 	/**
 	 * Safely get $_SERVER data using PHP filter.
+	 *
 	 * @deprecated - use $this->varServer(...)
 	 */
 	public function _SERVER( string $name, $filter = FILTER_CALLBACK, $options = null )
@@ -2912,251 +2950,6 @@ abstract class abstract_core
 	{
 		\_deprecated_function( __FUNCTION__, '2.6.1', 'getFilterCallback()');
 		return $this->getFilterCallback($filter,$options,$args);
-	}
-
-
-	/*
-	 *
-	 * error & logging functions
-	 *
-	 */
-
-
-	/**
-	 * wp_error with logging
-	 *
-	 * @param	string|int|object	$code Error code or wp_error or throwable instance
-	 * @param	string		$message Error message
-	 * @param	mixed		$data optional, Error data
-	 * @param	scalar		$id optional, source id
-	 * @return	object		WP_Error object
-	 */
-	public function error($code, $message = '', $data = '', $id = null): object
-	{
-		if (is_wp_error($code))
-		{
-			$error = $code;
-		}
-		else if (is_a($code,'\Throwable'))
-		{
-			$error = new \WP_Error( $code->getCode(), $code->getMessage(), ['file'=>$code->getFile(),'line'=>$code->getLine()] );
-		}
-		else
-		{
-			$error = new \WP_Error( $code, $message, $data );
-		}
-
-		$this->logError($error,$id);
-		return $error;
-
-	}
-
-
-	/**
-	 * fatal error with logging
-	 *
-	 * @param	string|int	$code Error code
-	 * @param	string		$message Error message
-	 * @param	mixed		$data optional, Error data
-	 * @param	scalar		$id optional, source id
-	 * @return	void
-	 */
-	public function fatal($code, $message = '', $data = '', $id = null): void
-	{
-		$error = $this->error($code, $message, $data, $id);
-	//	trigger_error($message,E_USER_ERROR);
-		wp_die($error);
-
-	}
-
-
-	/**
-	 * console/file logging - info (notice)
-	 *
-	 * @deprecated use logNotice()
-	 */
-	public function log($var, $context=null): bool
-	{
-		\_deprecated_function( __FUNCTION__, '0.1.1', 'logNotice()');
-		return $this->logInfo($var, $context);
-	}
-
-
-	/**
-	 * console/file logging - debug
-	 *
-	 * @deprecated use logDebug()
-	 */
-	public function logv($var, $context=null): bool
-	{
-		\_deprecated_function( __FUNCTION__, '0.1.1', 'logDebug()');
-		return $this->logDebug($var, $context);
-	}
-
-
-	/**
-	 * console/file logging - info (notice)
-	 *
-	 * @param	mixed	$var variable to log or WP_Error object
-	 * @param	scalar	$context optional, source id
-	 * @return	bool
-	 */
-	public function logInfo($var, $context=null): bool
-	{
-		return $this->log_write(LogLevel::PHP_NOTICE, $var, $context);
-	}
-
-
-	/**
-	 * console/file logging - notice
-	 *
-	 * @param	mixed	$var variable to log or WP_Error object
-	 * @param	scalar	$context optional, source id
-	 * @return	bool
-	 */
-	public function logNotice($var, $context=null): bool
-	{
-		return $this->log_write(LogLevel::PHP_NOTICE, $var, $context);
-	}
-
-
-	/**
-	 * console/file logging - data (warning)
-	 *
-	 * @param	mixed	$var variable to log or WP_Error object
-	 * @param	scalar	$context optional, source id
-	 * @return	bool
-	 */
-	public function logData($var, $context=null): bool
-	{
-		return $this->log_write(LogLevel::PHP_WARNING, $var, $context);
-	}
-
-
-	/**
-	 * console/file logging - warning
-	 *
-	 * @param	mixed	$var variable to log or WP_Error object
-	 * @param	scalar	$context optional, source id
-	 * @return	bool
-	 */
-	public function logWarning($var, $context=null): bool
-	{
-		return $this->log_write(LogLevel::PHP_WARNING, $var, $context);
-	}
-
-
-	/**
-	 * console/file logging - error
-	 *
-	 * @param	mixed	$var variable to log or WP_Error object
-	 * @param	scalar	$context optional, source id
-	 * @return	bool
-	 */
-	public function logError($var, $context=null): bool
-	{
-		return $this->log_write(LogLevel::PHP_ERROR, $var, $context);
-	}
-
-
-	/**
-	 * console/file logging - debug
-	 *
-	 * @param	mixed	$var variable to log or WP_Error object
-	 * @param	scalar	$context optional, source id
-	 * @return	bool
-	 */
-	public function logDebug($var, $context=null): bool
-	{
-		return $this->log_write(LogLevel::PHP_DEBUG, $var, $context);
-	}
-
-
-	/**
-	 * console/file logging - always
-	 *
-	 * @param	mixed	$var variable to log or WP_Error object
-	 * @param	scalar	$context optional, source id
-	 * @return	bool
-	 */
-	public function logAlways($var, $context=null): bool
-	{
-		return $this->log_write(LogLevel::PHP_ALWAYS, $var, $context);
-	}
-
-
-	/**
-	 * console/file logging
-	 *
-	 * @param	int		$level the debugging log level
-	 * @param	mixed	$var variable to log or WP_Error object
-	 * @param	scalar	$context optional, source id
-	 * @return	bool
-	 */
-	public function log_write($level, $var=null, $context=null): bool
-	{
-		if ($this->logging_filter === false)
-		{
-			// no logging
-			$this->logging_queue = null;
-			return false;
-		}
-
-		$args = [$level, $var, $context, microtime(true), $this->className];
-
-		if (is_null($this->logging_filter))
-		{
-			// not logging yet
-			$this->logging_queue[] = $args;
-			return true;
-		}
-		else
-		{
-			// logging
-			while (!empty($this->logging_queue))
-			{
-				$held = array_shift($this->logging_queue);
-				$this->_log_write($held);
-			}
-			return $this->_log_write($args);
-		}
-	}
-
-
-	/**
-	 * console/file logging
-	 *
-	 * @param	array	$args args array from log_write() - [$level,$var,$context,microtime(true)]
-	 * @return	bool	true for assertions - assert($this->log(...));
-	 */
-	private function _log_write(array $args): bool
-	{
-		if (empty($args[0])) return false;
-
-		if (is_wp_error($args[1]))
-		{
-			$args[1] = array( \get_class($args[1]) => [
-				'code'		=> $args[1]->get_error_code(),
-				'message'	=> $args[1]->get_error_message(),
-				'data'		=> $args[1]->get_error_data(),
-			]);
-		}
-		else if (is_a($args[1],'\Throwable'))
-		{
-			$args[1] = array( \get_class($args[1]) => [
-				'code'		=> $args[1]->getCode(),
-				'message'	=> $args[1]->getMessage(),
-				'data'		=> ['file'=>$args[1]->getFile(),'line'=>$args[1]->getLine()],
-			]);
-		}
-
-		/**
-		 * action {classname}_log_write to log debug data
-		 * @param	mixed	$args [$level,$var,$context,microtime(true)]
-		 * @return	void
-		 */
-		\do_action( $this->logging_filter, $args );
-		return true;
 	}
 
 
@@ -3426,7 +3219,7 @@ abstract class abstract_core
 
 		if (version_compare($curVersion, $extVersion) !== 0)					// version change
 		{
-			$this->logData('updated from version '.$curVersion.' to '.$extVersion, $className);
+			$this->logInfo('updated from version '.$curVersion.' to '.$extVersion, $className);
 			/**
 			 * action {classname}_version_updated_<extension> when <extension> version changes
 			 * @param	string	$curVersion currently installed version

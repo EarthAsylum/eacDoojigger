@@ -1,5 +1,19 @@
 == Changelog ==
 
+= Version 2.6.2 – August 30, 2024 =
+
++   Reworked debugging extension and logging with new logger helper compatible with PSR-3 logging.
+    +   See : https://eacdoojigger.earthasylum.com/how-to/#use-debugging-logger-methods
+    +   New PSR-3 logging method : `$this->log( $level, $message, $context )`
+    +   Or e.g. : `eacDoojigger->log('error', $message, $context )`
++   Support/compliant with WP Consent API.
++   New cookie methods supporting WP Consent API (if active).
+    +   See: https://eacdoojigger.earthasylum.com/how-to/#wp-consent-api-and-cookies
+    +   `set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[])`
++   Allow/default session access from derivative plugins when using `setVariable()` and `getVariable()`.
++   Added action `{pluginname}_startup` after `plugins_loaded`, before loading extensions.
++   Session debugging filter for `eacDoojigger_debugging`.
+
 = Version 2.6.1 – July 6, 2024 =
 
 +   Session manager extension:

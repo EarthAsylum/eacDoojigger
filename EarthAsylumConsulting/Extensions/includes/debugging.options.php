@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0517.1
+ * @version 	24.0830.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -20,7 +20,6 @@ if ($this->isSettingsPage('debugging'))
 	$fs = $this->fs->link_wp_filesystem(true,
 		'Debugging extension needs WordPress file access to manage logs and configuration options.'
 	);
-	$this->update_option('debug_to_file_allowed',($fs) ? 'yes' : 'no');
 }
 
 // see if we can get to the wp-config file (only single site or network admin)
@@ -51,12 +50,13 @@ $this->registerExtensionOptions( $this->className,
 								'type'		=> 	'checkbox',
 								'label'		=> 	'Logging Levels',
 								'options'	=> 	[
-													['Notices &amp; Information'=> LogLevel::PHP_NOTICE],
-													['Warnings &amp; Details'	=> LogLevel::PHP_WARNING],
-													['Errors &amp; Exceptions'	=> LogLevel::PHP_ERROR],
-													['Debugging Information'	=> LogLevel::PHP_DEBUG],
+													['Information'				=> LogLevel::LOG_INFO],
+													['Notices'					=> LogLevel::LOG_NOTICE],
+													['Warnings'					=> LogLevel::LOG_WARNING],
+													['Errors &amp; Exceptions'	=> LogLevel::LOG_ERROR],
+													['Debugging'				=> LogLevel::LOG_DEBUG],
 												],
-								'default'	=> 	[LogLevel::PHP_NOTICE,LogLevel::PHP_WARNING,LogLevel::PHP_ERROR,LogLevel::PHP_DEBUG],
+								'default'	=> 	[LogLevel::LOG_WARNING,LogLevel::LOG_ERROR],
 								'info'		=> 	'<small>* This does not effect PHP or system logging.</small>',
 								'help'		=>	'Sets the information/logging-level to be written to the log file.',
 							),
@@ -90,14 +90,15 @@ $this->registerExtensionOptions( $this->className,
 								'options'	=> 	[
 													['Backtrace \'deprecated\'  &amp; \'doing it wrong\' Messages'	=>'Enabled']
 												],
-								'info'		=>	'Messages often occure when invalid functions are called or invalid parameters are passed. '.
+								'info'		=>	'Messages often occure when invalid or outdated functions are called or invalid parameters are used. '.
 												'This option makes it easier to debug these errors.',
+								'help'		=>	'[info] Note: \'Notices &amp; Information\' along with \'Capture PHP Errors\' &amp; \'WP_DEBUG\' will also catch these as <em>notices</em>.',
 								'advanced'	=> 	true,
 							),
 		'debug_backtrace' 	=> array(
 								'type'		=> 	'range',
 								'label'		=> 	'Backtrace Levels',
-								'default'	=> 	3,
+								'default'	=> 	5,
 								'after'		=>	'<datalist id="debug_backtrace_ticks">'.
 													'<option value="0" label="0">0</option>'.
 													'<option value="1"></option>'.

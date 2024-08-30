@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Plugin;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0521.1
+ * @version		24.0823.1
  */
 
 trait eacDoojigger_administration
@@ -294,9 +294,10 @@ trait eacDoojigger_administration
 				function($action,$installOptions): bool		// callback onSuccess
 				{
 					$eacUtilityDir  = str_replace(WP_PLUGIN_DIR,'',$this->pluginHeader('VendorDir'))."/Utilities";
+					$eacHelpersDir 	= dirname($eacUtilityDir)."/Helpers";
 					$lines	= [
 						"  define('EACDOOJIGGER_VERSION','".$this->getVersion()."');",
-						"  define('EAC_DOOJIGGER_VERSION',EACDOOJIGGER_VERSION);",
+						"  define('EAC_DOOJIGGER_VERSION',EACDOOJIGGER_VERSION);", // deprecated
 
 						"  require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojigger_ftp_credentials.class.php';",
 						"  eacDoojigger_ftp_credentials::addFilters();",
@@ -306,6 +307,8 @@ trait eacDoojigger_administration
 
 						"  require_once WP_PLUGIN_DIR.'".$eacUtilityDir."/eacDoojiggerAutoloader.class.php';",
 						"  eacDoojiggerAutoloader::setAutoLoader();",
+						// PSR-3 Log versions may not be compatible
+						"  eacDoojiggerAutoloader::addNamespace('Psr',WP_PLUGIN_DIR.'".$eacHelpersDir."/vendor/Psr/php'.PHP_MAJOR_VERSION);",
 						"  eacDoojiggerAutoloader::setEmailNotification( '".$this->className."' );",
 					];
 					$marker = $this->pluginHeader('NameSpace').' eacDoojiggerAutoloader '.wp_date('Y-m-d H:i:s');

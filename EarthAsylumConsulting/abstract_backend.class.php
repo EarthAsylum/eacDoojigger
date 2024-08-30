@@ -434,7 +434,7 @@ abstract class abstract_backend extends abstract_core
 	{
 		$version = $this->getSemanticVersion()->version;
 
-		$this->logData($this->className.sprintf(' %s install version %s',\get_option('blogname'),$version),__METHOD__);
+		$this->logInfo($this->className.sprintf(' %s install version %s',\get_option('blogname'),$version),__METHOD__);
 
 		if (!$this->is_network_admin())
 		{
@@ -473,7 +473,7 @@ abstract class abstract_backend extends abstract_core
 		$newVersion = $this->getSemanticVersion()->version;
 		if ( ($compare = $this->isVersionCompare($oldVersion, $newVersion, true, 'upgrade', 'downgrade')) === true ) return;
 
-		$this->logData($this->className.sprintf(" %s {$compare} from version %s to %s",\get_option('blogname'),$oldVersion,$newVersion),__METHOD__);
+		$this->logInfo($this->className.sprintf(" %s {$compare} from version %s to %s",\get_option('blogname'),$oldVersion,$newVersion),__METHOD__);
 
 		//	if ($this->isVersionLessThan($newVersion,'3.0.0')) {...}
 

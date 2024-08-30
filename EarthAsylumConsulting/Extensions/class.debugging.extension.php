@@ -12,9 +12,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
 	 * @link		https://eacDoojigger.earthasylum.com/
-	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
+	 * @see			https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
 
 	class debugging_extension extends \EarthAsylumConsulting\abstract_extension
@@ -22,61 +21,37 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0422.1';
-
-		/**
-		 * @var array PHP to print string
-		 */
-		const PHP_TO_PRINT			=
-		[
-			LogLevel::PHP_ERROR		=> 'error',
-			LogLevel::PHP_WARNING	=> 'warning',
-			LogLevel::PHP_NOTICE	=> 'info',
-			LogLevel::PHP_DEBUG		=> 'debug',
-			LogLevel::PHP_ALWAYS	=> '-----', // used to log under any level
-
-			E_ERROR 				=> 'critical',
-			E_WARNING 				=> 'warning',
-			E_PARSE 				=> 'critical',
-			E_NOTICE 				=> 'notice',
-			E_CORE_ERROR 			=> 'critical',
-			E_CORE_WARNING 			=> 'warning',
-			E_COMPILE_ERROR 		=> 'critical',
-			E_COMPILE_WARNING 		=> 'warning',
-			E_RECOVERABLE_ERROR 	=> 'error',
-			E_DEPRECATED 			=> 'warning',
-			E_USER_DEPRECATED 		=> 'notice',
-		];
+		const VERSION	= '24.0830.1';
 
 		/**
 		 * @var internal variables
 		 */
-		private $logLevel 	= 0;
-		private $logPath 	= null;
-		private $logFile 	= null;
-		private $logLength	= 8192;
+		private $logLevel		= 0;		// sets the combined log levels (like php error reporting)
+		private $logPath		= null;		// directory path to logs
+		private $logFile		= null;		// log file resource
+		private $logLength		= 8192;		// error_log max length
 
-		private $reqType 	= 'page';
-		private $reqBreak 	= '+++';
+		private $reqType		= '';		// ajax, cron, rest, xml, http(s)
 
-		private $logData 	= null; // log data on page output
-		private $logText 	= null; // log data on file output
-		private $phpData 	= null; // log data on PHP errors
-		private $wpData 	= null; // log data on WP errors
+		private $logData		= null;		// log data on page output
+		private $logText		= null;		// log data on file output
+		private $phpData		= null;		// log data on PHP errors
+		private $wpData			= null;		// log data on WP errors
 
-		private $current_user 	= null;
+		private $current_user	= null;
+		private $wpConfig		= null;
 
 		/**
-		 * @var object wp-config-transformer
+		 * previous error/exception handlers
 		 */
-		private $wpConfig = false;
-
+		 private $previous_error_handler;
+		 private $previous_exception_handler;
 
 		/**
 		 * constructor method
 		 *
-		 * @param 	object	$plugin main plugin object
-		 * @return 	void
+		 * @param	object	$plugin main plugin object
+		 * @return	void
 		 */
 		public function __construct($plugin)
 		{
@@ -135,12 +110,25 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * initialize method - called from main plugin
 		 *
-		 * @return 	void
+		 * @return	void
 		 */
 		public function initialize()
 		{
 			if ( ! parent::initialize() ) return; // disabled
 			$this->current_user = wp_get_current_user();
+
+		/* using PSR-3 logging
+			$this->plugin->log('critical','This is a critical message');
+			$this->plugin->log('emergency','This is an emergency message');
+			$this->plugin->log('notice','This is a notice message');
+			$this->plugin->log('data','This is a data message',['@variable'=>array()]);
+			$this->plugin->log()->alert('This is an alert message',['@source'=>$this->className]);
+			$logger = $this->plugin->log();
+			$logger->warning('This is a warning message');
+
+			$this->plugin->error('error())','WP_ERROR passed as $variable');
+			//$this->plugin->fatal('fatal()','fatal message',['some data']);
+		*/
 		}
 
 
@@ -153,6 +141,9 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		{
 			if ($this->plugin->isSettingsPage('Debugging'))
 			{
+				if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+					$this->update_option('debug_to_file_allowed','yes');
+				}
 				// add additional css when our settings stylesheet loads.
 				$this->add_action('admin_enqueue_styles', function($styleId)
 				{
@@ -168,67 +159,67 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				});
 			}
 
-			/**
-			 * action {pluginname}_log_write to log debug data
-			 * @param	array	$args variable to log (level, data, context)
-			 * @return	void
-			 */
+			// subscribe to Logger action - file output
 			if ( ($this->is_option('debug_to_file','plugin') && $this->setLoggingPathname(true)) || $this->is_option('debug_to_file','server') )
 			{
-				$this->add_action( 'log_write', 		array($this, 'write_log_array'), 10, 1 );
+				$this->plugin->Log()->subscribe([$this,'file_log_data']);
+			}
+
+			// subscribe to Logger action - page output
+			if ($this->is_option('debug_on_page') && user_can($this->current_user, 'manage_options'))
+			{
+				$this->plugin->Log()->subscribe([$this,'page_log_data']);
+				if ($this->plugin->pluginHelpEnabled())
+				{
+					add_action( 'current_screen',		array( $this, 'page_debugging_help'), PHP_INT_MAX);
+				}
+				else
+				{
+					add_action( ($this->is_admin() ? 'admin_' : 'wp_').'footer',
+														array($this, 'page_debugging_output'), PHP_INT_MAX);
+				}
 			}
 
 			if ($this->is_option('debug_wp_errors'))
 			{
-				add_action( 'wp_error_added', 			array($this, 'capture_wp_error'), 10, 4);
-			}
-
-			if ($this->is_option('debug_depricated'))
-			{
-				add_action( 'doing_it_wrong_run', 		array($this, 'capture_doing_it_wrong'), 10, 3);
-				add_action( 'deprecated_function_run', 	array($this, 'capture_deprecated'), 10, 3);
-				add_action( 'deprecated_constructor_run',array($this, 'capture_deprecated'), 10, 3);
-				add_action( 'deprecated_file_included', array($this, 'capture_deprecated'), 10, 3);
-				add_action( 'deprecated_argument_run', 	array($this, 'capture_deprecated'), 10, 3);
-				add_action( 'deprecated_hook_run', 		array($this, 'capture_deprecated'), 10, 4);
+				add_action( 'wp_error_added',			array($this, 'capture_wp_error'), 10, 4);
 			}
 
 			if ($this->is_option('debug_heartbeat'))
 			{
-				add_filter( 'heartbeat_received', 		array($this, 'capture_heartbeat'), PHP_INT_MAX, 3);
+				add_filter( 'heartbeat_received',		array($this, 'capture_heartbeat'), PHP_INT_MAX, 3);
 			}
 
-			if ($this->is_option('debug_on_page') && user_can($this->current_user, 'manage_options'))
+			if ($this->is_option('debug_depricated') &&
+				! (defined('WP_DEBUG_LOG') && WP_DEBUG && $this->logLevel & LogLevel::LOG_NOTICE))
 			{
-				$this->add_action( 'log_write', 		array($this, 'save_data_array'), 10, 1 );
-				if ($this->plugin->pluginHelpEnabled())
-				{
-					add_action( 'current_screen', 		array( $this, 'page_debugging_help'), 999);
-				}
-				else
-				{
-					add_action( 'wp_footer', 			array($this, 'page_debugging_output'), 999);	// the end of the <body>
-					add_action( 'admin_footer', 		array($this, 'page_debugging_output'), 999);	// the end of the <body>
-				}
+				// if logging notices, wp_trigger_error will catch these
+				add_action( 'doing_it_wrong_run',		array($this, 'capture_deprecated_wrong'), 10, 3);
+				add_action( 'deprecated_function_run',	array($this, 'capture_deprecated_wrong'), 10, 3);
+				add_action( 'deprecated_class_run',		array($this, 'capture_deprecated_wrong'), 10, 3);
+				add_action( 'deprecated_constructor_run',array($this, 'capture_deprecated_wrong'), 10, 3);
+				add_action( 'deprecated_file_included', array($this, 'capture_deprecated_wrong'), 10, 4);
+				add_action( 'deprecated_argument_run',	array($this, 'capture_deprecated_wrong'), 10, 3);
+				add_action( 'deprecated_hook_run',		array($this, 'capture_deprecated_wrong'), 10, 4);
 			}
 
 			/**
-			 * action {pluginname}_daily_event to run daily  - (never runs for network_admin)
+			 * action {pluginname}_daily_event to run daily	 - (never runs for network_admin)
 			 * @return	void
 			 */
-			$this->add_action( 'daily_event', 			array($this, 'purge_logs'), 10, 1 );
+			$this->add_action( 'daily_event',			array($this, 'purge_logs'), 10, 1 );
 
 			/**
 			 * filter {classname}_debugging add to the debugging arrays
 			 * @return	array	extended array with [ extension_name => [key=>value array] ]
 			 */
-			$this->add_filter( 'debugging', 			array($this, 'debug_debugging'));
+			$this->add_filter( 'debugging',				array($this, 'debug_debugging'),5);
 
 			/**
 			 * filter {classname}_debuglog get the debugging log
 			 * @return	array	extended array with [ extension_name => [key=>value array] ]
 			 */
-			$this->add_filter( 'debuglog', 				array($this, 'debug_logdata'));
+			$this->add_filter( 'debuglog',				array($this, 'debug_logdata'));
 		}
 
 
@@ -263,7 +254,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function options_form_post_wp_debugging($value, $fieldName, $metaData, $priorValue)
 		{
-			if ($value == $priorValue) return $value; 	// no change
+			if ($value == $priorValue) return $value;	// no change
+			// wpConfig set in debugging.options.php
 			if (!$this->wpConfig) return $value;		// no configurator
 
 			foreach (['WP_DEBUG','WP_DEBUG_DISPLAY','WP_DEBUG_LOG'] as $wpdebug)
@@ -273,21 +265,19 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					case 'WP_DEBUG_LOG':	// retain debug.log path if set
 						$wp_debug_log = (defined('WP_DEBUG_LOG')) ? WP_DEBUG_LOG : false;
 						$path = (!is_bool($wp_debug_log))
-							? WP_DEBUG_LOG
+							? $this->wpConfig->get_value( 'constant', 'WP_DEBUG_LOG' )
 							: $this->get_option('wp_debug_log',null);
-						if (in_array($wpdebug,$value)) { 	// true
+						if (in_array($wpdebug,$value)) {	// true
 							if ($path) {
-								$this->wpConfig->update( 'constant', $wpdebug, $path );
+								$this->wpConfig->update( 'constant', $wpdebug, $path, ['raw'=>true] );
 							} else {
 								$this->wpConfig->update( 'constant', $wpdebug, 'TRUE', ['raw'=>true] );
 							}
 						} else {							// false
 							$this->wpConfig->update( 'constant', $wpdebug, 'FALSE', ['raw'=>true] );
 						}
-						if ($path && $wp_debug_log !== true) {
+						if ($path && !is_bool($wp_debug_log)) {
 							$this->update_option('wp_debug_log',$path);
-						} else {
-							$this->delete_option('wp_debug_log');
 						}
 						break;
 					default:
@@ -317,36 +307,22 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 
 		/**
-		 * capture wp 'doing it wrong' errors - doing_it_wrong_run hook
-		 *
-		 * @param string $function the function name
-		 * @param string $message the message
-		 * @param string $version  the WP version
-		 * @return void
-		 */
-		public function capture_doing_it_wrong($function, $message, $version)
-		{
-			$error_message 	= sprintf('doing_it_wrong::%1$s %2$s %3$s',$function,$message,$version);
-			$this->wpData[] = $error_message;
-			$backtraceTo = $this->get_option('debug_backtrace');
-			$error_trace 	= debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,$backtraceTo);
-			$this->plugin->logError($error_trace,$error_message);
-		}
-
-
-		/**
-		 * capture wp 'deprecated' errors - several deprecated_*_run hooks
+		 * capture wp 'deprecated' & 'doing_it_wrong' errors
 		 *
 		 * @param $args arguments vary by hook being captured
 		 * @return void
 		 */
-		public function capture_deprecated(...$args)
+		public function capture_deprecated_wrong(...$args)
 		{
-			$error_message 	= basename(current_action(),'_run').'::'.rtrim(implode(' ',func_get_args()));
+			foreach($args as &$value) {
+				$value = $this->clean_filepath($value);
+			}
+			$error_source 	= basename(current_action(),'_run');
+			$error_trigger	= $error_source.'_trigger_error';
+			$error_message	= $error_source.'::'.implode(', ',$args);
+			$error_trace 	= [ 'trace'=>$this->print_backtrace(debug_backtrace( false )) ];
+			$this->plugin->logWrite(E_USER_DEPRECATED,$error_trace,$error_message,['@source'=>$error_source]);
 			$this->wpData[] = $error_message;
-			$backtraceTo = $this->get_option('debug_backtrace');
-			$error_trace 	= debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,$backtraceTo);
-			$this->plugin->logError($error_trace,$error_message);
 		}
 
 
@@ -375,35 +351,35 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 							$ref = new \ReflectionFunction($fn['function']);
 							$filters[] = [
 								'[function]'=> $fn['function'] . '()',
-								'[file]' 	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
+								'[file]'	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
 							];
 							break;
 						case is_array($fn['function']) && is_object($fn['function'][0]):
 							$ref = new \ReflectionMethod($fn['function'][0],$fn['function'][1]);
 							$filters[] = [
 								'[method] ' => get_class($fn['function'][0])  . '->' . $fn['function'][1] . '()',
-								'[file]' 	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
+								'[file]'	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
 							];
 							break;
 						case is_array($fn['function']):
 							$ref = new \ReflectionMethod($fn['function'][0],$fn['function'][1]);
 							$filters[] = [
 								'[static] ' => $fn['function'][0]  . '::' . $fn['function'][1] . '()',
-								'[file]' 	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
+								'[file]'	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
 							];
 							break;
 						case $fn['function'] instanceof \Closure:
 							$ref = new \ReflectionFunction($fn['function']);
 							$filters[] = [
 								'[closure]' => 'function()',
-								'[file]' 	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
+								'[file]'	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
 							];
 							break;
 						case is_object($fn['function']):
 							$ref = new \ReflectionMethod($fn['function'],'__invoke');
 							$filters[] = [
 								'[invokable]' => get_class($fn['function']) . '()',
-								'[file]' 	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
+								'[file]'	=> str_replace(ABSPATH,'',$ref->getFileName()).'('.$ref->getStartLine().')'
 							];
 							break;
 						default:
@@ -413,47 +389,15 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					}
 				}
 			}
-			$this->plugin->logData(
+			$this->plugin->logWrite(E_USER_NOTICE,
 				[
-				//	'Hooks'	=>	max(0, (count($wp_filter['heartbeat_received']->callbacks)-1) ),
+				//	'Hooks' =>	max(0, (count($wp_filter['heartbeat_received']->callbacks)-1) ),
 					'Callbacks'		=>	$filters,
 					'Input Data'	=>	$data,
-					'Response Keys'	=>	array_keys($response),
+					'Response Keys' =>	array_keys($response),
 					'Screen Id'		=>	$screen_id,
 				],'WP_Heartbeat API');
 			return $response;
-		}
-
-
-		/**
-		 * {pluginName}_log_write called from plugin->log...
-		 *
-		 * @param array argument array
-		 *  	int		$level - log level (LogLevel::PHP_*)
-		 *  	mixed	$var - variable being logged
-		 *  	string	$context - context string
-		 *  	float	$mtime - mico-time (optional)
-		 * @return void
-		 */
-		public function save_data_array($args)
-		{
-			$this->saveData(...$args);
-		}
-
-
-		/**
-		 * {pluginName}_log_write called from plugin->log...
-		 *
-		 * @param array argument array
-		 *  	int		$level - log level (LogLevel::PHP_*)
-		 *  	mixed	$var - variable being logged
-		 *  	string	$context - context string
-		 *  	float	$mtime - mico-time (optional)
-		 * @return void
-		 */
-		public function write_log_array($args)
-		{
-			$this->logWrite(...$args);
 		}
 
 
@@ -477,9 +421,9 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			add_action( 'admin_footer', function()
 			{
 				/**
-				 * 	filter {pluginname}_debugging get debugging information
-				 * 	param	array 	current array
-				 * 	return	array	extended array with [ extension_name => [key=>value array] ]
+				 *	filter {pluginname}_debugging get debugging information
+				 *	param	array	current array
+				 *	return	array	extended array with [ extension_name => [key=>value array] ]
 				 */
 				$response = $this->apply_filters( 'debugging', [] );
 				foreach ($response as $name => $value)
@@ -508,14 +452,14 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			echo "<pre style='font-size:1em; line-height:1.1em; background:#f3fbdd;'>\n";
 
 			/**
-			 * 	filter {pluginname}_debugging get debugging information
-			 * 	param	array 	current array
-			 * 	return	array	extended array with [ extension_name => [key=>value array] ]
+			 *	filter {pluginname}_debugging get debugging information
+			 *	param	array	current array
+			 *	return	array	extended array with [ extension_name => [key=>value array] ]
 			 */
 			$response = $this->apply_filters( 'debugging', [] );
 			foreach ($response as $name => $value)
 			{
-				echo "<details><summary>+{$name}</summary>".@var_export($value,true)."</details>\n";
+				echo "<details><summary>+{$name}</summary>".var_export($value,true)."</details>\n";
 			}
 			echo "</pre></details>\n";
 		}
@@ -524,7 +468,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * purge old log files - (never runs for network_admin)
 		 *
-		 * @return 	void
+		 * @return	void
 		 */
 		public function purge_logs($asNetAdmin=false)
 		{
@@ -541,7 +485,6 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			{
 				$fsLogPath = $fs->find_folder($this->logPath);
 				$fsIterator = $fs->dirlist($fsLogPath,false);
-				$this->logDebug($fsIterator,__METHOD__);
 				foreach ($fsIterator as $file)
 				{
 					if ( $file['type'] == 'f' && ($timeNow - $file['lastmodunix']) > $timeOld )
@@ -572,23 +515,26 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * Get the debugging array for our own filter
 		 *
-		 * @param	array 	current debugging array
+		 * @param	array	current debugging array
 		 * @return	array	extended array with [ extension_name => [key=>value array] ]
 		 */
 		public function debug_debugging($debugging_array)
 		{
-			$debugging_array['Plugin Detail'] = array_merge($this->plugin->pluginHeaders(),array(
-				"Plugin Updated"	=> wp_date($this->plugin->date_time_format,filemtime($this->plugin->pluginHeader('PluginDir'))),
-				"Plugin Environment"=> $this->get_option('siteEnvironment'),
-				"WP Admin"			=> (is_admin()) ? 'True' : 'false',
-				"WP Multi Site"		=> (is_multisite()) ? 'True' : 'false',
-				"WP Network Admin"	=> (is_network_admin()) ? 'True' : 'false',
-				"WP Current User"	=> ($this->current_user) ? $this->current_user->data : 'none',
-				"WP Page Parent"	=> (function_exists('get_admin_page_parent')) ? get_admin_page_parent() : 'undefined',
-			));
+			$debugging_array['Plugin Detail'] = array_merge(
+				[ 	"Plugin Header"		=> $this->plugin->pluginHeaders() ],
+				[
+					"Plugin Updated"	=> wp_date($this->plugin->date_time_format,filemtime($this->plugin->pluginHeader('PluginDir'))),
+					"Plugin Environment"=> $this->get_option('siteEnvironment'),
+					"WP Admin"			=> (is_admin()) ? 'True' : 'false',
+					"WP Multi Site"		=> (is_multisite()) ? 'True' : 'false',
+					"WP Network Admin"	=> (is_network_admin()) ? 'True' : 'false',
+				//	"WP Current User"	=> ($this->current_user) ? $this->current_user->data : 'none',
+					"WP Page Parent"	=> (function_exists('get_admin_page_parent')) ? get_admin_page_parent() : 'undefined',
+				]
+			);
 
 			/*
-			$debugging_array['Plugin Options'] 	= (is_network_admin()) ? $this->plugin->networkOptions : $this->plugin->options;
+			$debugging_array['Plugin Options']	= (is_network_admin()) ? $this->plugin->networkOptions : $this->plugin->options;
 
 			if (method_exists($this->plugin, 'getOptionMetaData')) {
 				$debugging_array['Option Metadata'] = (is_network_admin()) ? $this->plugin->getNetworkMetaData() : $this->plugin->getOptionMetaData();
@@ -614,7 +560,23 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 			if (!empty($this->logData)) {
 				$debugging_array['Log Data'] = $this->logData;
-				$debugging_array['Log Data'][] = 'PHP Memory Used: '.round((memory_get_peak_usage(false) / 1024) / 1024).'M of '.ini_get('memory_limit');
+				$debugging_array['Log Data'][] = 'Peak Memory Used: '.round((memory_get_peak_usage(true) / 1024) / 1024).'M of '.ini_get('memory_limit');
+			}
+
+			if ( class_exists( '\WP_CONSENT_API' ) ) {
+				try {
+					$debugging_array['WP Consent'] = [
+						'Cookie Prefix' => \WP_CONSENT_API::$config->consent_cookie_prefix(),
+						'Consent Type'	=> wp_get_consent_type(),
+						'Categories'	=> [],
+					];
+					foreach(\WP_CONSENT_API::$config->consent_categories() as $category) {
+						$debugging_array['WP Consent']['Categories'][$category] = wp_has_consent($category);
+					}
+				//	if ($cookies = wp_get_cookie_info()) {
+				//		$debugging_array['WP Consent']['Cookie Info'] = $cookies;
+				//	}
+				} catch (\Throwable $e) {}
 			}
 
 		//	$debugging_array['Hooks'] = $this->getRegisteredHooks('the_content');
@@ -638,108 +600,227 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 
 		/**
+		 * show error reporting strings
+		 *
+		 * @param int	$errReporting or error_reporting()
+		 * @param bool	$asArray return array (else string)
+		 *
+		 * @return array|string
+		 */
+		public function showErrorReporting(int $errReporting=0, bool $asArray = false)
+		{
+			$errReporting = $errReporting ?: error_reporting();
+			$errLevels = array_filter(LogLevel::PHP_TO_STRING, function($k) use($errReporting)
+				{
+					return (bool)( ($k & $errReporting) && $k != E_ALL);
+				}, ARRAY_FILTER_USE_KEY
+			);
+			if (!$asArray) {
+				$errLevels = implode(', ',$errLevels);
+			}
+			//$this->plugin->logDebug($errLevels,'error reporting');
+			return $errLevels;
+		}
+
+
+		/**
 		 * set PHP error handler
 		 *
 		 * @return void
 		 */
 		private function setErrorhandler()
 		{
-			set_error_handler(array($this, 'phpErrorHandler'), ($this->is_option('debug_php_errors','All')) ? E_ALL : error_reporting() );
-			//set_exception_handler(array($this, 'phpErrorHandler'));				// Uncaught exceptions (not recommended)
+			ini_set('zend.exception_ignore_args', 0);
+			if ($this->apply_filters('set_error_handler', true)) {
+				$this->previous_error_handler =
+					set_error_handler( [$this, 'phpErrorHandler'], ($this->is_option('debug_php_errors','all')) ? E_ALL : error_reporting() );
+			}
+			if ($this->apply_filters('set_exception_handler', true)) {
+				$this->previous_exception_handler =
+					set_exception_handler( [$this, 'phpErrorHandler'] );	// Uncaught exceptions
+			}
 		}
 
 
 		/**
 		 * Handle PHP errors
 		 *
+		 * @param $exception 	- exception or error type
+		 * @param 				- error message
+		 * @param 				- error file
+		 * @param 				- error line
 		 * @return void
 		 */
-		public function phpErrorHandler()
+		public function phpErrorHandler($exception)
 		{
-			$backtraceTo = $this->get_option('debug_backtrace');
-
 			if (error_reporting() == 0) return true;	// ignore '@' functions
-			$errReorting = error_reporting(0);
+			$errReporting 				= error_reporting(0);
+			$context					= ['@source' => __FUNCTION__];
+			$error 						= array();
 
-			try {
-				$error = array();
-				if (func_num_args() > 3) 					// PHP error
-				{
-					list($error['type'], $error['message'], $error['file'], $error['line']) = func_get_args();
-					if (($this->logLevel & LogLevel::PHP_DEBUG)) {
-						$error['trace']	 = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,$backtraceTo);
-					}
+			if ( $exception instanceof \Throwable )		// exception object
+			{
+				$level 					= E_ERROR;
+				$error['type'] 			= 'Uncaught '.get_class($exception);
+				$error['message']		= $exception->getMessage();
+				$error['file']			= $this->clean_filepath($exception->getFile());
+				$error['line']			= $exception->getLine();
+				if ($code = $exception->getCode()) {
+					$error['code']		= $code;
 				}
-				else 										// exception object
-				{
-					$exc = func_get_arg(0);
-					$error['type']		= E_UNCAUGHT_EXCEPTION;
-					$error['code']		= $exc->getCode();
-					$error['message']	= $exc->getMessage();
-					$error['file']		= $exc->getFile();
-					$error['line']		= $exc->getLine();
-					if (($this->logLevel & LogLevel::PHP_DEBUG)) {
-						$error['trace']	= array_slice($exc->getTrace(),0,$backtraceTo);
-					}
+				if (($this->logLevel & LogLevel::LOG_DEBUG)) {
+					$error['trace'] 	= $this->print_backtrace($exception->getTrace());
 				}
-				$level = $error['type'];
-				$error['type'] = $this->phpErrorLevel($error['type']);
-				$this->plugin->log_write($level,$error,'php_error_handler');
-			} catch (\Throwable $e) {
-				restore_error_handler();
-				trigger_error($e->getMessage()." (".$e->getLine()." of ".$e->getFile().")",LogLevel::PHP_WARNING);
-				$this->setErrorhandler();
+				$context['exception'] 	= $exception; 	// as per PSR-3
+			}
+			else										// PHP error
+			{
+				$level 					= $exception;
+				list(
+					$error['type'],
+					$error['message'],
+					$error['file'],
+					$error['line']
+				) = func_get_args();
+				$error['type'] 			= ucwords(str_replace('_',' ', strtolower(substr(LogLevel::PHP_TO_STRING[$level],2))));
+				$error['file'] 			= $this->clean_filepath($error['file']);
+				if (($this->logLevel & LogLevel::LOG_DEBUG)) {
+					$error['trace']	 	= $this->print_backtrace(debug_backtrace(false),$error);
+				}
+				$context['php_error'] 	= $error;
 			}
 
-			$errType = ucwords( str_replace('_',' ', strtolower( substr($error['type'],2) ) ) );
-			$this->phpData[] = "PHP {$errType}: {$error['message']} in {$error['file']} on line {$error['line']}";
+			$this->plugin->logWrite($level,$error,$error['message'],$context);
 
-			error_reporting($errReorting);
-			return false; 									// allow PHP to handle the error
+			if (isset($context['exception']))
+			{
+				$this->logClose();
+				if ( $this->previous_exception_handler ) {
+					call_user_func( $this->previous_exception_handler, $context['exception'] );
+				} else {
+					throw $context['exception'];
+				}
+				exit(1);
+			}
+
+			$this->phpData[] = "PHP {$error['type']}: {$error['message']} in {$error['file']} on line {$error['line']}";
+			error_reporting($errReporting);
+			return false;								// allow PHP to handle the error
 		}
 
 
 		/**
-		 * convert PHP error level to string constant name
+		 * strip leading directory from file
 		 *
-		 * @param int $level PHP error level
-		 * @return string - friendly error level name
+		 * @return void
 		 */
-		private function phpErrorLevel($level): string
+		public function clean_filepath($file)
 		{
-			return LogLevel::PHP_TO_STRING[$level] ?? 'E_UNKNOWN_'.(string)$level;
+			static $truncate_paths;
+
+			if ( ! isset( $truncate_paths ) ) {
+				$truncate_paths = array(
+					wp_normalize_path( WP_CONTENT_DIR ),
+					wp_normalize_path( ABSPATH ),
+				);
+			}
+
+			return str_replace( $truncate_paths, '', wp_normalize_path( $file ) );
 		}
 
 
 		/**
-		 * PHP error level to print string
+		 * print_backtrace
+		 * like wp_debug_backtrace_summary
 		 *
-		 * @return int - log level
+		 * @return void
 		 */
-		private function phpLogString($level): string
+		public function print_backtrace($trace,$error='')
 		{
-			return self::PHP_TO_PRINT[$level] ?? (string)$level;
-		}
+			$caller      	= array();
 
+			foreach ( $trace as $call )
+			{
+				$file = $this->clean_filepath( $call['file'] ?? __FILE__ );
+				$line = $call['line'] ?? 0;
+
+				if ($error && $error['file'] == $file && $error['line'] == $line) {
+					continue; 							// already reported
+				}
+				$path = $file."({$line})";
+
+				$current = $call['args'] ?? [];
+				array_walk($current, function(&$value, $key) {
+					if (is_bool($value)) {
+						$value = ($value) ? 'true' : 'false';
+					} else if (is_null($value)) {
+						$value = 'null';
+					} else if (is_string($value)) {
+						$value = "'".$this->clean_filepath($value)."'";
+					} else if (!is_scalar($value)) {
+						$value = gettype($value);
+					}
+				});
+				$call['args'] = $current;
+
+				if ( isset( $call['class'] ) ) {
+					if ( in_array($call['class'],[__CLASS__,'Debug_Bar_PHP','WP_Hook']) ) {
+						continue; 						// Filter out calls.
+					}
+					$current = $path.": {$call['class']}{$call['type']}{$call['function']}" .
+						"(".implode(',',$call['args']).")";
+				} else {
+					$current = $path.": {$call['function']}" .
+						"(".implode(',',$call['args']).")";
+				}
+				$caller[] = $current;
+			}
+
+			if ($backtraceTo = $this->get_option('debug_backtrace')) {
+				$caller = array_slice($caller, 0, $backtraceTo);
+			}
+
+			return $caller;
+		}
 
 		/**
 		 * save data to output on page footer
 		 *
-		 * @param int		$level - log level (LogLevel::PHP_*)
-		 * @param mixed		$var - variable being logged
-		 * @param string	$context - context string
-		 * @param float		$mtime - mico-time (optional)
-		 * @param string	$source - used internally
+		 * @param array [level, message, context, code]
 		 * @return bool
 		 */
-		private function saveData($level, $var, $context='', $mtime=null, $source='')
+		public function page_log_data(array $data)
 		{
-			if ( !($this->logLevel & LogLevel::setLoggingLevel($level)) || $context == 'php_error_handler')
-			{
-				return;
-			}
+			$this->logToPage(
+				$data['level'],
+				$data['context']['@variable'] 	?? '',
+				$data['message'],
+				$data['context']['@time'] 		?? microtime(true),
+				$data['context']['@source'] 	?? '',
+				$data['print_code'],
+			);
+		}
 
-			$this->logData[] = $this->logMessage($var, $context, false);
+
+		/**
+		 * Save to the page log (called from 'page_log_data' action)
+		 * we don't actually "write" anything but prep the string and add it to the text string.
+		 *
+		 * @param int		 $level - log level (LogLevel::LOG_*)
+		 * @param mixed		 $var - variable being logged
+		 * @param string	 $message - message/context string
+		 * @param float		 $mtime - mico-time (optional)
+		 * @param string	 $source - source of log call or  internally set string
+		 * @param int|string $code - print_code (text)
+		 * @return bool
+		 */
+		private function logToPage($level, $var, $message='', $mtime=null, $source='', $code = '')
+		{
+			if ( !($this->logLevel & $level) || $source == 'phpErrorHandler')
+			{
+				return;	// we already logged this in $phpData
+			}
+			$this->logData[] =	trim( $message.": ".$this->logVariable($var,false), ' :' );
 		}
 
 
@@ -747,26 +828,46 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 * Write to the log file.
 		 * we don't actually "write" anything but prep the string and add it to the text string.
 		 *
-		 * @param int		$level - log level (LogLevel::PHP_*)
-		 * @param mixed		$var - variable being logged
-		 * @param string	$context - context string
-		 * @param float		$mtime - mico-time (optional)
-		 * @param string	$source - used internally
+		 * @param array [level, message, context, code]
 		 * @return bool
 		 */
-		private function logWrite($level, $var, $context='', $mtime=null, $source='')
+		public function file_log_data(array $data)
 		{
-			if ( !($this->logLevel & LogLevel::setLoggingLevel($level)) )
+			$this->logToFile(
+				$data['level'],
+				$data['context']['@variable'] 	?? '',
+				$data['message'],
+				$data['context']['@time'] 		?? microtime(true),
+				$data['context']['@source'] 	?? '',
+				$data['print_code'],
+			);
+		}
+
+
+		/**
+		 * Save to the file log (called from 'file_log_data' action)
+		 * we don't actually "write" anything but prep the string and add it to the text string.
+		 *
+		 * @param int		 $level - log level (LogLevel::LOG_*)
+		 * @param mixed		 $var - variable being logged
+		 * @param string	 $message - message/context string
+		 * @param float		 $mtime - mico-time (optional)
+		 * @param string	 $source - source of log call or  internally set string
+		 * @param int|string $code - print_code (text)
+		 * @return bool
+		 */
+		private function logToFile($level, $var, $message='', $mtime=null, $source='', $code = '')
+		{
+			if ( !($this->logLevel & $level) )
 			{
 				return;
 			}
 
 			// write to system log file
-			if ($this->is_option('debug_to_file','server') && $context != 'php_error_handler')
+			if ($this->is_option('debug_to_file','server') && $source != 'phpErrorHandler')
 			{
-				$message = $this->logMessage($var, $context, false);
-				$message = substr($message, 0, $this->logLength);
-				error_log( $message );
+				$errmsg = trim( $message.": ".$this->logVariable($var,false), ' :' );
+				error_log( substr($errmsg, 0, $this->logLength) );
 			}
 
 			// write to plugin log file
@@ -778,59 +879,17 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				}
 
 				if (!$mtime) $mtime = microtime(true);
-				list($sec,$usec) = explode('.',sprintf('%01.4f',$mtime));
+				$time = new \DateTime("@{$mtime}");
+				$time->setTimezone(wp_timezone());
+				$time = substr($time->format("H:i:s.u"),0,13);
 
-				$this->logText .= $this->reqBreak." ".sprintf('%-20s %-10s [%s] - ', $source, $this->phpLogString($level), wp_date("Y-m-d H:i:s.",$sec).$usec);
-				$this->logText .= $this->logMessage($var, $context, true) . "\n";
+				$logLine 		= 	sprintf('%-20.20s %-10.10s [%s] - ', $source, $code, $time) .
+									trim( $message.": ".$this->logVariable($var,true), ' :' );
+
+				$this->logText .= (empty($this->logText))
+					? "+++ " 	. $logLine . "\n"
+					: "--- " 	. $logLine . "\n";
 			}
-		}
-
-
-		/**
-		 * get log data message
-		 *
-		 * @param mixed	$var - variable being logged
-		 * @param string|array $context - context string or key=>value array
-		 * @param bool $detailed - output detail object data
-		 * @return bool
-		 */
-		private function logMessage($var, $context='', $detailed=true)
-		{
-			if (is_array($context))
-			{
-				$var = $this->psrInterpolate($var,$context);
-				$context = $context['log_context'] ?? '';
-			}
-
-			return trim( (string) $context.": ".$this->logVariable($var,$detailed) );
-		}
-
-
-		/**
-		 * Interpolates context values into the message placeholders.
-		 *
-		 * @param mixed	$var - variable being logged
-		 * @param array $context - key=>value array
-		 * @return string
-		 */
-		private function psrInterpolate($var, array $context = array())
-		{
-			if (is_array($var) || (is_object($var) && !method_exists($var, '__toString')))
-			{
-				return $var;
-			}
-			// build a replacement array with braces around the context keys
-			$replace = array();
-			foreach ($context as $key => $val)
-			{
-				// check that the value can be cast to string
-				if (!is_array($val) && (!is_object($val) || method_exists($val, '__toString')))
-				{
-					$replace['{' . $key . '}'] = $val;
-				}
-			}
-			// interpolate replacement values into the message and return
-			return strtr($var, $replace);
 		}
 
 
@@ -853,10 +912,13 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					return 'NULL';
 					break;
 				case is_object($var):
-					if (method_exists($var, '__toString')) {
-						return $var->__toString();
+					if ($var instanceof \DateTimeInterface) {
+						return $var->format(\DateTime::RFC3339);
 					}
-					if (!$detailed || !($this->logLevel >= LogLevel::PHP_ERROR)) {
+					if (method_exists($var, '__toString')) {
+						return (string)$var;
+					}
+					if (!$detailed) {
 						return ucfirst(\gettype($var).' '.\get_class($var));
 					}
 					$reflect = new \ReflectionObject($var);
@@ -879,11 +941,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					if (!$detailed) {
 						return ucfirst(\gettype($var));
 					}
-					try {
-						return @var_export($var,true);
-					} catch (\Throwable $e) {
-						return @var_export($e,true);
-					}
+					return str_replace("\n\n","\n",trim(print_r($var,true)));
 					break;
 			}
 		}
@@ -917,32 +975,50 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			}
 
 			if (!file_exists($file)) {
-				$this->add_admin_notice($this->pluginName.' Debugging: Unable to access log file','error');
+				$this->plugin->add_admin_notice($this->pluginName.' Debugging: Unable to access log file','error');
 				trigger_error('unable to access log file '.$file,E_USER_WARNING);
 				return false;
 			}
 
 			$this->logFile = $file;
 
-			if ($this->plugin->isAjaxRequest()) {
-				$this->reqType = 'Ajax';
-				$this->reqBreak = '---';
+			if ($this->plugin->doing_ajax()) {
+				$this->reqType = 'ajax';
+			} else if (wp_doing_cron()) {
+				$this->reqType = 'cron';
+			} else if (wp_is_json_request()) {
+				$this->reqType = 'rest';
+			} else if (wp_is_xml_request()) {
+				$this->reqType = 'xml';
 			} else {
-				$this->reqType = 'Page';
-				$this->reqBreak = '+++';
+				$this->reqType = is_ssl() ? 'https' : 'http';
 			}
-
-			$this->logText .= "\n".str_repeat($this->reqBreak,30)."\n";
 
 			$startTime = $this->plugin->pluginHeader('RequestTime');
 
-			$headers = ($this->logLevel & LogLevel::PHP_DEBUG) ? $this->getHeaders() : $this->reqBreak;
+			$date = new \DateTime("@{$startTime}");
+			$date->setTimezone(wp_timezone());
+			$date = $date->format("D M d Y T");
 
-			$this->logWrite(LogLevel::PHP_ALWAYS, $headers, $this->requestURL(), $startTime, $this->reqType." Request");
-
-			if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST)) {
-				$this->logWrite(LogLevel::PHP_DEBUG, $_POST, 'Post values', $startTime);
+			$request_data = [];
+			if ($this->logLevel & LogLevel::LOG_DEBUG)
+			{
+				if ($headers = $this->getHeaders()) {
+					$request_data['Request Headers']	= $headers;
+				}
+				if (!empty($_REQUEST)) {
+					$request_data['Request Values']		= $_REQUEST;
+				}
 			}
+
+			$this->logToFile(
+				LogLevel::LOG_ALWAYS,
+				$request_data ?: '',
+				$this->requestURL(),
+				$startTime,
+				$date,
+				'via '.$this->reqType,
+			);
 
 			\add_action( 'shutdown', array($this,'logClose'),PHP_INT_MAX );
 			return true;
@@ -957,23 +1033,44 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function logClose()
 		{
-			$mtime = microtime(true);
-			list($sec,$usec) = explode('.',sprintf('%01.4f',$mtime));
+			if (!$this->logFile) return;
+
+			$stopTime = microtime(true);
 
 			if (class_exists('\EarthAsylumConsulting\eacDoojiggerActionTimer',false)) {
-				$this->logWrite(LogLevel::PHP_DEBUG,\EarthAsylumConsulting\eacDoojiggerActionTimer::getArray(),'WordPress Timing');
+				$this->logToFile(
+					LogLevel::LOG_DEBUG,
+					\EarthAsylumConsulting\eacDoojiggerActionTimer::getArray(),
+					'WordPress Timing',
+					$stopTime
+				);
 			}
 
-			$this->logWrite(LogLevel::PHP_DEBUG,round((memory_get_peak_usage(false) / 1024) / 1024).'M of '.ini_get('memory_limit'),'PHP Memory Used');
+			$headers = ($this->logLevel & LogLevel::LOG_DEBUG) ? ['Response Headers' => headers_list()] : '';
 
-			$headers = ($this->logLevel & LogLevel::PHP_DEBUG) ? headers_list() : $this->reqBreak;
+			$startTime	= $this->plugin->pluginHeader('RequestTime');
+			$stopTime	= microtime(true);
 
-			$this->logWrite(LogLevel::PHP_ALWAYS, $headers, $this->requestURL(), null, $this->reqType." Exit");
+			$unit=array('b','K','M','G');
+			$memory = memory_get_peak_usage(true);
+			$memory = round($memory / pow(1024,($i=floor(log($memory,1024)))),2).$unit[$i];
 
-			$this->logText .= str_repeat($this->reqBreak,30)."\n";
+			$this->logToFile(
+				LogLevel::LOG_ALWAYS,
+				$headers,
+				sprintf("Duration: %01.4f Seconds, Peak Memory Used: %s of %s",
+					($stopTime - $startTime),
+					$memory,
+					ini_get('memory_limit')
+				),
+				$stopTime,
+				"exit ".$this->reqType
+			);
+
+			$this->logText .= str_repeat('-',100)."\n";
 
 			// wp_filesystem has no way to append to a file
-			file_put_contents($this->logFile, $this->logText, FILE_APPEND|LOCK_EX);
+			file_put_contents($this->logFile, $this->logText."\n", FILE_APPEND|LOCK_EX);
 			$this->logFile = $this->logPath = $this->logText = false;
 		}
 
@@ -989,10 +1086,10 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			$http = (is_ssl()) ? "https://" : "http://";
 
 			if ( (PHP_SAPI === 'cli') || (defined('WP_CLI') && WP_CLI) ) {
-				$_SERVER['REQUEST_METHOD'] 	= 'CLI';
-				$_SERVER['HTTP_HOST'] 		= parse_url(home_url(),PHP_URL_HOST);
-				$_SERVER['SERVER_NAME'] 	= gethostname();
-				$_SERVER['REQUEST_URI'] 	= (!empty($argv)) ? implode(' ',$argv) : '';
+				$_SERVER['REQUEST_METHOD']	= 'CLI';
+				$_SERVER['HTTP_HOST']		= parse_url(home_url(),PHP_URL_HOST);
+				$_SERVER['SERVER_NAME']		= gethostname();
+				$_SERVER['REQUEST_URI']		= (!empty($argv)) ? implode(' ',$argv) : '';
 			}
 
 			return sanitize_text_field( $_SERVER['SERVER_PROTOCOL'].' '.$_SERVER['REQUEST_METHOD'].' '.$http.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'] );
@@ -1006,7 +1103,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		private function getHeaders()
 		{
-			if (function_exists('getallheaders')) {
+			if (function_exists('getallheaders')) {		// apache_request_headers
 				$headers = getallheaders();
 			} else {
 				$headers = [];
@@ -1033,12 +1130,12 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 * @param object $fs WP_Filesystem
 		 * @param string $logPath full path to log folder
 		 * @param bool $exists log path must already exists
-		 * @return 	bool
+		 * @return	bool
 		 */
 		private function isWriteablePath($fs,$logPath,$exists=false)
 		{
 			if ($exists && !is_dir($logPath)) return false;
-			if  ($fs)
+			if	($fs)
 			{
 				return (($fsLogPath = $fs->find_folder($logPath)) && $fs->is_writable($fsLogPath))
 					? $logPath
@@ -1046,7 +1143,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			}
 			else
 			{
-				return (is_writable($fsLogPath))
+				return (is_writable($logPath))
 					? $logPath
 					: false;
 			}
@@ -1056,13 +1153,13 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * set (create) log file path
 		 *
-		 * @return 	bool
+		 * @return	bool
 		 */
 		private function setLoggingPathname($create=false,$asNetAdmin=false)
 		{
 			if (! $this->is_option('debug_to_file_allowed')) return false;
 
-			if  (! ($fs = $this->fs->load_wp_filesystem()) ) return false;
+			if	(! ($fs = $this->fs->load_wp_filesystem()) ) return false;
 			$create = $create && $fs;
 
 			$logPath = false;
@@ -1095,8 +1192,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 			if (is_multisite())
 			{
-				$logPath 	 = trailingslashit($logPath);
-				$logPath 	.= (is_network_admin() || $asNetAdmin)
+				$logPath	 = trailingslashit($logPath);
+				$logPath	.= (is_network_admin() || $asNetAdmin)
 								? sanitize_text_field(\get_network_option(null,'site_name'))
 								: sanitize_text_field(\get_option('blogname'));
 				if (!is_dir($logPath) && $create)
@@ -1111,8 +1208,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 			if (!is_writable($logPath))
 			{
-				$this->add_admin_notice($this->pluginName.' Debugging: Unable to access log path','error',
-					'File logging has been disabled');
+				$this->plugin->add_admin_notice($this->pluginName.' Debugging: Unable to access log path','error',
+					$logPath.'<br>File logging has been disabled');
 				trigger_error($this->pluginName.': unable to access log path '.$logPath,E_USER_WARNING);
 				$this->update_option('debug_to_file_allowed','no');
 				return false;

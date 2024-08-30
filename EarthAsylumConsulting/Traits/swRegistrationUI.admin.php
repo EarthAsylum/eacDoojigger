@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0523.1
+ * @version 	24.0821.1
  */
 
 trait swRegistrationUI
@@ -182,7 +182,9 @@ trait swRegistrationUI
 			// pass registration key in plugin updater request (from plugin_update.trait)
 			$this->add_filter( 'plugin_update_parameters', function($parameters)
 				{
-					$parameters['requestHeaders']['Authorization'] 	= "token ".base64_encode($this->getRegistrationKey());
+					if ($RegistrationKey = $this->getRegistrationKey()) {
+						$parameters['requestHeaders']['Authorization'] 	= "token ".base64_encode($RegistrationKey);
+					}
 					return $parameters;
 				}
 			);
