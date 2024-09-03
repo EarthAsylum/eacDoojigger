@@ -15,7 +15,7 @@ namespace EarthAsylumConsulting\Traits;
  * Used to create a new .zip archive from a directory
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger
+ * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2021 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		2.x

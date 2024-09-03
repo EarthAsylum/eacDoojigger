@@ -22,7 +22,7 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	/**
 	 * @trait eacDoojigger, loads only admin methods
 	 */
-	use \EarthAsylumConsulting\Plugin\eacDoojigger_administration;
+	use \EarthAsylumConsulting\Plugin\eacDoojigger_admin_traits;
 
 	/**
 	 * @var int folder permission

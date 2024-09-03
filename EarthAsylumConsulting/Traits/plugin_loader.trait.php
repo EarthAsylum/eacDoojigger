@@ -18,7 +18,7 @@ namespace EarthAsylumConsulting\Traits
 	 * or {classname}_extensions_loaded or {classname}_ready
 	 *
 	 * @category	WordPress Plugin
-	 * @package		{eac}Doojigger
+	 * @package		{eac}Doojigger\Traits
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
 	 * @version		24.0817.1

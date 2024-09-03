@@ -83,6 +83,7 @@ if ( is_network_admin_request() )
 {
 	/*
 	 * Back-End Network Administration context
+     * @ignore
 	 */
 	abstract class abstract_context extends \EarthAsylumConsulting\abstract_backend
 	{
@@ -98,6 +99,7 @@ else if ( is_admin_request() )
 {
 	/*
 	 * Back-End Administration context
+     * @ignore
 	 */
 	abstract class abstract_context extends \EarthAsylumConsulting\abstract_backend
 	{
@@ -112,7 +114,7 @@ else if ( is_admin_request() )
 else
 {
 	/**
-	 * Plugin context switch front-end (public) vs back-end (administration) - {eac}Doojigger for WordPress
+	 * Plugin context switch front-end (public) vs back-end (administration)
 	 *
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger

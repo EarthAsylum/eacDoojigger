@@ -83,6 +83,7 @@ $this->registerExtensionOptions( $this->className,
 								'default'	=> 	'disabled',
 								'info'		=> 	"<small>* This does not effect PHP's error reporting or logging settings.</small>",
 								'help'		=> 	'When capturing PHP errors, capture all errors or only those designated by the PHP error reporting setting.',
+								'advanced'	=> 	true,
 							),
 		'debug_depricated' 	=> array(
 								'type'		=> 	'checkbox',

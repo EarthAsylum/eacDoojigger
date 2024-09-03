@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * siteEnvironment, adminSettingsMenu, UninstallOptions, emailFatalNotice, backupOptions, restoreOptions, backupNetwork, restoreNetwork, clearCache, networkCache, networkActive
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger
+ * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		24.0424.1
@@ -167,6 +167,7 @@ trait standard_options
 	 *
 	 * @return 	array
 	 */
+/*
 	private function stdOptions_emailFatalNotice(): array
 	{
 		return [
@@ -179,6 +180,7 @@ trait standard_options
 			),
 		];
 	}
+*/
 
 
 	/**

@@ -1732,13 +1732,22 @@ abstract class abstract_backend extends abstract_core
 		// add clickable link to enable/disable advanced mode
 		if ($this->allowAdvancedMode())
 		{
-			$switchTo = ($this->isAdvancedMode()) ? 'disable' : 'enable';
+			$switchTo = ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
 			$href = $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' );
+/*
 			$h2a = preg_replace("|<span.*></span>|",
 					"<a href='{$href}'>".
 					"(<span class='tooltip dashicons dashicons-admin-settings' ".
-					"title='Click to {$switchTo} advanced mode'>".
+					"title='{$switchTo} advanced mode'>".
 					"</span>)</a>&nbsp;",
+					$h2a
+			);
+*/
+			$switchFr = ($this->isAdvancedMode()) ? 'Advanced' : 'Essentials';
+			$h2a = preg_replace("|</h2>|",
+					"<span style='float:right;font-size:.75em;font-weight:normal'>".
+					"( <a href='{$href}' data-tooltip title='{$switchTo} advanced mode'>{$switchFr}</a> )".
+					"</span></h2>",
 					$h2a
 			);
 		}

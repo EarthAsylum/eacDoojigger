@@ -5,7 +5,7 @@ namespace EarthAsylumConsulting;
  * {eac}DoojiggerPluginUpdater class - Manage {eac}Doojigger, derivative and extensioon software updates
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger Utilities\{eac}DoojiggerPluginUpdater
+ * @package		{eac}Doojigger\Utilities
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  * Version: 	1.0.0

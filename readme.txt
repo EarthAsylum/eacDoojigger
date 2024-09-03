@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             2.6.2
-Last Updated:           30-Aug-2024
+Last Updated:           03-Sep-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -416,8 +416,12 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.2 – August 30, 2024 =
+= Version 2.6.2 – September 3, 2024 =
 
++   Updated wpconfig-transformer to v1.3.6
++   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
++   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.
++   Changed advanced mode link on settings page (essentials|advanced).
 +   Reworked debugging extension and logging with new logger helper compatible with PSR-3 logging.
     +   See : https://eacdoojigger.earthasylum.com/how-to/#use-debugging-logger-methods
     +   New PSR-3 logging method : `$this->log( $level, $message, $context )`

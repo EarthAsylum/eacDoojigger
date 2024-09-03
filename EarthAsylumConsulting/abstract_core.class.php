@@ -60,6 +60,15 @@ abstract class abstract_core
 	 */
 	const NETWORK_OPTION_NAME			= 'network_options';
 
+	/**
+	 * @var array reserved options (not part of options array)
+	 */
+	const RESERVED_OPTIONS				= [
+		'uninstall_options',		// {classname}_uninstall_options for uninstall trait
+		'selected_update_channel',	// {classname}_selected_update_channel for plugin_update trait
+	//	'emailFatalNotice'			// {classname}_emailFatalNotice for recovery_mode_email - removed
+	];
+
 
 	/**
 	 * @var array plugin header values from the base file headers
@@ -228,8 +237,10 @@ abstract class abstract_core
 		$this->plugin			= $this;
 		$this->pluginName		= $this->getClassName();
 
-		$this->isReservedOption('uninstall_options',true);			// {classname}_uninstall_options for uninstall trait
-		$this->isReservedOption('selected_update_channel',true);	// {classname}_selected_update_channel for plugin_update trait
+		foreach (self::RESERVED_OPTIONS as $reserved)
+		{
+			$this->isReservedOption($reserved,true);
+		}
 
 		$this->load_all_plugin_options();
 		$this->load_all_network_options();
@@ -616,8 +627,8 @@ abstract class abstract_core
 					'RequiresEAC'	=> 'Requires EAC',			// The minimum required eacDoojigger version.
 					'RequiresWC'	=> 'WC requires at least',	// The lowest WooCommerce version that the plugin will work on.
 					'Author'		=> 'Author',				// The name of the plugin author.
-					'AuthorURI'		=> 'Author URI',			// The authorÕs website or profile on another website, such as WordPress.org.
-					'License'		=> 'License',				// The short name (slug) of the pluginÕs license (e.g. GPLv2).
+					'AuthorURI'		=> 'Author URI',			// The author's website or profile on another website, such as WordPress.org.
+					'License'		=> 'License',				// The short name (slug) of the plugin's license (e.g. GPLv2).
 					'LicenseURI'	=> 'License URI',			// A link to the full text of the license (e.g. https://www.gnu.org/licenses/gpl-2.0.html).
 					'TextDomain'	=> 'Text Domain',			// The gettext text domain of the plugin.
 					'DomainPath'	=> 'Domain Path',			// The domain path lets WordPress know where to find the translations.
@@ -692,8 +703,8 @@ abstract class abstract_core
      *      'RequiresEAC'   => 'Requires EAC',           The minimum required eacDoojigger version.
      *      'RequiresWC'    => 'WC requires at least',   The lowest WooCommerce version that the plugin will work on.
      *      'Author'        => 'Author',                 The name of the plugin author.
-     *      'AuthorURI'     => 'Author URI',             The authorÕs website or profile on another website, such as WordPress.org.
-     *      'License'       => 'License',                The short name (slug) of the pluginÕs license (e.g. GPLv2).
+     *      'AuthorURI'     => 'Author URI',             The authorâ€™s website or profile on another website, such as WordPress.org.
+     *      'License'       => 'License',                The short name (slug) of the pluginâ€™s license (e.g. GPLv2).
      *      'LicenseURI'    => 'License URI',            A link to the full text of the license (e.g. https://www.gnu.org/licenses/gpl-2.0.html).
      *      'TextDomain'    => 'Text Domain',            The gettext text domain of the plugin.
      *      'DomainPath'    => 'Domain Path',            The domain path lets WordPress know where to find the translations.
@@ -1331,24 +1342,17 @@ abstract class abstract_core
 
 
 	/**
-	 * plugin_hourly_event - reset the email address (remove '//' prefix)
+	 * plugin_hourly_event
 	 *
-	 * @internal
-	 *
-	 * @see EarthAsylumConsulting\eacDoojiggerAutoloader\php_fatal_error_email()
 	 * @return	void
 	 */
 	public function plugin_hourly_event(): void
 	{
-		if ($email = $this->get_option('emailFatalNotice')) {
-			$email = ltrim($email,'/');
-			$this->update_option('emailFatalNotice',$email);
-		}
 	}
 
 
 	/**
-	 * plugin_daily_event -
+	 * plugin_daily_event
 	 *
 	 * @return	void
 	 */
@@ -1358,7 +1362,7 @@ abstract class abstract_core
 
 
 	/**
-	 * plugin_weekly_event -
+	 * plugin_weekly_event
 	 *
 	 * @return	void
 	 */
@@ -2375,7 +2379,7 @@ abstract class abstract_core
 	/**
 	 * Query MySQL DB for its version
 	 *
-	 * @deprecated, use $this->wpdb->db_server_info()
+	 * @deprecated use $this->wpdb->db_server_info()
 	 *
 	 * @return	string|false
 	 */

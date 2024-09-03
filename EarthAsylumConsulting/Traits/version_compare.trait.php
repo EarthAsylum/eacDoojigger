@@ -13,7 +13,7 @@ namespace EarthAsylumConsulting\Traits;
  * version compare utilites trait - {eac}Doojigger for WordPress
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger
+ * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2021 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		2.x

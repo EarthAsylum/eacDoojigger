@@ -9,6 +9,7 @@ namespace EarthAsylumConsulting\Traits;
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		2.x
+ * @ignore
  */
 
 if ( !is_admin() )

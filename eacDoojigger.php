@@ -6,18 +6,22 @@
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		2.x
+ * @version		2.6.2
+ *
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
- * @uses		EarthAsylumConsulting\Traits\plugin_loader
- * @uses		EarthAsylumConsulting\Traits\plugin_environment
+ *
+ * @uses		EarthAsylumConsulting\abstract_context
+ * @uses		EarthAsylumConsulting\abstract_frontend
+ * @uses		EarthAsylumConsulting\abstract_backend
+ * @uses		EarthAsylumConsulting\abstract_core
  *
  * @wordpress-plugin
  * Plugin Name:			{eac}Doojigger
  * Plugin URI:			https://eacDoojigger.earthasylum.com/
  * Update URI: 			https://swregistry.earthasylum.com/software-updates/eacdoojigger.json
  * Description:			{eac}Doojigger for WordPress - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress.
- * Version:				2.6.2-RC2
+ * Version:				2.6.2-RC3
  * Requires at least:	5.8
  * Tested up to: 		6.6
  * Requires PHP:		7.4
@@ -30,36 +34,24 @@
  * Network: 			true
  */
 
-/*
- * 	                                    										/ abstract_frontend.class.php \
- *	eacDoojigger.php -> eacDoojigger.class.php - abstract_context.class.php -                or                	 - abstract_core.class.php = object of class eacDoojigger
- *	                                    										\ abstract_backend.class.php  /
- *
- */
-
-/*
-	See http://rachievee.com/the-wordpress-hooks-firing-sequence/
-	We trigger loading/initializing/hooks on 'plugins_loaded' action.
-	Derrivatives & Extensions should use 'init' or 'wp_loaded' (headers are sent before wp_loaded)
-	or {classname}_startup, {classname}_extensions_loaded, or {classname}_ready
-*/
-
-
 namespace EarthAsylumConsulting
 {
-	if (!trait_exists('\\EarthAsylumConsulting\\Traits\\plugin_loader'))
-	{
-		require __NAMESPACE__.'/Traits/plugin_loader.trait.php';
-		require __NAMESPACE__.'/Traits/plugin_environment.trait.php';
-	}
-
-	/* deprecated (may be referenced in derivatives and extensions) */
-	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION','2.6.2');
 	/* prefered (as of 2.6.0) */
 	if (!defined('EACDOOJIGGER_VERSION')) define('EACDOOJIGGER_VERSION','2.6.2');
 
+	/* deprecated (may be referenced in derivatives and extensions) */
+	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION',\EACDOOJIGGER_VERSION);
+
+	/* if mu_plugin autoloader is not installed... */
+	if (!class_exists('\\EarthAsylumConsulting\\eacDoojiggerAutoloader'))
+	{
+		include 'autoload.php';
+	}
+
 	/**
-	 * loader/initialization class
+	 * Plugin Loader - {eac}Doojigger for WordPress
+	 * @category	WordPress Plugin
+	 * @package		{eac}Doojigger
 	 */
 	class eacDoojigger
 	{
@@ -116,3 +108,10 @@ namespace  // global scope
 		}
 	);
 }
+
+/*
+ * 	                                    										/ abstract_frontend.class.php \
+ *	eacDoojigger.php -> eacDoojigger.class.php - abstract_context.class.php -                or                	 - abstract_core.class.php = object of class eacDoojigger
+ *	                                    										\ abstract_backend.class.php  /
+ */
+

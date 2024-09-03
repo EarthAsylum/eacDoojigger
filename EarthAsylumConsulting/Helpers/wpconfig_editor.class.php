@@ -1,7 +1,7 @@
 <?php
 namespace EarthAsylumConsulting\Helpers;
 
-require_once('vendor/wp-config-transformer-main/src/WPConfigTransformer.php');
+require_once('vendor/wp-config-transformer/src/WPConfigTransformer.php');
 
 /**
  * wpconfig editor class - uses WPConfigTransformer to edit wp-config.php using WP_Filesystem
@@ -9,15 +9,14 @@ require_once('vendor/wp-config-transformer-main/src/WPConfigTransformer.php');
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Helpers
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  */
 class wpconfig_editor extends \WPConfigTransformer
 {
 	/**
 	 * @var string version
 	 */
-	const VERSION				= '23.1013.1';
+	const VERSION				= '24.0903.1';
 
 	/**
 	 * @var object WP_Filesystem
@@ -36,7 +35,7 @@ class wpconfig_editor extends \WPConfigTransformer
 		global $wp_filesystem;
 
 		if (!isset($wp_filesystem)) {
-			throw new Exception( "wp_filesystem is not defined." );
+			throw new \Exception( "wp_filesystem is not defined." );
 		}
 
 		$this->fs = $wp_filesystem;
@@ -45,11 +44,11 @@ class wpconfig_editor extends \WPConfigTransformer
 		$basename = basename( $wp_config_path );
 
 		if ( ! $this->fs->exists( $wp_config_path ) ) {
-			throw new Exception( "{$basename} does not exist." );
+			throw new \Exception( "{$basename} does not exist." );
 		}
 
 		if ( ! $this->fs->is_writable( $wp_config_path ) ) {
-			throw new Exception( "{$basename} is not writable." );
+			throw new \Exception( "{$basename} is not writable." );
 		}
 
 		$this->wp_config_path = $wp_config_path;
@@ -71,7 +70,7 @@ class wpconfig_editor extends \WPConfigTransformer
 	 */
 	protected function save( $contents ) {
 		if ( ! trim( $contents ) ) {
-			throw new Exception( 'Cannot save the config file with empty contents.' );
+			throw new \Exception( 'Cannot save the config file with empty contents.' );
 		}
 
 		if ( $contents === $this->wp_config_src ) {
@@ -82,7 +81,7 @@ class wpconfig_editor extends \WPConfigTransformer
 		$result = $this->fs->put_contents( $this->wp_config_path, $contents, FS_CHMOD_FILE & ~0007 );
 
 		if ( false === $result ) {
-			throw new Exception( 'Failed to update the config file.' );
+			throw new \Exception( 'Failed to update the config file.' );
 		}
 
 		return true;

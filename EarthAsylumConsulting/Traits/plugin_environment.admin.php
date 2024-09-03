@@ -34,7 +34,7 @@ namespace EarthAsylumConsulting\Traits;
  * Add environment checks of PHP, WordPress, WooCommerce, and eacDoojigger versions
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger
+ * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
  * @version		2.x

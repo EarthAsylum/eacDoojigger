@@ -5,7 +5,7 @@ namespace EarthAsylumConsulting;
  * {eac}Doojigger Environment - Set WP_ENVIRONMENT_TYPE used by wp_get_environment_type()
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger Utilities\{eac}DoojiggerEnvironment
+ * @package		{eac}Doojigger\Utilities
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		1.0.8
@@ -15,7 +15,7 @@ namespace EarthAsylumConsulting;
  * Description:			Environment Switcher - set WP_ENVIRONMENT_TYPE from the network or general settings page.
  * Version:				1.0.8
  * Requires at least:	5.8.0
- * Tested up to: 		6.5
+ * Tested up to: 		6.6
  * Requires PHP:		7.2
  * Author:				EarthAsylum Consulting
  * Author URI:			http://www.earthasylum.com

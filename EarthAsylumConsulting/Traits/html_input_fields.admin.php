@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * Used by admin extensions outside of options/settings page. Uses private settings_options_page methods.
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger
+ * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		24.0502.1

@@ -6,39 +6,56 @@ namespace EarthAsylumConsulting;
  * Autoloader class for EarthAsylum Consulting {eac} Doojigger for WordPress classes and traits
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger Utilities\{eac}DoojiggerAutoloader
+ * @package		{eac}Doojigger\Utilities\{eac}DoojiggerAutoloader
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * Version: 	2.2.1
+ * Version: 	24.0903.1
  * @link		https://eacDoojigger.earthasylum.com/
  */
 
 /*
  * Usage:
  *
- * If the autoloader hasn't been loaded yet, this is needed...
+ * This autoloader class ('\EarthAsylumConsulting\eacDoojiggerAutoloader') should be loaded
+ * by the installed `eacDoojiggerAutoloader.php` mu-plugin and the eacDoojigger 'autoload.php'.
  *
- *		if (!class_exists('\\EarthAsylumConsulting\\eacDoojiggerAutoloader'))
- *		{
- *			require dirname(__DIR__).'/Utilities/eacDoojiggerAutoloader.class.php';
- *		}
+ * eacDoojiggerAutoloader::setAutoLoader( $namespace, '/path/to/namespace/folder' );
+ * - replaces $namespace with '/path/to/namespace/folder' when building file pathname from namespace name.
  *
- * set the autoloader with something like this
+ * Examples:
+ *
+ * eacDoojiggerAutoloader::setAutoLoader( 'MyNamespace', __DIR__.'/MyNamespace' );
+ * use MyNamespace\Traits\MyTrait 	__DIR__/MyNamespace/Traits/MyTrait.trait.php
+ * 								or	__DIR__/MyNamespace/Traits/class.MyTrait.trait.php
+ * 								or	__DIR__/MyNamespace/Traits/MyTrait.class.php
+ * 								or	__DIR__/MyNamespace/Traits/class.MyTrait.php
+ * 								or	__DIR__/MyNamespace/Traits/MyTrait.php
+ * eacDoojiggerAutoloader::setAutoLoader( 'Psr\Log', __DIR__.'/Helpers/vendor/Psr/Log' );
+ * use Psr\Log\LoggerTrait 			__DIR__/Helpers/vendor/Psr/Log/LoggerTrait.php
+ *
+ *
+ * Giving the base namespace name and the root directory for that namespace...
+ *
+ * 		Set the autoloader with something like this,
+ * 		(assuming the namespace folder is a sub-directory in the plugin folder)
  *
  *		eacDoojiggerAutoloader::setAutoLoader( $_namespace, dirname($_pluginfile).DIRECTORY_SEPARATOR.$_namespace );
- *			- and/or -
- *		eacDoojiggerAutoloader::addNamespace( $_namespace, dirname($_pluginfile).DIRECTORY_SEPARATOR.$_namespace );
  *
- * giving the base namespace name and the root directory for that namespace
+ * 		Additional namespace(s) may be added with:
+ *
+ *		eacDoojiggerAutoloader::addNamespace( $_namespace, $_directory );
+ *
+ * The default 'EarthAsylumConsulting' namespace/directory is set on the first call to setAutoLoader().
+ *
+ * The plugin loader trait (for eacDoojigger and derivatives) also sets:
+ *
+ * 		eacDoojiggerAutoloader::setAutoLoader($_namespace, $_directory);
  *
  *
- * When installed by {eac}Doojigger, the following is used in the mu-plugin:
+ * AUTOLOAD_TYPES provides a sub-namespace name to file suffix map...
  *
- *		define('EACDOOJIGGER_VERSION','2.3.4');
- *		require_once WP_PLUGIN_DIR.'/eacDoojigger/EarthAsylumConsulting/Utilities/eacDoojiggerAutoloader.class.php';
- *		eacDoojiggerAutoloader::setAutoLoader();
- *		eacDoojiggerAutoloader::setEmailNotification( 'eacDoojigger' );
- *
+ *		...\namespace\<sub-ns>\<classname>'		= 	<classname>.<suffix>.php
+ * 												or 	class.<classname>.<suffix>.php
  */
 
 class eacDoojiggerAutoloader
@@ -47,44 +64,96 @@ class eacDoojiggerAutoloader
 	 * @var array map object namespace to file type
 	 */
 	const AUTOLOAD_TYPES = [
-		'Plugin'		=>'plugin',		// 'Plugin' folder, 	<name>.php or <name>.plugin.php
-		'Helpers'		=>'class',		// 'Helpers' folder, 	<name>.php or <name>.class.php
-		'Traits'		=>'trait',		// 'Traits' folder, 	<name>.php or <name>.trait.php
-		'Interfaces'	=>'interface',	// 'Interfaces' folder, <name>.php or <name>.interface.php
-		'Extensions'	=>'extension'	// 'Extensions' folder, <name>.php or <name>.extension.php
+		// namespace 		= file suffix (maybe)
+		'Plugin'			=> 'plugin',
+		'Plugins'			=> 'plugin',
+		'Extensions'		=> 'extension',
+		'Helpers'			=> 'helper',
+		'Classes'			=> 'class',		// default
+		'Traits'			=> 'trait',
+		'Interfaces'		=> 'interface',
+		'Exceptions'		=> 'exception',
 	];
 
 	/**
-	 * @var bool is autoloader registered
+	 * @var array file name patterns to look for - %1$s = classname, %2$s = classtype
 	 */
-	public static $isRegistered = false;
+	const FILE_PATTERNS = [
+		'%1$s.%2$s.php',					// <classname>.<type>.php
+		'class.%1$s.%2$s.php',				// class.<classname>.<type>.php
+		'%1$s.class.php',					// <classname>.class.php
+		'class.%1$s.php',					// class.<classname>.php
+		'%1$s.php'							// <classname>.php
+	];
 
 	/**
-	 * @var array static array of [namespace => root_directory]
+	 * @var array static array of [namespace => [ root_directory, ... ] ]
 	 */
 	public static $validNamespace = [];
 
 	/**
-	 * @var string who loaded us (short class name used for emailing fatal errors)
+	 * @var array static debugging history
 	 */
-	public static $loaderClassName;
+	public static $history = [];
+
+	/**
+	 * register the autoloader for the default and (maybe) derivative namespace
+	 *
+	 * @params string $namespace 	derivative plugin root namespace
+	 * @params string $root 		derivative plugin root directory - 'wp-content/plugins/plugin_folder/NameSpace'
+	 * @return void
+	 */
+	public static function debugAutoLoader(array $debug_array): array
+	{
+		$debug_array['Autoloader'] = [
+			'Namespaces'	=> self::$validNamespace,
+		//	'Objects'		=> self::$history
+		];
+		return $debug_array;
+	}
+
+
+	/**
+	 * register the autoloader for the default and (maybe) derivative namespace
+	 *
+	 * @params string $namespace 	derivative plugin root namespace
+	 * @params string $root 		derivative plugin root directory - 'wp-content/plugins/plugin_folder/NameSpace'
+	 * @return void
+	 */
+	public static function setAutoLoader(string $namespace = '', string $root = ''): void
+	{
+		// add this default namespace and register the autoloader
+		if (! isset( self::$validNamespace[ __NAMESPACE__ ] ))
+		{
+			self::addNamespace( __NAMESPACE__, EACDOOJIGGER_HOME.DIRECTORY_SEPARATOR.__NAMESPACE__ );
+			spl_autoload_register( [self::class, 'autoLoader'] );
+			\add_filter( 'eacDoojigger_debugging',[self::class,'debugAutoLoader'] );
+		}
+
+		// add custom/alternate/derivative namespace or alternate directory
+		self::addNamespace( $namespace, $root );
+	}
 
 
 	/**
 	 * add namespace and root directory
 	 *
-	 * @params string $namespace plugin object root namespace name
-	 * @params string $root plugin root directory - '.../wp-content/plugins/plugin_folder/namespace_folder'
+	 * @params string $namespace 	root namespace name (namespace or namespace\subnamespace)
+	 * @params string $root 		root directory for above namespace
 	 * @return bool success
 	 */
 	public static function addNamespace(string $namespace, string $root): bool
 	{
 		if ( empty($root) || empty($namespace) )  return false;
 
-		if (! is_dir($root) ) $root = WP_PLUGIN_DIR.DIRECTORY_SEPARATOR.ltrim($root,DIRECTORY_SEPARATOR);
+		if (! is_dir($root) )
+		{
+			$root = WP_PLUGIN_DIR.DIRECTORY_SEPARATOR.ltrim($root,DIRECTORY_SEPARATOR);
+		}
 		if (! is_dir($root) ) return false;
 
-		// plugin namespace maps to namespace folder
+		$namespace = trim($namespace,'\\').'\\';
+
 		if (!isset( self::$validNamespace[ $namespace ] ))
 		{
 			self::$validNamespace[ $namespace ] = [];
@@ -98,87 +167,47 @@ class eacDoojiggerAutoloader
 
 
 	/**
-	 * register the autoloader
-	 *
-	 * @params string $namespace plugin object root namespace
-	 * @params string $root plugin root directory - '.../wp-content/plugins/plugin_folder/NameSpace'
-	 * @return void
-	 */
-	public static function setAutoLoader(string $namespace = '', string $root = ''): void
-	{
-		// add this namespace (vendor folder)
-		self::addNamespace( __NAMESPACE__, dirname(__DIR__) );
-
-		// add custom namespace
-		if ($namespace && ($namespace != __NAMESPACE__ || $root != dirname(__DIR__)))
-		{
-			self::addNamespace( $namespace, $root );
-		}
-
-		// register the autoloader for these namespaces
-		if (! empty(self::$validNamespace) && !self::$isRegistered )
-		{
-			self::$isRegistered = spl_autoload_register( [self::class, 'autoLoader'] );
-		}
-	}
-
-
-	/**
 	 * autoloader
 	 *
-	 * @params string $class class to be loaded (NameSpace\SubNameSpace\ClassName)
+	 * @params string $class class to be loaded (NameSpace\SubNameSpace\MaybeType\ClassName)
 	 * @return void
 	 */
 	public static function autoLoader(string $class)
 	{
-		$namespace = explode('\\',$class);									// NameSpace\Traits\TraitName = ['NameSpace','Traits','TraitName']
-		if (!isset(self::$validNamespace[ $namespace[0] ])) return;			// not in our namespaces
-
-		foreach( self::$validNamespace[ $namespace[0] ] as $root)			// each root directory registered for namespace
+		// find in our registered namespace(s)
+		foreach(array_keys(self::$validNamespace) as $ns)
 		{
-			$path 		= $namespace;										// ['NameSpace','Traits','TraitName']
-			$path[0] 	= $root;											// ['.../wp-content/plugins/plugin_folder/namespace_folder','Traits','TraitName']
-			$name 		= array_pop($path);									// 'TraitName'
+			if (0 === strpos( $class, $ns )) break;
+			$ns = false;
+		}
+		// bail if not in our namespaces
+		if (empty($ns)) return;
 
-			if (count($path) > 1) {											// get the type (namespace) 'Traits' and folder 'traits'
-				$type 	= $path[1];
-				$type 	= (array_key_exists($type, self::AUTOLOAD_TYPES)) ? self::AUTOLOAD_TYPES[$type] : strtolower($type);
-			} else {
-				$type	= 'class';
-			}
+		// remove root namespace and split to directory array
+		$namespace 		= explode('\\',str_replace($ns,'',$class));
+		// get class name
+		$classname 		= array_pop($namespace);
+		// maybe file type is part of namespace path (...\Traits\classname.php)
+		$classtype 		= (count($namespace) > 0) ? end($namespace) : 'Classes';
+		$classtype 		= self::AUTOLOAD_TYPES[$classtype] ?? strtolower($classtype);
+		// maybe strip '_type' from class name for file name (e.g. class something_extension in something.extension.php)
+		$classname 		= basename($classname,"_{$classtype}");
 
-			$path = implode(DIRECTORY_SEPARATOR,$path);						// .../wp-content/plugins/plugin_folder/namespace_folder/traits'
+		// each root directory registered for namespace
+		foreach( self::$validNamespace[ $ns ] as $root)
+		{
+			// prepend root directory
+			$path 		= $namespace;
+			array_unshift($path,$root);
+			$path 		= implode(DIRECTORY_SEPARATOR,$path).DIRECTORY_SEPARATOR;
 
-			// look in plugin_folder/namespace_folder/<type>s/, plugin_folder/namespace_folder/
-			foreach([ 	$path.DIRECTORY_SEPARATOR,
-						dirname($path).DIRECTORY_SEPARATOR,
-					] as $dir)
+			foreach (self::FILE_PATTERNS as $file)
 			{
-				foreach (array_unique([$name, basename($name,"_{$type}")]) as $slug)
+				$file = $path . sprintf($file,$classname,$classtype);
+				if (is_file($file))
 				{
-					if (is_file("{$dir}{$slug}.php"))								// <classname>.php
-					{
-						return require "{$dir}{$slug}.php";
-					}
-					if (is_file("{$dir}{$slug}.{$type}.php"))						// <classname>.<type>.php
-					{
-						return require "{$dir}{$slug}.{$type}.php";
-					}
-					if (is_file("{$dir}{$type}.{$slug}.php"))						// <type>.<classname>.php
-					{
-						return require "{$dir}{$type}.{$slug}.php";
-					}
-					if ($type != 'class')
-					{
-						if (is_file("{$dir}class.{$slug}.{$type}.php"))				// class.<classname>.<type>.php
-						{
-							return require "{$dir}class.{$slug}.{$type}.php";
-						}
-						if (is_file("{$dir}{$type}.{$slug}.php"))					// <type>.<classname>.class.php
-						{
-							return require "{$dir}{$type}.{$slug}.class.php";
-						}
-					}
+				//	self::$history[$class] = str_replace(WP_PLUGIN_DIR,'',$file);
+					return require $file;
 				}
 			}
 		}
@@ -186,13 +215,14 @@ class eacDoojiggerAutoloader
 
 
 	/**
-	 * set the fatal email loader
+	 * set the fatal email loader - no longer supported
 	 *
 	 * @params string $loaderClassName plugin class name (short)
 	 * @return void
 	 */
 	public static function setEmailNotification(string $loaderClassName): void
 	{
+	/*
 		self::$loaderClassName = $loaderClassName;
 		$emailOption = $loaderClassName .'_emailFatalNotice';
 		if ($emailAddress = \get_option( $emailOption ))
@@ -203,5 +233,6 @@ class eacDoojiggerAutoloader
 				return $email;
 			} );
 		}
+	*/
 	}
 }

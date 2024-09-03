@@ -5,10 +5,10 @@ namespace EarthAsylumConsulting\Traits;
  * software registration UI for use with {eac}SoftwareRegistry - {eac}Doojigger for WordPress
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger
+ * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0821.1
+ * @version 	24.0830.1
  */
 
 trait swRegistrationUI
@@ -111,6 +111,7 @@ trait swRegistrationUI
 									'type'		=> 	'display',
 									'label'		=> 	'Registration Information',
 									'default'	=> 	$this->getRegistryHtml($registrationKey),
+									'advanced'	=> 	true,
 								);
 			$pluginOptions['_refresh_registration']	= array(
 									'type'		=> 	'button',

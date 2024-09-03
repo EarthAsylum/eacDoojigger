@@ -6,7 +6,7 @@ namespace EarthAsylumConsulting\Traits;
  * with consistant parameters
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger\Helpers
+ * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		24.0509.1

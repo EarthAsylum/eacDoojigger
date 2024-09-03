@@ -7,7 +7,7 @@ namespace EarthAsylumConsulting\Traits;
  * Handles plugin upgrade notice from the plugins page in WordPress for self-or-WP hosted plugins
  *
  * @category	WordPress Plugin
- * @package		{eac}Doojigger
+ * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		2.x

@@ -10,11 +10,12 @@ namespace EarthAsylumConsulting\Plugin;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
+ * @ignore
  */
 
 if ( ! is_admin() )
 {
-	trait eacDoojigger_administration {}
+	trait eacDoojigger_admin_traits {}
 }
 else require "eacDoojigger.admin.php";
 

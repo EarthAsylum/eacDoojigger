@@ -1,7 +1,11 @@
 == Changelog ==
 
-= Version 2.6.2 – August 30, 2024 =
+= Version 2.6.2 – September 3, 2024 =
 
++   Updated wpconfig-transformer to v1.3.6
++   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
++   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.
++   Changed advanced mode link on settings page (essentials|advanced).
 +   Reworked debugging extension and logging with new logger helper compatible with PSR-3 logging.
     +   See : https://eacdoojigger.earthasylum.com/how-to/#use-debugging-logger-methods
     +   New PSR-3 logging method : `$this->log( $level, $message, $context )`

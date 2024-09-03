@@ -46,6 +46,7 @@ namespace EarthAsylumConsulting\Traits;
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @deprecated 	use plugin_environment.trait
+ * @ignore
  */
 
 trait plugin_loader_environment

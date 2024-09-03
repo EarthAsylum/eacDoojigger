@@ -645,10 +645,10 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * Handle PHP errors
 		 *
-		 * @param $exception 	- exception or error type
-		 * @param 				- error message
-		 * @param 				- error file
-		 * @param 				- error line
+		 * @param int|object $exception - exception or error type
+		 * @param string				- error message
+		 * @param string				- error file
+		 * @param int					- error line
 		 * @return void
 		 */
 		public function phpErrorHandler($exception)
@@ -1014,7 +1014,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			$this->logToFile(
 				LogLevel::LOG_ALWAYS,
 				$request_data ?: '',
-				$this->requestURL(),
+				'IP:'.$this->plugin->getVisitorIP().' '.$this->requestURL(),
 				$startTime,
 				$date,
 				'via '.$this->reqType,

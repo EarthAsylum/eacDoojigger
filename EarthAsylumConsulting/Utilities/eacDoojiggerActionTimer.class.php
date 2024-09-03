@@ -1,24 +1,4 @@
 <?php
-/**
- * {eac}DoojiggerActionTimer - Track the time to load (include) each plugin; Track duration of specific WP actions; Ability to time custom functions execution
- *
- * @category	WordPress Plugin
- * @package		{eac}Doojigger Utilities\{eac}DoojiggerActionTimer
- * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.1.9
- * @link		https://eacDoojigger.earthasylum.com/
- *
- * @wordpress-plugin
- * Plugin Name:			{eac}Doojigger ActionTimer
- * Description:			Track the time to load (include) each plugin; Track duration of specific WP actions; Ability to time custom function execution.
- * Version:				1.1.9
- * Requires at least:	5.5.0
- * Tested up to: 		6.5
- * Requires PHP:		7.2
- * Author:				EarthAsylum Consulting
- * Author URI:			http://www.earthasylum.com
- */
 
 /*
  * Should be installed in .../wp-content/mu-plugins
@@ -61,11 +41,21 @@ namespace EarthAsylumConsulting
 	 * Track the time to load (include) each plugin; Track duration of specific WP actions; Ability to time custom functions execution
 	 *
 	 * @category	WordPress Plugin
-	 * @package		{eac}Doojigger Utilities\{eac}DoojiggerActionTimer
+	 * @package		{eac}Doojigger\Utilities
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @version		1.x
 	 * @link		https://eacDoojigger.earthasylum.com/
+	 *
+	 * @wordpress-plugin
+	 * Plugin Name:			{eac}Doojigger ActionTimer
+	 * Description:			Track the time to load (include) each plugin; Track duration of specific WP actions; Ability to time custom function execution.
+	 * Version:				1.1.9
+	 * Requires at least:	5.5.0
+	 * Tested up to: 		6.6
+	 * Requires PHP:		7.2
+	 * Author:				EarthAsylum Consulting
+	 * Author URI:			http://www.earthasylum.com
 	 */
 	class eacDoojiggerActionTimer
 	{

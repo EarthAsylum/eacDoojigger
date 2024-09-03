@@ -13,6 +13,7 @@ namespace EarthAsylumConsulting\Traits;
  * @version		2.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
+ * @ignore
  */
 
 if ( ! is_admin() )
