@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             2.6.2
-Last Updated:           03-Sep-2024
+Last Updated:           04-Sep-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -416,8 +416,12 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.2 – September 3, 2024 =
+= Version 2.6.2 – September 4, 2024 =
 
++   New `text_to_array()` function to split textarea to array of lines.
++   Enhance security extension...
+    +   Block REST index list, WP core REST routes, non-rest json requests.
+    +   CORS headers w/white-list domains.
 +   Updated wpconfig-transformer to v1.3.6
 +   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
 +   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.

@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0419.1';
+		const VERSION 			= '24.0903.1';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -171,7 +171,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		public function addActionsAndFilters()
 		{
 			// add additional css when our settings stylesheet loads.
-			if (!$this->plugin->isSettingsPage('Security')) return;
+			if ($this->plugin->isSettingsPage('Security'))
 			{
 				$this->add_action('admin_enqueue_styles', function($styleId)
 				{
@@ -233,6 +233,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				}, 10, 3 );
 			}
 
+			add_filter('rest_api_init', 					array($this,'rest_api_cors'));
+
 			if ($this->isPolicyEnabled('secDisableRSS'))
 			{
 				$this->disable_rss_feeds();
@@ -240,13 +242,34 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if ($this->isPolicyEnabled('secUnAuthRest'))
 			{
+				if ($this->isPolicyEnabled('secUnAuthRest','no-rest')) {
+				//	add_filter( 'json_jsonp_enabled', 		'__return_false');
+					add_filter( 'rest_enabled', 			'__return_false');
+					add_filter( 'rest_jsonp_enabled', 		'__return_false' );
+				}
+				if ($this->isPolicyEnabled('secUnAuthRest','no-rest-index')) {
+					add_filter( 'rest_index', 				array($this, 'disable_rest_list'), 999 );
+					add_filter( 'rest_namespace_index', 	array($this, 'disable_rest_list'), 999 );
+					add_filter( 'rest_route_data', function($available, $routes){return [];}, 999, 2 );
+     			}
+				if ($this->isPolicyEnabled('secUnAuthRest','no-rest-core')) {
+					$this->disable_rest_core();
+				}
 				add_filter( 'rest_authentication_errors', 	array($this, "disable_rest"), 900, 1 );
+				remove_action('wp_head', 'rest_output_link_wp_head', 10);
+
+				if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
+					if (wp_is_json_request() && !defined('REST_REQUEST')) {
+						return $this->plugin->fatal('Invalid JSON Request');
+					}
+				}
 			}
 
 			if ($this->isPolicyEnabled('secDisableXML','no-xml'))
 			{
 				add_filter(	'xmlrpc_enabled', 				'__return_false');
 				add_filter( 'xmlrpc_methods', 				array($this, "disable_xml"), 900 );
+				remove_action('xmlrpc_rsd_apis', 'rest_output_rsd');
 			}
 
 			if ($this->isPolicyEnabled('secDisableXML','no-ping'))
@@ -401,7 +424,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			$this->security_rules[$fieldName] = false;
 
 			$marker		= $this->pluginName.' '.$this->className.' rewrite rule by uri';
-			$uriList 	= array_filter(array_map('trim', explode("\n", $value)), 'strlen');
+			$uriList 	= $this->plugin->text_to_array($value);
 
 			$value = implode("\n",$uriList);
 
@@ -417,7 +440,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 						$lines[] = "RewriteRule ^{$uri}(.*)$ - [F]";
 					}
 				}
-				$this->plugin->insert_with_markers($this->htaccess, $marker, $lines, '#');
+				$this->plugin->insert_with_markers($this->htaccess, $marker, $lines, '#', '', true);
 				$this->security_rules[$fieldName] = (!empty($lines));
 			}
 
@@ -441,7 +464,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			$this->security_rules[$fieldName] = false;
 
 			$marker		= $this->pluginName.' '.$this->className.' deny by address';
-			$ipList 	= array_filter(array_map('trim', explode("\n", $value)), 'strlen');
+			$ipList 	= $this->plugin->text_to_array($value);
 
 			$ipSet = array();
 			foreach ($ipList as $x => $ip)
@@ -741,6 +764,32 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
+		 * Set origin-specific CORS headers (rest_api_init -> rest_pre_serve_request)
+		 *
+		 * @param	$user user data
+		 * @return	WP_Error or $user
+		 */
+		public function rest_api_cors()
+		{
+			$allowed_origins = $this->mergePolicies('secAllowCors','');
+			if (empty($allowed_origins)) return;
+			$allowed_origins = $this->plugin->text_to_array($allowed_origins);
+			remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+			add_filter( 'rest_pre_serve_request', function($value) use($allowed_origins) {
+				$origin = get_http_origin();
+				if ( $origin && in_array( $origin, $allowed_origins ) ) {
+					header( 'Access-Control-Allow-Origin: ' . $origin );
+					header( 'Access-Control-Allow-Methods: OPTIONS, GET, POST, PUT, PATCH, DELETE' );
+					header( 'Access-Control-Allow-Credentials: true' );
+					header( 'Vary: Origin', false );
+				} elseif ( ! headers_sent() && 'GET' === $_SERVER['REQUEST_METHOD'] && ! is_user_logged_in() ) {
+					header( 'Vary: Origin', false );
+				}
+				return $value;
+			});
+		}
+
+		/**
 		 * disable rss feeds
 		 *
 		 * @return void
@@ -875,6 +924,43 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
+		 * disable REST API index/list
+		 *
+		 * @return void
+		 */
+		public function disable_rest_list($response)
+		{
+			$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API List denied');
+			$data = $response->get_data();
+			$data['namespaces'] = [];
+			$data['routes'] = [];
+			$response->set_data( $data );
+			return $response;
+		}
+
+
+		/**
+		 * disable WP Core REST API
+		 *
+		 * @return void
+		 */
+		public function disable_rest_core()
+		{
+			add_filter('rest_endpoints', function( $endpoints )
+				{
+					$this->plugin->logError($_SERVER['REQUEST_URI'],'WP REST Endpoints removed');
+					foreach( $endpoints as $route => $endpoint ) {
+						if( 0 === stripos( $route, '/wp/' ) || '/' === $route ) {
+							unset( $endpoints[ $route ] );
+						}
+					}
+					return $endpoints;
+				}
+			);
+		}
+
+
+		/**
 		 * disable un-authenticated REST API
 		 *
 		 * @param WP_Error
@@ -882,20 +968,24 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rest($authError)
 		{
-			$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied');
 
 			$content = __("Sorry, you do not have permission to access the requested resource");
 
-			if ($this->is_option('secUnAuthRest','no-rest') || $this->is_network_option('secUnAuthRest','no-rest'))
+			if ($this->isPolicyEnabled('secUnAuthRest','no-rest'))
 			{
+				$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied');
 				return new \WP_Error( 'rest_unauthorized', $content , array( 'status' => 401 ) );
 			}
 
 			if (!empty($authError)) return $authError;
 
-			if (!is_user_logged_in())
+			if ($this->isPolicyEnabled('secUnAuthRest','no-rest-unauth'))
 			{
-				return new \WP_Error( 'rest_unauthorized', $content , array( 'status' => 401 ) );
+				if (!is_user_logged_in())
+				{
+					$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied');
+					return new \WP_Error( 'rest_unauthorized', $content , array( 'status' => 401 ) );
+				}
 			}
 			return $authError;
 		}
@@ -1106,7 +1196,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				if ($getPost && isset($_POST[$optionName])) {
 					$value1 = sanitize_textarea_field($_POST[$optionName]);
-					$value1 = array_unique( array_filter(array_map('trim', explode("\n", $value3)), 'strlen') );
+					$value1 = array_unique( $this->plugin->text_to_array($value1) );
 				} else {
 					$value1 = $this->get_option($optionName,$default);
 					if (!is_array($value1)) $value1 = (empty($value1)) ? [] : array($value1);
@@ -1153,7 +1243,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					$values	.= "\n".$value2;
 				}
 
-				return array_unique( array_filter(array_map('trim', explode("\n", $values)), 'strlen') );
+				return array_unique( $this->plugin->text_to_array($values) );
 			}
 		}
 	}

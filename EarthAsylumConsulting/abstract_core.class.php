@@ -2520,6 +2520,22 @@ abstract class abstract_core
 
 
 	/**
+	 * parse delimited string to arrray
+	 *
+	 * @param	string	$string delimited by \n or $delimiters
+	 * @param	array 	$delimiters split string on these delimiters
+	 * @return	array
+	 */
+	public function text_to_array(string $string, array $delimiters=[';']): array
+	{
+		$delimiters = (array)$delimiters;
+		return array_filter(
+			array_map('trim', explode("\n", str_replace($delimiters,"\n",$string) ) )
+		);
+	}
+
+
+	/**
 	 * parse options/attributes to a key=value array using SimpleXMLElement
 	 *
 	 * @param	array|string	$attributes		options/attributes -

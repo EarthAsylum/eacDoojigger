@@ -1,7 +1,11 @@
 == Changelog ==
 
-= Version 2.6.2 – September 3, 2024 =
+= Version 2.6.2 – September 4, 2024 =
 
++   New `text_to_array()` function to split textarea to array of lines.
++   Enhance security extension...
+    +   Block REST index list, WP core REST routes, non-rest json requests.
+    +   CORS headers w/white-list domains.
 +   Updated wpconfig-transformer to v1.3.6
 +   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
 +   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.

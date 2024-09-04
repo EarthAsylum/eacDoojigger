@@ -986,8 +986,12 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				$this->reqType = 'ajax';
 			} else if (wp_doing_cron()) {
 				$this->reqType = 'cron';
-			} else if (wp_is_json_request()) {
+			} else if (defined('REST_REQUEST')) {
 				$this->reqType = 'rest';
+			} else if (wp_is_json_request()) {
+				$this->reqType = 'json';
+			} else if (wp_is_jsonp_request()) {
+				$this->reqType = 'jsonp';
 			} else if (wp_is_xml_request()) {
 				$this->reqType = 'xml';
 			} else {

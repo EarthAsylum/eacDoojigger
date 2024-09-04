@@ -126,14 +126,22 @@ $this->registerExtensionOptions( $this->className,
 				'advanced'	=> 	true,
 		),
 		'secUnAuthRest' 	=> array(
-				'type'		=>	'radio',
+				'type'		=>	'checkbox',
 				'label'		=>	"Disable REST API Requests ",
-				'options'	=>	array(['WordPress Default'=>''],['Disable Un-Authenticated REST'=>'no-rest-unauth'],['Disable ALL REST'=>'no-rest']),
+				'options'	=>	array(
+					['Index List'		=>'no-rest-index'],
+					['WP Core'			=>'no-rest-core'],
+					['Un-Authenticated'	=>'no-rest-unauth'],
+					['All REST'			=>'no-rest'],
+					['Non-REST JSON'	=>'no-json']
+				),
 				'default'	=>	$this->is_network_option('secUnAuthRest'),
 				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
-				'info'		=>	"Not all WordPress REST APIs require authentication. This option disables un-authenticated requests or all REST API requests.",
+				'info'		=>	"This option hides API index lists and may disable WP Core API URLS, un-authenticated requests, or all REST API URLs. ".
+								"Additionally, JSON requests to non-api URLs (often used in attacks) can be blocked.",
+				'help'		=> 	'REST (REpresentational State Transfer) API (Application Program Interface) - [info]',
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
 		),
@@ -142,9 +150,18 @@ $this->registerExtensionOptions( $this->className,
 				'label'		=>	"Disable XML-RPC ",
 				'options'	=>	array(['WordPress Default'=>''],['Disable XML-RPC'=>'no-xml'],['Disable Pingbacks'=>'no-ping']),
 				'default'	=>	$this->is_network_option('secDisableXML'),
-				'info'		=>	"XML-RPC (Remote Procedure Call) may also be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if XML-RPC is not needed.",
+				'info'		=>	"XML-RPC may also be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if XML-RPC is not needed.",
+				'help'		=> 	'XML (eXtensible Markup Language) RPC (Remote Procedure Call) - [info]',
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
+		),
+		'secAllowCors' 	=> array(
+				'type'		=>	'textarea',
+				'label'		=>	"CORS API White List ",
+				'default'	=>	$this->is_network_option('secAllowCors'),
+				'info'		=>	"Allow API access from specific origin domains only (via CORS headers). ".
+								"Enter origin URLs, 1 per line, starting with http/https.",
+				'attributes'=>	['placeholder'=>'https://origin.domain.com'],
 		),
 		'secCodeEditor' 	=> array(
 				'type'		=>	'radio',
@@ -177,7 +194,7 @@ $this->registerExtensionOptions( $this->className,
 									: ''),
 				'info'		=>	"Certain URIs should be unavailable or may present a security concern. ".
 								"This option allows you to block access to those URIs. ".
-								"Enter URIs 1 per line starting with '/'. For example '/category/name/' or just '/category'".
+								"Enter URIs, 1 per line, starting with '/'. For example '/category/name/' or just '/category'".
 								(($this->htaccess) ? '<br/><small>* These URIs will be blocked in the Apache .htaccess file using rewrite rules OR through internal code to ensure functionality.</small>' : '')
 		),
 		'secBlockIP' 		=> array(
