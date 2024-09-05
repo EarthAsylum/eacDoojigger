@@ -8,7 +8,13 @@ namespace EarthAsylumConsulting;
  * @package 	{eac}Doojigger\Utilities\{eac}DoojiggerAutoloader
  * @author 		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright 	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0903.1
+ * @version 	24.0904.1
+ */
+
+/*
+ * Included from eacDoojiggerAutoloader.php mu-plugin.
+ * Maybe included from eacDoojigger.php if autoloader is missing (not installed).
+ * Maybe included from eacDoojiggerAutoloader.class.php if eacDoojiggerAutoloader.php is outdated.
  */
 
 // should be defined in eacDoojiggerAutoloader.php mu-plugin

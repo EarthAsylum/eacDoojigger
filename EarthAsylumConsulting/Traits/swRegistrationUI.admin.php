@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0830.1
+ * @version 	24.0905.1
  */
 
 trait swRegistrationUI
@@ -135,10 +135,16 @@ trait swRegistrationUI
 			$this->plugin->registerNetworkOptions([$title,'registration'],$pluginOptions);
 			$this->plugin->registerPluginOptions([$title,'registration'],
 			[
-				'_registry_info'				=> array(
+				'registry_key'					=> 	array(
+									'type'		=> 	'disabled',
+									'label'		=> 	'Registration Key',
+									'default'	=>	$registrationKey,
+								),
+				'_registry_info'				=> 	array(
 									'type'		=> 	'display',
 									'label'		=> 	'Registration Information',
 									'default'	=> 	$this->getRegistryHtml($registrationKey),
+									'advanced'	=> 	true,
 								)
 			]);
 		}

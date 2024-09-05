@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0903.1';
+		const VERSION 			= '24.0905.1';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -233,7 +233,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				}, 10, 3 );
 			}
 
-			add_filter('rest_api_init', 					array($this,'rest_api_cors'));
+			add_filter('rest_api_init', 					array($this,'rest_api_cors'), 999);
 
 			if ($this->isPolicyEnabled('secDisableRSS'))
 			{
@@ -255,20 +255,24 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if ($this->isPolicyEnabled('secUnAuthRest','no-rest-core')) {
 					$this->disable_rest_core();
 				}
-				add_filter( 'rest_authentication_errors', 	array($this, "disable_rest"), 900, 1 );
+				add_filter( 'rest_authentication_errors', 	array($this, "disable_rest"), 999, 1 );
 				remove_action('wp_head', 'rest_output_link_wp_head', 10);
 
 				if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
-					if (wp_is_json_request() && !defined('REST_REQUEST')) {
-						return $this->plugin->fatal('Invalid JSON Request');
-					}
+					add_action('wp', function() {
+						if (wp_is_json_request() && !defined('REST_REQUEST')) {
+							$this->plugin->fatal('non-rest-json','Invalid JSON Request',
+								[$this->plugin->getVisitorIP(),file_get_contents('php://input')]
+							);
+						}
+					});
 				}
 			}
 
 			if ($this->isPolicyEnabled('secDisableXML','no-xml'))
 			{
 				add_filter(	'xmlrpc_enabled', 				'__return_false');
-				add_filter( 'xmlrpc_methods', 				array($this, "disable_xml"), 900 );
+				add_filter( 'xmlrpc_methods', 				array($this, "disable_xml"), 999 );
 				remove_action('xmlrpc_rsd_apis', 'rest_output_rsd');
 			}
 
@@ -314,7 +318,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				$this->security_rules['secCookies'] = false; // no longer using .htacess
 			//	if ( ! $this->security_rules['secCookies'] ) {
-					$this->add_action('http_headers_ready',	array($this, "checkCookieFlags"), 900  );
+					$this->add_action('http_headers_ready',	array($this, "checkCookieFlags"), 999  );
 			//	}
 			}
 
@@ -773,20 +777,24 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			$allowed_origins = $this->mergePolicies('secAllowCors','');
 			if (empty($allowed_origins)) return;
-			$allowed_origins = $this->plugin->text_to_array($allowed_origins);
-			remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+
+			add_filter( 'allowed_http_origins', function ($allowed) use($allowed_origins) {
+				return array_merge($allowed,$allowed_origins);
+			});
+
+			// instead of removing filter, replace Allow-Origin
+			// remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
 			add_filter( 'rest_pre_serve_request', function($value) use($allowed_origins) {
 				$origin = get_http_origin();
-				if ( $origin && in_array( $origin, $allowed_origins ) ) {
+				if (is_allowed_http_origin($origin)) {
+					$this->logDebug(['Origin'=>$origin, 'Allowed'=>$allowed_origins],'Matched REST origin');
 					header( 'Access-Control-Allow-Origin: ' . $origin );
-					header( 'Access-Control-Allow-Methods: OPTIONS, GET, POST, PUT, PATCH, DELETE' );
-					header( 'Access-Control-Allow-Credentials: true' );
-					header( 'Vary: Origin', false );
-				} elseif ( ! headers_sent() && 'GET' === $_SERVER['REQUEST_METHOD'] && ! is_user_logged_in() ) {
-					header( 'Vary: Origin', false );
+				} else {
+					$this->logError(['Origin'=>$origin, 'Allowed'=>$allowed_origins],'UnMatched REST origin');
+					header( 'Access-Control-Allow-Origin: ' . site_url() );
 				}
 				return $value;
-			});
+			},20);
 		}
 
 		/**

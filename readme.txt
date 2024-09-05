@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             2.6.2
-Last Updated:           04-Sep-2024
+Last Updated:           05-Sep-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -416,7 +416,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.2 – September 4, 2024 =
+= Version 2.6.2 – September 5, 2024 =
 
 +   New `text_to_array()` function to split textarea to array of lines.
 +   Enhance security extension...
@@ -430,7 +430,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
     +   See : https://eacdoojigger.earthasylum.com/how-to/#use-debugging-logger-methods
     +   New PSR-3 logging method : `$this->log( $level, $message, $context )`
     +   Or e.g. : `eacDoojigger->log('error', $message, $context )`
-+   Support/compliant with WP Consent API.
++   Support/compliance with WP Consent API.
 +   New cookie methods supporting WP Consent API (if active).
     +   See: https://eacdoojigger.earthasylum.com/how-to/#wp-consent-api-and-cookies
     +   `set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[])`

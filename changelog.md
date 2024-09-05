@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 2.6.2 – September 4, 2024 =
+= Version 2.6.2 – September 5, 2024 =
 
 +   New `text_to_array()` function to split textarea to array of lines.
 +   Enhance security extension...
@@ -14,7 +14,7 @@
     +   See : https://eacdoojigger.earthasylum.com/how-to/#use-debugging-logger-methods
     +   New PSR-3 logging method : `$this->log( $level, $message, $context )`
     +   Or e.g. : `eacDoojigger->log('error', $message, $context )`
-+   Support/compliant with WP Consent API.
++   Support/compliance with WP Consent API.
 +   New cookie methods supporting WP Consent API (if active).
     +   See: https://eacdoojigger.earthasylum.com/how-to/#wp-consent-api-and-cookies
     +   `set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[])`
