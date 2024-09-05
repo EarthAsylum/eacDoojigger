@@ -12,7 +12,7 @@ namespace EarthAsylumConsulting;
  */
 
 // should be defined in eacDoojiggerAutoloader.php mu-plugin
-if (! defined('EACDOOJIGGER_HOME') ) define( 'EACDOOJIGGER_HOME', dirname(__DIR__) );
+if (! defined('EACDOOJIGGER_HOME') ) define( 'EACDOOJIGGER_HOME', __DIR__ );
 
 // ftp credentials used by file system utility
 require_once __NAMESPACE__.'/Utilities/eacDoojigger_ftp_credentials.class.php';

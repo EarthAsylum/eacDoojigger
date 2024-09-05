@@ -11,7 +11,7 @@ use Psr\Log\LogLevel;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0828.1
+ * @version		24.0904.1
  */
 trait logging
 {
