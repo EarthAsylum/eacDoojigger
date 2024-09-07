@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0829.1
+ * @version		24.0906.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -514,15 +514,13 @@ abstract class abstract_core
 		 * action {classname}_ready, fired in plugin_loader
 		 * @return	void
 		 */
-		$this->add_action( 'ready',				array($this,'plugin_ready') );
+		$this->add_action( 'ready',				array($this, 'plugin_ready') );
 
 		/**
 		 * action {classname}_daily_event to run daily
 		 * @return	void
 		 */
-		/*
 		$this->add_action( 'daily_event',		array($this, 'plugin_daily_event') );
-		*/
 
 		/**
 		 * action {classname}_hourly_event to run hourly
@@ -1358,6 +1356,7 @@ abstract class abstract_core
 	 */
 	public function plugin_daily_event(): void
 	{
+		$this->purge_expired_transients();
 	}
 
 
@@ -1685,6 +1684,9 @@ abstract class abstract_core
 
 		$caches = array();
 
+		$this->purge_expired_transients();
+		$caches[] ='Expired Transients';
+
 		// WP object cache and plugins that use the api
 		if (function_exists('\wp_cache_flush')) {
 			\wp_cache_flush();
@@ -1741,6 +1743,35 @@ abstract class abstract_core
 		$more		= 'Caches cleared: '.implode(', ',$caches);
 		$this->add_admin_notice($message,'success',$more);
 		$this->do_action('after_flush_caches');
+	}
+
+
+	/**
+	 * purge expired transients for current blog
+	 */
+	public function purge_expired_transients()
+	{
+		global $wpdb;
+
+		$expired    = time() - HOUR_IN_SECONDS;
+		$table      = ($this->is_network_admin()) ? $this->wpdb->sitemeta : $this->wpdb->options;
+
+		// delete expired transients
+		$sql = "
+				delete from t1, t2 using $table t1
+				join $table t2 on t2.option_name = replace(t1.option_name, '_timeout', '')
+				where (t1.option_name like '\_transient\_timeout\_%' or t1.option_name like '\_site\_transient\_timeout\_%')
+				  and t1.option_value < '$expired'
+		";
+		$wpdb->query($sql);
+
+		// delete orphaned transient expirations
+		$sql = "
+				delete from $table
+				where (option_name like '\_transient\_timeout\_%' or option_name like '\_site\_transient\_timeout\_%')
+				  and option_value < '$expired'
+		";
+		$wpdb->query($sql);
 	}
 
 

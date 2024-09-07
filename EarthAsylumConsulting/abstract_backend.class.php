@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0517.1
+ * @version		24.0906.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -719,7 +719,7 @@ abstract class abstract_backend extends abstract_core
 		if (method_exists($this, 'deleteUpdaterTransient')) {
 			$this->deleteUpdaterTransient();
 		}
-
+	/*
 		// delete plugin transient data
 		if ($isNetwork || $this->is_network_admin())
 		{
@@ -743,6 +743,7 @@ abstract class abstract_backend extends abstract_core
 					"WHERE option_name LIKE '%_transient_timeout_".$this->prefixTransientName('%')."'"
 			);
 		}
+	*/
 	}
 
 

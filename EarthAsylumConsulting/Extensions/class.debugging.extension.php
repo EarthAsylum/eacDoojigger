@@ -55,7 +55,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin, self::ALLOW_ALL | self::DEFAULT_DISABLED);
+			parent::__construct($plugin, self::ALLOW_ALL /*| self::ALLOW_NON_PHP*/ | self::DEFAULT_DISABLED);
 
 			if ($this->is_admin())
 			{
@@ -149,11 +149,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				{
 					$style =
 						'#debug_backtrace,#debug_purge_time {width: 85%; max-width: 25em;}'.
-						'#debug_backtrace_ticks,#debug_purge_time_ticks {'.
+						'#debug_backtrace-ticks,#debug_purge_time-ticks {'.
 							'display: flex; width: 86%; max-width: 32em;'.
-							'justify-content: space-between;'.
-							'font-size: 0.85em;'.
-							'padding: 0 0 0 0.2em;'.
 						'}';
 					wp_add_inline_style( $styleId, $style );
 				});

@@ -8,7 +8,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
 Stable tag:             2.6.2  
-Last Updated:           05-Sep-2024  
+Last Updated:           07-Sep-2024  
 Requires at least:      5.8  
 Tested up to:           6.6  
 Requires PHP:           7.4  
@@ -59,14 +59,17 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   ---------------------------------   |   ----------------    |
 |   *file system access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *security*                          | Adds a number of security options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, block IP addresses, set global cookie flags, and more. |
+|   *security*                          | Adds a number of security options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, block IP addresses, set global cookie flags, and more. |
+|   *AbuseIPDB API*                     | Ability to block access by IP address based on [AnuseIPDB](https://www.abuseipdb.com) 'Abuse Confidence Level'. |
 |   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
+|   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
 |   *session*                           | Manages PHP sessions using well-known session managers or through WordPress transients. |
 |   *maintenance mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
 |   *admin tools*                       | Adds cache management and plugin option backup/restore, export/import. |
 |   *ajax action*                       | Adds an easy to use ajax responder (accessable from any extension) as well as a purely asynchronous device fingerprint action. |
 |   *material icons*                    | Adds Google's Material Icons to WordPress. |
+|   *cookie compliance*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters. |
 |   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
 
 
@@ -83,7 +86,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   ---------------------------------   |   ----------------    |
 |   *{eac}DoojiggerAutoloader*          | The required auto-loader to automatically load {eac}Doojigger (and derivative) classes and traits. |
 |   *{eac}DoojiggerEnvironment*         | The Environment Switcher to set WP environment from the network (multi-site) settings page. |
-|   *{eac}DoojiggerActionTimer*         |The timer/tracking utility to track the load/execution timing of WordPress actions and filters (as well as custom events) when WordPress loads. |
+|   *{eac}DoojiggerActionTimer*         | The timer/tracking utility to track the load/execution timing of WordPress actions and filters (as well as custom events) when WordPress loads. |
 
 
 |   Available Derivative Plugins        |                       |
@@ -91,13 +94,14 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/) | A full-featured Software Registration/Licensing Server (used by {eac}Doojigger). |
 
 
-|   Available Extension Plugins         |                       |
+|   Available Extension Plugins         |   [WordPress Repository](https://wordpress.org/plugins/search/earthasylum/) |
 |   ---------------------------------   |   ----------------    |
 |   [{eac}SimpleSMTP](https://eacdoojigger.earthasylum.com/eacsimplesmtp/)  | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
 |   [{eac}SimpleAWS](https://eacdoojigger.earthasylum.com/eacsimpleaws/)    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
 |   [{eac}SimpleCDN](https://eacdoojigger.earthasylum.com/eacsimplecdn/)    | Enables the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience. |
-|   [{eac}ObjectCache](https://eacdoojigger.earthasylum.com/objectcache/)   |  A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects. |
+|   [{eac}ObjectCache](https://eacdoojigger.earthasylum.com/objectcache/)   | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects. |
 |   [{eac}Readme](https://eacdoojigger.earthasylum.com/eacreadme/)          | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
+|   [{eac}SimpleGTM](https://eacdoojigger.earthasylum.com/eacsimplegtm/)    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
 |   [{eac}MetaPixel](https://eacdoojigger.earthasylum.com/eacmetapixel/)    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
 
 

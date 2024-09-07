@@ -185,7 +185,13 @@ details.settings-grid-head summary > * {display: inline;}
 }
 /* range field w/datalist */
 .settings-grid-item-input-range datalist {
+	justify-content: space-between;
+	font-size: 0.85em;
+	padding: 0;
+}
+.settings-grid-item-input-range datalist option {
 	color: var(--eac-admin-highlight);
+	text-align: right;
 }
 /* output for range field (use with <code><output ...</output></code>) */
 .settings-grid-item-input-range code output {

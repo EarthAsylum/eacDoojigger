@@ -9,10 +9,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2021 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
-	 * @link		https://eacDoojigger.earthasylum.com/
-	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
+	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
 	class security_extension extends \EarthAsylumConsulting\abstract_extension
@@ -20,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0905.1';
+		const VERSION 			= '24.0906.1';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -56,7 +53,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin, self::ALLOW_ALL);
+			parent::__construct($plugin, self::ALLOW_ALL | self::ALLOW_NON_PHP);
 
 			if ($this->is_admin())
 			{
@@ -149,6 +146,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					// only use site_option
 					$this->delete_option('secLoginUri');
 				}
+				// removed from this extension
+				$this->delete_option('secAbuseIPDB_key');
+				$this->delete_option('secAbuseIPDB_level');
 			}
 
 			// so we know if/what .htaccess rules have been set
@@ -178,26 +178,13 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					$style =
 						'.dashicons-networking {position: absolute; top: 1px; right: 2px; font-size: 16px; opacity: .5;}'.
 						'#secPassLock {width: 85%; max-width: 30em;}'.
-						'#secPassLockTicks {'.
-							'display: flex; width: 86%; max-width: 38em;'.
-							'justify-content: space-between;'.
-							'font-size: 0.85em;'.
-							'padding: 0 0 0 0.2em;'.
-						'}'.
-						'#secPassLockTicks option {text-align: right;}'.
+						'#secPassLock-ticks {display: flex; width: 86%; max-width: 38.5em;}'.
+
 						'#secPassTime {width: 85%;}'.
-						'#secPassTimeTicks {'.
-							'display: flex; width: 86%; padding: 0;'.
-							'font-size: 0.85em;'.
-						'}'.
-						'#secPassTimeTicks option {text-align: right;}'.
+						'#secPassTime-ticks {display: flex; width: 86%;}'.
+
 						'#secHeartbeat {width: 85%;}'.
-						'#secHeartbeatTicks {'.
-							'display: flex; width: 86%; padding: 0;'.
-							'justify-content: space-between;'.
-							'font-size: 0.85em;'.
-						'}'.
-						'#secHeartbeatTicks option {width:4%;}';
+						'#secHeartbeat-ticks {display: flex; width: 86%;}';
 					wp_add_inline_style( $styleId, $style );
 				});
 			}
@@ -233,7 +220,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				}, 10, 3 );
 			}
 
-			add_filter('rest_api_init', 					array($this,'rest_api_cors'), 999);
+			add_action('rest_api_init', 					array($this,'rest_api_cors'), 999);
 
 			if ($this->isPolicyEnabled('secDisableRSS'))
 			{
@@ -244,7 +231,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				if ($this->isPolicyEnabled('secUnAuthRest','no-rest')) {
 				//	add_filter( 'json_jsonp_enabled', 		'__return_false');
-					add_filter( 'rest_enabled', 			'__return_false');
+				//	add_filter( 'rest_enabled', 			'__return_false');	// deprecated
 					add_filter( 'rest_jsonp_enabled', 		'__return_false' );
 				}
 				if ($this->isPolicyEnabled('secUnAuthRest','no-rest-index')) {
@@ -256,7 +243,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					$this->disable_rest_core();
 				}
 				add_filter( 'rest_authentication_errors', 	array($this, "disable_rest"), 999, 1 );
-				remove_action('wp_head', 'rest_output_link_wp_head', 10);
+				remove_action('wp_head', 'rest_output_link_wp_head');
 
 				if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
 					add_action('wp', function() {
@@ -787,10 +774,12 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			add_filter( 'rest_pre_serve_request', function($value) use($allowed_origins) {
 				$origin = get_http_origin();
 				if (is_allowed_http_origin($origin)) {
-					$this->logDebug(['Origin'=>$origin, 'Allowed'=>$allowed_origins],'Matched REST origin');
+					$this->logDebug($origin,'CORS: Matched REST origin');
 					header( 'Access-Control-Allow-Origin: ' . $origin );
 				} else {
-					$this->logError(['Origin'=>$origin, 'Allowed'=>$allowed_origins],'UnMatched REST origin');
+					if ($origin) {
+						$this->logError(['Origin'=>$origin, 'Allowed'=>$allowed_origins],'CORS: UnMatched REST origin');
+					}
 					header( 'Access-Control-Allow-Origin: ' . site_url() );
 				}
 				return $value;
@@ -938,11 +927,14 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rest_list($response)
 		{
-			$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API List denied');
-			$data = $response->get_data();
-			$data['namespaces'] = [];
-			$data['routes'] = [];
-			$response->set_data( $data );
+			if (! is_user_logged_in())
+			{
+				$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API List denied');
+				$data = $response->get_data();
+				$data['namespaces'] = [];
+				$data['routes'] = [];
+				$response->set_data( $data );
+			}
 			return $response;
 		}
 
@@ -954,17 +946,19 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rest_core()
 		{
-			add_filter('rest_endpoints', function( $endpoints )
-				{
-					$this->plugin->logError($_SERVER['REQUEST_URI'],'WP REST Endpoints removed');
-					foreach( $endpoints as $route => $endpoint ) {
-						if( 0 === stripos( $route, '/wp/' ) || '/' === $route ) {
-							unset( $endpoints[ $route ] );
+			if (! is_user_logged_in())
+			{
+				add_filter('rest_endpoints', function( $endpoints )
+					{
+						foreach( $endpoints as $route => $endpoint ) {
+							if( 0 === stripos( $route, '/wp/' ) || '/' === $route ) {
+								unset( $endpoints[ $route ] );
+							}
 						}
+						return $endpoints;
 					}
-					return $endpoints;
-				}
-			);
+				);
+			}
 		}
 
 
@@ -976,12 +970,11 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rest($authError)
 		{
-
 			$content = __("Sorry, you do not have permission to access the requested resource");
 
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest'))
 			{
-				$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied');
+				$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied (no-rest)');
 				return new \WP_Error( 'rest_unauthorized', $content , array( 'status' => 401 ) );
 			}
 
@@ -991,7 +984,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				if (!is_user_logged_in())
 				{
-					$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied');
+					$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied (no-unauth)');
 					return new \WP_Error( 'rest_unauthorized', $content , array( 'status' => 401 ) );
 				}
 			}
@@ -1039,6 +1032,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function block_ip_address()
 		{
+			if (is_user_logged_in()) return;
 			$request 	= $this->plugin->getVisitorIP();
 			$ipList 	= $this->mergePolicies('secBlockIP','');
 			if (empty($ipList)) return;
@@ -1075,7 +1069,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			http_response_code(403);
 			$content = __("Sorry, you do not have permission to access the requested resource");
 
-			if (stripos($_SERVER['REQUEST_URI'],'wp-json/') !== false)
+			if (wp_is_json_request() || stripos($_SERVER['REQUEST_URI'],'wp-json/') !== false)
 			{
 				header('Content-Type: application/json');
 				die( wp_json_encode( [ 'code'=>'rest_forbidden','message'=>$content,'data'=>['status'=>403] ] ) );
@@ -1186,7 +1180,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				return ($this->is_option($optionName,$value) || $this->is_network_option($optionName,$value));
 			}
-			return ($this->is_option($optionName) || $this->is_network_option($optionName));
+			return ($this->is_option($optionName) ?: $this->is_network_option($optionName));
 		}
 
 

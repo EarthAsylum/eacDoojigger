@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0515.1
+ * @version 	24.0906.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -53,7 +53,7 @@ $this->registerExtensionOptions( $this->className,
 				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secPassLock')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
-				'after'		=>	'<datalist id="secPassLockTicks">'.
+				'after'		=>	'<datalist id="secPassLock-ticks">'.
 									'<option value="0" label="0"></option>'.
 									'<option value="1"></option>'.
 									'<option value="2" label="2"></option>'.
@@ -69,7 +69,7 @@ $this->registerExtensionOptions( $this->className,
 								'Lock the user account after <code>'.
 								'<output name="secPassLockShow" for="secPassLock">[value]</output>'.
 								'</code> login attempts (0 = unlimited).',
-				'attributes'=>	['min="0"', 'max="10"','step="1"','list="secPassLockTicks"',
+				'attributes'=>	['min="0"', 'max="10"','step="1"','list="secPassLock-ticks"',
 								'oninput'=>"secPassLockShow.value = this.value"],
 		),
 		'secPassTime'		=> array(
@@ -79,7 +79,7 @@ $this->registerExtensionOptions( $this->className,
 				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secPassTime')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
-				'after'		=>	'<datalist id="secPassTimeTicks">'.
+				'after'		=>	'<datalist id="secPassTime-ticks">'.
 									'<option value="5" label="5m"></option>'.
 									'<option value="30"></option>'.
 									'<option value="60" label="1hr" style="width:4%"></option>'.
@@ -110,7 +110,7 @@ $this->registerExtensionOptions( $this->className,
 								'Lock the user account for <code>'.
 								'<output name="secPassTimeShow" for="secPassTime">[value]</output>'.
 								'</code> minutes after failed login.',
-				'attributes'=>	['min="5"', 'max="1440"','step="5"','list="secPassTimeTicks"',
+				'attributes'=>	['min="5"', 'max="1440"','step="5"','list="secPassTime-ticks"',
 								'oninput'=>"secPassTimeShow.value = this.value"],
 		),
 		'secDisableRSS' 	=> array(
@@ -240,7 +240,7 @@ $this->registerExtensionOptions( $this->className,
 				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secHeartbeat')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
-				'after'		=>	'<datalist id="secHeartbeatTicks">'.
+				'after'		=>	'<datalist id="secHeartbeat-ticks">'.
 									'<option value="0" label="n/a"></option>'.
 									'<option value="15"></option>'.
 									'<option value="30" label="30"></option>'.
@@ -266,7 +266,7 @@ $this->registerExtensionOptions( $this->className,
 								'Allow heartbeat every <code>'.
 								'<output name="secHeartbeatShow" for="secHeartbeat">[value]</output>'.
 								'</code> seconds (0 = unrestricted).',
-				'attributes'=>	['min="0"', 'max="300"','step="15"','list="secHeartbeatTicks"',
+				'attributes'=>	['min="0"', 'max="300"','step="15"','list="secHeartbeat-ticks"',
 								'oninput'=>"secHeartbeatShow.value = this.value"],
 				'advanced'	=> 	true,
 		),

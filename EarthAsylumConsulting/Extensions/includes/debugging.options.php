@@ -100,7 +100,7 @@ $this->registerExtensionOptions( $this->className,
 								'type'		=> 	'range',
 								'label'		=> 	'Backtrace Levels',
 								'default'	=> 	5,
-								'after'		=>	'<datalist id="debug_backtrace_ticks">'.
+								'after'		=>	'<datalist id="debug_backtrace-ticks">'.
 													'<option value="0" label="0">0</option>'.
 													'<option value="1"></option>'.
 													'<option value="2" label="2">2</option>'.
@@ -118,7 +118,7 @@ $this->registerExtensionOptions( $this->className,
 												'When capturing PHP and WP coding errors, show backtracing up to <code>'.
 												'<output name="debug_backtrace_show" for="debug_backtrace">[value]</output>'.
 												'</code> levels.',
-								'attributes'=> 	['list=debug_backtrace_ticks',
+								'attributes'=> 	['list=debug_backtrace-ticks',
 												'min=0','max=12','step=1',
 												'oninput'=>"debug_backtrace_show.value = this.value"],
 								'advanced'	=> 	true,
@@ -156,7 +156,7 @@ $this->registerExtensionOptions( $this->className,
 								'type'		=> 	'range',
 								'label'		=> 	'Purge Log Files After',
 								'default'	=> 	0,
-								'after'		=>	'<datalist id="debug_purge_time_ticks">'.
+								'after'		=>	'<datalist id="debug_purge_time-ticks">'.
 													'<option value="0" label="0">0</option>'.
 													'<option value="1"></option>'.
 													'<option value="2" label="2">2</option>'.
@@ -174,7 +174,7 @@ $this->registerExtensionOptions( $this->className,
 											 	'Purge '.$this->pluginName.' log files after <code>'.
 												'<output name="debug_purge_time_show" for="debug_purge_time">[value]</output>'.
 												'</code> week(s).',
-								'attributes'=> 	['list=debug_purge_time_ticks',
+								'attributes'=> 	['list=debug_purge_time-ticks',
 												'min=0','max=12','step=1',
 												'oninput'=>"debug_purge_time_show.value = this.value"],
 							),
