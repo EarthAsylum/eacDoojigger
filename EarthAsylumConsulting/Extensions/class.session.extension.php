@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.0817.1';
+		const 	VERSION	= '24.0907.1';
 
 		/**
 		 * @var string supported session managers
@@ -438,7 +438,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			switch ($this->session->session_manager)
 			{
 				case self::SESSION_TRANSIENT:
-					$exp = $this->get_session_expiration();
+					$exp = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);
 					$this->set_transient($this->session_id,$this->session,$exp);
 					break;
 				case self::SESSION_WOOCOMMERCE:

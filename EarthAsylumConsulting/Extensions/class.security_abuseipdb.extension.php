@@ -60,16 +60,16 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 							'type'		=>	'display',
 							'label'		=>	"About",
 							'default'	=>	"<a href='https://www.abuseipdb.com'>AbuseIPDB</a> ".
-											"is a project dedicated to helping combat the spread of hackers, spammers, and abusive activity on the internet. ".
-											"The API used here allows you to utilize the AbuseIPDB database to block access based on the <em>abuse confidence level</em>.",
+											"is a project dedicated to helping combat abusive activity on the internet. ".
+											"This API utilizes the database to block access based on the <em>abuse confidence level</em>.",
 					),
 					'abuse_ipdb_key' 	=> array(
 							'type'		=>	'textarea',
 							'label'		=>	"API Key",
 							'default'	=>	$this->isPolicyEnabled('abuse_ipdb_key'),
 							'info'		=> 	$this->isPolicyEnabled('abuse_ipdb_key')
-								? "Your AbuseIPDB API Key enables the <em>IP Address check</em> and blocking."
-								: "Enter your <a href='https://www.abuseipdb.com/account/api'>AbuseIPDB API Key</a> to enable the <em>IP Address check</em>.",
+								? "Your AbuseIPDB API Key enables <em>IP Address checking</em>."
+								: "Enter your <a href='https://www.abuseipdb.com/account/api' target='_blank'>AbuseIPDB API Key</a> to enable <em>IP Address checking</em>.",
 					),
 					'abuse_ipdb_level'	=> array(
 							'type'		=>	'range',
@@ -96,8 +96,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 					'abuse_ipdb_bans' 	=> array(
 							'type'		=>	'textarea',
 							'label'		=>	"Additional Addresses ",
-							'info'		=>	"Treat additional IP address(es) as banned. ".
-											"Enter addresses 1 per line. For example '192.168.100.1' or '2001:0db8:85a3:08d3:1319:8a2e:0370:7334'",
+							'info'		=>	"Treat additional IP address(es) as banned. Enter 1 address per line.",
 							'advanced'	=> 	true,
 					),
 				]

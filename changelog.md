@@ -3,6 +3,7 @@
 = Version 2.6.2 – September 7, 2024 =
 
 +   Purge expired transients on cache clearing and automatically (daily).
+    +   Force minimum transient expiration with transient sessions.
 +   New `text_to_array()` function to split textarea to array of lines.
 +   New AbuseIPDB api (security) extension to block by IP address based on abuse score.
     +   See : https://www.abuseipdb.com 
