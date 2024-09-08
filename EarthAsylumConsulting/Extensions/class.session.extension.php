@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.0907.1';
+		const 	VERSION	= '24.0908.1';
 
 		/**
 		 * @var string supported session managers
@@ -107,9 +107,8 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 											'label'		=> 'Session Expiration',
 											'default'	=> '1',
 											'after'		=> 'Hours',
-											'info'		=> 'In hours (from 0.5 to '.$max_session_time.'), the time to retain a session with no activity.'.
-															' Set to 0 to retain for the current browser session.',
-											'attributes'=> ['min="0"', 'max="'.$max_session_time.'"','step=".5"']
+											'info'		=> 'In hours (from 0.5 to '.$max_session_time.'), the time to retain a session with no activity.',
+											'attributes'=> ['min=".5"', 'max="'.$max_session_time.'"','step=".5"']
 										),
 				]
 			);

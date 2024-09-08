@@ -35,7 +35,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0524.1';
+		const VERSION	= '24.0907.1';
 
 		/**
 		 * @var string action (script) id
@@ -72,6 +72,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		 */
 		public function admin_options_settings()
 		{
+		/*
 			if ( ! $this->plugin->is_network_admin() )
 			{
 				$this->registerExtensionOptions( 'plugin_settings',
@@ -81,10 +82,12 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 								'label'		=> 	'Device Fingerprint',
 								'options'	=> 	['Enabled'],
 								'info'		=>	'The fingerprint uses JavaScript to capture browser &amp; devices details.',
+								'advanced'	=> 	true,
 							),
 					]
 				);
 			}
+		*/
 		}
 
 
@@ -144,6 +147,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 			wp_enqueue_script( $scriptId );
 			wp_add_inline_script( $scriptId, $this->minifyString($javascript) );
 
+		/*
 			if ($this->is_option('ajax_device_id') && !$this->plugin->getVariable('fingerprint_hash'))
 			{
 				// https://github.com/thumbmarkjs/thumbmarkjs
@@ -164,6 +168,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 					"}());";
 				wp_add_inline_script( $scriptId, $javascript );
 			}
+		*/
 		}
 
 

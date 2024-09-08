@@ -2,6 +2,7 @@
 
 = Version 2.6.2 – September 7, 2024 =
 
++   Removed Ajax device fingerprinting.
 +   Purge expired transients on cache clearing and automatically (daily).
     +   Force minimum transient expiration with transient sessions.
 +   New `text_to_array()` function to split textarea to array of lines.
