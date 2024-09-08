@@ -61,7 +61,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 							'label'		=>	"About",
 							'default'	=>	"<a href='https://www.abuseipdb.com'>AbuseIPDB</a> ".
 											"is a project dedicated to helping combat abusive activity on the internet. ".
-											"This API utilizes the database to block access based on the <em>abuse confidence level</em>.",
+											"This <abbr title='Application Program Interface'>API</abbr> utilizes the database to block access based on the <em>abuse confidence level</em>.",
 					),
 					'abuse_ipdb_key' 	=> array(
 							'type'		=>	'textarea',
@@ -182,33 +182,11 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 				if ($data['abuseConfidenceScore'] >= $level) {
 					$this->error('access_denied',"Request from {$data['ipAddress']} denied (Abuse IP DB)");
 					$this->plugin->logDebug($data,__METHOD__);
-					$this->block_access();
+					wp_die(
+						__("Sorry, you do not have permission to access the requested resource"),
+						get_bloginfo('name').__(' - Permission Denied'),403
+					);
 				}
-			}
-		}
-
-
-		/**
-		 * output forbidden response
-		 *
-		 * @return void
-		 */
-		private function block_access()
-		{
-			http_response_code(403);
-			$content = __("Sorry, you do not have permission to access the requested resource");
-
-			if (wp_is_json_request() || stripos($_SERVER['REQUEST_URI'],'wp-json/') !== false)
-			{
-				header('Content-Type: application/json');
-				die( wp_json_encode( [ 'code'=>'rest_forbidden','message'=>$content,'data'=>['status'=>403] ] ) );
-			}
-			else
-			{
-				wp_die(
-					"<div style='text-align:center'><h1>".__('Permission Denied')."</h1><h2>{$content}</h2></div>",
-					get_bloginfo('name').__(' - Permission Denied'),403
-				);
 			}
 		}
 

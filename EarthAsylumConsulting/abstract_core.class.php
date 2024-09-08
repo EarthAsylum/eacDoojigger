@@ -1555,6 +1555,7 @@ abstract class abstract_core
 			$allowed_tags['option']		= _wp_add_global_attributes(['name'=>true,'value'=>true,'label'=>true]);
 			$allowed_tags['input']		= _wp_add_global_attributes(['name'=>true,'value'=>true,'type'=>true]);
 			$allowed_tags['output']		= _wp_add_global_attributes(['name'=>true,'form'=>true,'for'=>true]);
+			$allowed_tags['abbr']		= _wp_add_global_attributes(['title'=>true]);
 			$allowed_tags['form']		= false;
 		}
 
@@ -2877,7 +2878,7 @@ abstract class abstract_core
 	public function varServer( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
 		$filter = $this->getFilterCallback($filter,$options);
-		$name = strtoupper($name);
+		$name = strtoupper(str_replace('-','_',$name));
 		if ( $result = filter_input(INPUT_SERVER, $name, ...$filter) ) return $result;
 		$httpname = 'HTTP_'.$name;
 		if ( $result = filter_input(INPUT_SERVER, $httpname, ...$filter) ) return $result;

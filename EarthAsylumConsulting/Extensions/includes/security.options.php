@@ -113,27 +113,46 @@ $this->registerExtensionOptions( $this->className,
 				'attributes'=>	['min="5"', 'max="1440"','step="5"','list="secPassTime-ticks"',
 								'oninput'=>"secPassTimeShow.value = this.value"],
 		),
-		'secDisableRSS' 	=> array(
-				'type'		=>	'radio',
-				'label'		=>	"Disable RSS/ATOM Feeds ",
-				'options'	=>	array(['WordPress Default'=>''],['Disable RSS Feeds'=>'no-rss']),
-				'default'	=>	$this->is_network_option('secDisableRSS'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableRSS')
+		'secCodeEditor' 	=> array(
+				'type'		=>	'switch',
+				'label'		=>	"Disable Code Editor",
+				'options'	=>	array(['Code Editor Disabled'=>'no-code']),
+				'default'	=>	$this->is_network_option('secCodeEditor'),
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secCodeEditor')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
-				'info'		=>	"RSS/ATOM URLs may be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if RSS/ATOM feeds are not needed.",
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableRSS')) ? 'disabled="disabled"' : '',
-				'advanced'	=> 	true,
+				'info'		=>	"WordPress supports online editing of theme and plugin code. This option disables the WordPress code editor.",
+				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secCodeEditor')) ? 'disabled="disabled"' : '',
+		),
+		'secFileChanges' 	=> array(
+				'type'		=>	'switch',
+				'label'		=>	"Disable All File Changes ",
+				'options'	=>	array(['File Changes Disabled'=>'no-mods']),
+				'default'	=>	$this->is_network_option('secFileChanges'),
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secFileChanges')
+									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
+									: ''),
+				'info'		=>	"This option prevents all file modifications in WordPress via the administration interface - including new/updated themes and plugins. ".
+								"Disable file changes for everyday operation and enable when applying updates.",
+				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secFileChanges')) ? 'disabled="disabled"' : '',
+		),
+		'secAllowCors' 	=> array(
+				'type'		=>	'textarea',
+				'label'		=>	"<abbr title='Cross-Origin Resource Sharing'>CORS</abbr> <abbr title='Application Program Interface'>API</abbr> White List ",
+				'default'	=>	$this->is_network_option('secAllowCors'),
+				'info'		=>	"Allow API access from specific origin domains only (via CORS headers). ".
+								"Enter origin URLs, 1 per line, starting with http/https.",
+				'attributes'=>	['placeholder'=>'https://origin.domain.com'],
 		),
 		'secUnAuthRest' 	=> array(
-				'type'		=>	'checkbox',
-				'label'		=>	"Disable REST API Requests ",
+				'type'		=>	'switch',
+				'label'		=>	"Disable <abbr title='REpresentational State Transfer'>REST</abbr> Requests ",
 				'options'	=>	array(
-					['Index List'		=>'no-rest-index'],
-					['WP Core'			=>'no-rest-core'],
-					['Un-Authenticated'	=>'no-rest-unauth'],
-					['All REST'			=>'no-rest'],
-					['Non-REST JSON'	=>'no-json']
+					['API Index List'		=>'no-rest-index'],
+					['WordPress Core APIs'	=>'no-rest-core'],
+					['Un-Authenticated'		=>'no-rest-unauth'],
+					['All REST APIs'		=>'no-rest'],
+					["Remote Non-API <abbr title='Javascript Object Notation'>JSON</abbr>" =>'no-json']
 				),
 				'default'	=>	$this->is_network_option('secUnAuthRest'),
 				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')
@@ -146,45 +165,35 @@ $this->registerExtensionOptions( $this->className,
 				'advanced'	=> 	true,
 		),
 		'secDisableXML' 	=> array(
-				'type'		=>	'radio',
-				'label'		=>	"Disable XML-RPC ",
-				'options'	=>	array(['WordPress Default'=>''],['Disable XML-RPC'=>'no-xml'],['Disable Pingbacks'=>'no-ping']),
+				'type'		=>	'switch',
+				'label'		=>	"Disable <abbr title='eXtensible Markup Language - Remote Procedure Call'>XML-RPC</abbr>",
+				'options'	=>	array(['XML-RPC Disabled'=>'no-xml']),
 				'default'	=>	$this->is_network_option('secDisableXML'),
-				'info'		=>	"XML-RPC may also be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if XML-RPC is not needed.",
+				'info'		=>	"XML-RPC may be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if XML-RPC is not needed.",
 				'help'		=> 	'XML (eXtensible Markup Language) RPC (Remote Procedure Call) - [info]',
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
 		),
-		'secAllowCors' 	=> array(
-				'type'		=>	'textarea',
-				'label'		=>	"CORS API White List ",
-				'default'	=>	$this->is_network_option('secAllowCors'),
-				'info'		=>	"Allow API access from specific origin domains only (via CORS headers). ".
-								"Enter origin URLs, 1 per line, starting with http/https.",
-				'attributes'=>	['placeholder'=>'https://origin.domain.com'],
+		'secDisablePings' 	=> array(
+				'type'		=>	'switch',
+				'label'		=>	"Disable Pingbacks",
+				'options'	=>	array(['Pingbacks Disabled'=>'no-ping']),
+				'default'	=>	$this->is_network_option('secDisablePings'),
+				'info'		=>	"Pingbacks may be enabled or disabled on individual blog posts. This option disables all pingbacks.",
+				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisablePings')) ? 'disabled="disabled"' : '',
+				'advanced'	=> 	true,
 		),
-		'secCodeEditor' 	=> array(
-				'type'		=>	'radio',
-				'label'		=>	"Disable Code Editor ",
-				'options'	=>	array(['WordPress Default'=>''],['Disable Code Editor'=>'no-code']),
-				'default'	=>	$this->is_network_option('secCodeEditor'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secCodeEditor')
+		'secDisableRSS' 	=> array(
+				'type'		=>	'switch',
+				'label'		=>	"Disable <abbr title='Really Simple Syndication/Atom Syndication Format '>RSS/ATOM</abbr> Feeds ",
+				'options'	=>	array(['RSS Feeds Disabled'=>'no-rss']),
+				'default'	=>	$this->is_network_option('secDisableRSS'),
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableRSS')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
-				'info'		=>	"WordPress supports online editing of theme and plugin code. This option disables the WordPress code editor.",
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secCodeEditor')) ? 'disabled="disabled"' : '',
-		),
-		'secFileChanges' 	=> array(
-				'type'		=>	'radio',
-				'label'		=>	"Disable All File Changes ",
-				'options'	=>	array(['WordPress Default'=>''],['Disable File Changes'=>'no-mods']),
-				'default'	=>	$this->is_network_option('secFileChanges'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secFileChanges')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
-				'info'		=>	"This option prevents all file modifications in WordPress via the administration interface - including new/updated themes and plugins. ".
-								"Disable file changes for everyday operation and enable when applying updates.",
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secFileChanges')) ? 'disabled="disabled"' : '',
+				'info'		=>	"RSS/ATOM URLs may be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if RSS/ATOM feeds are not needed.",
+				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableRSS')) ? 'disabled="disabled"' : '',
+				'advanced'	=> 	true,
 		),
 		'secDisableURIs' 	=> array(
 				'type'		=>	'textarea',
@@ -273,7 +282,7 @@ $this->registerExtensionOptions( $this->className,
 		'secHeartbeatFE' 	=> array(
 				'type'		=>	'switch',
 				'label'		=>	"Disable Front-End Heartbeat ",
-				'options'	=> 	['Disabled'=>'Enabled'],
+				'options'	=> 	['Heartbeat Disabled'=>'Enabled'],
 				'default'	=>	$this->is_network_option('secHeartbeatFE'),
 				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secHeartbeatFE')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
@@ -292,6 +301,7 @@ $siteOptions = [
 	$this->enable_option=> array(
 			'type'		=>	'hidden',
 			'label'		=>	'Enabled',
+			'options'	=> ['Enabled'],
 			'default'	=>	($this->is_network_enabled()) ? 'Enabled' : '',
 			'info'		=>	( ($this->is_network_enabled()) ? 'Network Enabled' : 'Network Disabled' ) .
 							" <em>(Network policies may override site policies)</em>",

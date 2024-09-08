@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0906.1';
+		const VERSION 			= '24.0908.1';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -129,19 +129,20 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if ( is_multisite() && !is_network_admin() &&
 					(!defined( 'WP_CLI' ) && !defined( 'DOING_AJAX' ) && !defined( 'DOING_CRON' )) )
 				{
-					if ($this->isNetworkPolicy('secDisableRSS')) $this->delete_option('secDisableRSS');
-					if ($this->isNetworkPolicy('secUnAuthRest')) $this->delete_option('secUnAuthRest');
-					if ($this->isNetworkPolicy('secDisableXML')) $this->delete_option('secDisableXML');
-					if ($this->isNetworkPolicy('secCodeEditor')) $this->delete_option('secCodeEditor');
-					if ($this->isNetworkPolicy('secFileChanges')) $this->delete_option('secFileChanges');
-					if ($this->isNetworkPolicy('secHeartbeat')) $this->delete_option('secHeartbeat');
-					if ($this->isNetworkPolicy('secHeartbeatFE')) $this->delete_option('secHeartbeatFE');
+					if ($this->isNetworkPolicy('secDisableRSS')) 	$this->delete_option('secDisableRSS');
+					if ($this->isNetworkPolicy('secUnAuthRest')) 	$this->delete_option('secUnAuthRest');
+					if ($this->isNetworkPolicy('secDisableXML')) 	$this->delete_option('secDisableXML');
+					if ($this->isNetworkPolicy('secDisablePings')) 	$this->delete_option('secDisablePings');
+					if ($this->isNetworkPolicy('secCodeEditor')) 	$this->delete_option('secCodeEditor');
+					if ($this->isNetworkPolicy('secFileChanges')) 	$this->delete_option('secFileChanges');
+					if ($this->isNetworkPolicy('secHeartbeat')) 	$this->delete_option('secHeartbeat');
+					if ($this->isNetworkPolicy('secHeartbeatFE')) 	$this->delete_option('secHeartbeatFE');
 
 					if ($this->isNetworkPolicy('secPassPolicy')) {
-						$this->update_option('secPassPolicy', $this->mergePolicies('secPassPolicy',[],true));
+						$this->update_option('secPassPolicy', 		$this->mergePolicies('secPassPolicy',[],true));
 					}
 					if ($this->isNetworkPolicy('secCookies')) {
-						$this->update_option('secCookies', $this->mergePolicies('secCookies',[],true));
+						$this->update_option('secCookies', 			$this->mergePolicies('secCookies',[],true));
 					}
 					// only use site_option
 					$this->delete_option('secLoginUri');
@@ -246,24 +247,18 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				remove_action('wp_head', 'rest_output_link_wp_head');
 
 				if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
-					add_action('wp', function() {
-						if (wp_is_json_request() && !defined('REST_REQUEST')) {
-							$this->plugin->fatal('non-rest-json','Invalid JSON Request',
-								[$this->plugin->getVisitorIP(),file_get_contents('php://input')]
-							);
-						}
-					});
+					add_action('wp', 						array($this, 'disable_invalid_json'));
 				}
 			}
 
 			if ($this->isPolicyEnabled('secDisableXML','no-xml'))
 			{
 				add_filter(	'xmlrpc_enabled', 				'__return_false');
-				add_filter( 'xmlrpc_methods', 				array($this, "disable_xml"), 999 );
+				add_filter( 'xmlrpc_methods', 				array($this, "disable_xml"), 998 );
 				remove_action('xmlrpc_rsd_apis', 'rest_output_rsd');
 			}
 
-			if ($this->isPolicyEnabled('secDisableXML','no-ping'))
+			if ($this->isPolicyEnabled('secDisablePings','no-ping'))
 			{
 				// remove x-pingback HTTP header
 				add_filter('wp_headers', 					function($headers) {
@@ -271,10 +266,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					return $headers;
 				});
 				// disable pingbacks
-				add_filter( 'xmlrpc_methods', 				function($methods) {
-					unset( $methods['pingback.ping'] );
-					return $methods;
-				});
+				add_filter( 'xmlrpc_methods', 				array($this, "disable_pings"), 999 );
 			}
 
 			if ($this->isPolicyEnabled('secCodeEditor'))
@@ -825,10 +817,10 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		public function disable_rss_response()
 		{
 			$this->plugin->logError($_SERVER['REQUEST_URI'],'RSS access denied');
-			http_response_code(404);
-			header('Content-Type: application/xml');
-			$content = '<status>'.__('No Feed Available').'</status><message>'.__('There are no RSS/ATOM feeds available on this site').'</message><code>404</code>';
-			die("<error>{$content}</error>");
+			wp_die(
+				__("There are no RSS/ATOM feeds available on this site"),
+				get_bloginfo('name').__(' - No Feed Available'),404
+			);
 		}
 
 
@@ -837,24 +829,32 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 *
 		 * @return void|array - empty array of xmlrpc methods
 		 */
-		public function disable_xml()
+		public function disable_xml($methods)
 		{
-			$request 	= explode('?',$_SERVER['REQUEST_URI']);
-			$request 	= trim($request[0],'/');
+			$this->logDebug($methods,__METHOD__);
+			// remove all but pingbacks
+			return array_filter($methods, function($method)
+				{
+					return strpos($method,'ping') === false;
+				},
+			ARRAY_FILTER_USE_KEY);
+		}
 
-			if (empty($request)) return;
 
-			$request 	= '/'.$request;
-
-			$found = (stripos('/xmlrpc.php', $request) === 0);
-			if (!$found) return;
-
-			$this->plugin->logError($_SERVER['REQUEST_URI'],'XML-RPC access denied');
-
-			http_response_code(403);
-			$content = __("Sorry, you do not have permission to access the requested resource");
-			header('Content-Type: application/xml');
-			die ('<?xml version="1.0"?><methodResponse><fault><value><string>'.$content.'</string></value></fault></methodResponse>');
+		/**
+		 * disable xml-rpc pings
+		 *
+		 * @return void|array - empty array of xmlrpc methods
+		 */
+		public function disable_pings($methods)
+		{
+			$this->logDebug($methods,__METHOD__);
+			// remove all pingbacks
+			return array_filter($methods, function($method)
+				{
+					return strpos($method,'ping') !== false;
+				},
+			ARRAY_FILTER_USE_KEY);
 		}
 
 
@@ -993,6 +993,24 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
+		 * disable invalid json request
+		 *
+		 */
+		public function disable_invalid_json()
+		{
+			if (wp_is_json_request())
+			{
+				if (defined('REST_REQUEST')) return;
+				if ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') return;
+
+				$this->plugin->fatal('non-rest-json','Invalid JSON Request',
+					[$this->plugin->getVisitorIP(),file_get_contents('php://input')]
+				);
+			}
+		}
+
+
+		/**
 		 * disable uri
 		 *
 		 * @return void
@@ -1066,21 +1084,10 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		private function respondForbidden()
 		{
-			http_response_code(403);
-			$content = __("Sorry, you do not have permission to access the requested resource");
-
-			if (wp_is_json_request() || stripos($_SERVER['REQUEST_URI'],'wp-json/') !== false)
-			{
-				header('Content-Type: application/json');
-				die( wp_json_encode( [ 'code'=>'rest_forbidden','message'=>$content,'data'=>['status'=>403] ] ) );
-			}
-			else
-			{
-				wp_die(
-					"<div style='text-align:center'><h1>".__('Permission Denied')."</h1><h2>{$content}</h2></div>",
-					get_bloginfo('name').__(' - Permission Denied'),403
-				);
-			}
+			wp_die(
+				__("Sorry, you do not have permission to access the requested resource"),
+				get_bloginfo('name').__(' - Permission Denied'),403
+			);
 		}
 
 

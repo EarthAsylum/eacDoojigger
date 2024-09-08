@@ -2820,7 +2820,7 @@ abstract class abstract_backend extends abstract_core
 			document.head.appendChild( document.createElement("style") )
 					.innerHTML = ".settings-tooltip.dashicons::before { visibility: visible; }";
 			// for other pages/sections/fields
-			$( '.tooltip.dashicons,[data-tooltip]:not(.settings-tooltip)' ).tooltip({
+			$( 'abbr,.tooltip.dashicons,[data-tooltip]:not(.settings-tooltip)' ).tooltip({
 				content: function() {
 					var e = $( this );
 					return e.data( 'tooltip' ) || e.attr( 'title' );
@@ -2844,7 +2844,8 @@ abstract class abstract_backend extends abstract_core
 		return array_map(function($choice)
 			{
 				return [
-					'option'	=> esc_attr__(key($choice), $this->PLUGIN_TEXTDOMAIN),
+				//	'option'	=> esc_attr__(key($choice), $this->PLUGIN_TEXTDOMAIN),
+					'option'	=> $this->wp_kses(key($choice)),
 					'value'		=> esc_attr(current($choice))
 				];
 			},

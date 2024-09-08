@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 2.6.2 – September 7, 2024 =
+= Version 2.6.2 – September 8, 2024 =
 
 +   Removed Ajax device fingerprinting.
 +   Purge expired transients on cache clearing and automatically (daily).
@@ -11,6 +11,7 @@
 +   Enhanced security extension...
     +   Block REST index list, WP core REST routes, non-rest json requests.
     +   CORS headers w/white-list domains.
+    +   CSS/layout tweeks.
 +   Updated wpconfig-transformer to v1.3.6
 +   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
 +   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.

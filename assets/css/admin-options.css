@@ -202,8 +202,8 @@ details.settings-grid-head summary > * {display: inline;}
 /* input type = switch (checkbox) */
 .settings-grid-container .input-switch-wrap {
 	position: relative;
-	display: inline-block;
-	margin: 1px 0;
+	display: flex;
+	margin: 1px 0 .25em 0;
 	height: 20px;
 	font-weight: normal;
 	color: black;
@@ -231,13 +231,13 @@ details.settings-grid-head summary > * {display: inline;}
 	margin: 5px 1rem; opacity: 0;
 }
 /* when checked */
-.settings-grid-head input.input-switch:checked + .input-switch-slider {
+.settings-grid-head input.input-switch:checked ~ .input-switch-slider {
 	background-color: var(--eac-admin-highlight);
 }
-.settings-grid-item input.input-switch:checked + .input-switch-slider {
+.settings-grid-item input.input-switch:checked ~ .input-switch-slider {
 	background-color: var(--eac-admin-notify);
 }
-.settings-grid-container input.input-switch:checked + .input-switch-slider:before {
+.settings-grid-container input.input-switch:checked ~ .input-switch-slider:before {
 	transform: translateX(1.46em);
 }
 .settings-grid-container .input-switch-wrap:has(input.input-switch:checked) {
