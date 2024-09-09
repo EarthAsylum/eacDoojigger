@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0821.1
+ * @version		24.0909.1
  */
 trait cookie_consent
 {
@@ -18,13 +18,18 @@ trait cookie_consent
 	private static $cookie_hack_loaded = false;
 
 	/**
-	 * @var string defaul consent service name (set bay using class)
+	 * @var bool are we using consent api?
+	 */
+	private static $use_cookie_consent = false;
+
+	/**
+	 * @var string default consent service name (set by using class)
 	 */
 	public $cookie_default_service = '';
 
 
 	/**
-	 * initialize cookie consent (on startup)
+	 * initialize cookie consent (on _plugin_startup)
 	 *
 	 * @example $this->cookie_consent_init( $this->pluginHeader( 'PluginSlug' ) );
 	 *
@@ -37,7 +42,8 @@ trait cookie_consent
 	{
 		if ( class_exists( '\WP_CONSENT_API' ) )
 		{
-			$this->cookie_default_service = $default_service ?: dirname($plugin_slug);
+			$this->use_cookie_consent		= true;
+			$this->cookie_default_service 	= $default_service ?: dirname($plugin_slug);
 
 			// WP_CONSENT_API waits for plugins_loaded to instantiate (?)
 			// which may be after this plugin loads.
@@ -96,6 +102,17 @@ trait cookie_consent
 
 
 	/**
+	 * helper function to check for consent
+	 *
+	 * @return	void
+	 */
+	public function has_cookie_consent(string $category): bool
+	{
+		return ($this->use_cookie_consent) ? wp_has_consent($category) : true;
+	}
+
+
+	/**
 	 * set a cookie supporting wp_consent if enabled
 	 *
 	 * @param string		$name the cookie name
@@ -113,7 +130,7 @@ trait cookie_consent
 		$name	= sanitize_text_field($name);
 		$value 	= sanitize_text_field($value);
 
- 		$using_consent = (class_exists( '\WP_CONSENT_API' ));
+ 		$using_consent = $this->use_cookie_consent;
 		if ($consent === true) {
 			$consent = ($using_consent) ? $this->get_cookie_consent($name) : [];
 		}
@@ -261,7 +278,7 @@ trait cookie_consent
 			$name
 		);
 
-		if ($register && !empty($consent['function']) && class_exists('\WP_CONSENT_API'))
+		if ($register && !empty($consent['function']) && $this->use_cookie_consent)
 		{
 			// maybe replace '%s' with plugin/service name in function description
 			$consent['function'] = sprintf($consent['function'],$consent['plugin_or_service']);
@@ -280,7 +297,7 @@ trait cookie_consent
 	 */
 	public function get_cookie_consent($name = false): array
 	{
-		$consent = wp_get_cookie_info($name);
+		$consent = ($this->use_cookie_consent) ? wp_get_cookie_info($name) : false;
 		// because wp_get_cookie_info may return all cookies even when we ask for only one
 		if ($consent && $name) {
 			if (! isset($consent['plugin_or_service'])) return [];

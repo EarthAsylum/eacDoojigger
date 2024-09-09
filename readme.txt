@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             2.6.2
-Last Updated:           08-Sep-2024
+Last Updated:           09-Sep-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -420,7 +420,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.2 – September 8, 2024 =
+= Version 2.6.2 – September 9, 2024 =
 
 +   Removed Ajax device fingerprinting.
 +   Purge expired transients on cache clearing and automatically (daily).
@@ -441,6 +441,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
     +   New PSR-3 logging method : `$this->log( $level, $message, $context )`
     +   Or e.g. : `eacDoojigger->log('error', $message, $context )`
 +   Support/compliance with WP Consent API.
++   has_cookie_consent() method to check consent without checking for wp_consent api.
 +   New cookie methods supporting WP Consent API (if active).
     +   See: https://eacdoojigger.earthasylum.com/how-to/#wp-consent-api-and-cookies
     +   `set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[])`
