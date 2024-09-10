@@ -42,7 +42,7 @@ trait cookie_consent
 	{
 		if ( class_exists( '\WP_CONSENT_API' ) )
 		{
-			$this->use_cookie_consent		= true;
+			self::$use_cookie_consent		= true;
 			$this->cookie_default_service 	= $default_service ?: dirname($plugin_slug);
 
 			// WP_CONSENT_API waits for plugins_loaded to instantiate (?)
@@ -108,7 +108,7 @@ trait cookie_consent
 	 */
 	public function has_cookie_consent(string $category): bool
 	{
-		return ($this->use_cookie_consent) ? wp_has_consent($category) : true;
+		return (self::$use_cookie_consent) ? wp_has_consent($category) : true;
 	}
 
 
@@ -130,7 +130,7 @@ trait cookie_consent
 		$name	= sanitize_text_field($name);
 		$value 	= sanitize_text_field($value);
 
- 		$using_consent = $this->use_cookie_consent;
+ 		$using_consent = self::$use_cookie_consent;
 		if ($consent === true) {
 			$consent = ($using_consent) ? $this->get_cookie_consent($name) : [];
 		}
@@ -278,7 +278,7 @@ trait cookie_consent
 			$name
 		);
 
-		if ($register && !empty($consent['function']) && $this->use_cookie_consent)
+		if ($register && !empty($consent['function']) && self::$use_cookie_consent)
 		{
 			// maybe replace '%s' with plugin/service name in function description
 			$consent['function'] = sprintf($consent['function'],$consent['plugin_or_service']);
@@ -297,7 +297,7 @@ trait cookie_consent
 	 */
 	public function get_cookie_consent($name = false): array
 	{
-		$consent = ($this->use_cookie_consent) ? wp_get_cookie_info($name) : false;
+		$consent = (self::$use_cookie_consent) ? wp_get_cookie_info($name) : false;
 		// because wp_get_cookie_info may return all cookies even when we ask for only one
 		if ($consent && $name) {
 			if (! isset($consent['plugin_or_service'])) return [];
