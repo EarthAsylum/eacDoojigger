@@ -243,6 +243,7 @@ details.settings-grid-head summary > * {display: inline;}
 .settings-grid-container .input-switch-wrap:has(input.input-switch:checked) {
 	font-weight: revert; color: revert; opacity: 1;
 }
+.settings-grid-container .input-switch-wrap label:has(input.input-switch:disabled){opacity: 0.3 !important;}
 
 /* file input */
 .settings-grid-item .input-file-wrap input[type='submit'] {

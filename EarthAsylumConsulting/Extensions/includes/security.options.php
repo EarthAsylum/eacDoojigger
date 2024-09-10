@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0906.1
+ * @version 	24.0910.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -169,6 +169,9 @@ $this->registerExtensionOptions( $this->className,
 				'label'		=>	"Disable <abbr title='eXtensible Markup Language - Remote Procedure Call'>XML-RPC</abbr>",
 				'options'	=>	array(['XML-RPC Disabled'=>'no-xml']),
 				'default'	=>	$this->is_network_option('secDisableXML'),
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')
+									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
+									: ''),
 				'info'		=>	"XML-RPC may be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if XML-RPC is not needed.",
 				'help'		=> 	'XML (eXtensible Markup Language) RPC (Remote Procedure Call) - [info]',
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')) ? 'disabled="disabled"' : '',
@@ -179,6 +182,9 @@ $this->registerExtensionOptions( $this->className,
 				'label'		=>	"Disable Pingbacks",
 				'options'	=>	array(['Pingbacks Disabled'=>'no-ping']),
 				'default'	=>	$this->is_network_option('secDisablePings'),
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisablePings')
+									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
+									: ''),
 				'info'		=>	"Pingbacks may be enabled or disabled on individual blog posts. This option disables all pingbacks.",
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisablePings')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
@@ -301,7 +307,7 @@ $siteOptions = [
 	$this->enable_option=> array(
 			'type'		=>	'hidden',
 			'label'		=>	'Enabled',
-			'options'	=> ['Enabled'],
+	//		'options'	=> ['Enabled'],
 			'default'	=>	($this->is_network_enabled()) ? 'Enabled' : '',
 			'info'		=>	( ($this->is_network_enabled()) ? 'Network Enabled' : 'Network Disabled' ) .
 							" <em>(Network policies may override site policies)</em>",
