@@ -7,8 +7,8 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.6.2  
-Last Updated:           09-Sep-2024  
+Stable tag:             2.7.0  
+Last Updated:           10-Sep-2024  
 Requires at least:      5.8  
 Tested up to:           6.6  
 Requires PHP:           7.4  
@@ -67,7 +67,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *session*                           | Manages PHP sessions using well-known session managers or through WordPress transients. |
 |   *maintenance mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
 |   *admin tools*                       | Adds cache management and plugin option backup/restore, export/import. |
-|   *ajax action*                       | Adds an easy to use ajax responder (accessable from any extension) as well as a purely asynchronous device fingerprint action. |
+|   *ajax action*                       | Adds an easy to use ajax responder (accessable from any extension). |
 |   *material icons*                    | Adds Google's Material Icons to WordPress. |
 |   *cookie compliance*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters. |
 |   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |

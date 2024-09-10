@@ -13,14 +13,9 @@ namespace EarthAsylumConsulting\Traits;
 trait cookie_consent
 {
 	/**
-	 * @var bool defaul has hack been loaded?
+	 * @var bool has cookie consent been loaded?
 	 */
-	private static $cookie_hack_loaded = false;
-
-	/**
-	 * @var bool are we using consent api?
-	 */
-	private static $use_cookie_consent = false;
+	private static $cookie_consent_loaded = false;
 
 	/**
 	 * @var string default consent service name (set by using class)
@@ -38,11 +33,10 @@ trait cookie_consent
 	 *
 	 * @return void
 	 */
-	private function cookie_consent_init( string $plugin_slug = '', $default_service = '' ): void
+	private function cookie_consent_init( string $plugin_slug, string $default_service = '' ): void
 	{
 		if ( class_exists( '\WP_CONSENT_API' ) )
 		{
-			self::$use_cookie_consent		= true;
 			$this->cookie_default_service 	= $default_service ?: dirname($plugin_slug);
 
 			// WP_CONSENT_API waits for plugins_loaded to instantiate (?)
@@ -54,19 +48,22 @@ trait cookie_consent
 				add_filter( "wp_consent_api_registered_{$plugin_slug}", '__return_true' );
 			}
 
-			// add 'necessary' consent category, always allowed
-			add_filter('wp_consent_categories', function($consent) {
-				return array_merge(['necessary'],$consent);
-			});
-			// 'necessary' is always allowed
-			add_filter('wp_has_consent', function($has_consent, $category, $requested_by) {
-				return ($category == 'necessary') ? true : $has_consent;
-			},5,3);
+			// do only once
+			if (! self::$cookie_consent_loaded)
+			{
+				self::$cookie_consent_loaded = true;
 
-			// add javascript and filter for consent type (optin/optout)
-			if (! self::$cookie_hack_loaded) {
-				self::$cookie_hack_loaded = true;
-				add_action( 'wp_enqueue_scripts', array( $this, 'cookie_consent_hack' ),PHP_INT_MAX);
+				// add 'necessary' consent category, always allowed
+				add_filter('wp_consent_categories', function($consent) {
+					return array_merge(['necessary'],$consent);
+				});
+				// 'necessary' is always allowed
+				add_filter('wp_has_consent', function($has_consent, $category, $requested_by) {
+					return ($category == 'necessary') ? true : $has_consent;
+				},5,3);
+
+				// add javascript and filter for consent type (optin/optout)
+				add_action( 'wp_enqueue_scripts', array( $this, 'cookie_consent_patch' ),PHP_INT_MAX);
 			}
 		}
 	}
@@ -77,7 +74,7 @@ trait cookie_consent
 	 *
 	 * @return	void
 	 */
-	public function cookie_consent_hack(): void
+	public function cookie_consent_patch(): void
 	{
 		// WP Consent API doesn't pass client consent type to the server,
 		// use a cookie on change (provided the CMP fires 'wp_consent_type_defined' event).
@@ -90,7 +87,7 @@ trait cookie_consent
 		// some consent management platforms may not set wp_get_consent_type
 		add_filter('wp_get_consent_type',function($type)
 			{
-				if ((empty($type))) {
+				if ((empty($type))) {	// has not (yet) been set
 					$prefix	= \WP_CONSENT_API::$config->consent_cookie_prefix();
 					return $this->get_cookie("{$prefix}_consent_type",'optout');
 				}
@@ -98,17 +95,6 @@ trait cookie_consent
 			},
 			PHP_INT_MAX - 100
 		);
-	}
-
-
-	/**
-	 * helper function to check for consent
-	 *
-	 * @return	void
-	 */
-	public function has_cookie_consent(string $category): bool
-	{
-		return (self::$use_cookie_consent) ? wp_has_consent($category) : true;
 	}
 
 
@@ -121,7 +107,7 @@ trait cookie_consent
 	 * 						'delete', 'expired', 'session', 'n days', 'n months', etc.
 	 * @param array 		$options cookie parameters
 	 * 						'path', 'domain', 'secure', 'httponly', 'samesite'.
-	 * @param mixed 		$consent (array) consent parameters or (string) category or true, already registered
+	 * @param mixed 		$consent (array) consent parameters or (string) category or true = already registered
 	 *						'plugin_or_service', 'category', 'function', ...
 	 * @return bool 		success or failure (as best we can tell)
 	 */
@@ -130,7 +116,7 @@ trait cookie_consent
 		$name	= sanitize_text_field($name);
 		$value 	= sanitize_text_field($value);
 
- 		$using_consent = self::$use_cookie_consent;
+ 		$using_consent = self::$cookie_consent_loaded;
 		if ($consent === true) {
 			$consent = ($using_consent) ? $this->get_cookie_consent($name) : [];
 		}
@@ -159,7 +145,7 @@ trait cookie_consent
 			if (! $consent['category'] = wp_validate_consent_category(
 				apply_filters( 'wp_setcookie_category',$consent['category'],$name,$value )
 			)) {
-				_doing_it_wrong(__FUNCTION__, __("Missing/invalid consent category."), '2.6.2');
+				_doing_it_wrong(__FUNCTION__, __("Missing/invalid consent category."), '2.7.0');
 				return false;
 			}
 
@@ -278,10 +264,14 @@ trait cookie_consent
 			$name
 		);
 
-		if ($register && !empty($consent['function']) && self::$use_cookie_consent)
+		if ($register && !empty($consent['function']) && self::$cookie_consent_loaded)
 		{
-			// maybe replace '%s' with plugin/service name in function description
-			$consent['function'] = sprintf($consent['function'],$consent['plugin_or_service']);
+			// maybe replace placeholders with cookie array values
+			$consent['function'] = sprintf($consent['function'],
+				$consent['plugin_or_service'],
+				$consent['category'],
+				$consent['type'],
+			);
 			wp_add_cookie_info( $name, ...array_values($consent) );
 		}
 
@@ -297,7 +287,7 @@ trait cookie_consent
 	 */
 	public function get_cookie_consent($name = false): array
 	{
-		$consent = (self::$use_cookie_consent) ? wp_get_cookie_info($name) : false;
+		$consent = (self::$cookie_consent_loaded) ? wp_get_cookie_info($name) : false;
 		// because wp_get_cookie_info may return all cookies even when we ask for only one
 		if ($consent && $name) {
 			if (! isset($consent['plugin_or_service'])) return [];
@@ -316,5 +306,20 @@ trait cookie_consent
 	public function get_cookie(string $name, $default = null)
 	{
 		return (isset($_COOKIE[$name])) ? sanitize_text_field($_COOKIE[$name]) : $default;
+	}
+
+
+	/**
+	 * check consent is loaded and category set (convenience method)
+	 *
+	 * @param string		$category consent category to check.
+	 * @return	bool
+	 */
+	public function has_cookie_consent(string $category = null): bool
+	{
+		if (is_null($category)) {
+			return self::$cookie_consent_loaded;
+		}
+		return (self::$cookie_consent_loaded) ? wp_has_consent($category) : true;
 	}
 }

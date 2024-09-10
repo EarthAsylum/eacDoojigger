@@ -125,7 +125,7 @@ class eacDoojiggerAutoloader
 		// add this default namespace and register the autoloader
 		if (! isset( self::$validNamespace[ __NAMESPACE__ ] ))
 		{
-			// may not be set on new/upgrade install (v2.6.2)
+			// may not be set on new/upgrade install (v2.7.0)
 			if (! defined('EACDOOJIGGER_HOME') ){
 				require  WP_PLUGIN_DIR.'/eacDoojigger/autoload.php';
 			}

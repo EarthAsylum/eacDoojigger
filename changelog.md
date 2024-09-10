@@ -1,7 +1,8 @@
 == Changelog ==
 
-= Version 2.6.2 – September 9, 2024 =
+= Version 2.7.0 – September 10, 2024 =
 
++   Bumped v2.6.2 (never released) to v2.7.0
 +   Removed Ajax device fingerprinting.
 +   Purge expired transients on cache clearing and automatically (daily).
     +   Force minimum transient expiration with transient sessions.
@@ -11,7 +12,7 @@
 +   Enhanced security extension...
     +   Block REST index list, WP core REST routes, non-rest json requests.
     +   CORS headers w/white-list domains.
-    +   CSS/layout tweeks.
+    +   CSS/layout tweaks.
 +   Updated wpconfig-transformer to v1.3.6
 +   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
 +   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.
@@ -21,7 +22,7 @@
     +   New PSR-3 logging method : `$this->log( $level, $message, $context )`
     +   Or e.g. : `eacDoojigger->log('error', $message, $context )`
 +   Support/compliance with WP Consent API.
-+   has_cookie_consent() method to check consent without checking for wp_consent api.
++   has_cookie_consent() method to check consent.
 +   New cookie methods supporting WP Consent API (if active).
     +   See: https://eacdoojigger.earthasylum.com/how-to/#wp-consent-api-and-cookies
     +   `set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[])`

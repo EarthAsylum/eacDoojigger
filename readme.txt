@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.6.2
-Last Updated:           09-Sep-2024
+Stable tag:             2.7.0
+Last Updated:           10-Sep-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -59,7 +59,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *session*                           | Manages PHP sessions using well-known session managers or through WordPress transients. |
 |   *maintenance mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
 |   *admin tools*                       | Adds cache management and plugin option backup/restore, export/import. |
-|   *ajax action*                       | Adds an easy to use ajax responder (accessable from any extension) as well as a purely asynchronous device fingerprint action. |
+|   *ajax action*                       | Adds an easy to use ajax responder (accessable from any extension). |
 |   *material icons*                    | Adds Google's Material Icons to WordPress. |
 |   *cookie compliance*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters. |
 |   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
@@ -420,8 +420,9 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.6.2 – September 9, 2024 =
+= Version 2.7.0 – September 10, 2024 =
 
++   Bumped v2.6.2 (never released) to v2.7.0
 +   Removed Ajax device fingerprinting.
 +   Purge expired transients on cache clearing and automatically (daily).
     +   Force minimum transient expiration with transient sessions.
@@ -431,7 +432,7 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 +   Enhanced security extension...
     +   Block REST index list, WP core REST routes, non-rest json requests.
     +   CORS headers w/white-list domains.
-    +   CSS/layout tweeks.
+    +   CSS/layout tweaks.
 +   Updated wpconfig-transformer to v1.3.6
 +   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
 +   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.
@@ -441,82 +442,12 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
     +   New PSR-3 logging method : `$this->log( $level, $message, $context )`
     +   Or e.g. : `eacDoojigger->log('error', $message, $context )`
 +   Support/compliance with WP Consent API.
-+   has_cookie_consent() method to check consent without checking for wp_consent api.
++   has_cookie_consent() method to check consent.
 +   New cookie methods supporting WP Consent API (if active).
     +   See: https://eacdoojigger.earthasylum.com/how-to/#wp-consent-api-and-cookies
     +   `set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[])`
 +   Allow/default session access from derivative plugins when using `setVariable()` and `getVariable()`.
 +   Added action `{pluginname}_startup` after `plugins_loaded`, before loading extensions.
 +   Session debugging filter for `eacDoojigger_debugging`.
-
-= Version 2.6.1 – July 6, 2024 =
-
-+   Session manager extension:
-    +   Use session_set_cookie_params if session_start().
-    +   uses WC->session getters and setters.
-    +   Start session on demand not on 'init'.
-    +   Adjust session_save_data (shutdown) priority (8).
-    +   Added generic session manager using external plugin (or not).
-    +   Removed (outdated) 'WP Session Manager' support.
-+   Option input field type allow 'toggle' as alias for 'switch'.
-+   For option validation ('validate'=>...), false value triggers generic error notice.
-+   doing_ajax() checks wp_doing_ajax (admin-ajax.php) and 'XMLHttpRequest' (other).
-+   $this->isAjaxRequest() method deprecated for $this->doing_ajax().
-+   Removed user id from visitorId().
-+   Save visitorId using setVariable() (maybe session).
-    +   isNewVisitor() checks variable.
-
-= Version 2.6.0 – June 4, 2024 =
-
-+   EAC_DOOJIGGER_VERSION constant deprecated in favor of EACDOOJIGGER_VERSION.
-+   Fixed upgrade notice in plugin update notice trait.
-+   New getRelease() method returns 'Stable Tag' and 'Last Updated' from readme.
-+   Include header values from readme.txt in pluginData.
-+   Add stable release on plugins page when different than version.
-+   Moved plugin updater actions from plugin loader to new `eacDoojiggerPluginUpdater` class.
-    +   Loaded once in eacDoojiggerAutoloader.
-    +   Handles all derivative and extension plugins.
-    +   Reduces individual plugin footprint and redundancy.
-    +   Allows updating even when plugin is disabled or not network enabled on multi-site.
-+   Improved "Advanced Mode" with isAdvancedMode(), setAdvancedMode(), and allowAdvancedMode().
-    +   derivative plugins must call allowAdvancedMode(true) to enable, and may overload functions or use 'allow_advanced_mode' filter to implement.
-    +   filter `$this->apply_filters('is_advanced_mode',false,'settings');`
-+   Added 'advanced' attribute to settings fields to suppress field when not isAdvancedMode().
-+   Made (most) options_settings_page_* methods public so html_input trait can access them.
-+   New code-editor trait, loads code-mirror and wp_editor with consistant options/styling.
-+   Change to tiny-mce parameters and toolbars for html fields.
-+   Improved ajaxAction extension.
-    +   Added fingerprint option (using https://github.com/thumbmarkjs/thumbmarkjs).
-    +   Added `{pluginName}_{className}_{methodName}` filter in dispatcher.
-        +   e.g. `eacDoojigger_ajaxAction_deviceFingerprint`
-+   Added 'settings-grid-item-label' and 'settings-grid-item-input-{type}' class to settings divs.
-+   Change 'Requires at least' to WordPress 5.8.
-+   Several improvements to admin screen styling/layout.
-    +   Improved admin theme support using admin colors (from $_wp_admin_css_colors).
-+   Changes to some javascript loading code (inc. defer admin script).
-+   Support replaceable meta in options attributes, Ex. 'Title' => '[label] [info]'.
-    +   label, default, title, before, after, info, tooltip, help
-+   Added $this->wp_kses() custom wp_kses method with extended tags.
-    +   Now processes all (string) admin field option attributes through $this->wp_kses().
-    +   New 'script' field attribute since script tags no longer allowed in other attributes.
-    +   $this->minifyString() (used for inline scripts/css) now uses $this->wp_kses().
-+   Added 'tooltip' attribute to settings fields with jQuery hover tooltip.
-    +    Automatically populated with field 'info' when not set or set to true.
-+   added tooltip filter to disable auto-populate.
-    +   `$this->add_filter("automatic_tooltips", function($bool, $groupName, $groupMeta){...});`
-+   Added input field filters before rendering fields.
-    +   `$this->add_filter("options_group_meta_{$groupName}", function($groupMeta){...});`
-    +   `$this->add_filter("options_field_meta_{$fieldName}", function($fieldMeta, $fieldValue){...});`
-+   Added actions to wpmu_installer extension.
-    +   `do_action('eacDoojigger_installer_invoke', $installAction, $installMethod, $installOptions, $onSuccess)`
-    +   `do_action('eacDoojigger_installer_install', $installOptions)`
-    +   `do_action('eacDoojigger_installer_update', $installOptions)`
-    +   `do_action('eacDoojigger_installer_uninstall', $installOptions)`
-    +   `do_action('eacDoojigger_installer_delete', $installOptions)`
-+   Added filters to file_system extension.
-    +   `$fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem,true,'file system required',[]);`
-    +   `$fs = apply_filters('eacDoojigger_link_filesystem',$wp_filesystem,true,'file system required',[]);`
-+   Fix call/use of WC() in session_manager to prevent erros if woocommerce has been disabled.
-
 
 = See changelog.md for more =
