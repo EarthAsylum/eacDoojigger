@@ -52,7 +52,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *file system access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
 |   *security*                          | Adds a number of security options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, block IP addresses, set global cookie flags, and more. |
-|   *AbuseIPDB API*                     | Ability to block access by IP address based on [AnuseIPDB](https://www.abuseipdb.com) 'Abuse Confidence Level'. |
+|   *AbuseIPDB API*                     | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com) 'Abuse Confidence Level'. |
 |   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
