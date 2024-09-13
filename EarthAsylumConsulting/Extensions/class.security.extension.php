@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0908.1';
+		const VERSION 			= '24.0913.1';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -62,6 +62,25 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
+			}
+
+			// add additional css when our settings stylesheet loads.
+			if ($this->plugin->isSettingsPage('Security'))
+			{
+				$this->add_action('admin_enqueue_styles', function($styleId)
+				{
+					$style =
+						'.dashicons-networking {position: absolute; top: 1px; right: 2px; font-size: 16px; opacity: .5;}'.
+						'#secPassLock {width: 85%; max-width: 30em;}'.
+						'#secPassLock-ticks {display: flex; width: 86%; max-width: 38.5em;}'.
+
+						'#secPassTime {width: 85%;}'.
+						'#secPassTime-ticks {display: flex; width: 86%;}'.
+
+						'#secHeartbeat {width: 85%;}'.
+						'#secHeartbeat-ticks {display: flex; width: 86%;}';
+					wp_add_inline_style( $styleId, $style );
+				});
 			}
 		}
 
@@ -171,25 +190,6 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
-			// add additional css when our settings stylesheet loads.
-			if ($this->plugin->isSettingsPage('Security'))
-			{
-				$this->add_action('admin_enqueue_styles', function($styleId)
-				{
-					$style =
-						'.dashicons-networking {position: absolute; top: 1px; right: 2px; font-size: 16px; opacity: .5;}'.
-						'#secPassLock {width: 85%; max-width: 30em;}'.
-						'#secPassLock-ticks {display: flex; width: 86%; max-width: 38.5em;}'.
-
-						'#secPassTime {width: 85%;}'.
-						'#secPassTime-ticks {display: flex; width: 86%;}'.
-
-						'#secHeartbeat {width: 85%;}'.
-						'#secHeartbeat-ticks {display: flex; width: 86%;}';
-					wp_add_inline_style( $styleId, $style );
-				});
-			}
-
 			if ($this->login_uri = $this->get_site_option('secLoginUri'))
 			{
 				//$this->login_uri = $this->mergePolicies('secLoginUri','')[0];

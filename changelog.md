@@ -1,7 +1,8 @@
 == Changelog ==
 
-= Version 2.7.0 – September 10, 2024 =
+= Version 2.7.0 – September 13, 2024 =
 
++   Fixed (load) admin css when extension is disabled.
 +   Bumped v2.6.2 (never released) to v2.7.0
 +   Removed Ajax device fingerprinting.
 +   Purge expired transients on cache clearing and automatically (daily).

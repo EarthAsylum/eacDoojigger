@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0830.1';
+		const VERSION	= '24.0913.1';
 
 		/**
 		 * @var internal variables
@@ -64,6 +64,20 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
+			}
+
+			if ($this->plugin->isSettingsPage('Debugging'))
+			{
+				// add additional css when our settings stylesheet loads.
+				$this->add_action('admin_enqueue_styles', function($styleId)
+				{
+					$style =
+						'#debug_backtrace,#debug_purge_time {width: 85%; max-width: 25em;}'.
+						'#debug_backtrace-ticks,#debug_purge_time-ticks {'.
+							'display: flex; width: 86%; max-width: 32em;'.
+						'}';
+					wp_add_inline_style( $styleId, $style );
+				});
 			}
 
 			if ($this->isEnabled())
@@ -144,16 +158,6 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 					$this->update_option('debug_to_file_allowed','yes');
 				}
-				// add additional css when our settings stylesheet loads.
-				$this->add_action('admin_enqueue_styles', function($styleId)
-				{
-					$style =
-						'#debug_backtrace,#debug_purge_time {width: 85%; max-width: 25em;}'.
-						'#debug_backtrace-ticks,#debug_purge_time-ticks {'.
-							'display: flex; width: 86%; max-width: 32em;'.
-						'}';
-					wp_add_inline_style( $styleId, $style );
-				});
 			}
 
 			// subscribe to Logger action - file output

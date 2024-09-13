@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0906.1';
+		const VERSION 			= '24.0913.1';
 
 		/**
 		 * @var array additional IP addresses to block
@@ -42,6 +42,17 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
+			}
+
+			if ($this->plugin->isSettingsPage('Security'))
+			{
+				$this->add_action('admin_enqueue_styles', function($styleId)
+				{
+					$style =
+						'#abuse_ipdb_level {width: 85%; max-width: 30em;}'.
+						'#abuse_ipdb_level-ticks {display: flex; width: 86%; max-width: 38.5em;}';
+					wp_add_inline_style( $styleId, $style );
+				});
 			}
 		}
 
@@ -145,17 +156,6 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
-			if ($this->plugin->isSettingsPage('Security'))
-			{
-				$this->add_action('admin_enqueue_styles', function($styleId)
-				{
-					$style =
-						'#abuse_ipdb_level {width: 85%; max-width: 30em;}'.
-						'#abuse_ipdb_level-ticks {display: flex; width: 86%; max-width: 38.5em;}';
-					wp_add_inline_style( $styleId, $style );
-				});
-			}
-
 			if (! is_user_logged_in())
 			{
 				add_action('init', 			array($this, 'check_for_abuse'), 1);
