@@ -2229,28 +2229,26 @@ abstract class abstract_core
 	 *
 	 * @return	string	IP address
 	 */
-	public function getVisitorIP(/* $default=false */): ?string
+	public function getVisitorIP(): ?string
 	{
 		if ($ip = $this->getVariable('remote_ip')) return $ip;
 
-		$default = (func_num_args() > 0) ? func_get_arg(0) : null;
-
 		// look for these headers
-		foreach([	'HTTP_X_FORWARDED_FOR',
-					'HTTP_FORWARDED_FOR',
-					'HTTP_X_FORWARDED',
-					'HTTP_FORWARDED',
-					'HTTP_CF_CONNECTING_IP',
-					'HTTP_X_REAL_IP',
-					'HTTP_CLIENT_IP',
+		foreach([	'X_REAL_IP',
+					'CF_CONNECTING_IP',
+					'X_FORWARDED_FOR',
+					'FORWARDED_FOR',
+					'X_FORWARDED',
+					'FORWARDED',
+					'CLIENT_IP',
 					'REMOTE_ADDR',
 				] as $hdr)
 		{
 			if ( $addr = $this->varServer($hdr) )
 			{
 				// may have multiple addresses (forwards)
-				$addr = explode( ',', str_replace([' ',';'], ',', trim($addr)) );
-				$addr = array_reverse($addr);
+				$addr = $this->text_to_array($addr,[',',';',' ']);
+				//$addr = array_reverse($addr);
 				foreach($addr as $ip)
 				{
 					$ip = \filter_var($ip, FILTER_VALIDATE_IP,FILTER_FLAG_IPV4|FILTER_FLAG_IPV6);
@@ -2270,7 +2268,7 @@ abstract class abstract_core
 			$this->setVariable('remote_ip',$ip);
 			return $ip;
 		}
-		return $default;
+		return null;
 	}
 
 
@@ -2284,7 +2282,8 @@ abstract class abstract_core
 	{
 		if ($country = $this->getVariable('remote_country')) return $country;
 
-		if ($country = $this->varServer('GEOIP_COUNTRY_CODE')) {
+		if ($country = $this->varServer('GEOIP_COUNTRY_CODE')
+					?: $this->varServer('CF-IPCOUNTRY')) {
 		} else if ($httpLang = $this->varServer('HTTP_ACCEPT_LANGUAGE')) {
 			// break up string into pieces (languages and q factors)
 			preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $httpLang, $lang_parse);

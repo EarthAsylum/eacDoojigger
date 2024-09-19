@@ -1,7 +1,9 @@
 == Changelog ==
 
-= Version 2.7.0 – September 13, 2024 =
+= Version 2.7.0 – September 19, 2024 =
 
++   Fixed getVisitorIP() when proxied (i.e. before cloud flare).
++   Check Cf-Ipcountry for visitor country code.
 +   Fixed (load) admin css when extension is disabled.
 +   Bumped v2.6.2 (never released) to v2.7.0
 +   Removed Ajax device fingerprinting.

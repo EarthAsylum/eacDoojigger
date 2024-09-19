@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0913.1';
+		const VERSION 			= '24.0919.1';
 
 		/**
 		 * @var array additional IP addresses to block
@@ -158,7 +158,8 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 		{
 			if (! is_user_logged_in())
 			{
-				add_action('init', 			array($this, 'check_for_abuse'), 1);
+				// do this late so other rules may process
+				add_action('wp', 			array($this, 'check_for_abuse'), 100);
 			}
 		}
 
@@ -180,12 +181,8 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 			{
 				$data = $this->get_AbuseIPDB($key,$level);
 				if ($data['abuseConfidenceScore'] >= $level) {
-					$this->error('access_denied',"Request from {$data['ipAddress']} denied (Abuse IP DB)");
 					$this->plugin->logDebug($data,__METHOD__);
-					wp_die(
-						__("Sorry, you do not have permission to access the requested resource"),
-						get_bloginfo('name').__(' - Permission Denied'),403
-					);
+					$this->security->respondForbidden("Request from {$data['ipAddress']} denied, AbuseIPDB score {$data['abuseConfidenceScore']}");
 				}
 			}
 		}
@@ -202,11 +199,6 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 
 			$sessionKey 	= 'ip_data';
 			$transientKey 	= sprintf('%s_%s',$sessionKey,str_replace(['.',':'],'-',$ipAddress));
-
-			// check current session
-		//	if ($result = $this->getVariable($sessionKey)) {
-		//		return $result;
-		//	}
 
 			// check transient (previously blocked)
 			if ($result = $this->get_site_transient($transientKey)) {
@@ -236,11 +228,13 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 			$data = $result['data'];
 
 			$this->setVariable($sessionKey,$data);
-			$this->set_site_transient($transientKey,$data,HOUR_IN_SECONDS/2);
+			$this->set_site_transient($transientKey,$data,HOUR_IN_SECONDS*4);
 
 			if (! $this->getVariable('remote_country')) {
 				$this->setVariable('remote_country',$data['countryCode']);
 			}
+
+			$this->logDebug("{$data['ipAddress']} AbuseIPDB Confidence Score = {$data['abuseConfidenceScore']}",__METHOD__);
 
 			return $data;
 			/*

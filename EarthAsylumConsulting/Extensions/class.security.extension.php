@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0913.1';
+		const VERSION 			= '24.0918.1';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -816,11 +816,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rss_response()
 		{
-			$this->plugin->logError($_SERVER['REQUEST_URI'],'RSS access denied');
-			wp_die(
-				__("There are no RSS/ATOM feeds available on this site"),
-				get_bloginfo('name').__(' - No Feed Available'),404
-			);
+			$this->respondForbidden('RSS access denied');
 		}
 
 
@@ -831,11 +827,11 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_xml($methods)
 		{
-			$this->logDebug($methods,__METHOD__);
+		//	$this->logDebug($methods,__METHOD__);
 			// remove all but pingbacks
 			return array_filter($methods, function($method)
 				{
-					return strpos($method,'ping') === false;
+					return stripos($method,'ping') !== false;
 				},
 			ARRAY_FILTER_USE_KEY);
 		}
@@ -848,11 +844,11 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_pings($methods)
 		{
-			$this->logDebug($methods,__METHOD__);
+		//	$this->logDebug($methods,__METHOD__);
 			// remove all pingbacks
 			return array_filter($methods, function($method)
 				{
-					return strpos($method,'ping') !== false;
+					return stripos($method,'ping') === false;
 				},
 			ARRAY_FILTER_USE_KEY);
 		}
@@ -929,7 +925,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			if (! is_user_logged_in())
 			{
-				$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API List denied');
+				$this->plugin->error('access_denied','REST API List denied',
+					[$this->plugin->getVisitorIP(),$_SERVER['REQUEST_URI']]
+				);
 				$data = $response->get_data();
 				$data['namespaces'] = [];
 				$data['routes'] = [];
@@ -970,12 +968,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rest($authError)
 		{
-			$content = __("Sorry, you do not have permission to access the requested resource");
-
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest'))
 			{
-				$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied (no-rest)');
-				return new \WP_Error( 'rest_unauthorized', $content , array( 'status' => 401 ) );
+				$this->respondForbidden('REST API access denied (disabled)');
 			}
 
 			if (!empty($authError)) return $authError;
@@ -984,8 +979,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				if (!is_user_logged_in())
 				{
-					$this->plugin->logError($_SERVER['REQUEST_URI'],'REST API access denied (no-unauth)');
-					return new \WP_Error( 'rest_unauthorized', $content , array( 'status' => 401 ) );
+					$this->respondForbidden('REST API access denied (unauthorized)');
 				}
 			}
 			return $authError;
@@ -1003,9 +997,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if (defined('REST_REQUEST')) return;
 				if ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') return;
 
-				$this->plugin->fatal('non-rest-json','Invalid JSON Request',
-					[$this->plugin->getVisitorIP(),file_get_contents('php://input')]
-				);
+				$this->respondForbidden('Invalid JSON Request');
 			}
 		}
 
@@ -1038,8 +1030,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if (!$found) return;
 
-			$this->plugin->logError($_SERVER['REQUEST_URI'],'URI access denied');
-			$this->respondForbidden();
+			$this->respondForbidden('URI access denied');
 		}
 
 
@@ -1072,8 +1063,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				else return;
 			}
 
-			$this->plugin->logError($_SERVER['REQUEST_URI'],"Request from {$request} denied");
-			$this->respondForbidden();
+			$this->respondForbidden('IP access denied');
 		}
 
 
@@ -1082,12 +1072,19 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 *
 		 * @return void
 		 */
-		private function respondForbidden()
+		private function respondForbidden($logMsg='',$message=null)
 		{
-			wp_die(
-				__("Sorry, you do not have permission to access the requested resource"),
-				get_bloginfo('name').__(' - Permission Denied'),403
-			);
+			if ($logMsg) {
+				$this->plugin->error('access_denied',$logMsg,
+					array_filter([$this->plugin->getVisitorIP(),$_SERVER['REQUEST_URI'],file_get_contents('php://input')])
+				);
+			}
+
+			wp_die( new \WP_Error(
+				'access_denied',
+				__($message ?? "Sorry, you do not have permission to access the requested resource"),
+				['status' => 403]
+			) );
 		}
 
 

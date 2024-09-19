@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0913.1';
+		const VERSION	= '24.0918.1';
 
 		/**
 		 * @var internal variables
@@ -1051,7 +1051,13 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				);
 			}
 
-			$headers = ($this->logLevel & LogLevel::LOG_DEBUG) ? ['Response Headers' => headers_list()] : '';
+			if ($headers = ($this->logLevel & LogLevel::LOG_DEBUG) ? ['Response Headers' => headers_list()] : '')
+			{
+				$headers['Response Headers'] = array_merge(
+					[$_SERVER['SERVER_PROTOCOL'].' Status: '.http_response_code().' '.get_status_header_desc(http_response_code())],
+					$headers['Response Headers']
+				);
+			}
 
 			$startTime	= $this->plugin->pluginHeader('RequestTime');
 			$stopTime	= microtime(true);
@@ -1063,10 +1069,11 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			$this->logToFile(
 				LogLevel::LOG_ALWAYS,
 				$headers,
-				sprintf("Duration: %01.4f Seconds, Peak Memory Used: %s of %s",
+				sprintf("Status: %s, Duration: %01.4f Seconds, Peak Memory Used: %s of %s",
+					http_response_code(),
 					($stopTime - $startTime),
 					$memory,
-					ini_get('memory_limit')
+					ini_get('memory_limit'),
 				),
 				$stopTime,
 				"exit ".$this->reqType

@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             2.7.0
-Last Updated:           13-Sep-2024
+Last Updated:           19-Sep-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -420,8 +420,10 @@ To upgrade to version 2.0 of {eac}Doojigger : 1. Disable all derivative plugins;
 
 == Changelog ==
 
-= Version 2.7.0 – September 13, 2024 =
+= Version 2.7.0 – September 19, 2024 =
 
++   Fixed getVisitorIP() when proxied (i.e. before cloud flare).
++   Check Cf-Ipcountry for visitor country code.
 +   Fixed (load) admin css when extension is disabled.
 +   Bumped v2.6.2 (never released) to v2.7.0
 +   Removed Ajax device fingerprinting.
