@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0910.1
+ * @version 	24.0921.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -135,14 +135,6 @@ $this->registerExtensionOptions( $this->className,
 				'info'		=>	"This option prevents all file modifications in WordPress via the administration interface - including new/updated themes and plugins. ".
 								"Disable file changes for everyday operation and enable when applying updates.",
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secFileChanges')) ? 'disabled="disabled"' : '',
-		),
-		'secAllowCors' 	=> array(
-				'type'		=>	'textarea',
-				'label'		=>	"<abbr title='Cross-Origin Resource Sharing'>CORS</abbr> <abbr title='Application Program Interface'>API</abbr> White List ",
-				'default'	=>	$this->is_network_option('secAllowCors'),
-				'info'		=>	"Allow API access from specific origin domains only (via CORS headers). ".
-								"Enter origin URLs, 1 per line, starting with http/https.",
-				'attributes'=>	['placeholder'=>'https://origin.domain.com'],
 		),
 		'secUnAuthRest' 	=> array(
 				'type'		=>	'switch',
@@ -296,6 +288,45 @@ $this->registerExtensionOptions( $this->className,
 				'info'		=>	"Often the WordPress heartbeat ping is not needed on the site's public front-end. It can be disabled here but may be required by certain plugins or themes.",
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secHeartbeatFE')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
+		),
+	]
+);
+$this->registerExtensionOptions( 'Server_Side_CORS',
+	[
+		'secCorsOpt' 	=> array(
+				'type'		=>	'switch',
+				'label'		=>	"<abbr title='Cross-Origin Resource Sharing'>CORS</abbr> Options",
+				'options'	=>	array(
+					["Apply CORS to <abbr title='REpresentational State Transfer (e.g. /wp-json)'>REST</abbr> requests"	=>'rest'],
+					["Apply CORS to <abbr title='eXtensible Markup Language - Remote Procedure Call (e.g. xmlrpc.php)'>XML-RPC</abbr> requests" =>'xml'],
+					["Apply CORS to <abbr title='Asynchronous JavaScript and XML (e.g. admin-ajax.php)'>AJAX</abbr> requests"		=>'ajax'],
+					["Use <abbr title='Use http referer header'>referring URL</abbr> if no origin" =>'referer'],
+					["Use <abbr title='Get origin by reverse DNS lookup'>IP address</abbr> if no origin" =>'ip_address'],
+				),
+				'default'	=>	$this->is_network_option('secCorsOpt'),
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')
+									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
+									: ''),
+				'info'		=>	"CORS is a security feature implemented by browsers. These options implement basic ".
+								"CORS security at the server level helping to prevent malicious activty from browser &amp; non-browser sources.",
+				'help'		=> 	'CORS (Cross-Origin Resource Sharing) - [info]',
+				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secCorsOpt')) ? 'disabled="disabled"' : '',
+		),
+		'secAllowCors' 	=> array(
+				'type'		=>	'textarea',
+				'label'		=>	"CORS <abbr title='Application Program Interface'>API</abbr> White List",
+				'default'	=>	$this->is_network_option('secAllowCors'),
+				'info'		=>	"Allow API access from specific origin domains only. ".
+								"Enter origin URLs, 1 per line beginning with 'http://' or 'https://.",
+				'attributes'=>	['placeholder'=>'https://origin.domain.com'],
+		),
+		'secExcludeCors' 	=> array(
+				'type'		=>	'textarea',
+				'label'		=>	"CORS Exempt URIs",
+				'default'	=>	$this->is_network_option('secExcludeCors'),
+				'info'		=>	"Exclude server URIs from CORS security checks. ".
+								"Enter URIs, 1 per line, beginning with /.",
+				'attributes'=>	['placeholder'=>'/wp-json/...'],
 		),
 	]
 );

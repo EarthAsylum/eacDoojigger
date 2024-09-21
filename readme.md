@@ -8,7 +8,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
 Stable tag:             2.7.0  
-Last Updated:           19-Sep-2024  
+Last Updated:           21-Sep-2024  
 Requires at least:      5.8  
 Tested up to:           6.6  
 Requires PHP:           7.4  
@@ -59,7 +59,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   ---------------------------------   |   ----------------    |
 |   *file system access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *security*                          | Adds a number of security options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, block IP addresses, set global cookie flags, and more. |
+|   *security*                          | Adds a number of security options to your WordPress installation including server-side CORS, changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, set global cookie flags, and more. |
 |   *AbuseIPDB API*                     | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com) 'Abuse Confidence Level'. |
 |   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |

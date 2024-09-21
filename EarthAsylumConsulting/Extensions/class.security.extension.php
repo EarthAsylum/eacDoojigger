@@ -17,7 +17,12 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0918.1';
+		const VERSION 			= '24.0921.1';
+
+		/**
+		 * @var string extension alias
+		 */
+		const ALIAS 			= 'security';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -58,6 +63,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			if ($this->is_admin())
 			{
 				$this->registerExtension( [$this->className, 'Security'] );
+				$this->registerExtension( ['Server_Side_CORS', 'Security'] );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
@@ -221,7 +227,22 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				}, 10, 3 );
 			}
 
-			add_action('rest_api_init', 					array($this,'rest_api_cors'), 999);
+			if ($this->isPolicyEnabled('server_side_cors_extension_enabled'))
+			{
+				if ($this->isPolicyEnabled('secCorsOpt','rest')) {
+					add_action('rest_api_init', 					array($this,'rest_api_cors'), 999);
+				}
+				if ($this->isPolicyEnabled('secCorsOpt','xml')) {
+					if ( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ) {
+						add_action('init', 							array($this,'rest_api_cors'), 999);
+					}
+				}
+				if ($this->isPolicyEnabled('secCorsOpt','ajax')) {
+					if ( $this->plugin->doing_ajax() ) {
+						add_action('init', 							array($this,'rest_api_cors'), 999);
+					}
+				}
+			}
 
 			if ($this->isPolicyEnabled('secDisableRSS'))
 			{
@@ -755,24 +776,47 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		public function rest_api_cors()
 		{
 			$allowed_origins = $this->mergePolicies('secAllowCors','');
-			if (empty($allowed_origins)) return;
+			if (empty($allowed_origins)) $allowed_origins = [];
 
 			add_filter( 'allowed_http_origins', function ($allowed) use($allowed_origins) {
-				return array_merge($allowed,$allowed_origins);
+				$allowed_origins = array_merge($allowed,$allowed_origins);
+				return $allowed_origins;
 			});
-
-			// instead of removing filter, replace Allow-Origin
-			// remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-			add_filter( 'rest_pre_serve_request', function($value) use($allowed_origins) {
-				$origin = get_http_origin();
-				if (is_allowed_http_origin($origin)) {
-					$this->logDebug($origin,'CORS: Matched REST origin');
-					header( 'Access-Control-Allow-Origin: ' . $origin );
-				} else {
-					if ($origin) {
-						$this->logError(['Origin'=>$origin, 'Allowed'=>$allowed_origins],'CORS: UnMatched REST origin');
+			if ($this->isPolicyEnabled('secCorsOpt','referer')) {
+				add_filter( 'http_origin', function ($origin) {
+					if (empty($origin)) {
+						if ($origin = $this->plugin->varServer('HTTP_REFERER')) {
+							$origin = parse_url($origin);
+							$origin = $origin['scheme'].'://'.$origin['host'];
+						}
 					}
+					return $origin;
+				});
+			}
+			if ($this->isPolicyEnabled('secCorsOpt','ip_address')) {
+				add_filter( 'http_origin', function ($origin) {
+					if (empty($origin)) {
+						$origin = (is_ssl()) ? 'https://' : 'http://';
+						$origin .= gethostbyaddr($this->plugin->getVisitorIP());
+					}
+					return $origin;
+				});
+			}
+			$action = (current_action() == 'rest_api_init') ? 'rest_pre_serve_request' : 'wp_loaded';
+			remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+			add_filter( $action, function($value) use($allowed_origins) {
+				$origin = get_http_origin();
+				if ($this->match_disabled_uris('secExcludeCors') || is_allowed_http_origin($origin)) {
+					$this->logDebug($origin,'CORS: allowed origin');
+					header( 'Access-Control-Allow-Origin: ' . $origin );
+					header( 'Access-Control-Allow-Methods: ' .
+						$this->plugin->varServer('REQUEST_METHOD') ?: 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
+					header( 'Access-Control-Allow-Credentials: true' );
+					header( 'Vary: Origin', false );
+				} else {
+					$this->logError($origin,'CORS: denied origin');
 					header( 'Access-Control-Allow-Origin: ' . site_url() );
+					$this->respondForbidden('CORS access denied');
 				}
 				return $value;
 			},20);
@@ -1009,6 +1053,21 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_uris()
 		{
+			$found = $this->match_disabled_uris('secDisableURIs');
+
+			if (!$found) return;
+
+			$this->respondForbidden('URI access denied');
+		}
+
+
+		/**
+		 * disable uri
+		 *
+		 * @return void
+		 */
+		private function match_disabled_uris($optionName)
+		{
 			$request 	= explode('?',$_SERVER['REQUEST_URI']);
 			$request 	= trim($request[0],'/');
 
@@ -1016,21 +1075,14 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			$request 	= '/'.$request;
 
-			$uriList 	= $this->mergePolicies('secDisableURIs','');
+			$uriList 	= $this->mergePolicies($optionName,'');
 
 			if (empty($uriList)) return;
 
-			$found = false;
-			foreach ($uriList as $uri) {
-				if (stripos($uri, $request) === 0) {
-					$found = true;
-					break;
-				}
-			}
-
-			if (!$found) return;
-
-			$this->respondForbidden('URI access denied');
+			$found = array_filter($uriList,function($uri) use($request) {
+				return (stripos($request, $uri) === 0);
+			});
+			return !empty($found);
 		}
 
 

@@ -1,7 +1,8 @@
 == Changelog ==
 
-= Version 2.7.0 – September 19, 2024 =
+= Version 2.7.0 – September 21, 2024 =
 
++   Enhanced/implemented server-side CORS security.
 +   Fixed getVisitorIP() when proxied (i.e. before cloud flare).
 +   Check Cf-Ipcountry for visitor country code.
 +   Fixed (load) admin css when extension is disabled.

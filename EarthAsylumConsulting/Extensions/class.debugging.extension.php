@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0918.1';
+		const VERSION	= '24.0921.1';
 
 		/**
 		 * @var internal variables
@@ -987,8 +987,14 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				$this->reqType = 'ajax';
 			} else if (wp_doing_cron()) {
 				$this->reqType = 'cron';
-			} else if (defined('REST_REQUEST')) {
+			} else if (defined('REST_REQUEST') && REST_REQUEST) {			// may not be set yet
 				$this->reqType = 'rest';
+			} else if (strpos($_SERVER['REQUEST_URI'], '/wp-json') === 0) {
+				$this->reqType = 'rest';
+			} else if ( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ) {		// may not be set yet
+				$this->reqType = 'xmlrpc';
+			} else if (strpos($_SERVER['REQUEST_URI'], '/xmlrpc') === 0) {
+				$this->reqType = 'xmlrpc';
 			} else if (wp_is_json_request()) {
 				$this->reqType = 'json';
 			} else if (wp_is_jsonp_request()) {
