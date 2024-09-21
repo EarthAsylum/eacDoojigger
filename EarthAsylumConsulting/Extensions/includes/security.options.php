@@ -304,13 +304,13 @@ $this->registerExtensionOptions( 'Server_Side_CORS',
 					["Use <abbr title='Get origin by reverse DNS lookup'>IP address</abbr> if no origin" =>'ip_address'],
 				),
 				'default'	=>	$this->is_network_option('secCorsOpt'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
+//				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')
+//									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
+//									: ''),
 				'info'		=>	"CORS is a security feature implemented by browsers. These options implement basic ".
 								"CORS security at the server level helping to prevent malicious activty from browser &amp; non-browser sources.",
 				'help'		=> 	'CORS (Cross-Origin Resource Sharing) - [info]',
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secCorsOpt')) ? 'disabled="disabled"' : '',
+//				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secCorsOpt')) ? 'disabled="disabled"' : '',
 		),
 		'secAllowCors' 	=> array(
 				'type'		=>	'textarea',
