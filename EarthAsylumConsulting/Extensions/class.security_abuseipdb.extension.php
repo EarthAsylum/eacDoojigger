@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0919.1';
+		const VERSION 			= '24.0921.1';
 
 		/**
 		 * @var array additional IP addresses to block
@@ -182,7 +182,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 				$data = $this->get_AbuseIPDB($key,$level);
 				if ($data['abuseConfidenceScore'] >= $level) {
 					$this->plugin->logDebug($data,__METHOD__);
-					$this->security->respondForbidden("Request from {$data['ipAddress']} denied, AbuseIPDB score {$data['abuseConfidenceScore']}");
+					$this->security->respondForbidden("Request from {$data['ipAddress']} denied, Confidence score {$data['abuseConfidenceScore']}");
 				}
 			}
 		}

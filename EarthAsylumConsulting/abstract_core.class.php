@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0906.1
+ * @version		24.0922.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -2278,13 +2278,26 @@ abstract class abstract_core
 	 * @param	string	2 character country code default
 	 * @return	string	2 character country code (default=US)
 	 */
-	public function getVisitorCountry(/* $default='US' */): string
+	public function getVisitorCountry(string $default='US'): string
 	{
 		if ($country = $this->getVariable('remote_country')) return $country;
 
-		if ($country = $this->varServer('GEOIP_COUNTRY_CODE')
-					?: $this->varServer('CF-IPCOUNTRY')) {
-		} else if ($httpLang = $this->varServer('HTTP_ACCEPT_LANGUAGE')) {
+		if ($country = $this->varServer('GEOIP_COUNTRY_CODE')			// kinsta, et.al.
+					?: $this->varServer('CF-IPCOUNTRY')					// cloudflare
+					?: $this->varServer('CLOUDFRONT-VIEWER-COUNTRY')	// aws cloudfront
+					?: $this->varServer('X-APPENGINE-COUNTRY')			// google app engine
+					?: $this->varServer('X-GEO-COUNTRY')				// Acquia cloud
+		){
+			// trust country code set by server/proxy
+			if ($country == 'ZZ') {
+				$country = '';
+			} else {
+				$default = $country;
+			}
+		}
+
+		if (!$country && ($httpLang = $this->varServer('HTTP_ACCEPT_LANGUAGE')))
+		{
 			// break up string into pieces (languages and q factors)
 			preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i', $httpLang, $lang_parse);
 
@@ -2300,18 +2313,21 @@ abstract class abstract_core
 				// find a country code
 				foreach ($langs as $lang => $val) {
 					list ($l,$c) = explode('-',$lang.'-');	// en-us
-					if ($c) $country = strtoupper($c);		// US
+					if ($c) $default = strtoupper($c);		// US
 				}
 			}
-		} else {
-			$country = (func_num_args() > 0) ? func_get_arg(0) : 'US';
 		}
+
 		/**
 		 * filter {classname}_set_visitor_country get the visitor's country
 		 * @param	string	$country country code
+		 * @param	string	$default country code
 		 * @return	string	country code
 		 */
-		$country = $this->apply_filters( 'set_visitor_country', $country );
+		$country = strtoupper(
+			$this->apply_filters( 'set_visitor_country', $country, $default )
+			?: $default
+		);
 		$this->setVariable('remote_country',$country); // if visitor returns here
 		return $country;
 	}
@@ -2334,7 +2350,7 @@ abstract class abstract_core
 		$cookieName = $this->apply_filters( 'visitor_cookie_name', $cookieName );
 
 		$value = (!$forRequest)
-			? $this->varCookie($cookieName) ?: $this->getVariable($cookieName)
+			? $this->get_cookie($cookieName) ?: $this->getVariable($cookieName)
 			: null;
 
 		if (!$value)
@@ -2345,7 +2361,11 @@ abstract class abstract_core
 						$this->varServer('HTTP_ACCEPT_LANGUAGE') .
 						$this->varServer('HTTP_USER_AGENT') .
 						$this->varServer('REMOTE_PORT');
-			if ($forRequest) $value .= $this->pluginHeader('RequestTime');
+			if ($forRequest) {
+				$value .= $this->pluginHeader('RequestTime');
+			} else {
+				$this->setVariable('is_new_visitor',true);
+			}
 			/**
 			 * filter {classname}_set_visitor_id get the visitor's id
 			 * @param	string	$id
@@ -2394,9 +2414,9 @@ abstract class abstract_core
 		$cookieName = $this->apply_filters( 'visitor_cookie_name', $cookieName );
 
 		// get/set per-session (if session manager active)
-		$isNew	= $this->getVariable('_new_visitor')
+		$isNew	= $this->getVariable('is_new_visitor')
 					?? (!isset($_COOKIE[$cookieName]) && !$this->getVariable($cookieName));
-		$this->setVariable('_new_visitor',$isNew);
+		$this->setVariable('is_new_visitor',$isNew);
 		/**
 		 * filter {classname}_is_new_visitor is this a new visitor
 		 * @param	bool

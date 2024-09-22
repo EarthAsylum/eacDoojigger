@@ -1124,7 +1124,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 *
 		 * @return void
 		 */
-		private function respondForbidden($logMsg='',$message=null)
+		public function respondForbidden($logMsg='',$message=null)
 		{
 			if ($logMsg) {
 				$this->plugin->error('access_denied',$logMsg,
@@ -1132,6 +1132,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				);
 			}
 
+			http_response_code(403);
 			wp_die( new \WP_Error(
 				'access_denied',
 				__($message ?? "Sorry, you do not have permission to access the requested resource"),

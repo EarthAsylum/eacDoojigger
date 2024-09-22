@@ -7,7 +7,7 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.7.0  
+Stable tag:             2.7.0-RC4  
 Last Updated:           21-Sep-2024  
 Requires at least:      5.8  
 Tested up to:           6.6  
@@ -401,5 +401,10 @@ _Kevin Burkholder_
 
 10. My Awesome Plugin Contextual Help
 ![ContextualHelp](https://swregistry.earthasylum.com/software-updates/eacdoojigger/assets/screenshot-10.png)
+
+
+### Upgrade Notice
+
+The upcoming version 3.0 of {eac}Doojigger will drop support for PHP versions prior to 8.1.
 
 

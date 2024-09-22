@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.0908.1';
+		const 	VERSION	= '24.0921.1';
 
 		/**
 		 * @var string supported session managers
@@ -456,7 +456,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		 */
 		private function get_session_expiration( )
 		{
-			$exp = intval($this->get_option('session_expiration',1));
+			$exp = floatval($this->get_option('session_expiration',1));
 			/*
 			 * filter {classname}_session_expiration set the session expiration time
 			 * @param	float	$exp in hours
