@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.7.0-RC4
-Last Updated:           22-Sep-2024
+Stable tag:             2.7.0-RC4+23-Sep-2024
+Last Updated:           23-Sep-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -397,7 +397,7 @@ _Kevin Burkholder_
 
 == Upgrade Notice ==
 
-The upcoming version 3.0 of {eac}Doojigger will drop support for PHP versions prior to 8.1.
+Future versions (starting with 3.0) of {eac}Doojigger will drop support for PHP versions prior to 8.1.
 
 
 == Copyright ==
@@ -418,7 +418,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 2.7.0 – September 22, 2024 =
+= Version 2.7.0 – September 23, 2024 =
 
 +   Enhanced/implemented server-side CORS security.
 +   Fixed getVisitorIP() when proxied (i.e. before cloud flare).

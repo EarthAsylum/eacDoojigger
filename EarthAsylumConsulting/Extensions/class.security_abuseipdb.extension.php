@@ -17,7 +17,12 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0921.1';
+		const VERSION 			= '24.0923.1';
+
+		/**
+		 * @var string alias
+		 */
+		const ALIAS 			= 'abuse';
 
 		/**
 		 * @var array additional IP addresses to block
@@ -164,9 +169,18 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 		}
 
 
-		/*
-		 * Filters/actions
+		/**
+		 * increment the abuse score
+		 *
+		 * @param int $increment increment abuse score
 		 */
+		public function increment(int $increment=1): void
+		{
+			if ($key = $this->isPolicyEnabled('abuse_ipdb_key'))
+			{
+				$this->get_AbuseIPDB($key,$increment);
+			}
+		}
 
 
 		/**
@@ -179,7 +193,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 			// get site or network values
 			if ( ($key = $this->isPolicyEnabled('abuse_ipdb_key')) && ($level = $this->isPolicyEnabled('abuse_ipdb_level')) )
 			{
-				$data = $this->get_AbuseIPDB($key,$level);
+				$data = $this->get_AbuseIPDB($key);
 				if ($data['abuseConfidenceScore'] >= $level) {
 					$this->plugin->logDebug($data,__METHOD__);
 					$this->security->respondForbidden("Request from {$data['ipAddress']} denied, Confidence score {$data['abuseConfidenceScore']}");
@@ -191,28 +205,39 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 		/**
 		 * Use the AbuseIPDB API to validate/block IP address
 		 *
+		 * @param string	$key API key
+		 * @param int $increment increment abuse score
 		 */
-		public function get_AbuseIPDB($key,$level=100): array
+		public function get_AbuseIPDB(string $key,int $increment=0): array
 		{
 			$ipAddress 		= $this->getVisitorIP();
 			if (isset($this->ip_blocked[$ipAddress])) return $this->ip_blocked[$ipAddress];
 
-			$sessionKey 	= 'ip_data';
-			$transientKey 	= sprintf('%s_%s',$sessionKey,str_replace(['.',':'],'-',$ipAddress));
+			$transient_data_key 	= sprintf('%s_%s','ip_abuse_data',sanitize_key(str_replace(['.',':'],'-',$ipAddress)));
+			$transient_reset_key 	= sprintf('%s_%s','ip_abuse_data','ratelimit_reset');
+			$transient_time 		= HOUR_IN_SECONDS * 4;
 
-			// check transient (previously blocked)
-			if ($result = $this->get_site_transient($transientKey)) {
-				return $result;
+			// check transient (previously checked)
+			if ($data = $this->plugin->get_site_transient($transient_data_key)) {
+				if ($increment) {
+					$data['abuseConfidenceScore'] += $increment;
+					$this->plugin->set_site_transient($transient_data_key,$data,$transient_time);
+				}
+				return $data;
 			}
 
 			$data = [
 				'ipAddress'				=> $ipAddress,
-				'abuseConfidenceScore'	=> 0,
+				'abuseConfidenceScore'	=> -1,
 			];
 
-			$ipEncode = urlencode($ipAddress);
+			// check transient (previously exceeded limit)
+			if ($this->plugin->get_transient($transient_reset_key)) {
+				return $data;
+			}
+
 			$result = wp_remote_get(
-				add_query_arg(['ipAddress'=>$ipEncode],'https://api.abuseipdb.com/api/v2/check'),
+				add_query_arg(['ipAddress'=>urlencode($ipAddress)],'https://api.abuseipdb.com/api/v2/check'),
 				[
 					'headers' 	=> [
 						'Accept' 	=> 'application/json',
@@ -220,18 +245,39 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 					]
 				]
 			);
-			$result = (wp_remote_retrieve_response_code($result) == '200')
-				? json_decode( wp_remote_retrieve_body($result), true ) : null;
 
-			if (empty($result)) return $data;
+			$status = wp_remote_retrieve_response_code($result);
+			if ($status == '429') {			// rate limit reached
+				$reset = wp_remote_retrieve_header($result, 'X-RateLimit-Reset') ?: time()+$transient_time;
+				if ($reset) {
+					$log = [
+						'limit'		=> wp_remote_retrieve_header($result, 'X-RateLimit-Limit'),
+						'reset' 	=> wp_date('c',$reset),
+					];
+					$this->logError($log,'AbuseIPDB daily rate limit exceeded');
+					$this->plugin->set_transient($transient_reset_key,$log,$reset - time());
+				}
+				return $data;
+			}
 
-			$data = $result['data'];
+		//	if ($status != '200') return $data;
 
-			$this->setVariable($sessionKey,$data);
-			$this->set_site_transient($transientKey,$data,HOUR_IN_SECONDS*4);
+			$result = json_decode( wp_remote_retrieve_body($result), true );
 
-			if (! $this->getVariable('remote_country')) {
-				$this->setVariable('remote_country',$data['countryCode']);
+			if (!empty($result) && isset($result['data'])) {
+				$data = $result['data'];
+				unset($data['reports']);
+			}
+			if ($increment) {
+				$data['abuseConfidenceScore'] += $increment;
+			}
+
+			$this->plugin->set_site_transient($transient_data_key,$data,$transient_time);
+
+			if ($data['countryCode']) {
+				if (! $this->plugin->getVariable('remote_country')) {
+					$this->plugin->setVariable('remote_country',$data['countryCode']);
+				}
 			}
 
 			$this->logDebug("{$data['ipAddress']} AbuseIPDB Confidence Score = {$data['abuseConfidenceScore']}",__METHOD__);

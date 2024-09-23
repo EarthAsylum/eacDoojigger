@@ -1881,7 +1881,7 @@ abstract class abstract_backend extends abstract_core
 
 		$info .= "<tr><td>". __('Server', $this->PLUGIN_TEXTDOMAIN) ."</td>";
 		$info .= "<td>". esc_attr($this->varServer('SERVER_SOFTWARE')) .
-				 " (". esc_attr($this->varServer('SERVER_ADDR')) .")</td></tr>\n";
+				 " (". esc_attr($this->varServer('SERVER_NAME'))." | ".esc_attr($this->varServer('SERVER_ADDR')) .")</td></tr>\n";
 
 		$info .= "<tr><td>". __('PHP Version', $this->PLUGIN_TEXTDOMAIN) ."</td>";
 		$info .= "<td>". phpversion()." (".php_sapi_name().")" ."</td></tr>\n";
