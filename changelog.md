@@ -1,7 +1,8 @@
 == Changelog ==
 
-= Version 2.7.0 – September 22, 2024 =
+= Version 2.7.0 – September 24, 2024 =
 
++   Do not assume session IP is correct in getVisitorIP().
 +   Enhanced/implemented server-side CORS security.
 +   Fixed getVisitorIP() when proxied (i.e. before cloud flare).
 +   Fixed isNewVisitor() set with visitor cookie.

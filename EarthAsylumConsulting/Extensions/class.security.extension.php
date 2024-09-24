@@ -775,6 +775,10 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function rest_api_cors()
 		{
+			// should we trust browser sec headers?
+		//	if ( ($this->plugin->varServer('Sec-Fetch-Mode') == 'cors') &&
+		//	     ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') ) return;
+
 			$allowed_origins = $this->mergePolicies('secAllowCors','');
 			if (empty($allowed_origins)) $allowed_origins = [];
 
@@ -782,6 +786,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				$allowed_origins = array_merge($allowed,$allowed_origins);
 				return $allowed_origins;
 			});
+			// should we trust browser referer header?
 			if ($this->isPolicyEnabled('secCorsOpt','referer')) {
 				add_filter( 'http_origin', function ($origin) {
 					if (empty($origin)) {

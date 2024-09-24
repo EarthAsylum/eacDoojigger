@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.7.0-RC4+240923
-Last Updated:           23-Sep-2024
+Stable tag:             2.7.0-RC4+240924
+Last Updated:           24-Sep-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -418,8 +418,9 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 2.7.0 – September 23, 2024 =
+= Version 2.7.0 – September 24, 2024 =
 
++   Do not assume session IP is correct in getVisitorIP().
 +   Enhanced/implemented server-side CORS security.
 +   Fixed getVisitorIP() when proxied (i.e. before cloud flare).
 +   Fixed isNewVisitor() set with visitor cookie.

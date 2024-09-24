@@ -2231,7 +2231,12 @@ abstract class abstract_core
 	 */
 	public function getVisitorIP(): ?string
 	{
-		if ($ip = $this->getVariable('remote_ip')) return $ip;
+		static $remote_ip = null;
+
+		if ($remote_ip) return $remote_ip;
+
+		// as_async_request_queue_runner may have client IP when initiated from server
+		// if ($ip = $this->getVariable('remote_ip')) return $ip;
 
 		// look for these headers
 		foreach([	'X_REAL_IP',
@@ -2249,24 +2254,24 @@ abstract class abstract_core
 				// may have multiple addresses (forwards)
 				$addr = $this->text_to_array($addr,[',',';',' ']);
 				//$addr = array_reverse($addr);
-				foreach($addr as $ip)
+				foreach($addr as $remote_ip)
 				{
-					$ip = \filter_var($ip, FILTER_VALIDATE_IP,FILTER_FLAG_IPV4|FILTER_FLAG_IPV6);
-					if (!empty($ip)) break 2; // got it
+					$remote_ip = \filter_var($remote_ip, FILTER_VALIDATE_IP,FILTER_FLAG_IPV4|FILTER_FLAG_IPV6);
+					if (!empty($remote_ip)) break 2; // got it
 				}
 			}
 		}
 
 		/**
 		 * filter {classname}_set_visitor_ip get the visitor's IP address
-		 * @param	string	$ip IP address
+		 * @param	string	$remote_ip IP address
 		 * @return	string	IP address
 		 */
-		$ip = $this->apply_filters( 'set_visitor_ip', $ip );
+		$remote_ip = $this->apply_filters( 'set_visitor_ip', $remote_ip );
 
-		if (!empty($ip)) {
-			$this->setVariable('remote_ip',$ip);
-			return $ip;
+		if (!empty($remote_ip)) {
+			$this->setVariable('remote_ip',$remote_ip);
+			return $remote_ip;
 		}
 		return null;
 	}
