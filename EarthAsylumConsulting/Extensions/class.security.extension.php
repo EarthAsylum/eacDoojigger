@@ -780,12 +780,14 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		//	     ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') ) return;
 
 			$allowed_origins = $this->mergePolicies('secAllowCors','');
-			if (empty($allowed_origins)) $allowed_origins = [];
 
-			add_filter( 'allowed_http_origins', function ($allowed) use($allowed_origins) {
-				$allowed_origins = array_merge($allowed,$allowed_origins);
-				return $allowed_origins;
-			});
+			// what origins are allowed
+			if (!empty($allowed_origins)) {
+				add_filter( 'allowed_http_origins', function ($allowed) use($allowed_origins) {
+					$allowed_origins = array_merge($allowed,$allowed_origins);
+					return $allowed_origins;
+				});
+			}
 			// should we trust browser referer header?
 			if ($this->isPolicyEnabled('secCorsOpt','referer')) {
 				add_filter( 'http_origin', function ($origin) {
@@ -798,6 +800,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					return $origin;
 				});
 			}
+			// should we trust IP address headers?
 			if ($this->isPolicyEnabled('secCorsOpt','ip_address')) {
 				add_filter( 'http_origin', function ($origin) {
 					if (empty($origin)) {
@@ -807,9 +810,21 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					return $origin;
 				});
 			}
+			// is this origin allowed? Match origin ends with allowed
+			add_filter( 'allowed_http_origin', function($origin, $origin_arg) {
+				if (empty($origin) && !empty($origin_arg)) {	// $origin not allowed (so far)
+					foreach(get_allowed_http_origins() as $allowed) {
+						if (substr_compare($origin_arg, $allowed, - strlen($allowed)) === 0) {
+							return $origin_arg;
+						}
+					};
+				}
+				return $origin;
+			},10,2);
+
 			$action = (current_action() == 'rest_api_init') ? 'rest_pre_serve_request' : 'wp_loaded';
 			remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-			add_filter( $action, function($value) use($allowed_origins) {
+			add_filter( $action, function($value) {
 				$origin = get_http_origin();
 				if ($this->match_disabled_uris('secExcludeCors') || is_allowed_http_origin($origin)) {
 					$this->logDebug($origin,'CORS: allowed origin');
@@ -821,7 +836,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				} else {
 					$this->logError($origin,'CORS: denied origin');
 					header( 'Access-Control-Allow-Origin: ' . site_url() );
-					$this->respondForbidden('CORS access denied');
+					wp_die( $this->respondForbidden('CORS access denied') );
 				}
 				return $value;
 			},20);
@@ -865,7 +880,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rss_response()
 		{
-			$this->respondForbidden('RSS access denied');
+			wp_die( $this->respondForbidden('RSS access denied') );
 		}
 
 
@@ -1019,7 +1034,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest'))
 			{
-				$this->respondForbidden('REST API access denied (disabled)');
+				return $this->respondForbidden('REST API access denied (disabled)');
 			}
 
 			if (!empty($authError)) return $authError;
@@ -1028,7 +1043,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				if (!is_user_logged_in())
 				{
-					$this->respondForbidden('REST API access denied (unauthorized)');
+					return $this->respondForbidden('REST API access denied (unauthorized)');
 				}
 			}
 			return $authError;
@@ -1046,7 +1061,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if (defined('REST_REQUEST')) return;
 				if ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') return;
 
-				$this->respondForbidden('Invalid JSON Request');
+				wp_die( $this->respondForbidden('Invalid JSON Request') );
 			}
 		}
 
@@ -1062,7 +1077,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if (!$found) return;
 
-			$this->respondForbidden('URI access denied');
+			wp_die( $this->respondForbidden('URI access denied') );
 		}
 
 
@@ -1120,7 +1135,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				else return;
 			}
 
-			$this->respondForbidden('IP access denied');
+			wp_die( $this->respondForbidden('IP access denied') );
 		}
 
 
@@ -1138,11 +1153,11 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			}
 
 			http_response_code(403);
-			wp_die( new \WP_Error(
+			return new \WP_Error(
 				'access_denied',
 				__($message ?? "Sorry, you do not have permission to access the requested resource"),
 				['status' => 403]
-			) );
+			);
 		}
 
 

@@ -196,7 +196,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 				$data = $this->get_AbuseIPDB($key);
 				if ($data['abuseConfidenceScore'] >= $level) {
 					$this->plugin->logDebug($data,__METHOD__);
-					$this->security->respondForbidden("Request from {$data['ipAddress']} denied, Confidence score {$data['abuseConfidenceScore']}");
+					wp_die( $this->security->respondForbidden("Request from {$data['ipAddress']} denied, Confidence score {$data['abuseConfidenceScore']}") );
 				}
 			}
 		}

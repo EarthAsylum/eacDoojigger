@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 2.7.0 – September 24, 2024 =
+= Version 2.7.0 – September 25, 2024 =
 
 +   Do not assume session IP is correct in getVisitorIP().
 +   Enhanced/implemented server-side CORS security.

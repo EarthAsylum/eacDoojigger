@@ -300,7 +300,7 @@ $this->registerExtensionOptions( 'Server_Side_CORS',
 					["Apply CORS to <abbr title='REpresentational State Transfer (e.g. /wp-json)'>REST</abbr> requests"	=>'rest'],
 					["Apply CORS to <abbr title='eXtensible Markup Language - Remote Procedure Call (e.g. xmlrpc.php)'>XML-RPC</abbr> requests" =>'xml'],
 					["Apply CORS to <abbr title='Asynchronous JavaScript and XML (e.g. admin-ajax.php)'>AJAX</abbr> requests"		=>'ajax'],
-					["Use <abbr title='Use http referer header'>referring URL</abbr> if no origin" =>'referer'],
+					["Use <abbr title='Get origin from the http referer header'>referring URL</abbr> if no origin" =>'referer'],
 					["Use <abbr title='Get origin by reverse DNS lookup'>IP address</abbr> if no origin" =>'ip_address'],
 				),
 				'default'	=>	$this->is_network_option('secCorsOpt'),
@@ -317,14 +317,15 @@ $this->registerExtensionOptions( 'Server_Side_CORS',
 				'label'		=>	"CORS <abbr title='Application Program Interface'>API</abbr> White List",
 				'default'	=>	$this->is_network_option('secAllowCors'),
 				'info'		=>	"Allow API access from specific origin domains only. ".
-								"Enter origin URLs, 1 per line beginning with 'http://' or 'https://.",
-				'attributes'=>	['placeholder'=>'https://origin.domain.com'],
+								"Enter origin URLs, 1 per line beginning with 'http://' or 'https://, or simply the ending domain name ".
+								"(e.g. 'http://api.trusted_domain.com' or '.trusted_domain.com').",
+				'attributes'=>	['placeholder'=>'https://origin.trusted_domain.com'],
 		),
 		'secExcludeCors' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"CORS Exempt URIs",
 				'default'	=>	$this->is_network_option('secExcludeCors'),
-				'info'		=>	"Exclude server URIs from CORS security checks. ".
+				'info'		=>	"Exclude site URIs from CORS security checks, allowing access from any origin. ".
 								"Enter URIs, 1 per line, beginning with /.",
 				'attributes'=>	['placeholder'=>'/wp-json/...'],
 		),
