@@ -182,7 +182,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 			 */
 			if (! $auth = $this->apply_filters('report_abuse_api',true,$request))
 			{
-				return $this->plugin->request_forbidden("report_abuse_auth",'',401) );
+				return $this->plugin->request_forbidden("report_abuse_auth",'',401);
 			}
 			/*
 			// allow origin in CORS
