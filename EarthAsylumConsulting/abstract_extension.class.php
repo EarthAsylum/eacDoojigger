@@ -152,7 +152,7 @@ abstract class abstract_extension
 
 	/**
 	 * @var string the option name to enable (false=no option)
-	 * 		can be set (as ENABLED_OPTION) before constructor to override 'Enabled' option
+	 * 		can be set (as ENABLED_OPTION) before registerExtension() to override 'Enabled' option
 	 */
 	protected $enable_option = null;
 
@@ -320,7 +320,7 @@ abstract class abstract_extension
 					$this->isEnabled(false);
 				}
 			}
-			else if (!$this->is_option($this->enable_option))
+			else if (!$this->plugin->is_option($this->enable_option))
 			{
 				$this->isEnabled(false);
 			}
@@ -427,13 +427,18 @@ abstract class abstract_extension
 		if (is_bool($enabled))
 		{
 			$this->enabled = $enabled;
-			if ($perm === true && $this->enable_option) {
+			if ($perm === true && $this->enable_option)
+			{
 				$this->plugin->update_option($this->enable_option,($enabled ? 'Enabled' : ''));
 			}
 		}
 		else if (is_string($enabled)) 	// checking another extension's 'enabled'
 		{
 			$this->enabled = (bool)( $this->plugin->isExtension($enabled,true) );
+		}
+		else
+		{
+		//	$this->enabled = (bool)( $this->enable_option && $this->plugin->is_option($this->enable_option) );
 		}
 
 		/**

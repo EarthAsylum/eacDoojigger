@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 2.7.0 – October 3, 2024 =
+= Version 2.7.0 – October 4, 2024 =
 
 +   Enhanced security extensions...
     +   Implemented server-side CORS security.

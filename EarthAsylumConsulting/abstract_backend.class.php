@@ -2514,7 +2514,7 @@ abstract class abstract_backend extends abstract_core
 			case 'checkbox':
 				$choices = $this->getOptionChoiceArray($optionMeta['options']); // uses esc_attr()
 				$name 	 = (count($choices) == 1) ? $optionKey : $optionKey.'[]';
-				$html 	.= $tab."<input type='hidden' name='{$optionKey}' value='' />";
+				$html 	.= $tab."<input type='hidden' name='{$optionKey}' value=''{$parentAtts} />";
 				$current = (!is_array($savedOptionValue)) ? array($savedOptionValue) : $savedOptionValue;
 				foreach ($choices as $id=>$choice) {
 					if (is_null($choice)) continue;
@@ -2530,7 +2530,7 @@ abstract class abstract_backend extends abstract_core
 			case 'switch':
 				$choices = $this->getOptionChoiceArray($optionMeta['options']); // uses esc_attr()
 				$name 	 = (count($choices) == 1) ? $optionKey : $optionKey.'[]';
-				$html 	.= $tab."<input type='hidden' name='{$optionKey}' value='' />";
+				$html 	.= $tab."<input type='hidden' name='{$optionKey}' value=''{$parentAtts} />";
 				$current = (!is_array($savedOptionValue)) ? array($savedOptionValue) : $savedOptionValue;
 				foreach ($choices as $id=>$choice) {
 					if (is_null($choice)) continue;

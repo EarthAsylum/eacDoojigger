@@ -19,17 +19,6 @@ $current_login_uri = $this->get_site_option('secLoginUri');
 /* register this extension with [group name, tab name], and settings fields */
 $this->registerExtensionOptions( $this->className,
 	[
-		'secLoginNonce' 	=> array(
-				'type'		=>	'switch',
-				'label'		=>	"Add Secure Nonce",
-				'options'	=>	['Enabled'],
-				'default'	=>	$this->is_network_option('secLoginNonce','Enabled'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secLoginNonce')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
-				'info'		=>	"Add and verify a hidden 'number-used-once' to the login/reset forms.",
-		//		'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secLoginNonce')) ? 'disabled="disabled"' : '',
-		),
 		'secLoginUri'		=> array(
 				'type'		=>	($this->htaccess) ? 'text' : 'disabled',
 				'label'		=> 	"Change Login URI ",
@@ -42,6 +31,17 @@ $this->registerExtensionOptions( $this->className,
 								'Users must login at this url before accessing the WordPress dashboard.'.
 								(($this->htaccess) ? '<br/><small>* Updates the Apache .htaccess file using rewrite rules and adds filters/actions for login.</small>' : ''),
 				'attributes'=>	['pattern'=>'[a-zA-Z0-9_\.\-]*','placeholder'=>'wp-login.php']
+		),
+		'secLoginNonce' 	=> array(
+				'type'		=>	'switch',
+				'label'		=>	"Add Secure Nonce",
+				'options'	=>	['Enabled'],
+				'default'	=>	$this->is_network_option('secLoginNonce','Enabled'),
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secLoginNonce')
+									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
+									: ''),
+				'info'		=>	"Add and verify a hidden 'number-used-once' to the login/reset forms.",
+				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secLoginNonce')) ? 'disabled="disabled"' : '',
 		),
 		'secPassPolicy' 	=> array(
 				'type'		=>	'checkbox',
@@ -166,7 +166,7 @@ $this->registerExtensionOptions( $this->className,
 				'label'		=>	"Disable <abbr title='eXtensible Markup Language - Remote Procedure Call'>XML-RPC</abbr>",
 				'options'	=>	[
 					'XML-RPC Disabled'		=> 'no-xml',
-					'Pingbacks Disabled'	=> 'no-ping'
+					"<abbr title='Disable XML Pingbacks. For (newer) REST Pingbacks, go to Settings&rarr;Discussions.'>Pingbacks</abbr> Disabled"	=> 'no-ping'
 				],
 				'default'	=>	$this->is_network_option('secDisableXML'),
 				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')
@@ -189,6 +189,18 @@ $this->registerExtensionOptions( $this->className,
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableRSS')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
 		),
+		'secDisableEmbed' 	=> array(
+				'type'		=>	'switch',
+				'label'		=>	"Disable oEmbed exchange",
+				'options'	=>	array(['oEmbed Disabled'=>'no-embed']),
+				'default'	=>	$this->is_network_option('secDisableEmbed'),
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableEmbed')
+									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
+									: ''),
+				'info'		=>	"oEmbed is a format for allowing an embedded representation of a URL on third party sites.",
+				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableEmbed')) ? 'disabled="disabled"' : '',
+				'advanced'	=> 	true,
+		),
 		'secDisableURIs' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Disable Site URIs ",
@@ -208,7 +220,8 @@ $this->registerExtensionOptions( $this->className,
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
 				'info'		=>	"Require the presence of an HTTP header in all requests. ".
-								"If your web site is behind a CDN (e.g. CloudFlare), you may be able to use a CDN-specific (or custom) http header and verify its existance to block any attempt to bypass the CDN.",
+								"If your web site is behind a CDN (e.g. CloudFlare), you may be able to use a CDN-specific (or custom) http header and verify its existance to block any attempt to bypass the CDN. ".
+								"You may enter the header name or header:value to validate a specific value.",
 		),
 		'secBlockHttp' 	=> array(
 				'type'		=>	'textarea',
@@ -218,7 +231,8 @@ $this->registerExtensionOptions( $this->className,
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
 				'info'		=>	"Many bots or suspicious browsers include detectable http headers. ".
-								"Use this list to look for and block requests with any of these headers.",
+								"Use this list to look for and block requests with any of these headers. ".
+								"You may enter the header name or header:value to block a specific value.",
 				'advanced'	=> 	true,
 		),
 		'secBlockIP' 		=> array(

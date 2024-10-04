@@ -11,7 +11,7 @@ namespace EarthAsylumConsulting\Extensions;
  *		});
  */
 
-if (! class_exists(__NAMESPACE__.'\server_side_cors', false) )
+if (! class_exists(__NAMESPACE__.'\security_server_cors', false) )
 {
 	/**
 	 * Extension: fraudguard - FraudGuard API - {eac}Doojigger for WordPress
@@ -22,12 +22,12 @@ if (! class_exists(__NAMESPACE__.'\server_side_cors', false) )
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
-	class server_side_cors extends \EarthAsylumConsulting\abstract_extension
+	class security_server_cors extends \EarthAsylumConsulting\abstract_extension
 	{
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1003.1';
+		const VERSION 			= '24.1004.1';
 
 		/**
 		 * @var string|array|bool to set (or disable) default group display/switch
@@ -99,6 +99,15 @@ if (! class_exists(__NAMESPACE__.'\server_side_cors', false) )
 		public function initialize()
 		{
 			if ( ! parent::initialize() ) return; // disabled
+
+			if ( $this->plugin->isSettingsPage('Security'))
+			{
+				if ( is_multisite() && !is_network_admin() &&
+					(!defined( 'WP_CLI' ) && !defined( 'DOING_AJAX' ) && !defined( 'DOING_CRON' )) )
+				{
+					if ($this->security->isNetworkPolicy('secCorsOpt')) 	$this->delete_option('secCorsOpt');
+				}
+			}
 
 			if ($this->security->isPolicyEnabled('secCorsOpt','host_origin'))
 			{
@@ -242,5 +251,5 @@ if (! class_exists(__NAMESPACE__.'\server_side_cors', false) )
 /**
  * return a new instance of this class
  */
-if (isset($this)) return new server_side_cors($this);
+if (isset($this)) return new security_server_cors($this);
 ?>

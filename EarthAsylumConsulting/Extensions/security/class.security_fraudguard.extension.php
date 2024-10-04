@@ -1,7 +1,7 @@
 <?php
 namespace EarthAsylumConsulting\Extensions;
 
-if (! class_exists(__NAMESPACE__.'\fraudguard_extension', false) )
+if (! class_exists(__NAMESPACE__.'\security_fraudguard_extension', false) )
 {
 	/**
 	 * Extension: fraudguard - FraudGuard API - {eac}Doojigger for WordPress
@@ -12,12 +12,12 @@ if (! class_exists(__NAMESPACE__.'\fraudguard_extension', false) )
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
-	class fraudguard_extension extends \EarthAsylumConsulting\abstract_extension
+	class security_fraudguard_extension extends \EarthAsylumConsulting\abstract_extension
 	{
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1003.1';
+		const VERSION 			= '24.1004.1';
 
 		/**
 		 * @var string|array|bool to set (or disable) default group display/switch
@@ -250,5 +250,5 @@ if (! class_exists(__NAMESPACE__.'\fraudguard_extension', false) )
 /**
  * return a new instance of this class
  */
-if (isset($this)) return new fraudguard_extension($this);
+if (isset($this)) return new security_fraudguard_extension($this);
 ?>

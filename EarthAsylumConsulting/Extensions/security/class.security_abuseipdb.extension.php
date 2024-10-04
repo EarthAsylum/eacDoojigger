@@ -1,7 +1,7 @@
 <?php
 namespace EarthAsylumConsulting\Extensions;
 
-if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
+if (! class_exists(__NAMESPACE__.'\security_abuseipdb_extension', false) )
 {
 	/**
 	 * Extension: abuseipdb - AbuseIPDB API - {eac}Doojigger for WordPress
@@ -12,12 +12,12 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
-	class abuse_extension extends \EarthAsylumConsulting\abstract_extension
+	class security_abuseipdb_extension extends \EarthAsylumConsulting\abstract_extension
 	{
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1003.1';
+		const VERSION 			= '24.1004.1';
 
 		/**
 		 * @var string alias
@@ -163,7 +163,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 					'args'					=> array(
 						'reason'			=> ['default' => ''],
 						'category'			=> ['default' => ''],
-						'threshold'			=> ['default' => '3'],
+						'threshold'			=> ['default' => '0'],
 					),
 				),
 			));
@@ -304,7 +304,7 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 
 			if (!is_writable($logPath)) return false;
 
-			$file = $logPath."/AbuseIPDB_".wp_date('Ymd').".csv";
+			$file = $logPath."/AbuseIPDB_".date('Ymd').".csv";
 
 			if (!$fs->exists($file)) {
 				if (($fsLogPath = $fs->find_folder(dirname($file))) && $fs->is_writable($fsLogPath)) {
@@ -486,5 +486,5 @@ if (! class_exists(__NAMESPACE__.'\abuse_extension', false) )
 /**
  * return a new instance of this class
  */
-if (isset($this)) return new abuse_extension($this);
+if (isset($this)) return new security_abuseipdb_extension($this);
 ?>

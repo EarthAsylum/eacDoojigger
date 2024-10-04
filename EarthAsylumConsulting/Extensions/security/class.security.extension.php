@@ -170,12 +170,13 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if ( is_multisite() && !is_network_admin() &&
 					(!defined( 'WP_CLI' ) && !defined( 'DOING_AJAX' ) && !defined( 'DOING_CRON' )) )
 				{
+					if ($this->isNetworkPolicy('secLoginNonce')) 	$this->delete_option('secLoginNonce');
 					if ($this->isNetworkPolicy('secDisableRSS')) 	$this->delete_option('secDisableRSS');
 					if ($this->isNetworkPolicy('secUnAuthRest')) 	$this->delete_option('secUnAuthRest');
 					if ($this->isNetworkPolicy('secDisableXML')) 	$this->delete_option('secDisableXML');
 					if ($this->isNetworkPolicy('secFileChanges')) 	$this->delete_option('secFileChanges');
-					if ($this->isNetworkPolicy('secHeartbeat')) 	$this->delete_option('secHeartbeat');
-					if ($this->isNetworkPolicy('secHeartbeatFE')) 	$this->delete_option('secHeartbeatFE');
+				//	if ($this->isNetworkPolicy('secHeartbeat')) 	$this->delete_option('secHeartbeat');
+				//	if ($this->isNetworkPolicy('secHeartbeatFE')) 	$this->delete_option('secHeartbeatFE');
 
 					if ($this->isNetworkPolicy('secPassPolicy')) {
 						$this->update_option('secPassPolicy', 		$this->mergePolicies('secPassPolicy'));
@@ -248,6 +249,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
+			add_filter( 'the_generator',					'__return_empty_string', 999);
+			add_filter( 'get_shortlink',					'__return_empty_string', 999);
+
 			if ($this->login_uri = $this->get_site_option('secLoginUri'))
 			{
 				add_filter( 'site_url', 					array($this, 'wp_login_filter'), 10, 4 );
@@ -283,6 +287,11 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				$this->disable_rss_feeds();
 			}
 
+			if ($this->isPolicyEnabled('secDisableEmbed'))
+			{
+				$this->disable_embeds();
+			}
+
 			if ($this->isPolicyEnabled('secUnAuthRest'))
 			{
 				if ($this->isPolicyEnabled('secUnAuthRest','no-rest')) {
@@ -293,13 +302,15 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if ($this->isPolicyEnabled('secUnAuthRest','no-rest-index')) {
 					add_filter( 'rest_index', 				array($this, 'disable_rest_list'), 999 );
 					add_filter( 'rest_namespace_index', 	array($this, 'disable_rest_list'), 999 );
-					add_filter( 'rest_route_data', function($available, $routes){return [];}, 999, 2 );
+					add_filter( 'rest_route_data', 			'__return_empty_array', 999);
      			}
 				if ($this->isPolicyEnabled('secUnAuthRest','no-rest-core')) {
 					$this->disable_rest_core();
 				}
+
 				add_filter( 'rest_authentication_errors', 	array($this, "disable_rest"), 999, 1 );
-				remove_action('wp_head', 'rest_output_link_wp_head');
+				remove_action( 'wp_head', 					'rest_output_link_wp_head');
+				remove_action( 'template_redirect', 		'rest_output_link_header', 11 );
 
 				if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
 					add_action('wp', 						array($this, 'disable_invalid_json'));
@@ -310,7 +321,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				add_filter(	'xmlrpc_enabled', 				'__return_false');
 				add_filter( 'xmlrpc_methods', 				array($this, "disable_xml"), 998 );
-				remove_action('xmlrpc_rsd_apis', 'rest_output_rsd');
+				remove_action('xmlrpc_rsd_apis', 			'rest_output_rsd');
+				remove_action('wp_head', 					'rsd_link');
 			}
 
 			if ($this->isPolicyEnabled('secDisableXML','no-ping'))
@@ -319,6 +331,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				add_filter('wp_headers', 					function($headers) {
 					unset($headers['X-Pingback']);
 					return $headers;
+				});
+				add_action('wp', 							function() {
+					header_remove('X-Pingback');
 				});
 				// disable pingbacks
 				add_filter( 'xmlrpc_methods', 				array($this, "disable_pings"), 999 );
@@ -620,6 +635,48 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			add_action( 'do_feed_atom_comments',		array($this, "disable_rss_response"), 1 );
 
 			add_action( 'current_theme_supports-automatic-feed-links', '__return_false', 999 );
+		}
+
+
+		/**
+		 * disable oEmbed
+		 * creds: https://kinsta.com/knowledgebase/disable-embeds-wordpress/
+		 *
+		 * @return void
+		 */
+		public function disable_embeds()
+		{
+			// Remove the REST API endpoint.
+			remove_action( 'rest_api_init', 'wp_oembed_register_route' );
+
+			// Turn off oEmbed auto discovery.
+			add_filter( 'embed_oembed_discover', '__return_false' );
+
+			// Don't filter oEmbed results.
+			remove_filter( 'oembed_dataparse', 'wp_filter_oembed_result', 10 );
+
+			// Remove oEmbed discovery links.
+			remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
+
+			// Remove oEmbed-specific JavaScript from the front-end and back-end.
+			remove_action( 'wp_head', 'wp_oembed_add_host_js' );
+			add_filter( 'tiny_mce_plugins', function($plugins) {
+				return array_diff($plugins, array('wpembed'));
+			});
+
+			// Remove all embeds rewrite rules.
+			add_filter( 'rewrite_rules_array', function($rules) {
+				return array_filter($rules, function($rewrite) {
+					return (strpos($rewrite, 'embed=true') === false);
+				});
+			});
+
+			// Remove filter of the oEmbed result before any HTTP requests are made.
+			remove_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result', 10 );
+
+			add_action( 'wp_footer', function() {
+				wp_dequeue_script( 'wp-embed' );
+			});
 		}
 
 

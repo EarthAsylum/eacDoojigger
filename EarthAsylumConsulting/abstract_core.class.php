@@ -1648,6 +1648,8 @@ abstract class abstract_core
 			);
 		}
 
+		ob_clean();
+		header_remove('Set-Cookie');
 		http_response_code( $status );
 		status_header( $status );
 		nocache_headers();
