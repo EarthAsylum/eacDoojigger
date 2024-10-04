@@ -1627,6 +1627,39 @@ abstract class abstract_core
 
 
 	/**
+	 * output forbidden response
+	 *
+	 * @example wp_die( $this->request_forbidden( 'access_denied' ) );
+	 *
+	 * @param string 	$logMsg to log error message
+	 * @param string 	$message override default message
+	 * @param int 		$status override default status
+	 * @return WP_Error
+	 */
+	public function request_forbidden(string $logMsg='', string $message='', int $status=403)
+	{
+		if ($logMsg)
+		{
+			$this->plugin->error(
+				'access_denied',
+				$logMsg,
+				array_filter([$this->getVisitorIP(),$_SERVER['REQUEST_URI'],file_get_contents('php://input')]),
+				get_status_header_desc($status).': '.$logMsg
+			);
+		}
+
+		http_response_code( $status );
+		status_header( $status );
+		nocache_headers();
+		return new \WP_Error(
+			'access_denied',
+			__($message ?: "Sorry, you do not have permission to access the requested resource"),
+			['status' => $status]
+		);
+	}
+
+
+	/**
 	 * is this a test or live production site
 	 *
 	 * @param	bool	$site_is_test false=live, true=test on first call to override option
@@ -2580,13 +2613,14 @@ abstract class abstract_core
 	 *
 	 * @param	string	$string delimited by \n or $delimiters
 	 * @param	array 	$delimiters split string on these delimiters
+	 * @param 	callable $callback array_map callback function (i.e. sanitize_textarea_field)
 	 * @return	array
 	 */
-	public function text_to_array(string $string, array $delimiters=[';']): array
+	public function text_to_array(string $string, array $delimiters=[';'], $callback = 'trim'): array
 	{
 		$delimiters = (array)$delimiters;
 		return array_filter(
-			array_map('trim', explode("\n", str_replace($delimiters,"\n",$string) ) )
+			array_map($callback, explode("\n", str_replace($delimiters,"\n",$string) ) )
 		);
 	}
 

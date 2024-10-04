@@ -12,7 +12,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		2.x
+ * @version		24.1003.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_core
@@ -21,14 +21,27 @@ namespace EarthAsylumConsulting;
 abstract class abstract_extension
 {
 	/**
-	 * @var VERSION constant in child class for version updating
+	 * @var string in child class for version updating
 	 */
-	const VERSION	= false;
+	const VERSION		= false;
 
 	/**
-	 * @var ALIAS constant in child class for alias class name
+	 * @var string in child class for alias class name
 	 */
-	const ALIAS		= null;
+	const ALIAS			= null;
+
+	/**
+	 * @var string to set default tab name
+	 */
+	const TAB_NAME		= null;
+
+	/**
+	 * @var string|array|bool to set (or disable) default group display/switch
+	 * 		false 		disable the 'Enabled'' option for this group
+	 * 		string 		the label for the 'Enabled' option
+	 * 		array 		override options for the 'Enabled' option (label,help,title,info, etc.)
+	 */
+	const ENABLE_OPTION	= null;
 
 	/**
 	 * @var constructor flags (actual values subject to change)
@@ -38,8 +51,8 @@ abstract class abstract_extension
 	const ALLOW_NETWORK		= 0b00000100;		// enabled for network admin in multisite (uses network options)
 	const ALLOW_CRON		= 0b00001000;		// enabled for cron requests
 	const ALLOW_CLI			= 0b00010000;		// enabled for wp-cli requests
-	const DEFAULT_DISABLED	= 0b00100000;		// force {classname}_enabled' option to default to not enabled
 	const ALLOW_ALL			= self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ALLOW_CRON|self::ALLOW_CLI;
+	const DEFAULT_DISABLED	= 0b00100000;		// force {classname}_enabled' option to default to not enabled
 	const ALLOW_NON_PHP		= 0b01000000;		// enabled when loaded for a url not ending in .php
 
 	/**
@@ -139,6 +152,7 @@ abstract class abstract_extension
 
 	/**
 	 * @var string the option name to enable (false=no option)
+	 * 		can be set (as ENABLED_OPTION) before constructor to override 'Enabled' option
 	 */
 	protected $enable_option = null;
 
@@ -273,25 +287,32 @@ abstract class abstract_extension
 
 		$optionGroup = $this->plugin->standardizeOptionGroup($optionGroup);
 		$groupName = (is_array($optionGroup)) ? $optionGroup[0] : $optionGroup;
-		$this->defaultTab = (is_array($optionGroup)) ? $optionGroup[1] : null;
+		$this->defaultTab = (is_array($optionGroup)) ? $optionGroup[1] : static::TAB_NAME;
 
-		if ( $this->enable_option === false )
+		if ( $this->enable_option === false || static::ENABLE_OPTION === false)
 		{
 			$enabledOption = [];
 		}
 		else
 		{
+			$override = static::ENABLE_OPTION ?: $this->enable_option;
 			// group names, sanitized, suffixed with '_extension_enabled'
 			$this->enable_option = basename(sanitize_key(str_replace(' ','_',$groupName)),'_extension').'_extension_enabled';
-			$enabledOption =
-				[
-					$this->enable_option => array(
-									'type'		=> 'checkbox',
-									'label'		=> 'Enabled',
-									'options'	=> ['Enabled'],
-									'default'	=> ($this->flags & self::DEFAULT_DISABLED) ? '' : 'Enabled'
-								)
-				];
+			$enabledOption = [
+					'type'			=> 'checkbox',
+					'options'		=> ['Enabled'],
+					'default'		=> ($this->flags & self::DEFAULT_DISABLED) ? '' : 'Enabled',
+			];
+			if ($override)
+			{
+				if (is_array($override)) {
+					$enabledOption = array_replace($enabledOption,$override);
+				} else {
+					$enabledOption['label'] = $override;
+				}
+			}
+			$enabledOption = [ $this->enable_option => $enabledOption ];
+
 			if ( $this->plugin->isSettingsPage() && isset($_POST[$this->enable_option]) )
 			{
 				if ($_POST[$this->enable_option] == '')

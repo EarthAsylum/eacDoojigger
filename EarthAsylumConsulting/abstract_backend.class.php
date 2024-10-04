@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0906.1
+ * @version		24.1003.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -1808,7 +1808,7 @@ abstract class abstract_backend extends abstract_core
 			foreach ($optionGroup as $groupName => $optionMeta)
 			{
 				// show plugin/extension group <section>, <header> and <fieldset>
-				$this->options_settings_page_section($groupName, $optionMeta);
+				$this->options_settings_page_section($groupName, $optionMeta, $currentTab);
 
 				// show all group/extension options
 				foreach ($optionMeta as $optionKey => $optionData)
@@ -2227,7 +2227,7 @@ abstract class abstract_backend extends abstract_core
 	 * @param	array 	$optionMeta meta-data for $group
 	 * @return	void
 	 */
-	public function options_settings_page_section(string $groupName, array &$optionMeta): void
+	public function options_settings_page_section(string $groupName, array &$optionMeta, string $currentTab=''): void
 	{
 		$groupName = esc_attr($groupName);
 
@@ -2245,26 +2245,44 @@ abstract class abstract_backend extends abstract_core
 
 		// the '_enabled' option
 		$optionKey 		= basename(sanitize_key(str_replace(' ','_',$groupName)),'_extension').'_extension_enabled';
-		$optionData 	= $optionMeta[$optionKey] ?? false;
+		$optionData 	= $optionMeta[$optionKey] ?? [];
 		$optionValue 	= ($optionData)
 			? ($optionData['value'] ?? $this->get_option($optionKey))
 			: false;
+		$displayName 	= ($optionData)
+			? $optionData['label'] ?: $groupName
+			: $groupName;
 
 		echo "<header class='settings-grid-container {$groupClass}' data-name='{$groupClass}'>\n";
 
 		// data-toggle is clickable and toggles the $groupClass fieldset
 		echo "\t<details ".($optionValue===''?'':'open').
 			 " class='settings-grid-head settings-grid-head-label wp-ui-highlight' data-toggle='{$groupClass}'>";
-		echo "<summary>{$groupName}</summary>";
+		echo "<summary>{$displayName}</summary>";
 		echo "</details>\n";
 
 		echo "\t<div class='settings-grid-head settings-grid-head-enable wp-ui-highlight'>";
 		if ($optionData)
 		{
-			$optionData['type'] = 'switch';
+			if (is_string($optionData['tooltip']) && !empty($optionData['tooltip']))
+			{
+				$optionData['tooltip'] = $this->wp_kses($optionData['tooltip'],['a'=>false,'details'=>false]);
+			}
+			// add tooltip
+			if (is_string($optionData['tooltip']) && !empty($optionData['tooltip']))
+			{
+				echo "\n\t\t<span class='settings-tooltip dashicons dashicons-editor-help' style='margin-left: -1.35em;' title=\"".trim(strip_tags($displayName))."\">".
+					 __($optionData['tooltip'],$this->PLUGIN_TEXTDOMAIN)."</span>";
+			}
 			$optionData['attributes']['onclick'] = "eacDoojigger.toggle_settings('{$groupClass}',this.firstElementChild.checked);";
 			$this->options_settings_page_field($optionKey, $optionData, $optionValue);
 			unset($optionMeta[$optionKey]);
+			// add field help
+		}
+		if ($currentTab) {
+			if (!isset($optionData['help'])) $optionData['help'] = '&nbsp;';
+			$optionData['label'] = "<strong>".$displayName."</strong>";
+			$this->options_settings_page_help([$groupName,$currentTab], $optionKey, $optionData);
 		}
 		echo "</div>\n"; 	// enabled
 		echo "</header>\n";	// container

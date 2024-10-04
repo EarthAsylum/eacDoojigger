@@ -1,9 +1,20 @@
 == Changelog ==
 
-= Version 2.7.0 – September 25, 2024 =
+= Version 2.7.0 – October 3, 2024 =
 
++   Enhanced security extensions...
+    +   Implemented server-side CORS security.
+        +   Apply CORS rules to rest, xml, ajax requests.
+        +   Options to use referer or reverse DNS to get origin.
+        +   Validate server host IP when passed as origin.
+        +   Origin white-list and excluded URIs.
+    +   New AbuseIPDB api extension to block by IP address based on abuse score.
+        +   See : https://www.abuseipdb.com 
+    +   New FraudGuard api extension to block by IP address based on risk level.
+        +   See : https://www.fraudguard.io 
+    +   Block REST index list, WP core REST routes, non-rest json requests.
+    +   Required and/or blocked http header(s) (prevent CDN bypass).
 +   Do not assume session IP is correct in getVisitorIP().
-+   Enhanced/implemented server-side CORS security.
 +   Fixed getVisitorIP() when proxied (i.e. before cloud flare).
 +   Fixed isNewVisitor() set with visitor cookie.
 +   Check Cf-Ipcountry for visitor country code.
@@ -13,12 +24,6 @@
 +   Purge expired transients on cache clearing and automatically (daily).
     +   Force minimum transient expiration with transient sessions.
 +   New `text_to_array()` function to split textarea to array of lines.
-+   New AbuseIPDB api (security) extension to block by IP address based on abuse score.
-    +   See : https://www.abuseipdb.com 
-+   Enhanced security extension...
-    +   Block REST index list, WP core REST routes, non-rest json requests.
-    +   CORS headers w/white-list domains.
-    +   CSS/layout tweaks.
 +   Updated wpconfig-transformer to v1.3.6
 +   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
 +   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.

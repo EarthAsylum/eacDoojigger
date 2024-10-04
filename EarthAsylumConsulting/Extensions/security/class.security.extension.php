@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.0921.1';
+		const VERSION 			= '24.1001.1';
 
 		/**
 		 * @var string extension alias
@@ -62,8 +62,17 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if ($this->is_admin())
 			{
-				$this->registerExtension( [$this->className, 'Security'] );
-				$this->registerExtension( ['Server_Side_CORS', 'Security'] );
+				// disable 'enabled' option on sites when network activated
+				if (is_multisite() && !$this->plugin->is_network_admin() && $this->plugin->is_network_enabled() )
+				{
+					$this->enable_option = array(
+						'type'		=> 'hidden',
+						'value'		=>	($this->is_network_enabled()) ? 'Enabled' : '',
+						'info'		=>	( ($this->is_network_enabled()) ? 'Network Enabled' : 'Network Disabled' ) .
+										" <em>(Network policies may override site policies)</em>",
+					);
+				}
+				$this->registerExtension( [ $this->className, basename(__DIR__) ] );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
@@ -88,6 +97,11 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					wp_add_inline_style( $styleId, $style );
 				});
 			}
+
+			if ($this->isEnabled())
+			{
+				$this->early_addActionsAndFilters();
+			}
 		}
 
 
@@ -99,7 +113,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function admin_options_settings()
 		{
-			include 'includes/security.options.php';
+			require 'includes/security.options.php';
 		}
 
 
@@ -146,6 +160,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if ( $this->plugin->isSettingsPage('Security'))
 			{
+				$this->delete_option('secDisablePings'); // removed
+				$this->delete_option('secCodeEditor'); // removed
 				// see if we can get to the config files (only single site or network admin)
 				$this->htaccess = $this->plugin->htaccess_handle();
 				$this->wpConfig = $this->plugin->wpconfig_handle();
@@ -157,24 +173,19 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					if ($this->isNetworkPolicy('secDisableRSS')) 	$this->delete_option('secDisableRSS');
 					if ($this->isNetworkPolicy('secUnAuthRest')) 	$this->delete_option('secUnAuthRest');
 					if ($this->isNetworkPolicy('secDisableXML')) 	$this->delete_option('secDisableXML');
-					if ($this->isNetworkPolicy('secDisablePings')) 	$this->delete_option('secDisablePings');
-					if ($this->isNetworkPolicy('secCodeEditor')) 	$this->delete_option('secCodeEditor');
 					if ($this->isNetworkPolicy('secFileChanges')) 	$this->delete_option('secFileChanges');
 					if ($this->isNetworkPolicy('secHeartbeat')) 	$this->delete_option('secHeartbeat');
 					if ($this->isNetworkPolicy('secHeartbeatFE')) 	$this->delete_option('secHeartbeatFE');
 
 					if ($this->isNetworkPolicy('secPassPolicy')) {
-						$this->update_option('secPassPolicy', 		$this->mergePolicies('secPassPolicy',[],true));
+						$this->update_option('secPassPolicy', 		$this->mergePolicies('secPassPolicy'));
 					}
 					if ($this->isNetworkPolicy('secCookies')) {
-						$this->update_option('secCookies', 			$this->mergePolicies('secCookies',[],true));
+						$this->update_option('secCookies', 			$this->mergePolicies('secCookies'));
 					}
 					// only use site_option
 					$this->delete_option('secLoginUri');
 				}
-				// removed from this extension
-				$this->delete_option('secAbuseIPDB_key');
-				$this->delete_option('secAbuseIPDB_level');
 			}
 
 			// so we know if/what .htaccess rules have been set
@@ -191,6 +202,47 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
+		 * Add filters and actions - called from constructor
+		 *
+		 */
+		public function early_addActionsAndFilters()
+		{
+			if (!is_user_logged_in())
+			{
+				$this->validate_http_header(true);
+				$this->validate_http_header(false);
+			}
+
+			if ($this->isPolicyEnabled('secFileChanges','no-code'))
+			{
+				$this->disable_code_edit();
+			}
+
+			if ($this->isPolicyEnabled('secFileChanges','no-mods'))
+			{
+				$this->disable_file_mods();
+			}
+
+			if ($this->isPolicyEnabled('secLoginNonce'))
+			{
+				add_action( 'login_form', 					array($this, 'wp_login_form') );
+				add_filter( 'wp_authenticate_user', 		array($this, 'wp_login_authenticate'), 10, 2 );
+
+				add_action( 'register_form', 				array($this, 'wp_login_form') );
+				add_filter( 'registration_errors', 			array($this, 'wp_login_authenticate'), 10, 2 );
+
+				add_action( 'lostpassword_form', 			array($this, 'wp_login_form') );
+				add_action( 'lostpassword_post',			array($this, 'wp_login_authenticate'), 10, 2 );
+
+				add_action( 'woocommerce_login_form',		array($this, 'wp_login_form') );
+				add_action( 'woocommerce_register_form', 	array($this, 'wp_login_form'));
+				add_action( 'woocommerce_register_post', 	array($this, 'wp_login_authenticate'), 10, 2 );
+				add_action( 'woocommerce_lostpassword_form',array($this, 'wp_login_form'));
+			}
+		}
+
+
+		/**
 		 * Add filters and actions - called from main plugin
 		 *
 		 */
@@ -198,7 +250,6 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			if ($this->login_uri = $this->get_site_option('secLoginUri'))
 			{
-				//$this->login_uri = $this->mergePolicies('secLoginUri','')[0];
 				add_filter( 'site_url', 					array($this, 'wp_login_filter'), 10, 4 );
 				add_filter( 'network_site_url', 			array($this, 'wp_login_filter'), 10, 4 );
 				add_action( 'login_init', 					array($this, 'wp_login_init') );
@@ -218,30 +269,13 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if ($this->isPolicyEnabled('secPassLock'))
 			{
-				add_action( 'wp_authenticate_user', 		array($this, 'validate_authentication_attempts'), 10, 2 );
+				add_filter( 'wp_authenticate_user', 		array($this, 'validate_authentication_attempts'), 10, 2 );
 				add_filter( 'login_redirect', 				function( $url, $query, $user ) {
 					if (! is_wp_error( $user )) {
 						$this->delete_transient('login_attempt_'.$user->ID);
 					}
 					return $url;
 				}, 10, 3 );
-			}
-
-			if ($this->isPolicyEnabled('server_side_cors_extension_enabled'))
-			{
-				if ($this->isPolicyEnabled('secCorsOpt','rest')) {
-					add_action('rest_api_init', 					array($this,'rest_api_cors'), 999);
-				}
-				if ($this->isPolicyEnabled('secCorsOpt','xml')) {
-					if ( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ) {
-						add_action('init', 							array($this,'rest_api_cors'), 999);
-					}
-				}
-				if ($this->isPolicyEnabled('secCorsOpt','ajax')) {
-					if ( $this->plugin->doing_ajax() ) {
-						add_action('init', 							array($this,'rest_api_cors'), 999);
-					}
-				}
 			}
 
 			if ($this->isPolicyEnabled('secDisableRSS'))
@@ -279,25 +313,15 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				remove_action('xmlrpc_rsd_apis', 'rest_output_rsd');
 			}
 
-			if ($this->isPolicyEnabled('secDisablePings','no-ping'))
+			if ($this->isPolicyEnabled('secDisableXML','no-ping'))
 			{
 				// remove x-pingback HTTP header
 				add_filter('wp_headers', 					function($headers) {
-					unset($headers['X-pingback']);
+					unset($headers['X-Pingback']);
 					return $headers;
 				});
 				// disable pingbacks
 				add_filter( 'xmlrpc_methods', 				array($this, "disable_pings"), 999 );
-			}
-
-			if ($this->isPolicyEnabled('secCodeEditor'))
-			{
-				$this->disable_code_edit();
-			}
-
-			if ($this->isPolicyEnabled('secFileChanges'))
-			{
-				$this->disable_file_mods();
 			}
 
 			if ($this->isPolicyEnabled('secDisableURIs'))
@@ -316,257 +340,18 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if ($this->isPolicyEnabled('secCookies'))
 			{
-				$this->security_rules['secCookies'] = false; // no longer using .htacess
-			//	if ( ! $this->security_rules['secCookies'] ) {
-					$this->add_action('http_headers_ready',	array($this, "checkCookieFlags"), 999  );
-			//	}
+				$this->add_action('http_headers_ready',	array($this, "checkCookieFlags"), 999  );
 			}
 
 			if ($this->isPolicyEnabled('secHeartbeat'))
 			{
-				add_filter( 'heartbeat_settings', 			array($this, "set_hearttbeat")  );
+				add_filter( 'heartbeat_settings', 			array($this, "set_heartbeat")  );
 			}
 
 			if ($this->isPolicyEnabled('secHeartbeatFE'))
 			{
 				add_action( 'wp_enqueue_scripts', 			function() {wp_deregister_script( 'heartbeat' );} );
 			}
-		}
-
-
-		/*
-		 * Form post filters
-		 */
-
-
-		/**
-		 * filter for options_form_post_secLoginUri
-		 *
-		 * @param mixed		$value - the value POSTed
-		 * @param string	$fieldName - the name of the field/option
-		 * @param array		$metaData - the option metadata
-		 * @param mixed		$priorValue - the previous value
-		 * @return mixed $value
-		 */
-		public function options_form_post_secLoginUri($value, $fieldName, $metaData, $priorValue)
-		{
-			if ($value == $priorValue) return $value; 	// no change
-
-			$this->security_rules[$fieldName] = false;
-
-			$marker	= $this->pluginName.' '.$this->className.' rewrite rule for wp-login';
-			$value 	= sanitize_file_name($value);
-
-			if ($this->htaccess)
-			{
-				$lines = array();
-				if (!empty($value))
-				{
-					$lines = array(
-						"RewriteEngine on",
-						"RewriteRule ^".preg_quote($value)."$ /wp-login.php [L]",
-					);
-					$this->login_uri = $value;
-				}
-				$this->plugin->insert_with_markers($this->htaccess, $marker, $lines, '#', '', true);
-				$this->security_rules[$fieldName] = (!empty($lines));
-			}
-			$this->wp_login_notice($value);
-			return $value;
-		}
-
-
-		/**
-		 * filter for options_form_post_secPassLock
-		 *
-		 * @param mixed		$value - the value POSTed
-		 * @param string	$fieldName - the name of the field/option
-		 * @param array		$metaData - the option metadata
-		 * @param mixed		$priorValue - the previous value
-		 * @return mixed $value
-		 */
-		public function options_form_post_secPassLock($value, $fieldName, $metaData, $priorValue)
-		{
-			if ($policy = $this->isNetworkPolicy('secPassLock')) {
-				if (!is_network_admin()) $value = min($value,$policy);
-			}
-			return $value;
-		}
-
-
-		/**
-		 * filter for options_form_post_secPassTime
-		 *
-		 * @param mixed		$value - the value POSTed
-		 * @param string	$fieldName - the name of the field/option
-		 * @param array		$metaData - the option metadata
-		 * @param mixed		$priorValue - the previous value
-		 * @return mixed $value
-		 */
-		public function options_form_post_secPassTime($value, $fieldName, $metaData, $priorValue)
-		{
-			if ($policy = $this->isNetworkPolicy('secPassTime')) {
-				if (!is_network_admin())  $value = max($value,$policy);
-			}
-			return $value;
-		}
-
-
-		/**
-		 * filter for options_form_post_secDisableURIs
-		 *
-		 * @param mixed		$value - the value POSTed
-		 * @param string	$fieldName - the name of the field/option
-		 * @param array		$metaData - the option metadata
-		 * @param mixed		$priorValue - the previous value
-		 * @return mixed $value
-		 */
-		public function options_form_post_secDisableURIs($value, $fieldName, $metaData, $priorValue)
-		{
-			if ($value == $priorValue) return $value; 	// no change
-
-			$this->security_rules[$fieldName] = false;
-
-			$marker		= $this->pluginName.' '.$this->className.' rewrite rule by uri';
-			$uriList 	= $this->plugin->text_to_array($value);
-
-			$value = implode("\n",$uriList);
-
-			if ($this->htaccess)
-			{
-				$lines = array();
-				if (!empty($value))
-				{
-					$lines = ['RewriteEngine on'];
-					foreach ($uriList as $uri)
-					{
-						$uri = ltrim($uri,'/');
-						$lines[] = "RewriteRule ^{$uri}(.*)$ - [F]";
-					}
-				}
-				$this->plugin->insert_with_markers($this->htaccess, $marker, $lines, '#', '', true);
-				$this->security_rules[$fieldName] = (!empty($lines));
-			}
-
-			return $value;
-		}
-
-
-		/**
-		 * filter for options_form_post_secBlockIP
-		 *
-		 * @param mixed		$value - the value POSTed
-		 * @param string	$fieldName - the name of the field/option
-		 * @param array		$metaData - the option metadata
-		 * @param mixed		$priorValue - the previous value
-		 * @return mixed $value
-		 */
-		public function options_form_post_secBlockIP($value, $fieldName, $metaData, $priorValue)
-		{
-			if ($value == $priorValue) return $value; 	// no change
-
-			$this->security_rules[$fieldName] = false;
-
-			$marker		= $this->pluginName.' '.$this->className.' deny by address';
-			$ipList 	= $this->plugin->text_to_array($value);
-
-			$ipSet = array();
-			foreach ($ipList as $x => $ip)
-			{
-				// valid IP address
-				$ipCheck = \filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4|FILTER_FLAG_IPV6);
-				if (!$ipCheck) {
-					// valid host name
-					$ipCheck = filter_var($ip, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
-					if ($ipCheck) {
-						// routable host name
-						$ipCheck = filter_var(gethostbyname($ip), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4|FILTER_FLAG_IPV6);
-					}
-				}
-				if (!$ipCheck) {
-					if (strpos($ip, '(invalid)') === false) $ipList[$x] = $ip.' (invalid)';
-				} else {
-					$ipSet[] = $ip;
-				}
-			}
-
-			$value = implode("\n",$ipList);
-
-			if ($this->htaccess)
-			{
-				$lines = array();
-				foreach ($ipSet as $ip)
-				{
-					$lines[] = "deny from {$ip}";
-				}
-				$this->plugin->insert_with_markers($this->htaccess, $marker, $lines, '#');
-				$this->security_rules[$fieldName] = (!empty($lines));
-			}
-
-			return $value;
-		}
-
-
-		/**
-		 * filter for options_form_post_secCookies
-		 *
-		 * @param mixed		$value - the value POSTed
-		 * @param string	$fieldName - the name of the field/option
-		 * @param array		$metaData - the option metadata
-		 * @param mixed		$priorValue - the previous value
-		 * @return mixed $value
-		 */
-		public function options_form_post_secCookies($value, $fieldName, $metaData, $priorValue)
-		{
-			if ($value == $priorValue) return $value; 	// no change
-
-			$this->security_rules[$fieldName] = false;
-
-			$marker		= $this->pluginName.' '.$this->className.' set cookie headers';
-
-			if (!is_array($value)) $value = [];
-			$httpOnly 	= in_array('httponly',$value);
-			$secure 	= in_array('secure',$value);
-			$strict 	= in_array('strict',$value);
-
-			if ($this->userIni)
-			{
-				$lines = [
-					'session.cookie_httponly = ' . ( ($httpOnly) ? 'on' : 'off' ),
-					'session.cookie_secure = ' . ( ($secure) ? 'on' : 'off' ),
-					'session.cookie_samesite = '. ( ($strict) ? '"Strict"' : '"Lax"' ),
-				];
-				$this->plugin->insert_with_markers($this->userIni, $marker, $lines, ';');
-			}
-
-
-			/*
-			 * no longer doing this in .htaccess - may cause duplicate/conflicting flags
-			 * instead, filter set-cookie headers in checkCookieFlags()
-			 */
-
-			/*
-			$exclude = $this->mergePolicies('secCookiesExc','',true); // w/$_POST values
-			// can't do this with woocommerce_items_in_cart & woocommerce_cart_hash and other excluded cookies
-			if (empty($exclude) && $this->htaccess)
-			{
-				$string = 	( ($httpOnly) ? '; HttpOnly' : '' ) .
-							( ($secure) ? '; Secure' : '' ) .
-							( ($strict) ? '; SameSite=Strict' : '' );
-				$lines = array();
-				if (!empty($string)) {
-					$lines = [
-						"<IfModule mod_headers.c>",
-						"  Header always edit Set-Cookie (.*) \"\$1{$string}\"",
-						"  Header onsuccess edit Set-Cookie (.*) \"\$1{$string}\"",
-						"</IfModule>",
-					];
-				}
-				$this->plugin->insert_with_markers($this->htaccess, $marker, $lines, '#');
-				$this->security_rules[$fieldName] = (!empty($lines));
-			}
-			*/
-			return $value;
 		}
 
 
@@ -659,6 +444,46 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
+		 * wp_login form action - add custom nonce
+		 *
+		 * @return void
+		 */
+		public function wp_login_form()
+		{
+			$name 	= '_eac_'.wp_create_nonce(date('Ymd'));
+			$nonce 	= wp_create_nonce($name);
+			echo "<input type='hidden' name='{$name}' value='{$nonce}' />\n";
+		}
+
+
+		/**
+		 * wp_login post action - validate custom nonce
+		 *
+		 * @param object $user wp_user or wp_error
+		 * @return object $user
+		 */
+		public function wp_login_authenticate( $user, ...$args )
+		{
+			if (defined('XMLRPC_REQUEST') && XMLRPC_REQUEST) { return $user; }
+			if (defined('REST_REQUEST') && REST_REQUEST) { return $user; }
+
+			if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+				$name 	= '_eac_'.wp_create_nonce(date('Ymd'));
+				$nonce 	= $_REQUEST[$name] ?? null;
+				if ( ! wp_verify_nonce( $nonce, $name ) ) {
+					$this->do_action('report_abuse','prohibited login attempt');
+					if (is_wp_error($user)) {
+						$user->add( 'eac_login_nonce',__( 'Invalid form submission.' ) );
+					} else {
+						$user = new \WP_Error( 'eac_login_nonce',__( 'Invalid form submission.' ) );
+					}
+				}
+			}
+			return $user;
+		}
+
+
+		/**
 		 * welcome email filter
 		 *
 		 * @param string	$content email message content
@@ -707,7 +532,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		private function validatePassword($password, $wpErrors)
 		{
-			$policy = $this->mergePolicies('secPassPolicy',[]);
+			$policy = $this->mergePolicies('secPassPolicy');
 
 			if (in_array('min-len', $policy) && strlen($password) < 10)
 			{
@@ -768,81 +593,6 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
-		 * Set origin-specific CORS headers (rest_api_init -> rest_pre_serve_request)
-		 *
-		 * @param	$user user data
-		 * @return	WP_Error or $user
-		 */
-		public function rest_api_cors()
-		{
-			// should we trust browser sec headers?
-		//	if ( ($this->plugin->varServer('Sec-Fetch-Mode') == 'cors') &&
-		//	     ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') ) return;
-
-			$allowed_origins = $this->mergePolicies('secAllowCors','');
-
-			// what origins are allowed
-			if (!empty($allowed_origins)) {
-				add_filter( 'allowed_http_origins', function ($allowed) use($allowed_origins) {
-					$allowed_origins = array_merge($allowed,$allowed_origins);
-					return $allowed_origins;
-				});
-			}
-			// should we trust browser referer header?
-			if ($this->isPolicyEnabled('secCorsOpt','referer')) {
-				add_filter( 'http_origin', function ($origin) {
-					if (empty($origin)) {
-						if ($origin = $this->plugin->varServer('HTTP_REFERER')) {
-							$origin = parse_url($origin);
-							$origin = $origin['scheme'].'://'.$origin['host'];
-						}
-					}
-					return $origin;
-				});
-			}
-			// should we trust IP address headers?
-			if ($this->isPolicyEnabled('secCorsOpt','ip_address')) {
-				add_filter( 'http_origin', function ($origin) {
-					if (empty($origin)) {
-						$origin = (is_ssl()) ? 'https://' : 'http://';
-						$origin .= gethostbyaddr($this->plugin->getVisitorIP());
-					}
-					return $origin;
-				});
-			}
-			// is this origin allowed? Match origin ends with allowed
-			add_filter( 'allowed_http_origin', function($origin, $origin_arg) {
-				if (empty($origin) && !empty($origin_arg)) {	// $origin not allowed (so far)
-					foreach(get_allowed_http_origins() as $allowed) {
-						if (substr_compare($origin_arg, $allowed, - strlen($allowed)) === 0) {
-							return $origin_arg;
-						}
-					};
-				}
-				return $origin;
-			},10,2);
-
-			$action = (current_action() == 'rest_api_init') ? 'rest_pre_serve_request' : 'wp_loaded';
-			remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-			add_filter( $action, function($value) {
-				$origin = get_http_origin();
-				if ($this->match_disabled_uris('secExcludeCors') || is_allowed_http_origin($origin)) {
-					$this->logDebug($origin,'CORS: allowed origin');
-					header( 'Access-Control-Allow-Origin: ' . $origin );
-					header( 'Access-Control-Allow-Methods: ' .
-						$this->plugin->varServer('REQUEST_METHOD') ?: 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
-					header( 'Access-Control-Allow-Credentials: true' );
-					header( 'Vary: Origin', false );
-				} else {
-					$this->logError($origin,'CORS: denied origin');
-					header( 'Access-Control-Allow-Origin: ' . site_url() );
-					wp_die( $this->respondForbidden('CORS access denied') );
-				}
-				return $value;
-			},20);
-		}
-
-		/**
 		 * disable rss feeds
 		 *
 		 * @return void
@@ -880,7 +630,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rss_response()
 		{
-			wp_die( $this->respondForbidden('RSS access denied') );
+			wp_die( $this->plugin->request_forbidden('RSS access denied') );
 		}
 
 
@@ -897,7 +647,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				{
 					return stripos($method,'ping') !== false;
 				},
-			ARRAY_FILTER_USE_KEY);
+				ARRAY_FILTER_USE_KEY
+			);
 		}
 
 
@@ -914,7 +665,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				{
 					return stripos($method,'ping') === false;
 				},
-			ARRAY_FILTER_USE_KEY);
+				ARRAY_FILTER_USE_KEY
+			);
 		}
 
 
@@ -989,6 +741,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			if (! is_user_logged_in())
 			{
+				$this->do_action('report_abuse','prohibited REST API request');
 				$this->plugin->error('access_denied','REST API List denied',
 					[$this->plugin->getVisitorIP(),$_SERVER['REQUEST_URI']]
 				);
@@ -1034,7 +787,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest'))
 			{
-				return $this->respondForbidden('REST API access denied (disabled)');
+				$this->do_action('report_abuse','prohibited REST API request');
+				return $this->plugin->request_forbidden('REST API access denied (disabled)');
 			}
 
 			if (!empty($authError)) return $authError;
@@ -1043,7 +797,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				if (!is_user_logged_in())
 				{
-					return $this->respondForbidden('REST API access denied (unauthorized)');
+					$this->do_action('report_abuse','prohibited REST API request');
+					return $this->plugin->request_forbidden('REST API access denied (unauthorized)');
 				}
 			}
 			return $authError;
@@ -1061,7 +816,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if (defined('REST_REQUEST')) return;
 				if ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') return;
 
-				wp_die( $this->respondForbidden('Invalid JSON Request') );
+				$this->do_action('report_abuse','prohibited JSON request');
+				wp_die( $this->plugin->request_forbidden('Invalid JSON Request') );
 			}
 		}
 
@@ -1077,7 +833,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if (!$found) return;
 
-			wp_die( $this->respondForbidden('URI access denied') );
+			wp_die( $this->plugin->request_forbidden('URI access denied') );
 		}
 
 
@@ -1086,7 +842,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 *
 		 * @return void
 		 */
-		private function match_disabled_uris($optionName)
+		public function match_disabled_uris($optionName)
 		{
 			$request 	= explode('?',$_SERVER['REQUEST_URI']);
 			$request 	= trim($request[0],'/');
@@ -1095,7 +851,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			$request 	= '/'.$request;
 
-			$uriList 	= $this->mergePolicies($optionName,'');
+			$uriList 	= $this->mergePolicies($optionName);
 
 			if (empty($uriList)) return;
 
@@ -1103,6 +859,34 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				return (stripos($request, $uri) === 0);
 			});
 			return !empty($found);
+		}
+
+
+		/**
+		 * require a specific http header
+		 *
+		 * @return void
+		 */
+		public function validate_http_header(bool $required)
+		{
+			$option = ($required) ? 'secRequireHttp' : 'secBlockHttp';
+			if ( ! $headers = $this->mergePolicies($option) ) return;
+
+			$found = array_filter($headers,function($header) {
+				list($name,$value) = array_map('trim', explode(":", $header.':', 2));
+				if (! $server = $this->varServer($name)) return false;
+				return ($value)
+					? preg_match("`".rtrim($value,':')."`", $server, $m)
+					: true;
+			});
+			if ($required) {
+				if ($found) return;
+			} else {
+				if (!$found) return;
+			}
+
+			$this->do_action('report_abuse','invalid http request');
+			wp_die( $this->plugin->request_forbidden('Invalid http request') );
 		}
 
 
@@ -1115,49 +899,22 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			if (is_user_logged_in()) return;
 			$request 	= $this->plugin->getVisitorIP();
-			$ipList 	= $this->mergePolicies('secBlockIP','');
+			$ipList 	= $this->mergePolicies('secBlockIP');
 			if (empty($ipList)) return;
 
 			if (!in_array($request, $ipList))
 			{
 				if ($request = $_SERVER['HTTP_REFERER'] ?? null)
 				{
-					$found = false;
-					foreach ($ipList as $ip)
-					{
-						if (stripos($ip, $request) !== false) {
-							$found = true;
-							break;
-						}
-					}
-					if (!$found) return;
+					$found = array_filter($ipList,function($ip) use($request) {
+						return (stripos($ip, $request) !== false);
+					});
+					if (empty($found)) return;
 				}
 				else return;
 			}
 
-			wp_die( $this->respondForbidden('IP access denied') );
-		}
-
-
-		/**
-		 * output forbidden response
-		 *
-		 * @return void
-		 */
-		public function respondForbidden($logMsg='',$message=null)
-		{
-			if ($logMsg) {
-				$this->plugin->error('access_denied',$logMsg,
-					array_filter([$this->plugin->getVisitorIP(),$_SERVER['REQUEST_URI'],file_get_contents('php://input')])
-				);
-			}
-
-			http_response_code(403);
-			return new \WP_Error(
-				'access_denied',
-				__($message ?? "Sorry, you do not have permission to access the requested resource"),
-				['status' => 403]
-			);
+			wp_die( $this->plugin->request_forbidden('IP access denied') );
 		}
 
 
@@ -1168,13 +925,13 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function checkCookieFlags()
 		{
-			$policy 	= $this->mergePolicies('secCookies',[]);
+			$policy 	= $this->mergePolicies('secCookies');
 
 			$httpOnly 	= in_array('httponly',$policy);
 			$secure 	= in_array('secure',$policy) && is_ssl();
 			$strict 	= in_array('strict',$policy);
 
-			$exclude 	= $this->mergePolicies('secCookiesExc','');
+			$exclude 	= $this->mergePolicies('secCookiesExc');
 
 			$newHeaders = [];
 			foreach (headers_list() as $header)
@@ -1214,7 +971,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 * @param array heartbeat parameters
 		 * @return array heartbeat parameters (interval set)
 		 */
-		public function set_hearttbeat($options)
+		public function set_heartbeat($options)
 		{
 		//	if (is_admin() && function_exists('get_current_screen')) {
 		//		// don't modify heartbeat when editing
@@ -1269,60 +1026,43 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 * @param bool $getPost - POSTed values
 		 * @return mixed
 		 */
-		public function mergePolicies($optionName, $default = [], $getPost = false)
+		public function mergePolicies($optionName, $default = [], $getPost = true)
 		{
-			if (is_array($default))
+			if (is_int($default))
 			{
-				if ($getPost && isset($_POST[$optionName])) {
-					$value1 = sanitize_textarea_field($_POST[$optionName]);
-					$value1 = array_unique( $this->plugin->text_to_array($value1) );
-				} else {
-					$value1 = $this->get_option($optionName,$default);
-					if (!is_array($value1)) $value1 = (empty($value1)) ? [] : array($value1);
-				}
-
-				$value2 = $this->is_network_option($optionName);
-				if (!is_array($value2)) $value2 = (empty($value2)) ? [] : array($value2);
-
-				return array_unique( array_merge($value1,$value2) );
-			}
-			else if (is_int($default))
-			{
-				if ($getPost && isset($_POST[$optionName])) {
-					$value1 = intval($_POST[$optionName]);
-				} else {
-					$value1 = intval( $this->get_option($optionName,$default) );
-				}
-
+				$value1 = ($getPost && isset($_POST[$optionName]))
+					? intval($_POST[$optionName])
+					: intval($this->get_option($optionName,$default));
 				$value2 = intval( $this->is_network_option($optionName) );
-
 				return max($value1,$value2);
 			}
 			else if (is_bool($default))
 			{
-				if ($getPost && isset($_POST[$optionName])) {
-					$value1 = $this->plugin->isTrue($_POST[$optionName]);
-				} else {
-					$value1 = $this->get_option($optionName,$default);
+				$value1 = ($getPost && isset($_POST[$optionName]))
+					? $this->plugin->isTrue($_POST[$optionName])
+					: $this->get_option($optionName,$default);
+				$value2 = $this->is_network_option($optionName);
+				return ($value1 || $value2) ? true : false;
+			}
+			else // expect string or array, return array of strings
+			{
+				$value1 = ($getPost && isset($_POST[$optionName]))
+					? $_POST[$optionName]
+					: $this->get_option($optionName,$default);
+				if (!is_array($value1)) {
+					$value1 = (empty($value1))
+						? []
+						: $this->plugin->text_to_array($value1,[',',';'],'sanitize_textarea_field');
 				}
 
 				$value2 = $this->is_network_option($optionName);
-
-				return ($value1 || $value2) ? true : false;
-			}
-			else // expect string, return array of strings
-			{
-				if ($getPost && isset($_POST[$optionName])) {
-					$values = sanitize_textarea_field($_POST[$optionName]);
-				} else {
-					$values	= $this->get_option($optionName,$default);
+				if (!is_array($value2)) {
+					$value2 = (empty($value2))
+						? []
+						: $this->plugin->text_to_array($value2,[',',';'],'sanitize_textarea_field');
 				}
 
-				if ($value2 = $this->is_network_option($optionName)) {
-					$values	.= "\n".$value2;
-				}
-
-				return array_unique( $this->plugin->text_to_array($values) );
+				return array_unique( array_merge($value1,$value2) );
 			}
 		}
 	}
