@@ -53,7 +53,7 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	{
 		parent::__construct($header);
 
-		$this->logAlways('version '.$this->getVersion().' '.wp_date('Y-m-d H:i:s',filemtime(__FILE__)),__CLASS__);
+		$this->logInfo('version '.$this->getVersion().' '.wp_date('Y-m-d H:i:s',filemtime(__FILE__)),__CLASS__);
 
 		if ($this->is_admin())
 		{

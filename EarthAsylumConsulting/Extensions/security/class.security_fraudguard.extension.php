@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_fraudguard_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1004.1';
+		const VERSION 			= '24.1005.1';
 
 		/**
 		 * @var string|array|bool to set (or disable) default group display/switch
@@ -58,8 +58,8 @@ if (! class_exists(__NAMESPACE__.'\security_fraudguard_extension', false) )
 				$this->add_action('admin_enqueue_styles', function($styleId)
 				{
 					$style =
-						'#fraudguard_level {width: 85%; max-width: 30em;}'.
-						'#fraudguard_level-ticks {display: flex; width: 86%; max-width: 38.5em;}';
+						'#fraudguard_level {width: 85%; max-width: 20em;}'.
+						'#fraudguard_level-ticks {display: flex; width: 86%; max-width: 25em;}';
 					wp_add_inline_style( $styleId, $style );
 				});
 			}
@@ -144,7 +144,7 @@ if (! class_exists(__NAMESPACE__.'\security_fraudguard_extension', false) )
 				$data = $this->apply_filters('fraud_check_result',$data);
 				if ($data['risk_level'] >= $level) {
 					$this->plugin->logDebug($data,__METHOD__);
-					wp_die( $this->plugin->request_forbidden("Request from {$data['ipAddress']} denied, Fraud risk level {$data['risk_level']}") );
+					wp_die( $this->plugin->request_forbidden("Request from {$data['ipAddress']} denied, FraudGuard risk level {$data['risk_level']}") );
 				}
 			}
 			return $data;

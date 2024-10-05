@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_abuseipdb_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1004.1';
+		const VERSION 			= '24.1005.1';
 
 		/**
 		 * @var string alias
@@ -183,7 +183,7 @@ if (! class_exists(__NAMESPACE__.'\security_abuseipdb_extension', false) )
 			 */
 			if (! $auth = $this->apply_filters('report_abuse_api',true,$request))
 			{
-				return $this->plugin->request_forbidden("report_abuse_auth",'',401);
+				return $this->plugin->request_forbidden("Report Abuse authentication failed",401);
 			}
 			/*
 			// allow origin in CORS
@@ -207,13 +207,13 @@ if (! class_exists(__NAMESPACE__.'\security_abuseipdb_extension', false) )
 		public function report_abuse_api($request)
 		{
 			$reason 	= sanitize_text_field($request->get_param('reason'))
-							?: 'unauthorized origin blocked';
+							?: 'disallowed remote request blocked';
 			$category 	= sanitize_text_field($request->get_param('category'));
 			$threshold 	= intval($request->get_param('threshold'));
 
 			$this->report_abuse($reason,$category,$threshold);
 
-			wp_die( $this->plugin->request_forbidden("report abuse api ".$reason) );
+			wp_die( $this->plugin->request_forbidden("Report Abuse API ".$reason) );
 		}
 
 
@@ -352,7 +352,7 @@ if (! class_exists(__NAMESPACE__.'\security_abuseipdb_extension', false) )
 				$data = $this->apply_filters('abuse_check_result',$data);
 				if ($data['abuseConfidenceScore'] >= $level) {
 					$this->plugin->logDebug($data,__METHOD__);
-					wp_die( $this->plugin->request_forbidden("Request from {$data['ipAddress']} denied, Confidence score {$data['abuseConfidenceScore']}") );
+					wp_die( $this->plugin->request_forbidden("Request from {$data['ipAddress']} denied, Abuse Confidence score {$data['abuseConfidenceScore']}") );
 				}
 			}
 		}

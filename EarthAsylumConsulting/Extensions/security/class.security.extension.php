@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1001.1';
+		const VERSION 			= '24.1005.1';
 
 		/**
 		 * @var string extension alias
@@ -308,9 +308,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					$this->disable_rest_core();
 				}
 
-				add_filter( 'rest_authentication_errors', 	array($this, "disable_rest"), 999, 1 );
+				add_filter( 'rest_authentication_errors', 	array($this, "disable_rest"), 999 );
 				remove_action( 'wp_head', 					'rest_output_link_wp_head');
-				remove_action( 'template_redirect', 		'rest_output_link_header', 11 );
+				remove_action( 'template_redirect', 		'rest_output_link_header');
 
 				if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
 					add_action('wp', 						array($this, 'disable_invalid_json'));
@@ -355,7 +355,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if ($this->isPolicyEnabled('secCookies'))
 			{
-				$this->add_action('http_headers_ready',	array($this, "checkCookieFlags"), 999  );
+				$this->add_action('http_headers_ready',		array($this, "checkCookieFlags"), 999  );
 			}
 
 			if ($this->isPolicyEnabled('secHeartbeat'))
@@ -845,7 +845,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest'))
 			{
 				$this->do_action('report_abuse','prohibited REST API request');
-				return $this->plugin->request_forbidden('REST API access denied (disabled)');
+				return $this->plugin->request_forbidden('REST API access denied');
 			}
 
 			if (!empty($authError)) return $authError;
@@ -855,7 +855,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if (!is_user_logged_in())
 				{
 					$this->do_action('report_abuse','prohibited REST API request');
-					return $this->plugin->request_forbidden('REST API access denied (unauthorized)');
+					return $this->plugin->request_forbidden('REST API access denied',401);
 				}
 			}
 			return $authError;
@@ -874,7 +874,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') return;
 
 				$this->do_action('report_abuse','prohibited JSON request');
-				wp_die( $this->plugin->request_forbidden('Invalid JSON Request') );
+				wp_die( $this->plugin->request_forbidden('Invalid JSON Request',400) );
 			}
 		}
 
@@ -943,7 +943,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			}
 
 			$this->do_action('report_abuse','invalid http request');
-			wp_die( $this->plugin->request_forbidden('Invalid http request') );
+			wp_die( $this->plugin->request_forbidden('Invalid http request',400) );
 		}
 
 
@@ -971,7 +971,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				else return;
 			}
 
-			wp_die( $this->plugin->request_forbidden('IP access denied') );
+			wp_die( $this->plugin->request_forbidden('access denied by IP address') );
 		}
 
 

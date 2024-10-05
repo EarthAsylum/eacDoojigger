@@ -28,7 +28,7 @@ $this->registerExtensionOptions( $this->className,
 				'label'		=>	'Abuse Confidence Level',
 				'default'	=>	$this->is_network_option('abuse_ipdb_level',80),
 				'after'		=>	'<datalist id="abuse_ipdb_level-ticks">'.
-									'<option value="10" label="10"></option>'.
+				//					'<option value="10" label="10"></option>'.
 									'<option value="20" label="20"></option>'.
 									'<option value="30" label="30"></option>'.
 									'<option value="40" label="40"></option>'.
@@ -42,7 +42,7 @@ $this->registerExtensionOptions( $this->className,
 								'Block access on abuse level of <code>'.
 								'<output name="abuse_ipdb_level_show" for="abuse_ipdb_level">[value]</output>'.
 								'</code> or greater.',
-				'attributes'=>	['min="10"', 'max="100"','step="5"','list="abuse_ipdb_level-ticks"',
+				'attributes'=>	['min="20"', 'max="100"','step="5"','list="abuse_ipdb_level-ticks"',
 								'oninput'=>"abuse_ipdb_level_show.value = this.value"],
 		),
 		'abuse_ipdb_bans' 	=> array(

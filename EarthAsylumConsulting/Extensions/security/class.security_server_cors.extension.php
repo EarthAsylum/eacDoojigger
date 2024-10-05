@@ -27,7 +27,7 @@ if (! class_exists(__NAMESPACE__.'\security_server_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1004.1';
+		const VERSION 			= '24.1005.1';
 
 		/**
 		 * @var string|array|bool to set (or disable) default group display/switch
@@ -144,7 +144,7 @@ if (! class_exists(__NAMESPACE__.'\security_server_cors', false) )
 				}
 			}
 			if ($this->security->isPolicyEnabled('secCorsOpt','ajax')) {
-				if ( $this->plugin->doing_ajax() ) {
+				if ($this->plugin->doing_ajax()) {
 					if (!$this->plugin->varServer('X-Requested-With')) {
 						wp_die( $this->plugin->request_forbidden('Invalid XMLHttp Request') );
 					}
@@ -174,7 +174,7 @@ if (! class_exists(__NAMESPACE__.'\security_server_cors', false) )
 				if ($this->plugin->varServer('Origin') == $this->plugin->varServer('Host')) {
 					if (!in_array($this->plugin->getVisitorIP(),$this->host_ips)) {
 						$this->do_action('report_abuse','invalid origin to ip address');
-						wp_die( $this->plugin->request_forbidden('Invalid origin/IP: '.$origin.' - '.$this->plugin->getVisitorIP()) );
+						wp_die( $this->plugin->request_forbidden('Invalid origin/address ('.$origin.', '.$this->plugin->getVisitorIP().')') );
 					}
 				}
 			}
@@ -240,7 +240,7 @@ if (! class_exists(__NAMESPACE__.'\security_server_cors', false) )
 					$this->logError($origin,'CORS: denied origin');
 					header( 'Access-Control-Allow-Origin: ' . site_url() );
 					$this->do_action('report_abuse','prohibited cross-origin request');
-					wp_die( $this->plugin->request_forbidden('Cross-Origin access denied: '.$origin) );
+					wp_die( $this->plugin->request_forbidden('Cross-Origin access denied from '.$origin) );
 				}
 				return $value;
 			},20);

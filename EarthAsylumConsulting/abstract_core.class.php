@@ -1636,16 +1636,25 @@ abstract class abstract_core
 	 * @param int 		$status override default status
 	 * @return WP_Error
 	 */
-	public function request_forbidden(string $logMsg='', string $message='', int $status=403)
+	public function request_forbidden(string $logMsg='', int $status=403, string $message='')
 	{
+		if (empty($message))
+		{
+			$message = sprintf("%s (%s)",
+				 __('Sorry, your request could not be processed', $this->PLUGIN_TEXTDOMAIN ),
+				 __(get_status_header_desc($status), $this->PLUGIN_TEXTDOMAIN )
+			);
+		}
+
 		if ($logMsg)
 		{
-			$this->plugin->error(
-				'access_denied',
-				$logMsg,
-				array_filter([$this->getVisitorIP(),$_SERVER['REQUEST_URI'],file_get_contents('php://input')]),
-				get_status_header_desc($status).': '.$logMsg
-			);
+			$this->logError(get_status_header_desc($status).' - '.$logMsg, 'access_denied');
+		//	$this->plugin->error(
+		//	/* code */		'access_denied',
+		//	/* message */	$logMsg,
+		//	/* data */		array_filter([$this->getVisitorIP(),$_SERVER['REQUEST_URI'],file_get_contents('php://input')]),
+		//	/* id */		get_status_header_desc($status).': '.$logMsg
+		//	);
 		}
 
 		ob_clean();
@@ -1655,7 +1664,7 @@ abstract class abstract_core
 		nocache_headers();
 		return new \WP_Error(
 			'access_denied',
-			__($message ?: "Sorry, you do not have permission to access the requested resource"),
+			$message,
 			['status' => $status]
 		);
 	}
@@ -2280,6 +2289,7 @@ abstract class abstract_core
 					'FORWARDED_FOR',
 					'X_FORWARDED',
 					'FORWARDED',
+					'X_CLUSTER_CLIENT_IP',
 					'CLIENT_IP',
 					'REMOTE_ADDR',
 				] as $hdr)
@@ -2329,7 +2339,7 @@ abstract class abstract_core
 					?: $this->varServer('X-GEO-COUNTRY')				// Acquia cloud
 		){
 			// trust country code set by server/proxy
-			if ($country == 'ZZ') {
+			if ($country == 'XX' || $country == 'ZZ') {
 				$country = '';
 			} else {
 				$default = $country;

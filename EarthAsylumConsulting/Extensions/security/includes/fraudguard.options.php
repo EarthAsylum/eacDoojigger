@@ -40,7 +40,7 @@ $this->registerExtensionOptions( $this->className,
 				'info'		=>	'Risk level 1: no or low risk, 2: suspicious behavior, 3: potentially harmful '.
 								'4: malicious activities, 5:  extremely perilous',
 				'after'		=>	'<datalist id="fraudguard_level-ticks">'.
-									'<option value=""  label="1"></option>'.
+				//					'<option value=""  label="1"></option>'.
 									'<option value="2" label="2"></option>'.
 									'<option value="3" label="3"></option>'.
 									'<option value="4" label="4"></option>'.
@@ -49,7 +49,7 @@ $this->registerExtensionOptions( $this->className,
 								'Block access on risk level of <code>'.
 								'<output name="fraudguard_level_show" for="fraudguard_level">[value]</output>'.
 								'</code> or greater.',
-				'attributes'=>	['min="1"', 'max="5"','step="1"','list="fraudguard_level-ticks"',
+				'attributes'=>	['min="2"', 'max="5"','step="1"','list="fraudguard_level-ticks"',
 								'oninput'=>"fraudguard_level_show.value = this.value"],
 		),
 		'fraudguard_version'=> array(
