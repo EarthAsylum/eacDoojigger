@@ -128,6 +128,7 @@ if (! class_exists(__NAMESPACE__.'\security_abuseipdb_extension', false) )
 					$this->ip_blocked[$ip] = [
 						'ipAddress'				=> $ip,
 						'abuseConfidenceScore'	=> 100,
+						'risk_level'			=> 5,
 					];
 				}
 			}
@@ -424,7 +425,7 @@ if (! class_exists(__NAMESPACE__.'\security_abuseipdb_extension', false) )
 				if (!empty($result) && isset($result['data'])) {
 					$data = $result['data'];
 					$risk = intval($data['abuseConfidenceScore']);
-					$data['risk_level'] 	= ($risk > 20) ? round($risk / 20,0) : 1; 	// (0-100 = 1-5)
+					$data['risk_level'] 	= ($risk > 20) ? round($risk / 20,0,PHP_ROUND_HALF_DOWN) : 1; 	// (0-100 = 1-5)
 					$data['isocode'] 		= $data['countryCode'];
 					$data['api'] 			= 'AbuseIPDB';
 					unset($data['reports']);

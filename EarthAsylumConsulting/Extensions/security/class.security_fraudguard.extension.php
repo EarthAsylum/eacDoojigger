@@ -215,7 +215,8 @@ if (! class_exists(__NAMESPACE__.'\security_fraudguard_extension', false) )
 				$result = json_decode( wp_remote_retrieve_body($result), true );
 				if (!empty($result)) {
 					$data = array_merge($data,$result);
-					$data['abuseConfidenceScore'] = $data['risk_level'] * 20; 	// (1-5 = 20-100)
+					$risks = [1=>10,2=>30,3=>60,4=>80,5=>100];
+					$data['abuseConfidenceScore'] = $risks[ $data['risk_level'] ]; 	// (1-5 = 10-100)
 					$data['countryCode'] 	= $data['isocode'];
 					$data['api'] 			= 'FraudGuard';
 				}
