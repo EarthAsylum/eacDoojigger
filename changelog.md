@@ -1,17 +1,9 @@
 == Changelog ==
 
-= Version 2.7.0 – October 5, 2024 =
+= Version 2.7.0 – October 7, 2024 =
 
 +   Enhanced security extensions...
-    +   Implemented server-side CORS security.
-        +   Apply CORS rules to rest, xml, ajax requests.
-        +   Options to use referer or reverse DNS to get origin.
-        +   Validate server host IP when passed as origin.
-        +   Origin white-list and excluded URIs.
-    +   New AbuseIPDB api extension to block by IP address based on abuse score.
-        +   See : https://www.abuseipdb.com 
-    +   New FraudGuard api extension to block by IP address based on risk level.
-        +   See : https://www.fraudguard.io 
+    +   Add custom secure nonce on login and lost password pages.
     +   Block REST index list, WP core REST routes, non-rest json requests.
     +   Required and/or blocked http header(s) (prevent CDN bypass).
 +   Do not assume session IP is correct in getVisitorIP().

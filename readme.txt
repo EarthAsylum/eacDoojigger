@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.7.0-RC5+241005
-Last Updated:           05-Oct-2024
+Stable tag:             2.7.0
+Last Updated:           07-Oct-2024
 Requires at least:      5.8
 Tested up to:           6.6
 Requires PHP:           7.4
@@ -51,9 +51,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   ---------------------------------   |   ----------------    |
 |   *file system access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *security*                          | Adds a number of security/firewall options to your WordPress installation including server-side CORS, changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, set global cookie flags, and more. |
-|   *AbuseIPDB API*                     | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com) 'Abuse Confidence Level'. |
-|   *FraudGuard API*                    | Ability to block access by IP address based on [FruadGuard](https://www.fraudguard.io) 'Risk Level'. |
+|   *security*                          | Adds a number of security/firewall options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, set global cookie flags, and more. |
 |   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
@@ -419,18 +417,10 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 2.7.0 – October 5, 2024 =
+= Version 2.7.0 – October 7, 2024 =
 
 +   Enhanced security extensions...
-    +   Implemented server-side CORS security.
-        +   Apply CORS rules to rest, xml, ajax requests.
-        +   Options to use referer or reverse DNS to get origin.
-        +   Validate server host IP when passed as origin.
-        +   Origin white-list and excluded URIs.
-    +   New AbuseIPDB api extension to block by IP address based on abuse score.
-        +   See : https://www.abuseipdb.com 
-    +   New FraudGuard api extension to block by IP address based on risk level.
-        +   See : https://www.fraudguard.io 
+    +   Add custom secure nonce on login and lost password pages.
     +   Block REST index list, WP core REST routes, non-rest json requests.
     +   Required and/or blocked http header(s) (prevent CDN bypass).
 +   Do not assume session IP is correct in getVisitorIP().

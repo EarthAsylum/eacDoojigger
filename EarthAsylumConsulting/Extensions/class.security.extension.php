@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1005.1';
+		const VERSION 			= '24.1007.1';
 
 		/**
 		 * @var string extension alias
@@ -72,7 +72,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 										" <em>(Network policies may override site policies)</em>",
 					);
 				}
-				$this->registerExtension( [ $this->className, basename(__DIR__) ] );
+				$this->registerExtension( [ $this->className, 'security' ] );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
@@ -799,9 +799,10 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			if (! is_user_logged_in())
 			{
 				$this->do_action('report_abuse','prohibited REST API request');
-				$this->plugin->error('access_denied','REST API List denied',
-					[$this->plugin->getVisitorIP(),$_SERVER['REQUEST_URI']]
-				);
+				$this->logError($_SERVER['REQUEST_URI'],'REST API List denied');
+			//	$this->plugin->error('access_denied','REST API List denied',
+			//		[$this->plugin->getVisitorIP(),$_SERVER['REQUEST_URI']]
+			//	);
 				$data = $response->get_data();
 				$data['namespaces'] = [];
 				$data['routes'] = [];
