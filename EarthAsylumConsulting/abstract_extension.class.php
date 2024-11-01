@@ -12,7 +12,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.1003.1
+ * @version		24.1031.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_core
@@ -52,8 +52,8 @@ abstract class abstract_extension
 	const ALLOW_CRON		= 0b00001000;		// enabled for cron requests
 	const ALLOW_CLI			= 0b00010000;		// enabled for wp-cli requests
 	const ALLOW_ALL			= self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ALLOW_CRON|self::ALLOW_CLI;
-	const DEFAULT_DISABLED	= 0b00100000;		// force {classname}_enabled' option to default to not enabled
-	const ALLOW_NON_PHP		= 0b01000000;		// enabled when loaded for a url not ending in .php
+	const ALLOW_NON_PHP		= 0b00100000;		// enabled when loaded for a url not ending in .php
+	const DEFAULT_DISABLED	= 0b01000000;		// force {classname}_enabled' option to default to not enabled
 
 	/**
 	 * @var bool is this extension network enabled
@@ -69,63 +69,6 @@ abstract class abstract_extension
 	protected $update_plugin_file;
 
 	/**
-	 * @var plugin class method that can be called directly from extensions ($this->method() vs $this->plugin->method())
-	 */
-/*
-	const PLUGIN_SHORTCUT_METHODS = [
-		// site options
-			'is_option',
-			'get_option',
-			'get_option_decrypt',
-		//	'set_option',
-			'add_option',
-			'delete_option',
-			'update_option',
-			'update_option_encrypt',
-		// network options
-		//	'is_network_option',
-			'get_network_option',
-			'get_network_option_decrypt',
-		//	'set_network_option',
-			'add_network_option',
-			'delete_network_option',
-			'update_network_option',
-			'update_network_option_encrypt',
-		// site or network options
-			'get_site_option',
-			'get_site_option_decrypt',
-		//	'set_site_option',
-			'add_site_option',
-			'delete_site_option',
-			'update_site_option',
-			'update_site_option_encrypt',
-		// filters
-			'has_filter',
-			'add_filter',
-			'remove_filter',
-			'apply_filters',
-			'did_filter',
-		// actions
-			'has_action',
-			'add_action',
-			'remove_action',
-			'do_action',
-			'did_action',
-		// contextual help
-			'addPluginHelpTab',
-			'addPluginSidebarText',
-			'addPluginSidebarLink',
-		// other
-			'is_admin',
-			'is_network_admin',
-			'add_option_error',
-			'add_option_warning',
-			'add_option_success',
-			'add_option_notice',
-	];
-*/
-
-	/**
 	 * @var object Holds the parent plugin class object
 	 */
 	protected $plugin;
@@ -136,7 +79,7 @@ abstract class abstract_extension
 	protected $className;
 
 	/**
-	 * @var string The name of the plugin class (sans namespace) aka $className
+	 * @var string The name of the plugin class (sans namespace)
 	 */
 	protected $pluginName;
 
@@ -148,7 +91,7 @@ abstract class abstract_extension
 	/**
 	 * @var int flags passed to constructor
 	 */
-	protected $flags = true;
+	protected $flags;
 
 	/**
 	 * @var string the option name to enable (false=no option)
@@ -295,9 +238,9 @@ abstract class abstract_extension
 		}
 		else
 		{
-			$override = static::ENABLE_OPTION ?: $this->enable_option;
+			$override = static::ENABLE_OPTION; // ?: $this->enable_option;
 			// group names, sanitized, suffixed with '_extension_enabled'
-			$this->enable_option = basename(sanitize_key(str_replace(' ','_',$groupName)),'_extension').'_extension_enabled';
+			$this->enable_option = basename($this->plugin->toKeyString($groupName,'_'),'_extension').'_extension_enabled';
 			$enabledOption = [
 					'type'			=> 'checkbox',
 					'options'		=> ['Enabled'],

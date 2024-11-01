@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1003.1
+ * @version		24.1101.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -128,6 +128,11 @@ abstract class abstract_backend extends abstract_core
 	protected $extensionVersions 		= array();
 
 	/**
+	 * @var bool are we on the settings page
+	 */
+	protected $is_settings_page			= null;
+
+	/**
 	 * @var array default tab name(s) - set to control order
 	 */
 	public $defaultTabs 				= array('general');
@@ -159,29 +164,6 @@ abstract class abstract_backend extends abstract_core
 		add_action( 'upgrader_process_complete',			array( $this, 'plugin_admin_upgraded'), 10, 2 );
 		// Register admin_init to check for new install or upgraded version of the plugin
 		add_action('admin_init',							array( $this, 'plugin_admin_installed') );
-	}
-
-
-	/**
-	 * Called after instantiation of this class to load all extension classes.
-	 * Tracks extension versions and upgrades in backend
-	 *
-	 * @return	void
-	 */
-	public function loadAllExtensions(): void
-	{
-		$this->logInfo('',__METHOD__);
-
-		$this->extensionVersions = $this->get_option(self::PLUGIN_INSTALLED_EXTENSIONS, []);
-
-		parent::loadAllExtensions();
-
-		// when loading plugin extensions, save version transient
-		if ( count($this->extensionVersions) > 0 )
-		{
-			$this->update_option(self::PLUGIN_INSTALLED_EXTENSIONS, $this->extensionVersions);
-		}
-		unset($this->extensionVersions);
 	}
 
 
@@ -607,6 +589,79 @@ abstract class abstract_backend extends abstract_core
 			wp_unschedule_hook($eventName);
 		}
 	}
+
+
+	/*
+	 *
+	 * When loading plugin extensions
+	 *
+	 */
+
+
+	/**
+	 * Called after instantiation of this class to load all extension classes.
+	 * Tracks extension versions and upgrades in backend
+	 *
+	 * @return	void
+	 */
+	public function loadAllExtensions(): void
+	{
+		$this->logInfo('',__METHOD__);
+
+		$this->extensionVersions = $this->get_option(self::PLUGIN_INSTALLED_EXTENSIONS, []);
+
+		// abstract_core loads extensions
+		parent::loadAllExtensions();
+
+		// save extension versions
+		if ( count($this->extensionVersions) > 0 )
+		{
+			$this->update_option(self::PLUGIN_INSTALLED_EXTENSIONS, $this->extensionVersions);
+		}
+		unset($this->extensionVersions);
+	}
+
+
+	/**
+	 * is this an updated extension (when loaded from abstract_core)
+	 *
+	 * @param	string	$className extension name
+	 * @param	string	$extVersion extension version loaded
+	 * @return	void
+	 */
+	protected function checkExtensionUpgrade(string $className, string $extVersion): void
+	{
+		if ($extVersion == 'unknown') return;
+
+		$curVersion = $this->extensionVersions[$className] ?? '0.0';
+
+		if (version_compare($curVersion, $extVersion) !== 0)					// version change
+		{
+			$this->logInfo('updated from version '.$curVersion.' to '.$extVersion, $className);
+			/**
+			 * action {classname}_version_updated_<extension> when <extension> version changes
+			 * @param	string	$curVersion currently installed version
+			 * @param	string	$extVersion newly installed version
+			 * @return	void
+			 */
+			$this->do_action( "version_updated_{$className}", $curVersion, $extVersion );
+			/**
+			 * AND/OR - use a direct call method
+			 */
+			if (method_exists($this->extension_objects[ $className ], 'adminVersionUpdate'))
+			{
+				call_user_func([$this->extension_objects[ $className ], 'adminVersionUpdate'], $curVersion, $extVersion);
+			}
+		}
+		$this->extensionVersions[$className] = $extVersion;
+	}
+
+
+	/*
+	 *
+	 * Updating configuration file(s)
+	 *
+	 */
 
 
 	/**
@@ -1061,8 +1116,6 @@ abstract class abstract_backend extends abstract_core
 	{
 		if (!current_user_can('manage_options')) return;
 
-		$settings_slug = $this->getSettingsSlug();
-
 		$this->requireExtraPluginFiles();
 		$displayName = $this->pluginHeader('Title');
 
@@ -1079,11 +1132,11 @@ abstract class abstract_backend extends abstract_core
 		 */
 
 		// action: load-admin_page_eacdoojigger-site-settings
-		$hook_suffix = add_submenu_page('options.php',
+		add_submenu_page('options.php',
 				$displayName,
 				$displayName,
 				'manage_options',
-				$settings_slug,
+				$this->getSettingsSlug(),
 			    $this->getSettingsCallback()
 		);
 
@@ -1094,10 +1147,10 @@ abstract class abstract_backend extends abstract_core
 			if ( in_array('Plugins Menu',$optionsArray) )
 			{
 				// action: load-plugins_page_eacdoojigger-site-settings
-				$hook_suffix = add_plugins_page($displayName,
+				add_plugins_page($displayName,
 							$displayName,
 							'manage_options',
-							$settings_slug,
+							$this->getSettingsSlug(),
 						    $this->getSettingsCallback()
 				);
 			}
@@ -1105,19 +1158,19 @@ abstract class abstract_backend extends abstract_core
 			{
 				// action: load-settings_page_eacdoojigger-site-settings
 				if ($this->is_network_admin()) {
-					$hook_suffix = add_submenu_page('settings.php',
+					add_submenu_page('settings.php',
 							$displayName,
 							$displayName,
 							'manage_options',
-							$settings_slug,
+							$this->getSettingsSlug(),
 						    $this->getSettingsCallback()
 					);
 				} else {
-					$hook_suffix = add_options_page(
+					add_options_page(
 							$displayName,
 							$displayName,
 							'manage_options',
-							$settings_slug,
+							$this->getSettingsSlug(),
 						    $this->getSettingsCallback()
 					);
 				}
@@ -1125,22 +1178,22 @@ abstract class abstract_backend extends abstract_core
 			if ( in_array('Tools Menu',$optionsArray) )
 			{
 				// action: load-tools_page_eacdoojigger-site-settings
-				$hook_suffix = add_management_page(
+				add_management_page(
 							$displayName,
 							$displayName,
 							'manage_options',
-							$settings_slug,
+							$this->getSettingsSlug(),
 						    $this->getSettingsCallback()
 				);
 			}
 			if ( in_array('Main Sidebar',$optionsArray) )
 			{
 				// action: load-toplevel_page_eacdoojigger-site-settings
-				$hook_suffix = add_menu_page(
+				add_menu_page(
 							$displayName,
 							$displayName,
 							'manage_options',
-							$settings_slug,
+							$this->getSettingsSlug(),
 						    $this->getSettingsCallback(),
 							'dashicons-admin-plugins',
 							(($this->is_network_admin()) ? 21 : 66) // position after Plugins (20/65) menu item
@@ -1149,17 +1202,66 @@ abstract class abstract_backend extends abstract_core
 				$tabNames 	= $this->getTabNames();
 				foreach ($tabNames as $tabName)
 				{
-					add_submenu_page($settings_slug,
-							$displayName.'->'.$tabName,
+					add_submenu_page($this->getSettingsSlug(),
+							$displayName,//.'->'.$tabName,
 							$tabName,
 							'manage_options',
-							$settings_slug.(($tab)?'&tab='.$this->toKeyString($tabName):''),
+							$this->getSettingsSlug(($tab)?$tabName:''),
 							$this->getSettingsCallback(),
 					);
 					$tab = true;
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * when we're on our settings page
+	 *
+	 * @param string $isTab check specific tab name
+	 * @return	bool
+	 */
+	public function isSettingsPage($isTab = null): bool
+	{
+		if (is_null($this->is_settings_page) || !empty($isTab))
+		{
+			$this->is_settings_page = false;
+			if (!is_admin())
+			{
+				return $this->is_settings_page;
+			}
+
+			if ($isTab) $isTab = $this->toKeyString($isTab);
+			if (wp_doing_ajax())
+			{
+				if (isset($_SERVER['HTTP_REFERER']) && str_contains($_SERVER['HTTP_REFERER'], $this->getSettingsSlug()))
+				{
+					$this->is_settings_page = true;
+					if ($isTab) return ( str_ends_with($_SERVER['HTTP_REFERER'],$isTab) );
+				}
+			}
+			else
+			{
+				if ( str_starts_with( $this->varGet('page') ?? '', $this->getSettingsSlug() ) )
+				{
+					$this->is_settings_page = true;
+					if ($isTab) return ($isTab == $this->getCurrentTab());
+				}
+			}
+		}
+		return $this->is_settings_page;
+	}
+
+
+	/**
+	 * get settings page callback
+	 *
+	 * @return	array	the settings page callback
+	 */
+	public function getSettingsCallback(): array
+	{
+		return [$this,'options_settings_page'];
 	}
 
 
@@ -1639,6 +1741,27 @@ abstract class abstract_backend extends abstract_core
 
 
 	/**
+	 * get settings tab (i.e. the page for setting options)
+	 *
+	 * @return	string	the settings slug name
+	 */
+	public function getCurrentTab($tabNames=null): ?string
+	{
+		$plugin_page = $this->varGet('page');
+		if (str_starts_with($plugin_page,$this->getSettingsSlug()))
+		{
+			if (empty($tabNames)) $tabNames = $this->getTabNames();
+			return ltrim(
+					$this->varGet('tab')
+				?: 	str_replace($this->getSettingsSlug(),'',$plugin_page)
+				?: 	$this->toKeyString(current($tabNames)),
+			'-');
+		}
+		return null;
+	}
+
+
+	/**
 	 * Settings group name
 	 *
 	 * @return	void
@@ -1673,9 +1796,8 @@ abstract class abstract_backend extends abstract_core
 			$this->deleteUpdaterTransient();
 		}
 
-		$settingsTab 	= add_query_arg(['page'=>$this->getSettingsSlug()],$this->varServer('REQUEST_URI'));
 		$tabGroups 		= $this->getTabGroups();
-		$currentTab 	= $this->varGet('tab') ?: $this->toKeyString(key($tabGroups));
+		$currentTab 	= $this->getCurrentTab(array_keys($tabGroups));
 		$tabName 		= array_filter(array_keys($tabGroups), function($tab) use($currentTab)
 			{
 				return $currentTab == $this->toKeyString($tab);
@@ -1689,7 +1811,6 @@ abstract class abstract_backend extends abstract_core
 		}
 		$currentTab 	= $tabName = current($tabName); // tab display value
 		$settingsGroup 	= $this->getSettingsGroup($currentTab);
-
 
 		if ($_SERVER['REQUEST_METHOD'] == 'GET')
 		{
@@ -1706,7 +1827,7 @@ abstract class abstract_backend extends abstract_core
 
 		// HTML for the page
 
-		$pluginClass = $this->toKeyString( $this->prefixOptionName($this->className.'_settings') );
+		$pluginClass = $this->toKeyString( $this->prefixOptionName($this->className.'_settings'),'_' );
 		echo "<div class='wrap {$pluginClass} {$settingsGroup}'>\n";
 
 		$h1 = 	"<h1 id='settings_h1'>".
@@ -1720,12 +1841,12 @@ abstract class abstract_backend extends abstract_core
 		$h1 = $this->apply_filters( "options_form_h1_html", $h1 );
 
 		$h2Version = ($stable = $this->pluginHeader('StableTag'))
-			? " <small data-tooltip title='".$this->getRelease()."'>".
-				"(v".$this->getVersion().")</small>"
+			? " <small>(<abbr title='".$this->getRelease()."'>".
+				"v".$this->getVersion()."</abbr>)</small>"
 			: " <small>(v".$this->getVersion().")</small>";
 		$h2  =
 		$h2a =	"<h2 id='settings_h2'>".
-				"<span class='dashicons dashicons-admin-settings'></span>".
+				"<span style='color:var(--eac-admin-icon)' class='dashicons dashicons-admin-settings'></span>".
 				__( $this->pluginHeader('Name'), $this->PLUGIN_TEXTDOMAIN ).
 				$h2Version.' - '.
 				__( $currentTab, $this->PLUGIN_TEXTDOMAIN ).
@@ -1795,7 +1916,12 @@ abstract class abstract_backend extends abstract_core
 			foreach ($tabGroups as $tabName => $optionGroup)
 			{
 				if (empty($optionGroup)) continue;
-				echo "\t<a href='".add_query_arg(['tab'=>$this->toKeyString($tabName)],$settingsTab)."' class='wp-ui-highlight nav-tab";
+				parse_str('page='.$this->getSettingsSlug($tabName),$query_args);
+				echo "\t<a href='".
+					add_query_arg($query_args,
+					$_SERVER['REQUEST_URI']).
+				//	admin_url('admin.php')).
+					"' class='wp-ui-highlight nav-tab";
 				if ($currentTab == $tabName) echo " nav-tab-active active";
 				echo " button-primary'>$tabName</a>\n";
 			}
@@ -2239,12 +2365,12 @@ abstract class abstract_backend extends abstract_core
 		$optionMeta = $this->apply_filters( "options_group_meta_{$groupName}", $optionMeta );
 
 		// show plugin/extension group
-		$groupClass 	= $this->toKeyString($groupName);
+		$groupClass 	= $this->toKeyString($groupName,'_');
 		echo "<!-- [ {$groupName} ] -->\n";
 		echo "<section class='settings-grid {$groupClass}' data-name='{$groupClass}' data-title='{$groupName}'>\n";
 
 		// the '_enabled' option
-		$optionKey 		= basename(sanitize_key(str_replace(' ','_',$groupName)),'_extension').'_extension_enabled';
+		$optionKey 		= basename($this->toKeyString($groupName,'_'),'_extension').'_extension_enabled';
 		$optionData 	= $optionMeta[$optionKey] ?? [];
 		$optionValue 	= ($optionData)
 			? ($optionData['value'] ?? $this->get_option($optionKey))
@@ -2320,14 +2446,14 @@ abstract class abstract_backend extends abstract_core
 		if ($optionMeta['type'] == 'help') return;
 
 		$optionMeta = array_merge(self::OPTION_META_KEYS,$optionMeta);
-		$optionMeta['value'] =  $optionValue;
+		$optionMeta['value'] =  $optionValue ?: $optionMeta['default'];
 
 		$displayName = __($this->wp_kses($optionMeta['label'] ?? ''),$this->PLUGIN_TEXTDOMAIN);
 		$style = ($optionMeta['type'] == 'hidden') ? " style='display:none;'" : "";
 
 		// process string replacement [meta name] with meta value
 		$meta 	= array_filter($optionMeta,function($v,$k){
-			return in_array($k,['type','label','default','title','before','after','info','tooltip','help','value']) && is_string($v);
+			return in_array($k,['type','label','default','title','before','after','info','tooltip','help','value']) && is_scalar($v);
 		},ARRAY_FILTER_USE_BOTH);
 		$keys 	= array_map(function($k){return "[{$k}]";},array_keys($meta));
 		$values = array_values($meta);
@@ -2679,6 +2805,7 @@ abstract class abstract_backend extends abstract_core
 		if ( !$this->pluginHelpEnabled() ) return;
 
 		$optionMeta = array_merge(self::OPTION_META_KEYS,$optionMeta);
+		$optionMeta['value'] =  $optionMeta['value'] ?? $optionMeta['default'];
 
 		if ( !in_array($optionMeta['type'],['display','hidden']) || !empty($optionMeta['help']) )
 		{
@@ -2687,7 +2814,7 @@ abstract class abstract_backend extends abstract_core
 				: $optionMeta['help'] ?? '[title] [info]'; 		// field help
 
 			$meta 	= array_filter($optionMeta,function($v,$k){
-				return in_array($k,['type','label','default','title','before','after','info','tooltip','help']) && is_scalar($v);
+				return in_array($k,['type','label','default','title','before','after','info','tooltip','help','value']) && is_scalar($v);
 			},ARRAY_FILTER_USE_BOTH);
 			$keys 	= array_map(function($k){return "[{$k}]";},array_keys($meta));
 			$values = array_values($meta);
@@ -2869,17 +2996,5 @@ abstract class abstract_backend extends abstract_core
 			},
 			$this->parseAttributes($choices,true)	// array of arrays
 		);
-	}
-
-
-	/**
-	 * convert a display title/name to a key/class string
-	 *
-	 * @param	string 	$string	to be converted
-	 * @return	string
-	 */
-	protected function toKeyString($string): string
-	{
-		return \sanitize_key(str_replace(' ','_',$string));
 	}
 }

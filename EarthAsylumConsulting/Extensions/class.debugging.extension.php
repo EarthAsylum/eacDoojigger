@@ -21,7 +21,18 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0921.1';
+		const VERSION	= '24.1027.1';
+
+		/**
+		 * @var array disable for these file extensions
+		 */
+//		const STATIC_FILE_TYPES = [
+//			/* Images	*/ 'jpg', 'jpeg', 'jpe', 'gif', 'png', 'bmp', 'tif', 'tiff', 'ico', 'heic', 'webp', 'avif',
+//			/* Documents*/ 'pdf', 'doc', 'docx', 'ppt', 'pptx', 'pps', 'ppsx', 'odt', 'xls', 'xlsx', 'PSD', 'XML', 'psd', 'ai', 'pages',
+//			/* Audio 	*/ 'aac', 'ac3', 'aif', 'aiff', 'flac', 'm3a', 'm4a', 'm4b', 'mka', 'mp1', 'mp2', 'mp3', 'ogg', 'oga', 'ram', 'wav', 'wma',
+//			/* Video	*/ '3g2', '3gp', '3gpp', 'asf', 'avi', 'divx', 'dv', 'flv', 'm4v', 'mkv', 'mov', 'mp4', 'mpeg', 'mpg', 'mpv', 'ogm', 'ogv', 'qt', 'rm', 'vob', 'wmv',
+//			/* Fonts 	*/ 'ttf', 'otf', 'woff', 'woff2', 'eot',
+//		];
 
 		/**
 		 * @var internal variables
@@ -55,7 +66,24 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin, self::ALLOW_ALL /*| self::ALLOW_NON_PHP*/ | self::DEFAULT_DISABLED);
+			parent::__construct($plugin, (self::ALLOW_ALL | self::ALLOW_NON_PHP | self::DEFAULT_DISABLED) & ~self::ALLOW_CRON);
+
+			$ext = explode('?',$_SERVER['REQUEST_URI']);
+			$ext = pathinfo(trim($ext[0],'/'),PATHINFO_EXTENSION);
+			if (!empty($ext))
+			{
+				$fileTypes = wp_get_ext_types();
+				$fileTypes = array_merge(
+					$fileTypes['image'],
+					$fileTypes['audio'],
+					$fileTypes['video'],
+					$fileTypes['document'],
+					$fileTypes['spreadsheet'],
+					$fileTypes['interactive'],
+					['ttf', 'otf', 'woff', 'woff2', 'eot']
+				);
+				if (in_array($ext,$fileTypes)) return $this->isEnabled(false);
+			}
 
 			if ($this->is_admin())
 			{
@@ -129,6 +157,13 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		public function initialize()
 		{
 			if ( ! parent::initialize() ) return; // disabled
+			if (wp_doing_ajax() && $_REQUEST['action'] == 'heartbeat')
+			{
+				if (!$this->is_option('debug_heartbeat')) {
+					return $this->isEnabled(false);
+				}
+			}
+
 			$this->current_user = wp_get_current_user();
 
 		/* using PSR-3 logging
@@ -958,7 +993,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		{
 			if (!$this->isEnabled() || empty($this->logPath)) return false;
 
-			$file = $this->logPath."/".$this->pluginName."_".wp_date('Ymd').".log";
+			$file = $this->logPath."/debug.".wp_date('Y-m-d').".log";
 
 			if ($fs = $this->fs->load_wp_filesystem())
 			{
@@ -1019,6 +1054,9 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				}
 				if (!empty($_REQUEST)) {
 					$request_data['Request Values']		= $_REQUEST;
+				}
+				if ($input = file_get_contents('php://input')) {
+					$request_data['Input Stream']		= $input;
 				}
 			}
 
@@ -1177,64 +1215,29 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		{
 			if (! $this->is_option('debug_to_file_allowed')) return false;
 
-			if	(! ($fs = $this->fs->load_wp_filesystem()) ) return false;
-			$create = $create && $fs;
-
-			$logPath = false;
-			$logFolder = sanitize_key($this->pluginName.'_logs');
-
-			// check for writeable folder defined by WP_DEBUG_LOG
-			if (defined('WP_DEBUG_LOG') && is_string(WP_DEBUG_LOG)) {
-				if ($logPath = $this->isWriteablePath($fs, realpath(dirname(WP_DEBUG_LOG)))) {
-					$logPath = trailingslashit($logPath).$logFolder;
-				}
-			}
-			// check for existing, writeable folder at wp-content/uploads/{$logFolder}
-			if (!$logPath) {
-				$uploads = trailingslashit(wp_get_upload_dir()['basedir']);
-				$logPath = $this->isWriteablePath($fs, $uploads.$logFolder, true);
-			}
-			// set default folder at wp-content
-			if (!$logPath) {
-				$logPath = WP_CONTENT_DIR.'/'.$logFolder;
-			}
-
-			if (!is_dir($logPath) && $create)
-			{
-				if (($fsLogPath = $fs->find_folder(dirname($logPath))) && $fs->is_writable($fsLogPath)) {
-					$fsLogPath .= basename($logPath);
-					// since we write to this not using $fs, we need onwner & group write access
-					$fs->mkdir($fsLogPath,FS_CHMOD_DIR|0660);
-				}
-			}
-
+			$logPath 		= $this->pluginName;
 			if (is_multisite())
 			{
-				$logPath	 = trailingslashit($logPath);
-				$logPath	.= (is_network_admin() || $asNetAdmin)
-								? sanitize_text_field(\get_network_option(null,'site_name'))
-								: sanitize_text_field(\get_option('blogname'));
-				if (!is_dir($logPath) && $create)
-				{
-					if (($fsLogPath = $fs->find_folder(dirname($logPath))) && $fs->is_writable($fsLogPath)) {
-						$fsLogPath .= basename($logPath);
-						// since we write to this not using $fs, we need onwner & group write access
-						$fs->mkdir($fsLogPath,FS_CHMOD_DIR|0660);
-					}
-				}
+				$siteName	= (is_network_admin() || $asNetAdmin)
+								? \get_network_option(null,'site_name')
+								: \get_option('blogname');
+				$logPath 	= trailingslashit($logPath) .
+							  sanitize_text_field($siteName);
 			}
 
-			if (!is_writable($logPath))
+			$logPath 		= $this->plugin->get_output_file(trailingslashit($logPath),$create);
+
+			if (is_wp_error($logPath))
 			{
 				$this->plugin->add_admin_notice($this->pluginName.' Debugging: Unable to access log path','error',
-					$logPath.'<br>File logging has been disabled');
-				trigger_error($this->pluginName.': unable to access log path '.$logPath,E_USER_WARNING);
+					$logPath->get_error_data().'<br>File logging has been disabled');
+				trigger_error($this->pluginName.': unable to access log path '.$logPath->get_error_data(),E_USER_WARNING);
 				$this->update_option('debug_to_file_allowed','no');
 				return false;
 			}
 
 			$this->logPath = $logPath;
-			return true;
+			return $logPath;
 		}
 	}
 }

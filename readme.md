@@ -7,11 +7,11 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             2.7.0  
-Last Updated:           07-Oct-2024  
+Stable tag:             3.0.0-beta1+24.1101.1  
+Last Updated:           1-Nov-2024  
 Requires at least:      5.8  
-Tested up to:           6.6  
-Requires PHP:           7.4  
+Tested up to:           6.7  
+Requires PHP:           8.1  
 Contributors:           [earthasylum](https://github.com/earthasylum),[kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
 License:                EarthAsylum Consulting Proprietary License - {eac}PLv1  
 License URI:            https://eacDoojigger.earthasylum.com/end-user-license-agreement/  
@@ -59,7 +59,10 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   ---------------------------------   |   ----------------    |
 |   *file system access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *security*                          | Adds a number of security/firewall options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, set global cookie flags, and more. |
+|   *security*                          | Adds a number of security/firewall options to your WordPress installation including server-side CORS, changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, set global cookie flags, and more. |
+|   *AbuseIPDB API*                     | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com) 'Abuse Confidence Level'. |
+|   *FraudGuard API*                    | Ability to block access by IP address based on [FruadGuard](https://www.fraudguard.io) 'Risk Level'. |
+|   *IpGeoLocation API*                 | Ability to block access by IP address based on [IpGeoLocation](https://www.ipgeolocation.io) 'Threat Score'. |
 |   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
@@ -403,6 +406,12 @@ _Kevin Burkholder_
 
 
 ### Upgrade Notice
+
+#### 3.0
+
+As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1+
+
+= 2.7.0
 
 Future versions (starting with 3.0) of {eac}Doojigger will drop support for PHP versions prior to 8.1.
 

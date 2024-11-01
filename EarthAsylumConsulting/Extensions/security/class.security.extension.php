@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1007.1';
+		const VERSION 			= '24.1029.1';
 
 		/**
 		 * @var string extension alias
@@ -93,7 +93,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 						'#secPassTime-ticks {display: flex; width: 86%;}'.
 
 						'#secHeartbeat {width: 85%;}'.
-						'#secHeartbeat-ticks {display: flex; width: 86%;}';
+						'#secHeartbeat-ticks {display: flex; width: 86%;}'.
+						'#secHeartbeat-ticks option {min-width: 1.5em;}';
 					wp_add_inline_style( $styleId, $style );
 				});
 			}
@@ -189,6 +190,21 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				}
 			}
 
+			// default actions if security_ra_extension is disabled
+			if (! $this->plugin->isExtension('risk_assessment') )
+			{
+				/**
+				 * action {plugin}_register_[threat|fraud|abuse|risk]
+				 * @param string $message additional comment text
+				 * @param int $score risk score (0-100)
+				 * @param int $http_status optional, set http status on die
+				 */
+				foreach (['fraud','threat','abuse','risk'] as $type)
+				{
+					$this->add_action( "register_{$type}", array($this, 'register_risk_action'),10,3 );
+				}
+			}
+
 			// so we know if/what .htaccess rules have been set
 			$this->security_rules = wp_parse_args(
 				$this->get_site_option('security_extension_rules',[]),
@@ -208,36 +224,33 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function early_addActionsAndFilters()
 		{
-			if (!is_user_logged_in())
-			{
-				$this->validate_http_header(true);
-				$this->validate_http_header(false);
-			}
-
+			// code editor
 			if ($this->isPolicyEnabled('secFileChanges','no-code'))
 			{
 				$this->disable_code_edit();
 			}
 
+			// all file changes/updates
 			if ($this->isPolicyEnabled('secFileChanges','no-mods'))
 			{
 				$this->disable_file_mods();
 			}
 
+			// custom nonce on login page(s)
 			if ($this->isPolicyEnabled('secLoginNonce'))
 			{
 				add_action( 'login_form', 					array($this, 'wp_login_form') );
-				add_filter( 'wp_authenticate_user', 		array($this, 'wp_login_authenticate'), 10, 2 );
+				add_filter( 'wp_authenticate_user', 		array($this, 'wp_login_authenticate'), 5, 2 );
 
 				add_action( 'register_form', 				array($this, 'wp_login_form') );
-				add_filter( 'registration_errors', 			array($this, 'wp_login_authenticate'), 10, 2 );
+				add_filter( 'registration_errors', 			array($this, 'wp_login_authenticate'), 5, 2 );
 
 				add_action( 'lostpassword_form', 			array($this, 'wp_login_form') );
-				add_action( 'lostpassword_post',			array($this, 'wp_login_authenticate'), 10, 2 );
+				add_action( 'lostpassword_post',			array($this, 'wp_login_authenticate'), 5, 2 );
 
 				add_action( 'woocommerce_login_form',		array($this, 'wp_login_form') );
 				add_action( 'woocommerce_register_form', 	array($this, 'wp_login_form'));
-				add_action( 'woocommerce_register_post', 	array($this, 'wp_login_authenticate'), 10, 2 );
+				add_action( 'woocommerce_register_post', 	array($this, 'wp_login_authenticate'), 5, 2 );
 				add_action( 'woocommerce_lostpassword_form',array($this, 'wp_login_form'));
 			}
 		}
@@ -249,9 +262,40 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
+			// remove generator from page, shortlink from header
 			add_filter( 'the_generator',					'__return_empty_string', 999);
 			add_filter( 'get_shortlink',					'__return_empty_string', 999);
 
+			$this->add_action( 'ready',						function()
+			{
+				// check for custom http headers
+				if (!is_user_logged_in())
+				{
+					$this->validate_http_header(true);	// required
+					$this->validate_http_header(false);	// blocked
+
+					// disabled site uris
+					if ($this->isPolicyEnabled('secDisableURIs'))
+					{
+						if ( ! $this->security_rules['secDisableURIs'] ) {
+							$this->disable_uris();
+						}
+					}
+
+					// block IP addresses (apache may not know original IP address)
+					if ($this->isPolicyEnabled('secBlockIP'))
+					{
+					//	if ( ! $this->security_rules['secBlockIP'] ) {
+							$this->block_ip_address();
+					//	}
+					}
+				}
+			});
+
+			// this seems to trigger too many false-positives
+			//add_action('wp_verify_nonce_failed', 			array($this, 'wp_nonce_failure'));
+
+			// change login uri (wp-login)
 			if ($this->login_uri = $this->get_site_option('secLoginUri'))
 			{
 				add_filter( 'site_url', 					array($this, 'wp_login_filter'), 10, 4 );
@@ -261,6 +305,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				add_filter( 'site_option_welcome_email', 	array($this, 'welcome_email_filter') );
 			}
 
+			// password policy
 			if ($this->isPolicyEnabled('secPassPolicy'))
 			{
 				add_action( 'user_profile_update_errors', 	array($this, 'validate_password_policy'), 10, 3 );
@@ -271,93 +316,77 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				add_action( 'woocommerce_password_reset', 				array($this, 'validate_password_policy'), 10, 2 );
 			}
 
+			// lock account after x attempts
 			if ($this->isPolicyEnabled('secPassLock'))
 			{
-				add_filter( 'wp_authenticate_user', 		array($this, 'validate_authentication_attempts'), 10, 2 );
-				add_filter( 'login_redirect', 				function( $url, $query, $user ) {
-					if (! is_wp_error( $user )) {
-						$this->delete_transient('login_attempt_'.$user->ID);
-					}
-					return $url;
-				}, 10, 3 );
+				add_filter( 'wp_authenticate_user', 		array($this, 'validate_authentication_attempts'), 5, 2 );
+				add_action( 'wp_login', 					function( $uername, $user ) {
+					$this->delete_transient('login_attempt_'.$user->ID);
+					$this->do_action('clear_risk');
+				}, 10, 2 );
 			}
 
+			// login attempt with invalid user name
+			add_action( 'wp_login_failed', 					function( $uername, $error ) {
+				if ($error->get_error_code() == 'invalid_username') {
+					$this->do_action('register_threat','login attempt with invalid user name');
+				}
+			}, 10, 2 );
+
+			// disable REST APIs
+			if ($this->isPolicyEnabled('secUnAuthRest'))
+			{
+				$this->disable_rest();
+			}
+
+			// disable XML
+			if ($this->isPolicyEnabled('secDisableXML'))
+			{
+				if ($this->isPolicyEnabled('secDisableXML','no-xml'))
+				{
+					add_filter( 'xmlrpc_methods', 			array($this, "disable_xml"), 998 );
+					remove_action('xmlrpc_rsd_apis', 		'rest_output_rsd');
+					remove_action('wp_head', 				'rsd_link');
+				}
+				/*
+				if ($this->isPolicyEnabled('secDisableXML','no-ping'))
+				{
+					// remove x-pingback HTTP header
+					add_filter('wp_headers', 				function($headers) {
+						unset($headers['X-Pingback']);
+						return $headers;
+					});
+					add_action('wp', 						function() {
+						header_remove('X-Pingback');
+					});
+					// disable pingbacks
+					add_filter( 'xmlrpc_methods', 			array($this, "disable_pings"), 999 );
+				}
+				*/
+				if ($this->isPolicyEnabled('secDisableXML','no-rpc')) {
+					add_action('wp_headers', 				array($this, 'disable_invalid_xml'));
+				}
+			}
+
+			// disable RSS
 			if ($this->isPolicyEnabled('secDisableRSS'))
 			{
 				$this->disable_rss_feeds();
 			}
 
+			// disabled oEmbed
 			if ($this->isPolicyEnabled('secDisableEmbed'))
 			{
 				$this->disable_embeds();
 			}
 
-			if ($this->isPolicyEnabled('secUnAuthRest'))
-			{
-				if ($this->isPolicyEnabled('secUnAuthRest','no-rest')) {
-				//	add_filter( 'json_jsonp_enabled', 		'__return_false');
-				//	add_filter( 'rest_enabled', 			'__return_false');	// deprecated
-					add_filter( 'rest_jsonp_enabled', 		'__return_false' );
-				}
-				if ($this->isPolicyEnabled('secUnAuthRest','no-rest-index')) {
-					add_filter( 'rest_index', 				array($this, 'disable_rest_list'), 999 );
-					add_filter( 'rest_namespace_index', 	array($this, 'disable_rest_list'), 999 );
-					add_filter( 'rest_route_data', 			'__return_empty_array', 999);
-     			}
-				if ($this->isPolicyEnabled('secUnAuthRest','no-rest-core')) {
-					$this->disable_rest_core();
-				}
-
-				add_filter( 'rest_authentication_errors', 	array($this, "disable_rest"), 999 );
-				remove_action( 'wp_head', 					'rest_output_link_wp_head');
-				remove_action( 'template_redirect', 		'rest_output_link_header');
-
-				if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
-					add_action('wp', 						array($this, 'disable_invalid_json'));
-				}
-			}
-
-			if ($this->isPolicyEnabled('secDisableXML','no-xml'))
-			{
-				add_filter(	'xmlrpc_enabled', 				'__return_false');
-				add_filter( 'xmlrpc_methods', 				array($this, "disable_xml"), 998 );
-				remove_action('xmlrpc_rsd_apis', 			'rest_output_rsd');
-				remove_action('wp_head', 					'rsd_link');
-			}
-
-			if ($this->isPolicyEnabled('secDisableXML','no-ping'))
-			{
-				// remove x-pingback HTTP header
-				add_filter('wp_headers', 					function($headers) {
-					unset($headers['X-Pingback']);
-					return $headers;
-				});
-				add_action('wp', 							function() {
-					header_remove('X-Pingback');
-				});
-				// disable pingbacks
-				add_filter( 'xmlrpc_methods', 				array($this, "disable_pings"), 999 );
-			}
-
-			if ($this->isPolicyEnabled('secDisableURIs'))
-			{
-				if ( ! $this->security_rules['secDisableURIs'] ) {
-					$this->disable_uris();
-				}
-			}
-
-			if ($this->isPolicyEnabled('secBlockIP'))
-			{
-				if ( ! $this->security_rules['secBlockIP'] ) {
-					$this->block_ip_address();
-				}
-			}
-
+			// set cookie flags
 			if ($this->isPolicyEnabled('secCookies'))
 			{
 				$this->add_action('http_headers_ready',		array($this, "checkCookieFlags"), 999  );
 			}
 
+			// WP heartbeat
 			if ($this->isPolicyEnabled('secHeartbeat'))
 			{
 				add_filter( 'heartbeat_settings', 			array($this, "set_heartbeat")  );
@@ -370,9 +399,46 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		}
 
 
+		/**
+		 * default action for 'register_risk', overridden by risk_assessment extension
+		 * action {plugin}_register_[threat|fraud|abuse|risk]
+		 *
+		 * @param string $message additional comment text
+		 * @param int $score risk score (0-100)
+		 * @param int $http_status optional, set http status on die
+		 */
+		public function register_risk_action($message='',$score=0,$http_status=403)
+		{
+			static $limit 		= 100;	// max
+			static $threshold 	= 25;	// max
+			static $maxScore 	= 0;
+			static $count 		= 0;
+
+			//if (! $limit)		$limit 		= $this->isPolicyEnabled('risk_assessment_limit') ?: 80;
+			//if (! $threshold)	$threshold 	= $this->isPolicyEnabled('risk_assessment_threshold') ?: 5;
+
+			$maxScore += intval( $score ?: $limit / $threshold );
+			$count++;
+			if ($maxScore >= $limit || $count == $threshold) {
+				wp_die( $this->plugin->access_denied($message,intval($http_status)) );
+			}
+		}
+
+
 		/*
 		 * Filters/actions
 		 */
+
+
+		/**
+		 * wp_nonce_failure (wp_verify_nonce_failed)
+		 *
+		 * @return void
+		 */
+		public function wp_nonce_failure()
+		{
+			$this->do_action('register_risk','failed to validate wp nonce');
+		}
 
 
 		/**
@@ -396,16 +462,13 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 * @param string	$url complete url
 		 * @param string  	$path path of url
 		 * @param string  	$scheme http|https
-		 * @param int|null  $blodId site id or null (current)
+		 * @param int|null  $blogId site id or null (current)
 		 * @return	string url
 		 */
 		public function wp_login_filter( $url, $path, $scheme, $blogId=null )
 		{
-			if ($this->login_uri)
-			{
-				if ( strpos( $path, 'wp-login.php' ) !== false ) {
-					$url = str_replace('wp-login.php', $this->login_uri, $url);
-				}
+			if ( strpos( $path, 'wp-login.php' ) !== false ) {
+				$url = str_replace('wp-login.php', $this->login_uri, $url);
 			}
 			return $url;
 		}
@@ -420,17 +483,15 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 		    global $wp_query;
 
-			if ($this->login_uri)
+			if (strpos( $_SERVER["REQUEST_URI"], $this->login_uri ) === false)
 			{
-				if (strpos( $_SERVER["REQUEST_URI"], $this->login_uri ) === false)
-				{
-				    if ($wp_query) $wp_query->set_404();
-    				status_header( 404 );
-    				if (get_template_part( 404 ) === false) {
-						wp_die('<h4>404 Page Not Found</h4>','Page Not Found',404);
-					}
-    				exit();
+				$this->do_action('register_risk','accessing invalid login page');
+				if ($wp_query) $wp_query->set_404();
+				status_header( 404 );
+				if (get_template_part( 404 ) === false) {
+					wp_die( $this->plugin->access_denied(status: 404) );
 				}
+				exit();
 			}
 		}
 
@@ -442,18 +503,19 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function wp_login_redirect($location)
 		{
-			if ($this->login_uri)
-			{
-				if ( (is_admin() && !is_user_logged_in()) &&
-				     (!defined( 'WP_CLI' ) && !defined( 'DOING_AJAX' ) && !defined( 'DOING_CRON' )) ) {
-					wp_die('<h4>401 Unauthorized</h4>'.
-							__('You do not have permission to access the requested resource.'),'Unauthorized',401);
-				}
-				if (substr($location,0,4) == 'http' && strpos($location, site_url()) === false) {
-					return $location;
-				}
-				$location = str_replace('wp-login.php', $this->login_uri, $location);
+			// admin page, not logged in
+			if ( (is_admin() && !is_user_logged_in()) &&
+				 (!defined( 'WP_CLI' ) && !defined( 'DOING_AJAX' ) && !defined( 'DOING_CRON' ))
+			) {
+				wp_die( $this->plugin->access_denied(status: 401) );
 			}
+			// outside redirect
+			if (substr($location,0,4) == 'http' && strpos($location, site_url()) === false) {
+				return $location;
+			}
+			// replace login uri
+			$location = str_replace('wp-login.php', $this->login_uri, $location);
+
 			return $location;
 		}
 
@@ -465,9 +527,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function wp_login_form()
 		{
-			$name 	= '_eac_'.wp_create_nonce(date('Ymd'));
-			$nonce 	= wp_create_nonce($name);
-			echo "<input type='hidden' name='{$name}' value='{$nonce}' />\n";
+			// nonce name/action is itself nonce'd
+			$action = '_eac_'.wp_create_nonce(date('Ymd'));
+			wp_nonce_field( $action, $action, false );
 		}
 
 
@@ -482,16 +544,20 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			if (defined('XMLRPC_REQUEST') && XMLRPC_REQUEST) { return $user; }
 			if (defined('REST_REQUEST') && REST_REQUEST) { return $user; }
 
-			if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-				$name 	= '_eac_'.wp_create_nonce(date('Ymd'));
-				$nonce 	= $_REQUEST[$name] ?? null;
-				if ( ! wp_verify_nonce( $nonce, $name ) ) {
-					$this->do_action('report_abuse','prohibited login attempt');
+			if ($_SERVER['REQUEST_METHOD'] == 'POST')
+			{
+				remove_action('wp_verify_nonce_failed', array($this, 'wp_nonce_failure'));
+				$action = '_eac_'.wp_create_nonce(date('Ymd'));
+				$nonce 	= $_REQUEST[$action] ?? null;
+				if ( ! wp_verify_nonce( $nonce, $action ) ) {
 					if (is_wp_error($user)) {
 						$user->add( 'eac_login_nonce',__( 'Invalid form submission.' ) );
 					} else {
 						$user = new \WP_Error( 'eac_login_nonce',__( 'Invalid form submission.' ) );
 					}
+					status_header( 401 );
+					header_remove('Set-Cookie');
+					$this->do_action('register_threat','prohibited login attempt',0,401);
 				}
 			}
 			return $user;
@@ -586,15 +652,18 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function validate_authentication_attempts( $user, ...$args )
 		{
-			if (empty($user) || empty($user->ID)) return $user;
+			if ( !($user instanceof \WP_User) || empty($user->ID) ) return $user;
 
-			$maxAttempts = $this->mergePolicies('secPassLock',0);
-			if ($maxAttempts < 1) return $user;
+			// we have a valid user but may not yet be authenticated
+
+			if ( !($maxAttempts = $this->mergePolicies('secPassLock',0)) ) return $user;
 
 			$curAttempts = $this->get_transient('login_attempt_'.$user->ID, 0) + 1;
 
+			// too many attempts
 			if ($curAttempts > $maxAttempts)
 			{
+				$this->do_action('register_threat','invalid login attempt');
 				return new \WP_Error( 'account_lockout',__( 'This account has been temporarily locked.' ) );
 			}
 
@@ -604,6 +673,354 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			}
 
 			return $user;
+		}
+
+
+		/**
+		 * disable code editor
+		 *
+		 * @return void
+		 */
+		public function disable_code_edit()
+		{
+			if (!defined('DISALLOW_FILE_EDIT'))
+			{
+				define( 'DISALLOW_FILE_EDIT', true );
+			}
+			else if (is_admin())
+			{
+			//	\add_action( 'all_admin_notices', array($this,'disable_code_edit_error') );
+			}
+		}
+
+
+		/**
+		 * DISALLOW_FILE_EDIT was already set
+		 *
+		 * @return void
+		 */
+		public function disable_code_edit_error()
+		{
+			echo '<div class="notice notice-error"><h4>' .
+					__( "Error setting Code Editor option, Constant 'DISALLOW_FILE_EDIT' is already defined as ".(DISALLOW_FILE_EDIT ? 'true' : 'false')) .
+				 '</h4>'.( (DISALLOW_FILE_EDIT) ? '' : '<p>You can set DISALLOW_FILE_EDIT in wp-config.php with : <code>define(\'DISALLOW_FILE_EDIT\', true);</code></p>' ) .'</div>';
+		}
+
+
+		/**
+		 * disable file mods
+		 *
+		 * @return void
+		 */
+		public function disable_file_mods()
+		{
+			if (!defined('DISALLOW_FILE_MODS'))
+			{
+				define( 'DISALLOW_FILE_MODS', true );
+			}
+			else if (is_admin())
+			{
+			//	\add_action( 'all_admin_notices', array($this,'disable_file_mods_error') );
+			}
+		}
+
+
+		/**
+		 * DISALLOW_FILE_MODS was already set
+		 *
+		 * @return void
+		 */
+		public function disable_file_mods_error()
+		{
+			echo '<div class="notice notice-error"><h4>' .
+					__( "Error setting File Changes option, Constant 'DISALLOW_FILE_MODS' is already defined as ".(DISALLOW_FILE_MODS ? 'true' : 'false') ) .
+				 '</h4>'.( (DISALLOW_FILE_MODS) ? '' : '<p>You can set DISALLOW_FILE_MODS in wp-config.php with : <code>define(\'DISALLOW_FILE_MODS\', true);</code></p>' ) .'</div>';
+		}
+
+
+		/**
+		 * disable REST API
+		 *
+		 * @return void
+		 */
+		public function disable_rest()
+		{
+			if ($this->isPolicyEnabled('secUnAuthRest','no-rest')) {
+				add_filter( 'rest_jsonp_enabled', 		'__return_false' );
+				add_filter( 'rest_endpoints', 			array($this, "disable_rest_all"), 999 );
+			}
+
+			if ($this->isPolicyEnabled('secUnAuthRest','no-rest-index')) {
+				add_filter( 'rest_index', 				array($this, 'disable_rest_list'), 999 );
+				add_filter( 'rest_namespace_index', 	array($this, 'disable_rest_list'), 999 );
+				add_filter( 'rest_route_data', 			'__return_empty_array', 999);
+			}
+
+			if ($this->isPolicyEnabled('secUnAuthRest','no-rest-core')) {
+				add_filter('rest_endpoints',			array($this, 'disable_rest_core'), 999);
+			}
+
+			if ($this->isPolicyEnabled('secUnAuthRest','no-rest-unauth')) {
+	  			add_filter( 'rest_authentication_errors', array($this, 'invalid_rest_auth'), 999);
+				add_filter( 'rest_endpoints',			array($this, 'disable_rest_auth'));
+			//	if (! is_user_logged_in()) {
+			//		add_filter( 'rest_pre_serve_request', array($this, "disable_rest_auth") );
+			//	}
+			}
+
+			add_action( 'after_setup_theme',			function() {
+				remove_action( 'wp_head', 				'rest_output_link_wp_head',10,0);
+				remove_action( 'template_redirect', 	'rest_output_link_header',11,0);
+			});
+
+			if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
+				add_action('wp_headers', 				array($this, 'disable_invalid_json'));
+			}
+		}
+
+
+		/**
+		 * disable REST API index/list
+		 *
+		 * @return void
+		 */
+		public function disable_rest_list($response)
+		{
+			if (! is_user_logged_in())
+			{
+				$this->do_action('register_abuse','prohibited REST API request');
+				$data = $response->get_data();
+				$data['namespaces'] = [];
+				$data['routes'] = [];
+				$response->set_data( $data );
+			}
+			return $response;
+		}
+
+
+		/**
+		 * disable All REST API
+		 *
+		 * @param WP_Error
+		 * @return WP_Error
+		 */
+		public function disable_rest_all($endpoints)
+		{
+			if (! current_user_can('edit_pages') ) // not editor or better
+			{
+				array_walk($endpoints, function(&$endpoint,$route)
+					{
+						foreach ($endpoint as $key => &$ep) {
+							if (is_array($ep) && is_int($key)) {
+								$ep['permission_callback'] 	= [$this,'invalid_rest'];
+							}
+						}
+					}
+				);
+			}
+			return $endpoints;
+		}
+
+
+		/**
+		 * disable WP Core REST API
+		 *
+		 * @return void
+		 */
+		public function disable_rest_core($endpoints)
+		{
+			if (! current_user_can('edit_posts') ) // not contributor or better
+			{
+				array_walk($endpoints, function(&$endpoint,$route)
+					{
+						if (str_starts_with($route, '/wp/v')) {
+							foreach ($endpoint as $key => &$ep) {
+								if (is_array($ep) && is_int($key)) {
+									$ep['permission_callback'] 	= [$this,'invalid_rest'];
+								}
+							}
+						}
+					}
+				);
+			}
+			return $endpoints;
+		}
+
+
+		/**
+		 * invalid rest call
+		 *
+		 * @return void|array - empty array of xmlrpc methods
+		 */
+		public function invalid_rest($args)
+		{
+			static $once = true;
+			if ($once) {
+				$once = false;
+				$this->do_action('register_abuse',"prohibited REST method",0,404);
+				return $this->plugin->access_denied(status: 404);
+			}
+			return false;
+		}
+
+
+		/**
+		 * disable un-authenticated REST API
+		 *
+		 * @param WP_Error
+		 * @return WP_Error
+		 */
+		public function disable_rest_auth($endpoints)
+		{
+			if (! is_user_logged_in())
+			{
+				array_walk($endpoints, function(&$endpoint,$route)
+					{
+						foreach ($endpoint as $key => &$ep) {
+							if (is_array($ep) && is_int($key)) {
+								if (!isset($ep['permission_callback']) || $ep['permission_callback'] == '__return_true') {
+									$ep['permission_callback'] 	= [$this,'unauthorized_rest'];
+								}
+							}
+						}
+					}
+				);
+			}
+			return $endpoints;
+		}
+
+
+		/**
+		 * disable un-authenticated REST API
+		 *
+		 * @param bool
+		 * @return WP_Error
+		 */
+		public function invalid_rest_auth($result)
+		{
+			if ( $result === true || is_wp_error( $result ) ) {
+				return $result;
+			}
+			if ( ! is_user_logged_in() ) {
+				return $this->unauthorized_rest();
+			}
+			return $result;
+		}
+
+
+		/**
+		 * unauthorized rest call
+		 *
+		 * @return void|array - empty array of xmlrpc methods
+		 */
+		public function unauthorized_rest($args)
+		{
+			static $once = true;
+			if ($once) {
+				$once = false;
+				$this->do_action('register_abuse','unauthoriized REST API request',0,401);
+				return $this->plugin->access_denied(status: 401);
+			}
+			return false;
+		}
+
+
+		/**
+		 * disable invalid json request
+		 *
+		 */
+		public function disable_invalid_json()
+		{
+			if (wp_is_json_request())
+			{
+				if (defined('REST_REQUEST') && REST_REQUEST) return;
+				if ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') return;
+
+				$this->do_action('register_threat','prohibited JSON request',0,400);
+			}
+		}
+
+
+		/**
+		 * disable xml-rpc
+		 *
+		 * @return void|array - empty array of xmlrpc methods
+		 */
+		public function disable_xml($methods)
+		{
+			$this->do_action('register_abuse',"prohibited XML method");
+			return [];
+		/*
+			array_walk($methods, function(&$value,$method)
+				{
+					if (stripos($method,'ping') === false) {
+						$value = [$this,'invalid_xml'];
+					}
+				}
+			);
+			return $methods;
+		*/
+		}
+
+
+		/**
+		 * disable xml-rpc pings
+		 *
+		 * @return void|array - empty array of xmlrpc methods
+		 */
+		public function disable_pings($methods)
+		{
+			array_walk($methods, function(&$value,$method)
+				{
+					if (stripos($method,'ping') !== false) {
+						$value = [$this,'invalid_xml'];
+					}
+				}
+			);
+			return $methods;
+		}
+
+
+		/**
+		 * invalid xml-rpc call
+		 *
+		 * @return void|array - empty array of xmlrpc methods
+		 */
+		public function invalid_xml($args)
+		{
+			while( ob_get_level() ) {ob_end_clean();}
+			$this->do_action('register_abuse',"prohibited XML method",0,404);
+		//	http_response_code( 400 );
+		//	return new \IXR_Error( 400, 'prohibited XML method' );
+			wp_die( $this->plugin->access_denied('prohibited XML method',404) );
+		}
+
+
+		/**
+		 * disable invalid xml request
+		 *
+		 */
+		public function disable_invalid_xml()
+		{
+			if (wp_is_xml_request())
+			{
+				if (defined('XMLRPC_REQUEST') && XMLRPC_REQUEST) return;
+				if ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') return;
+
+				$this->do_action('register_threat','prohibited XML request',0,400);
+			}
+		}
+
+
+		/**
+		 * disable rss feeds
+		 *
+		 * @return void
+		 */
+		public function disable_rss_response()
+		{
+			$this->do_action('register_abuse','prohibited RSS access',0,404);
+			wp_die( $this->plugin->access_denied('prohibited RSS access',404) );
 		}
 
 
@@ -681,202 +1098,29 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
-		 * disable rss feeds
+		 * require a specific http header
 		 *
 		 * @return void
 		 */
-		public function disable_rss_response()
+		public function validate_http_header(bool $required)
 		{
-			wp_die( $this->plugin->request_forbidden('RSS access denied') );
-		}
+			$option = ($required) ? 'secRequireHttp' : 'secBlockHttp';
+			if ( ! $headers = $this->mergePolicies($option) ) return;
 
-
-		/**
-		 * disable xml-rpc
-		 *
-		 * @return void|array - empty array of xmlrpc methods
-		 */
-		public function disable_xml($methods)
-		{
-		//	$this->logDebug($methods,__METHOD__);
-			// remove all but pingbacks
-			return array_filter($methods, function($method)
-				{
-					return stripos($method,'ping') !== false;
-				},
-				ARRAY_FILTER_USE_KEY
-			);
-		}
-
-
-		/**
-		 * disable xml-rpc pings
-		 *
-		 * @return void|array - empty array of xmlrpc methods
-		 */
-		public function disable_pings($methods)
-		{
-		//	$this->logDebug($methods,__METHOD__);
-			// remove all pingbacks
-			return array_filter($methods, function($method)
-				{
-					return stripos($method,'ping') === false;
-				},
-				ARRAY_FILTER_USE_KEY
-			);
-		}
-
-
-		/**
-		 * disable code editor
-		 *
-		 * @return void
-		 */
-		public function disable_code_edit()
-		{
-			if (!defined('DISALLOW_FILE_EDIT'))
-			{
-				define( 'DISALLOW_FILE_EDIT', true );
-			}
-			else if (is_admin())
-			{
-			//	\add_action( 'all_admin_notices', array($this,'disable_code_edit_error') );
-			}
-		}
-
-
-		/**
-		 * DISALLOW_FILE_EDIT was already set
-		 *
-		 * @return void
-		 */
-		public function disable_code_edit_error()
-		{
-			echo '<div class="notice notice-error"><h4>' .
-					__( "Error setting Code Editor option, Constant 'DISALLOW_FILE_EDIT' is already defined as ".(DISALLOW_FILE_EDIT ? 'true' : 'false')) .
-				 '</h4>'.( (DISALLOW_FILE_EDIT) ? '' : '<p>You can set DISALLOW_FILE_EDIT in wp-config.php with : <code>define(\'DISALLOW_FILE_EDIT\', true);</code></p>' ) .'</div>';
-		}
-
-
-		/**
-		 * disable file mods
-		 *
-		 * @return void
-		 */
-		public function disable_file_mods()
-		{
-			if (!defined('DISALLOW_FILE_MODS'))
-			{
-				define( 'DISALLOW_FILE_MODS', true );
-			}
-			else if (is_admin())
-			{
-			//	\add_action( 'all_admin_notices', array($this,'disable_file_mods_error') );
-			}
-		}
-
-
-		/**
-		 * DISALLOW_FILE_MODS was already set
-		 *
-		 * @return void
-		 */
-		public function disable_file_mods_error()
-		{
-			echo '<div class="notice notice-error"><h4>' .
-					__( "Error setting File Changes option, Constant 'DISALLOW_FILE_MODS' is already defined as ".(DISALLOW_FILE_MODS ? 'true' : 'false') ) .
-				 '</h4>'.( (DISALLOW_FILE_MODS) ? '' : '<p>You can set DISALLOW_FILE_MODS in wp-config.php with : <code>define(\'DISALLOW_FILE_MODS\', true);</code></p>' ) .'</div>';
-		}
-
-
-		/**
-		 * disable REST API index/list
-		 *
-		 * @return void
-		 */
-		public function disable_rest_list($response)
-		{
-			if (! is_user_logged_in())
-			{
-				$this->do_action('report_abuse','prohibited REST API request');
-				$this->logError($_SERVER['REQUEST_URI'],'REST API List denied');
-			//	$this->plugin->error('access_denied','REST API List denied',
-			//		[$this->plugin->getVisitorIP(),$_SERVER['REQUEST_URI']]
-			//	);
-				$data = $response->get_data();
-				$data['namespaces'] = [];
-				$data['routes'] = [];
-				$response->set_data( $data );
-			}
-			return $response;
-		}
-
-
-		/**
-		 * disable WP Core REST API
-		 *
-		 * @return void
-		 */
-		public function disable_rest_core()
-		{
-			if (! is_user_logged_in())
-			{
-				add_filter('rest_endpoints', function( $endpoints )
-					{
-						foreach( $endpoints as $route => $endpoint ) {
-							if( 0 === stripos( $route, '/wp/' ) || '/' === $route ) {
-								unset( $endpoints[ $route ] );
-							}
-						}
-						return $endpoints;
-					}
-				);
-			}
-		}
-
-
-		/**
-		 * disable un-authenticated REST API
-		 *
-		 * @param WP_Error
-		 * @return WP_Error
-		 */
-		public function disable_rest($authError)
-		{
-			if ($this->isPolicyEnabled('secUnAuthRest','no-rest'))
-			{
-				$this->do_action('report_abuse','prohibited REST API request');
-				return $this->plugin->request_forbidden('REST API access denied');
+			$found = array_filter($headers,function($header) {
+				list($name,$value) = array_map('trim', explode(":", $header.':', 2));
+				if (! $server = $this->varServer($name)) return false;
+				return ($value)
+					? preg_match("`".rtrim($value,':')."`", $server, $m)
+					: true;
+			});
+			if ($required) {
+				if ($found) return;
+			} else {
+				if (!$found) return;
 			}
 
-			if (!empty($authError)) return $authError;
-
-			if ($this->isPolicyEnabled('secUnAuthRest','no-rest-unauth'))
-			{
-				if (!is_user_logged_in())
-				{
-					$this->do_action('report_abuse','prohibited REST API request');
-					return $this->plugin->request_forbidden('REST API access denied',401);
-				}
-			}
-			return $authError;
-		}
-
-
-		/**
-		 * disable invalid json request
-		 *
-		 */
-		public function disable_invalid_json()
-		{
-			if (wp_is_json_request())
-			{
-				if (defined('REST_REQUEST')) return;
-				if ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') return;
-
-				$this->do_action('report_abuse','prohibited JSON request');
-				wp_die( $this->plugin->request_forbidden('Invalid JSON Request',400) );
-			}
+			$this->do_action('register_threat','invalid http request',100,400);
 		}
 
 
@@ -887,11 +1131,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_uris()
 		{
-			$found = $this->match_disabled_uris('secDisableURIs');
+			if (! $this->match_disabled_uris('secDisableURIs')) return;
 
-			if (!$found) return;
-
-			wp_die( $this->plugin->request_forbidden('URI access denied') );
+			wp_die( $this->plugin->access_denied('URI access denied') );
 		}
 
 
@@ -921,46 +1163,17 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
-		 * require a specific http header
-		 *
-		 * @return void
-		 */
-		public function validate_http_header(bool $required)
-		{
-			$option = ($required) ? 'secRequireHttp' : 'secBlockHttp';
-			if ( ! $headers = $this->mergePolicies($option) ) return;
-
-			$found = array_filter($headers,function($header) {
-				list($name,$value) = array_map('trim', explode(":", $header.':', 2));
-				if (! $server = $this->varServer($name)) return false;
-				return ($value)
-					? preg_match("`".rtrim($value,':')."`", $server, $m)
-					: true;
-			});
-			if ($required) {
-				if ($found) return;
-			} else {
-				if (!$found) return;
-			}
-
-			$this->do_action('report_abuse','invalid http request');
-			wp_die( $this->plugin->request_forbidden('Invalid http request',400) );
-		}
-
-
-		/**
 		 * block ip/host address
 		 *
 		 * @return void
 		 */
 		public function block_ip_address()
 		{
-			if (is_user_logged_in()) return;
 			$request 	= $this->plugin->getVisitorIP();
 			$ipList 	= $this->mergePolicies('secBlockIP');
 			if (empty($ipList)) return;
 
-			if (!in_array($request, $ipList))
+			if (!$this->plugin->isIpInList($request,$ipList))
 			{
 				if ($request = $_SERVER['HTTP_REFERER'] ?? null)
 				{
@@ -972,7 +1185,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				else return;
 			}
 
-			wp_die( $this->plugin->request_forbidden('access denied by IP address') );
+			wp_die( $this->plugin->access_denied('access denied by IP address') );
 		}
 
 

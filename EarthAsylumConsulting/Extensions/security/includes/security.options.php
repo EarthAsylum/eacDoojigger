@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1003.1
+ * @version 	24.1029.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -22,15 +22,16 @@ $this->registerExtensionOptions( $this->className,
 		'secLoginUri'		=> array(
 				'type'		=>	($this->htaccess) ? 'text' : 'disabled',
 				'label'		=> 	"Change Login URI ",
-				'before'	=>	'<code>'.site_url().'/</code>',
+				'before'	=>	site_url('/'),
 				'default'	=> 	$current_login_uri,
 				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secPassPolicy')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
 				'info'		=>	'Security by obscurity: Change the name of the well-known \'wp-login\'. '.
-								'Users must login at this url before accessing the WordPress dashboard.'.
-								(($this->htaccess) ? '<br/><small>* Updates the Apache .htaccess file using rewrite rules and adds filters/actions for login.</small>' : ''),
-				'attributes'=>	['pattern'=>'[a-zA-Z0-9_\.\-]*','placeholder'=>'wp-login.php']
+								'Users must login at this url before accessing the WordPress dashboard.',
+				//				(($this->htaccess) ? '<br/><small>* Updates the Apache .htaccess file using rewrite rules and adds filters/actions for login.</small>' : ''),
+				'attributes'=>	['pattern'=>'[a-zA-Z0-9_\.\-]*','placeholder'=>'wp-login.php'],
+				'width'		=>	'25',
 		),
 		'secLoginNonce' 	=> array(
 				'type'		=>	'switch',
@@ -40,7 +41,7 @@ $this->registerExtensionOptions( $this->className,
 				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secLoginNonce')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
-				'info'		=>	"Add and verify a hidden 'number-used-once' to the login/reset forms.",
+				'info'		=>	"Add and verify a hidden 'number-used-once' security token to the login/reset forms to block malicious attacks.",
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secLoginNonce')) ? 'disabled="disabled"' : '',
 		),
 		'secPassPolicy' 	=> array(
@@ -144,13 +145,13 @@ $this->registerExtensionOptions( $this->className,
 		'secUnAuthRest' 	=> array(
 				'type'		=>	'switch',
 				'label'		=>	"Disable <abbr title='REpresentational State Transfer'>REST</abbr> Requests ",
-				'options'	=>	array(
-					['API Index List'		=>'no-rest-index'],
-					['WordPress Core APIs'	=>'no-rest-core'],
-					['Un-Authenticated APIs'=>'no-rest-unauth'],
-					['All REST APIs'		=>'no-rest'],
-					["Remote Non-API <abbr title='Javascript Object Notation'>JSON</abbr>" =>'no-json']
-				),
+				'options'	=>	[
+					"<abbr title='Do not reveal REST namespaces and routes.'>API Index List</abbr>" =>'no-rest-index',
+					"<abbr title='Block /wp/ routes. Only Administrators, Editors, and Contributors may access.'>WordPress Core APIs</abbr>" =>'no-rest-core',
+					"<abbr title='Block all un-authenticated routes. Only Logged-In Users may access.'>Un-Authenticated APIs</abbr>" =>'no-rest-unauth',
+					"<abbr title='Block all routes. Only Administrators and Editors may access.'>All REST APIs</abbr>" =>'no-rest',
+					"<abbr title='Typically invalid unless custom code has been added.'>Non-REST JSON Requests</abbr>" =>'no-json',
+				],
 				'default'	=>	$this->is_network_option('secUnAuthRest'),
 				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
@@ -166,7 +167,8 @@ $this->registerExtensionOptions( $this->className,
 				'label'		=>	"Disable <abbr title='eXtensible Markup Language - Remote Procedure Call'>XML-RPC</abbr>",
 				'options'	=>	[
 					'XML-RPC Disabled'		=> 'no-xml',
-					"<abbr title='Disable XML Pingbacks. For (newer) REST Pingbacks, go to Settings&rarr;Discussions.'>Pingbacks</abbr> Disabled"	=> 'no-ping'
+				//	"<abbr title='Disable XML Pingbacks. For (newer) REST Pingbacks, go to Settings&rarr;Discussions.'>Pingbacks</abbr> Disabled"	=> 'no-ping',
+					"<abbr title='Typically invalid unless custom code has been added.'>Non-RPC XML Requests</abbr>" =>'no-rpc',
 				],
 				'default'	=>	$this->is_network_option('secDisableXML'),
 				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')
@@ -201,17 +203,6 @@ $this->registerExtensionOptions( $this->className,
 				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableEmbed')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
 		),
-		'secDisableURIs' 	=> array(
-				'type'		=>	'textarea',
-				'label'		=>	"Disable Site URIs ",
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableURIs')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
-				'info'		=>	"Certain site URIs should be unavailable or may present a security concern. ".
-								"This option allows you to block access to those URIs. ".
-								"Enter URIs, 1 per line, starting with '/'. For example '/category/name/' or just '/category'".
-								(($this->htaccess) ? '<br/><small>* These URIs will be blocked in the Apache .htaccess file using rewrite rules OR through internal code to ensure functionality.</small>' : '')
-		),
 		'secRequireHttp' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Require HTTP Headers",
@@ -235,6 +226,18 @@ $this->registerExtensionOptions( $this->className,
 								"You may enter the header name or header:value to block a specific value.",
 				'advanced'	=> 	true,
 		),
+		'secDisableURIs' 	=> array(
+				'type'		=>	'textarea',
+				'label'		=>	"Disable Site URIs ",
+				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableURIs')
+									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
+									: ''),
+				'info'		=>	"Certain site URIs should be unavailable or may present a security concern. ".
+								"This option allows you to block access to those URIs. ".
+								"Enter URIs, 1 per line, starting with '/'. For example '/category/name/' or just '/category'",
+				'help'		=>	"[info]".
+								(($this->htaccess) ? '<br/>* These URIs will be blocked in the Apache .htaccess file using rewrite rules OR through internal code to ensure functionality.' : '')
+		),
 		'secBlockIP' 		=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Block IP Addresses",
@@ -242,8 +245,9 @@ $this->registerExtensionOptions( $this->className,
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
 				'info'		=>	"Block specific IP addresses or host/referrer names. ".
-								"Enter addresses 1 per line. For example: <br>192.168.100.1 <br>2001:0db8:85a3:08d3:1319:8a2e:0370:7334 <br>maliciousdomain.com".
-								(($this->htaccess) ? '<br/><small>* These addresses will be blocked in the Apache .htaccess file using deny from rules OR through internal code to ensure functionality.</small>' : ''),
+								"Enter addresses or subnets 1 per line. For example: <br>192.168.100.1 or 192.168.100.0/16 <br>2001:0db8:85a3:08d3:1319:8a2e:0370:7334 <br>maliciousdomain.com",
+				'help'		=>	"[info]".
+								(($this->htaccess) ? '<br/>* These addresses will be blocked in the Apache .htaccess file using RequireAll rules AND through internal code to ensure functionality.' : ''),
 				'advanced'	=> 	true,
 		),
 		'secCookies' 		=> array(
@@ -274,32 +278,32 @@ $this->registerExtensionOptions( $this->className,
 		'secHeartbeat'		=> array(
 				'type'		=>	'range',
 				'label'		=>	"WP Heartbeat Time ",
-				'default'	=>	$this->is_network_option('secHeartbeat','0'),
+				'default'	=>	$this->is_network_option('secHeartbeat') ?: 0,
 				'info'		=>	"Although not a security concern, WordPress pings the server every 15 to 60 seconds. This option can be used to slow it down and lessen resource usage.",
 				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secHeartbeat')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
 				'after'		=>	'<datalist id="secHeartbeat-ticks">'.
-									'<option value="0" label="n/a"></option>'.
-									'<option value="15"></option>'.
-									'<option value="30" label="30"></option>'.
-									'<option value="45"></option>'.
-									'<option value="60" label="60"></option>'.
-									'<option value="75"></option>'.
-									'<option value="90" label="90"></option>'.
-									'<option value="105"></option>'.
+									'<option value="0"   label="n/a"></option>'.
+									'<option value="15"  label=""></option>'.
+									'<option value="30"  label="30"></option>'.
+									'<option value="45"  label=""></option>'.
+									'<option value="60"  label="60"></option>'.
+									'<option value="75"  label=""></option>'.
+									'<option value="90"  label="90"></option>'.
+									'<option value="105" label=""></option>'.
 									'<option value="120" label="120"></option>'.
-									'<option value="135"></option>'.
+									'<option value="135" label=""></option>'.
 									'<option value="150" label="150"></option>'.
-									'<option value="165"></option>'.
+									'<option value="165" label=""></option>'.
 									'<option value="180" label="180"></option>'.
-									'<option value="195"></option>'.
+									'<option value="195" label=""></option>'.
 									'<option value="210" label="210"></option>'.
-									'<option value="225"></option>'.
+									'<option value="225" label=""></option>'.
 									'<option value="240" label="240"></option>'.
-									'<option value="255"></option>'.
+									'<option value="255" label=""></option>'.
 									'<option value="270" label="270"></option>'.
-									'<option value="285"></option>'.
+									'<option value="285" label=""></option>'.
 									'<option value="300" label="300"></option>'.
 								'</datalist>'.PHP_EOL.
 								'Allow heartbeat every <code>'.
@@ -424,8 +428,9 @@ $this->add_filter( 'options_form_post_secBlockIP',		function($value, $fieldName,
 		$ipSet = array();
 		foreach ($ipList as $x => $ip)
 		{
+			list($ip,$subn) = explode('/',str_replace(' (invalid)','',$ip));
 			// valid IP address
-			$ipCheck = \filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4|FILTER_FLAG_IPV6);
+			$ipCheck = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4|FILTER_FLAG_IPV6);
 			if (!$ipCheck) {
 				// valid host name
 				$ipCheck = filter_var($ip, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
@@ -435,9 +440,9 @@ $this->add_filter( 'options_form_post_secBlockIP',		function($value, $fieldName,
 				}
 			}
 			if (!$ipCheck) {
-				if (strpos($ip, '(invalid)') === false) $ipList[$x] = $ip.' (invalid)';
+				$ipList[$x] = $ip.' (invalid)';
 			} else {
-				$ipSet[] = $ip;
+				$ipSet[] = $ipList[$x];
 			}
 		}
 
@@ -445,10 +450,14 @@ $this->add_filter( 'options_form_post_secBlockIP',		function($value, $fieldName,
 
 		if ($this->htaccess)
 		{
-			$lines = array();
-			foreach ($ipSet as $ip)
-			{
-				$lines[] = "deny from {$ip}";
+			$lines = [];
+			if (!empty($ipSet)) {
+				$lines[] = "<RequireAll>";
+				foreach ($ipSet as $ip)
+				{
+					$lines[] = "\tRequire not ip {$ip}";
+				}
+				$lines[] = "</RequireAll>";
 			}
 			$this->plugin->insert_with_markers($this->htaccess, $marker, $lines, '#');
 			$this->security_rules[$fieldName] = (!empty($lines));

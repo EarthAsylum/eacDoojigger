@@ -1,5 +1,48 @@
 == Changelog ==
 
+= Version 3.0 – November 1, 2024 =
+
++   Tested with WordPress 6.7.
++   Dropped support for PHP < 8.1.
++   New Risk Assessment security module using 3rd-party API extensions as well as internal actions and filters to assess and track security risks by IP address.
+    +   Implemented server-side CORS security.
+        +   Apply CORS rules to rest, xml, and admin-ajax.php requests.
+        +   Options to use referer or reverse DNS to get origin.
+        +   Validate local server host IP when passed as origin.
+        +   Origin white-list and excluded URIs.
+    +   New `register_[fraud|threat|abuse|risk]` hooks used to tag risky actions and, possibly, block access.
+        +   Added `register_threat` action to several security checks.
+    +   New AbuseIPDB api extension to block by IP address based on abuse score.
+        +   See : https://www.abuseipdb.com 
+    +   New FraudGuard api extension to block by IP address based on risk level.
+        +   See : https://www.fraudguard.io 
+    +   New IpGeoLocation api extension to block by IP address based on threat score.
+        +   See : https://www.ipgeolocation.io
++   New `access_denied()` method used to block fraudulent requests.
++   Reworked admin options menu(s).
++   Improved extension loader methods.
++   Added user roles to advanced mode arrays and allow array of OR'd options.
+    +   `$this->isAdvancedMode('global','administrator')`
+    +   `$this->isAdvancedMode('global',['administrator','editor'])`
++   Standard methods for option, hook, table names with prefix.
+    +   `addClassNamePrefix()`, `removeClassNamePrefix()`, `getClassNamePrefix()`, `hasClassNamePrefix()`
++   New ipUtil helper to check IP address against list of addresses and/or subnets (cidr).
+    +   New `isIpInList()` method using ipUtil.
++   New `get_output_file()` to create/write a file in appropriate WP path.
+	 +  a. where the WP debug log is stored.
+	 +  b. in the upload folder.
+	 +  Uses wp_filesystem for proper access.
++   Debugging extension uses `get_output_file()` and changes log file name.
++   New hooks trait includes all prefixed action and filter functions.
+    +   New `has_filter_count()`, `has_action_count()`
+    +   New `wp_filter_count()`, `wp_action_count()` (not prefixed).
++   Added `ENABLE_OPTION` constant to extensions to allow override of the enable option used in an admin tab section.
++   Added `TAB_NAME` constant to extensions to allow setting the default tab name.
++   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
++   Suppress shutdown error for not-called parent methods.
++   Check additional headers in `getVisitorIP()`.
++   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).
+
 = Version 2.7.0 – October 7, 2024 =
 
 +   Enhanced security extensions...

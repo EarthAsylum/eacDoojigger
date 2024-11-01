@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		24.1030.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -54,7 +54,7 @@ abstract class abstract_frontend extends abstract_core
 		parent::loadAllExtensions();
 
 		// when loading plugin extensions from disk, save transient for front-end
-		if ( count($this->extensionTransient) >= 1 ) // plugin & default extensions
+		if ( count($this->extensionTransient) > 0 ) // plugin & default extensions
 		{
 			$this->set_transient( self::PLUGIN_EXTENSION_TRANSIENT, $this->extensionTransient, DAY_IN_SECONDS );
 		}

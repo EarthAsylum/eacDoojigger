@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0922.1
+ * @version		24.1031.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -23,6 +23,16 @@ abstract class abstract_core
 	 * @trait methods for logging using Logger helper
 	 */
 	use \EarthAsylumConsulting\Traits\logging;
+
+	/**
+	 * @trait methods for actions & filters
+	 */
+	use \EarthAsylumConsulting\Traits\hooks;
+
+	/**
+	 * @trait methods for advanced mode
+	 */
+	use \EarthAsylumConsulting\Traits\advanced_mode;
 
 	/**
 	 * @trait methods for cookie consent using WP Consent API
@@ -114,26 +124,6 @@ abstract class abstract_core
 
 
 	/**
-	 * @var array Advanced Mode.
-	 * use setAdvancedMode(bool, what, level) to set,
-	 * use isAdvancedMode(what, level) to check
-	 */
-	public $advanced_mode				= array(
-		'global'		=> array(
-			'default'	=> false,
-		),
-		'settings'		=> array(
-			'default'	=> false,
-		),
-	);
-
-	/**
-	 * @var bool Advanced Mode allowed.
-	 */
-	public $advanced_mode_allowed		= false;
-
-
-	/**
 	 * @var string The name of this plugin class (sans namespace) aka $pluginName
 	 * @used-by getClassName()
 	 */
@@ -186,11 +176,6 @@ abstract class abstract_core
 	 * @var bool plugin is network enabled
 	 */
 	protected $is_network_enabled		= null;
-
-	/**
-	 * @var bool are we on the settings page
-	 */
-	protected $is_settings_page			= null;
 
 	/**
 	 * @var object WordPress DB
@@ -257,20 +242,13 @@ abstract class abstract_core
 		$this->setPluginHeaderValues($header);
 		$this->setSiteEnvironment();
 
-		// set 'advanced mode'
-		$this->config_advanced_mode(); // before user loaded - backward compatible with define(plugin_ADVANCED_MODE)
-		add_action( 'set_current_user', 		array ($this, 'config_advanced_mode' ) );
-
-
-		$this->add_action( 'startup',			array($this, '_plugin_startup') );
-
 		/**
-		 * action eacDoojigger_ready, fired in plugin_loader for eacDoojigger
+		 * action {pluginName}_startuo, fired in plugin_loader after loading, before extensions
 		 * @return	void
 		 */
-		\add_action( 'eacDoojigger_ready',		array($this,'eacDoojigger_ready') );
+		$this->add_action( 'startup',			array($this, '_plugin_startup') );
 
-		\add_action( 'shutdown',				array($this,'_plugin_shutdown') );
+		\add_action( 'shutdown',				array($this, '_plugin_shutdown') );
 	}
 
 
@@ -295,6 +273,11 @@ abstract class abstract_core
 	 */
 	public function _plugin_startup()
 	{
+
+		// initialize 'advanced mode' settings
+		$this->advanced_mode_init();
+
+		// cookie consent interface with wp_consent_api
 		$this->cookie_consent_init( $this->pluginHeader( 'PluginSlug' ), $this->pluginName );
 	}
 
@@ -316,13 +299,13 @@ abstract class abstract_core
 
 		foreach ($this->requiredMethods as $method => $wasCalled)
 		{
-			if (! $wasCalled)
-			{
-				trigger_error(
-					sprintf(__('The %1$s() method in %2$s must call the parent method - parent::%1$s()',$this->PLUGIN_TEXTDOMAIN),
-						$method,$this->className),
-					E_USER_ERROR);
-			}
+		//	if (! $wasCalled)
+		//	{
+		//		trigger_error(
+		//			sprintf(__('The %1$s() method in %2$s must call the parent method - parent::%1$s()',$this->PLUGIN_TEXTDOMAIN),
+		//				$method,$this->className),
+		//			E_USER_ERROR);
+		//	}
 		}
 	}
 
@@ -371,7 +354,7 @@ abstract class abstract_core
 	 *	{plugin directory}/Extensions		- global extensions
 	 *	{plugin directory}/{site-name}		- site extensions
 	 * sub-directories...
-	 *	'./frontend'						- only load for front-end
+	 *	'./frontend' or '/public'			- only load for front-end
 	 *	'./backend' or ./admin;				- only load for back-end (admin)
 	 *	'./network'							- only load for network back-end (admin)
 	 *	any other sub-directory				- load *.extension.php files
@@ -393,7 +376,7 @@ abstract class abstract_core
 			$pluginDir = $this->pluginHeader('PluginDir');
 			$directories = array_filter($directories, function($dir) use($pluginDir)
 				{
-					return ( strpos( $dir, $pluginDir ) == 0 );
+					return ( str_starts_with( $dir, $pluginDir ) );
 				}
 			);
 			if ($this->loadExtensions( $slug, $directories ) == 0)
@@ -435,7 +418,7 @@ abstract class abstract_core
 			$themeDir = \get_stylesheet_directory() . "/{$this->className}/Extensions";
 			if (is_dir($themeDir))
 			{
-				$dirNames[\sanitize_key(\get_stylesheet())] = [$themeDir];
+				$dirNames[$this->toKeyString(\get_stylesheet())] = [$themeDir];
 			}
 
 			/**
@@ -475,21 +458,6 @@ abstract class abstract_core
 
 		// initialize extensions
 		$this->callAllExtensions('initialize');
-
-		/*
-		\add_action('init', function() {
-			$version = $this->getVersion();
-			\_doing_it_wrong( 'thisFunction', 'thisFunction is wrong', $version );
-			\_deprecated_function( __FUNCTION__, $version, 'plugin_ready()');
-			\_deprecated_class( get_class($this), $version, __CLASS__ );
-			\_deprecated_constructor( get_class($this), $version, __CLASS__ );
-			\_deprecated_argument( __FUNCTION__, $version, 'test _deprecated_argument');
-			\_deprecated_file( __FILE__, $version, __FILE__, 'test _deprecated_file' );
-			\_deprecated_hook( current_action(), $version, 'new_'.current_action(), 'test _deprecated_hook' );
-			trigger_error('a php triggered warning', E_USER_WARNING);
-		//	throw new \ErrorException('a php error exception', 0, E_USER_ERROR);
-		});
-		*/
 	}
 
 
@@ -504,11 +472,6 @@ abstract class abstract_core
 	public function addActionsAndFilters(): void
 	{
 		$this->requiredMethods['addActionsAndFilters'] = true;
-
-	//	if ( is_multisite() )
-	//	{
-	//		\add_action( 'switch_blog',			array($this,'switching_blog'), 10, 3);
-	//	}
 
 		/**
 		 * action {classname}_ready, fired in plugin_loader
@@ -526,9 +489,7 @@ abstract class abstract_core
 		 * action {classname}_hourly_event to run hourly
 		 * @return	void
 		 */
-		/*
-		$this->add_action( 'hourly_event', 		array($this, 'plugin_hourly_event') );
-		*/
+		//$this->add_action( 'hourly_event', 	array($this, 'plugin_hourly_event') );
 
 		/**
 		 * action {classname}_flush_caches tell others to clear caches/transient data
@@ -536,15 +497,6 @@ abstract class abstract_core
 		 * @return	void
 		 */
 		$this->add_action( 'flush_caches',		array($this,'flush_caches') );
-
-		/**
-		 * filter {classname}_is_advanced_mode check for advanced mode
-		 * @param bool 		$bool 	ignored
-		 * @param string 	$what 	what is in advanced mode
-		 * @param string 	$level	what level is in advanced mode (default, basic, standard, pro)
-		 * @return	bool
-		 */
-		$this->add_filter('is_advanced_mode', 	array($this,'is_advanced_mode'),10,3);
 
 		// load extension actions & filters
 		$this->callAllExtensions('addActionsAndFilters');
@@ -558,7 +510,7 @@ abstract class abstract_core
 		$this->reservedOptions = $this->apply_filters('reserved_options', $this->reservedOptions);
 
 		// admin action link(s)
-		add_action( 'admin_bar_init', 			array( $this, 'do_admin_action_links' ), 20 );
+		add_action( 'admin_bar_init', 			array($this, 'do_admin_action_links'), 20 );
 	}
 
 
@@ -588,17 +540,6 @@ abstract class abstract_core
 	public function plugin_ready(): void
 	{
 		$this->logInfo(__FUNCTION__,$this->className);
-	}
-
-
-	/**
-	 * eacDoojigger is fully loaded and ready.
-	 * Called when eacDoojigger_ready is ready (all extensions/filters/shortcodes loaded)
-	 *
-	 * @return	void
-	 */
-	public function eacDoojigger_ready(): void
-	{
 	}
 
 
@@ -742,153 +683,6 @@ abstract class abstract_core
 
 	/*
 	 *
-	 * filters & actions using prefixed name
-	 *
-	 */
-
-
-	/**
-	 * has_filter with prefixed name
-	 *
-	 * @param string $hookName the name of the filter
-	 * @param mixed ...$args arguments passed to filter
-	 * @return	mixed
-	 */
-	public function has_filter(string $hookName,...$args)
-	{
-		return \has_filter( $this->prefixHookName($hookName), ...$args );
-	}
-
-
-	/**
-	 * add_filter with prefixed name
-	 *
-	 * @param string $hookName the name of the filter
-	 * @param mixed ...$args arguments passed to filter
-	 * @return	mixed
-	 */
-	public function add_filter(string $hookName,...$args)
-	{
-		return \add_filter( $this->prefixHookName($hookName), ...$args );
-	}
-
-
-	/**
-	 * remove_filter with prefixed name
-	 *
-	 * @param string $hookName the name of the filter
-	 * @param mixed ...$args arguments passed to filter
-	 * @return	mixed
-	 */
-	public function remove_filter(string $hookName,...$args)
-	{
-		return \remove_filter( $this->prefixHookName($hookName), ...$args );
-	}
-
-
-	/**
-	 * apply_filters with prefixed name
-	 *
-	 * @param string $hookName the name of the filter
-	 * @param mixed ...$args arguments passed to filter
-	 * @return	mixed
-	 */
-	public function apply_filters(string $hookName,...$args)
-	{
-		return \apply_filters( $this->prefixHookName($hookName), ...$args );
-	}
-
-
-	/**
-	 * did_filter with prefixed name (WP 6.1)
-	 *
-	 * @param string $hookName the name of the filter
-	 * @return	mixed
-	 */
-	public function did_filter(string $hookName)
-	{
-		return \did_filter( $this->prefixHookName($hookName) );
-	}
-
-
-	/**
-	 * has_action with prefixed name
-	 *
-	 * @param string $hookName the name of the action
-	 * @param mixed ...$args arguments passed to action
-	 * @return	mixed
-	 */
-	public function has_action(string $hookName,...$args)
-	{
-		return \has_action( $this->prefixHookName($hookName), ...$args );
-	}
-
-
-	/**
-	 * add_action with prefixed name
-	 *
-	 * @param string $hookName the name of the action
-	 * @param mixed ...$args arguments passed to action
-	 * @return	mixed
-	 */
-	public function add_action(string $hookName,...$args)
-	{
-		return \add_action( $this->prefixHookName($hookName), ...$args );
-	}
-
-
-	/**
-	 * remove_action with prefixed name
-	 *
-	 * @param string $hookName the name of the action
-	 * @param mixed ...$args arguments passed to action
-	 * @return	mixed
-	 */
-	public function remove_action(string $hookName,...$args)
-	{
-		return \remove_action( $this->prefixHookName($hookName), ...$args );
-	}
-
-
-	/**
-	 * do_action with prefixed name
-	 *
-	 * @param string $hookName the name of the action
-	 * @param mixed ...$args arguments passed to action
-	 * @return	mixed
-	 */
-	public function do_action(string $hookName,...$args)
-	{
-		return \do_action( $this->prefixHookName($hookName), ...$args );
-	}
-
-
-	/**
-	 * did_action with prefixed name
-	 *
-	 * @param string $hookName the name of the action
-	 * @return	mixed
-	 */
-	public function did_action(string $hookName)
-	{
-		return \did_action( $this->prefixHookName($hookName) );
-	}
-
-
-	/**
-	 * Get the prefixed version of the hook name
-	 *
-	 * @param	string	$hookName filter/action name
-	 * @return	string	hookname with prefix
-	 */
-	public function prefixHookName(string $hookName): string
-	{
-		return $this->prefixOptionName($hookName);
-	}
-
-
-	/*
-	 *
 	 * utility/helper functions
 	 *
 	 */
@@ -949,121 +743,6 @@ abstract class abstract_core
 
 
 	/**
-	 * config advanced mode - aids in complexity and/or licensing limits.
-	 * set 'advanced mode' based on defined constant or user meta
-	 *
-	 * @return void
-	 */
-	public function config_advanced_mode(): void
-	{
-		// user preference
-		$option = $this->prefixOptionName('advanced_mode');
-		if (($user = \get_current_user_id()) && ($option = \get_user_meta($user,$option,true))) {
-			$this->setAdvancedMode($option,'global');
-			$this->setAdvancedMode($option,'settings');
-		}
-		// wp-config constant allows and overrides advanced mode
-		$option = strtoupper($this->pluginName).'_ADVANCED_MODE';
-		if ( defined( $option ) ) {
-			$option = constant($option);
-			$this->allowAdvancedMode(true);
-			$this->setAdvancedMode($option,'global');
-			$this->setAdvancedMode($option,'settings');
-		}
-	}
-
-
-	/**
-	 * allow advanced mode - aids in complexity and/or licensing limits.
-	 * @example $this->allowAdvancedMode(false);
-	 *
-	 * @param bool $allow - allow or not
-	 * @return bool - allowed or not
-	 */
-	public function allowAdvancedMode(bool $allow = null): bool
-	{
-		if (is_bool($allow))
-		{
-			$this->advanced_mode_allowed = $allow;
-		}
-		/**
-		 * filter {classname}_allow_advanced_mode to set advanced mode
-		 * @param string $allow - allow or not
-		 * @return	bool
-		 */
-		$this->advanced_mode_allowed = $this->apply_filters('allow_advanced_mode',$this->advanced_mode_allowed);
-		return $this->advanced_mode_allowed;
-	}
-
-
-	/**
-	 * set advanced mode - aids in complexity and/or licensing limits.
-	 * @example: $this->setAdvancedMode(true,'settings');
-	 *
-	 * @param bool $is - is or is not
-	 * @param string $what - what is in advanced mode (global, settings, ...)
-	 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
-	 * @return	void
-	 */
-	public function setAdvancedMode( $is = true, string $what = null,string $level = null): void
-	{
-		$what	= strtolower($what ?? 'global');
-		$level	= strtolower($level ?? 'default');
-		$is		= $this->isTrue($is);
-
-		$this->advanced_mode[$what][$level] = $is;
-
-		if (! isset( $this->advanced_mode[$what]['default'] ))
-		{
-			$this->advanced_mode[$what]['default'] = ! $this->advanced_mode[$what][$level];
-		}
-	}
-
-
-	/**
-	 * is advanced mode - aids in complexity and/or licensing limits.
-	 * @example $this->isAdvancedMode('settings');
-	 *
-	 * @param string $what - what is in advanced mode
-	 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
-	 * @return	bool - is or is not
-	 */
-	public function isAdvancedMode(string $what = null, string $level = null): bool
-	{
-		$what	= strtolower($what ?? 'global');
-		$level	= strtolower($level ?? 'default');
-		$is		= true;
-
-		foreach ([$what,'global'] as $w)
-		{
-			foreach ([$level,'default'] as $l)
-			{
-				if (isset( $this->advanced_mode[$w], $this->advanced_mode[$w][$l] ))
-				{
-					return $this->advanced_mode[$w][$l] && $this->allowAdvancedMode();
-				}
-			}
-		}
-		return false;
-	}
-
-
-	/**
-	 * is advanced mode filter - aids in complexity and/or licensing limits.
-	 * @example $this->apply_filters('is_advanced_mode',false,'settings');
-	 *
-	 * @param bool $bool - ignored
-	 * @param string $what - what is in advanced mode
-	 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
-	 * @return	bool - is or is not
-	 */
-	public function is_advanced_mode(bool $bool = false, string $what = null, string $level = null): bool
-	{
-		return $this->isAdvancedMode($what, $level);
-	}
-
-
-	/**
 	 * add an action link (for menu and/or clickable actions)
 	 *
 	 * @param string $action action name
@@ -1097,18 +776,6 @@ abstract class abstract_core
 		{
 			switch ($menuFN)
 			{
-				case 'enable_advanced_mode':
-					if ($this->is_admin() && $this->allowAdvancedMode() && $user = get_current_user_id()) {
-						$option = $this->prefixOptionName('advanced_mode');
-						\update_user_meta($user,$option,'true');
-					}
-					break;
-				case 'disable_advanced_mode':
-					if ($this->is_admin() && $this->allowAdvancedMode() && $user = get_current_user_id()) {
-						$option = $this->prefixOptionName('advanced_mode');
-						\delete_user_meta($user,$option);
-					}
-					break;
 				default:
 					$this->do_action($menuFN);
 					break;
@@ -1401,14 +1068,14 @@ abstract class abstract_core
 		if ( empty($object) || $object == $this )
 		{
 			if ( empty($this->className) ) {
-				$this->className	= basename(str_replace('\\', '/', get_class($this)));
+				$this->className = basename(str_replace('\\', '/', get_class($this)));
 			}
 			return $this->className;
 		}
 
 		if (is_string($object))
 		{
-			$object = $this->isExtension($object,false);
+			$object = $this->getExtension($object,false);
 		}
 
 		if (is_object($object))
@@ -1431,7 +1098,7 @@ abstract class abstract_core
 	{
 		if (!empty($extension))
 		{
-			if ($extension = $this->isExtension($extension,false)) {
+			if ($extension = $this->getExtension($extension,false)) {
 				return $extension->getVersion() ?: $default;
 			} else {
 				return $default;
@@ -1573,7 +1240,7 @@ abstract class abstract_core
 	 */
 	public function safeEcho($string): bool
 	{
-		if (!wp_doing_ajax() && !wp_doing_cron())
+		if (!$this->doing_ajax() && !wp_doing_cron())
 		{
 			echo $string;
 			return true;
@@ -1629,44 +1296,36 @@ abstract class abstract_core
 	/**
 	 * output forbidden response
 	 *
-	 * @example wp_die( $this->request_forbidden( 'access_denied' ) );
+	 * @example wp_die( $this->access_denied( 'access_denied' ) );
 	 *
 	 * @param string 	$logMsg to log error message
 	 * @param string 	$message override default message
 	 * @param int 		$status override default status
 	 * @return WP_Error
 	 */
-	public function request_forbidden(string $logMsg='', int $status=403, string $message='')
+	public function access_denied(string $logMsg='', int $status=0, string $message='')
 	{
-		if (empty($message))
+		if (!$status)
 		{
-			$message = sprintf("%s (%s)",
-				 __('Sorry, your request could not be processed', $this->PLUGIN_TEXTDOMAIN ),
-				 __(get_status_header_desc($status), $this->PLUGIN_TEXTDOMAIN )
-			);
+			$status = (http_response_code() !== 200) ? http_response_code() : 403;
 		}
+
+		$message = sprintf("%s (%s)",
+			 __($message ?: 'Sorry, your request could not be processed', $this->PLUGIN_TEXTDOMAIN ),
+			 strtolower(__(get_status_header_desc($status), $this->PLUGIN_TEXTDOMAIN))
+		);
 
 		if ($logMsg)
 		{
-			$this->logError(get_status_header_desc($status).' - '.$logMsg, 'access_denied');
-		//	$this->plugin->error(
-		//	/* code */		'access_denied',
-		//	/* message */	$logMsg,
-		//	/* data */		array_filter([$this->getVisitorIP(),$_SERVER['REQUEST_URI'],file_get_contents('php://input')]),
-		//	/* id */		get_status_header_desc($status).': '.$logMsg
-		//	);
+			$this->logError(get_status_header_desc($status).' - '.$logMsg, __FUNCTION__);
 		}
 
-		ob_clean();
-		header_remove('Set-Cookie');
-		http_response_code( $status );
-		status_header( $status );
+		while (ob_get_level()) {ob_end_clean();}
 		nocache_headers();
-		return new \WP_Error(
-			'access_denied',
-			$message,
-			['status' => $status]
-		);
+		header_remove('Set-Cookie');
+		header_remove('Link');
+		http_response_code( $status );
+		return new \WP_Error(__FUNCTION__, $message, ['status' => $status]);
 	}
 
 
@@ -1723,7 +1382,6 @@ abstract class abstract_core
 		if (method_exists($this,'deleteTransients') && $fullFlush && !wp_using_ext_object_cache())
 		{
 			$this->deleteTransients($this->is_network_admin());
-			$this->logDebug('deleteTransients',__METHOD__);
 			$message .= ' & transient';
 		}
 
@@ -1787,6 +1445,7 @@ abstract class abstract_core
 		$message	= sprintf("The %s cleanup action has been triggered.",$message);
 		$more		= 'Caches cleared: '.implode(', ',$caches);
 		$this->add_admin_notice($message,'success',$more);
+		$this->logDebug($more,$message);
 		$this->do_action('after_flush_caches');
 	}
 
@@ -1873,7 +1532,68 @@ abstract class abstract_core
 
 
 	/**
-	 * get the current url
+	 * get the current url based on WP request
+	 */
+	public function getRequestURL(): string
+	{
+		global $wp;
+		static $url = null;
+		if ( ! $url )
+		{
+			$url = add_query_arg( $wp->query_vars, network_home_url( $wp->request ) );
+		}
+		return $url;
+	}
+
+
+	/**
+	 * get the current url part(s) based on WP request
+	 *
+	 * @param int PHP url part constant
+	 */
+	public function getRequestParts($part): string
+	{
+		static $url_parts = null;
+		if ( ! $url_parts )
+		{
+			$url_parts = parse_url( $this->getRequestURL() );
+		}
+		return ($part) ? $url_parts[$part] : $url_parts;
+	}
+
+
+	/**
+	 * Returns the local host from home_url
+	 */
+	public function getRequestHost(): string
+	{
+		static $local_host = null;
+		if ( ! $local_host )
+		{
+			$local_host = $this->getRequestParts( PHP_URL_HOST );
+		}
+		return $local_host;
+	}
+
+
+	/**
+	 * get the current url path based on WP request
+	 *
+	 * @return	string the full url of the current request
+	 */
+	public function getRequestPath(): string
+	{
+		static $url_path = null;
+		if ( ! $url_path )
+		{
+			$url_path = $this->getRequestParts( PHP_URL_PATH );
+		}
+		return $url_path;
+	}
+
+
+	/**
+	 * get the current url based on http request
 	 *
 	 * @return	string the full url of the current request
 	 */
@@ -1929,20 +1649,25 @@ abstract class abstract_core
 	 *
 	 * @return	string	the settings slug name
 	 */
-	public function getSettingsSlug(): string
+	public function getSettingsSlug($tab=null): string
 	{
-		return strtolower($this->className) . ($this->is_network_admin() ? '-network' : '-site') . '-settings';
+		return strtolower($this->className) .
+		//		($this->is_network_admin() ? '-network' : '-site') .
+				'-settings' .
+		//		($tab ? '-'.$this->toKeyString($tab) : '');
+				($tab ? '&tab='.$this->toKeyString($tab) : '');
 	}
 
 
 	/**
-	 * get settings page callback
+	 * when we're on our settings page
 	 *
-	 * @return	array	the settings page callback
+	 * @param string $isTab check specific tab name
+	 * @return	bool
 	 */
-	public function getSettingsCallback(): array
+	public function isSettingsPage($isTab = null): bool
 	{
-		return [$this,'options_settings_page'];
+		return false;
 	}
 
 
@@ -1990,8 +1715,7 @@ abstract class abstract_core
 	 */
 	public function getSettingsURL($plugin=true,$tab=null): string
 	{
-		$query = [ 'page' => $this->getSettingsSlug() ];
-		if ($tab) $query['tab'] = $tab;
+		$query = [ 'page' => $this->getSettingsSlug($tab) ];
 
 		return ($this->is_network_admin())
 			? esc_url( add_query_arg( $query, network_admin_url( 'admin.php' ) ) )
@@ -2147,48 +1871,6 @@ abstract class abstract_core
 
 
 	/**
-	 * when we're on our settings page
-	 *
-	 * @param string $isTab check specific tab name
-	 * @return	bool
-	 */
-	public function isSettingsPage($isTab = null): bool
-	{
-		if (is_null($this->is_settings_page) || !empty($isTab))
-		{
-			$this->is_settings_page = false;
-			if (!is_admin())
-			{
-				return $this->is_settings_page;
-			}
-
-			if ($isTab) $isTab = \sanitize_key(str_replace(' ','_',$isTab));
-			if (wp_doing_ajax())
-			{
-				if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], $this->getSettingsSlug()) !== false)
-				{
-					$this->is_settings_page = true;
-					if ($isTab) return (strpos($_SERVER['HTTP_REFERER'], "tab={$isTab}") !== false);
-				}
-			}
-			else
-			{
-				if ( $this->varGet('page') == $this->getSettingsSlug() )
-				{
-					$this->is_settings_page = true;
-					if ($isTab)
-					{
-						$thisTab = $this->toKeyString( $this->varGet('tab') ?? current($this->getTabNames()) );
-						return ($thisTab === $isTab);
-					}
-				}
-			}
-		}
-		return $this->is_settings_page;
-	}
-
-
-	/**
 	 * get or check the current screen name
 	 *
 	 * @param	string	name to check for
@@ -2269,6 +1951,19 @@ abstract class abstract_core
 
 
 	/**
+	 * Check an IP address against list of IPs/subnets
+	 *
+	 * @param string $ipAddress IPv4 or IPv6 address
+	 * @param array  $ipList list of IP addresses or subnets (cidr)
+	 * @return bool
+	 */
+	public function isIpInList(string $ipAddress, array $ipList): bool
+	{
+		return !empty($ipList) && \EarthAsylumConsulting\Helpers\ipUtil::checkIp($ipAddress, $ipList);
+	}
+
+
+	/**
 	 * Get the visitor's IP address
 	 *
 	 * @return	string	IP address
@@ -2279,33 +1974,7 @@ abstract class abstract_core
 
 		if ($remote_ip) return $remote_ip;
 
-		// as_async_request_queue_runner may have client IP when initiated from server
-		// if ($ip = $this->getVariable('remote_ip')) return $ip;
-
-		// look for these headers
-		foreach([	'X_REAL_IP',
-					'CF_CONNECTING_IP',
-					'X_FORWARDED_FOR',
-					'FORWARDED_FOR',
-					'X_FORWARDED',
-					'FORWARDED',
-					'X_CLUSTER_CLIENT_IP',
-					'CLIENT_IP',
-					'REMOTE_ADDR',
-				] as $hdr)
-		{
-			if ( $addr = $this->varServer($hdr) )
-			{
-				// may have multiple addresses (forwards)
-				$addr = $this->text_to_array($addr,[',',';',' ']);
-				//$addr = array_reverse($addr);
-				foreach($addr as $remote_ip)
-				{
-					$remote_ip = \filter_var($remote_ip, FILTER_VALIDATE_IP,FILTER_FLAG_IPV4|FILTER_FLAG_IPV6);
-					if (!empty($remote_ip)) break 2; // got it
-				}
-			}
-		}
+		$remote_ip = \EarthAsylumConsulting\Helpers\ipUtil::getRemoteIP();
 
 		/**
 		 * filter {classname}_set_visitor_ip get the visitor's IP address
@@ -2370,14 +2039,15 @@ abstract class abstract_core
 
 		/**
 		 * filter {classname}_set_visitor_country get the visitor's country
-		 * @param	string	$country country code
-		 * @param	string	$default country code
+		 * @param	string	$country country code (if set from header)
+		 * @param	string	$default country code (from accept_language)
 		 * @return	string	country code
 		 */
 		$country = strtoupper(
 			$this->apply_filters( 'set_visitor_country', $country, $default )
 			?: $default
 		);
+
 		$this->setVariable('remote_country',$country); // if visitor returns here
 		return $country;
 	}
@@ -2426,6 +2096,7 @@ abstract class abstract_core
 
 			$value = sha1($value);
 		}
+
 		/**
 		 * filter {classname}_enable_visitor_cookie to enable setting visitor cookie
 		 * @param	bool		false
@@ -2465,7 +2136,7 @@ abstract class abstract_core
 
 		// get/set per-session (if session manager active)
 		$isNew	= $this->getVariable('is_new_visitor')
-					?? (!isset($_COOKIE[$cookieName]) && !$this->getVariable($cookieName));
+					?: (!isset($_COOKIE[$cookieName]) && !$this->getVariable($cookieName));
 		$this->setVariable('is_new_visitor',$isNew);
 		/**
 		 * filter {classname}_is_new_visitor is this a new visitor
@@ -2638,6 +2309,71 @@ abstract class abstract_core
 
 
 	/**
+	 * convert a display title/name to a key/class string
+	 *
+	 * @param	string 	$string	to be converted
+	 * @param	string 	$with	to replace ' '
+	 * @return	string
+	 */
+	public function toKeyString(string $string, string $with = '-'): string
+	{
+		return \sanitize_key(str_replace(' ',$with,$string));
+	}
+
+
+	/**
+	 * Simple minify for JS or CSS content.
+	 * Strips comments, leading/ttrailing white-space, new-lines.
+	 * Warning: not all js/css strings may succesfully pass through this regex!
+	 *
+	 * @param	string	js/css content
+	 * @param	bool|string	strip new-line (set false to preserve line-endings)
+	 * @return	string	minified content
+	 */
+	public function minifyString(string $content,$stripNL=true): string
+	{
+		$search =
+			[
+				'|/\*\s[\s\S\t\n\r]*?\*/|',		// remove comment blocks	(/* ... */)
+				'|//\s[\s\S]*?$|m',				// remove line-ending comments (//{space}...)
+				'|^\s*|m',						// remove leading whitespace
+				'|\s*$|m',						// remove trailing whitespace
+				'|\t|',							// remove tabs
+			];
+		$search[] = ($stripNL)
+			?	'|\R|m'							// remove line-endings
+			:	'|^\R|m';						// remove blank lines
+		return preg_replace( $search, '', str_replace('&amp;&amp;','&&',$this->wp_kses($content,[])) );
+	}
+
+
+	/**
+	 * Increases or decreases the brightness of a color by a percentage of the current brightness.
+	 *
+	 * @param	string	$hexCode		Supported formats: `#FFF`, `#FFFFFF`, `FFF`, `FFFFFF`
+	 * @param	float	$adjustPercent	A number between -1 and 1. E.g. 0.3 = 30% lighter; -0.4 = 40% darker.
+	 *
+	 * @author	maliayas (https://stackoverflow.com/questions/3512311/how-to-generate-lighter-darker-color-with-php)
+	 *
+	 * @return	string
+	 */
+	public function modifyColor($hexCode, $adjustPercent)
+	{
+		$hexCode = ltrim($hexCode, '#');
+		if (strlen($hexCode) == 3) {
+			$hexCode = $hexCode[0] . $hexCode[0] . $hexCode[1] . $hexCode[1] . $hexCode[2] . $hexCode[2];
+		}
+		$hexCode = array_map('hexdec', str_split($hexCode, 2));
+		foreach ($hexCode as & $color) {
+			$adjustableLimit = $adjustPercent < 0 ? $color : 255 - $color;
+			$adjustAmount = ceil($adjustableLimit * $adjustPercent);
+			$color = str_pad(dechex($color + $adjustAmount), 2, '0', STR_PAD_LEFT);
+		}
+		return '#' . implode($hexCode);
+	}
+
+
+	/**
 	 * parse options/attributes to a key=value array using SimpleXMLElement
 	 *
 	 * @param	array|string	$attributes		options/attributes -
@@ -2768,61 +2504,79 @@ abstract class abstract_core
 
 
 	/**
-	 * Simple minify for JS or CSS content.
-	 * Strips comments, leading/ttrailing white-space, new-lines.
-	 * Warning: not all js/css strings may succesfully pass through this regex!
+	 * When creating a file, find appropriate path
+	 * a. where the debug log is stored
+	 * b. in the upload folder
 	 *
-	 * @param	string	js/css content
-	 * @param	bool|string	strip new-line (set false to preserve line-endings)
-	 * @return	string	minified content
+	 * @param string relative file path name
+	 * @param bool $create create path/file
+	 * @param string first record when creating file
+	 * @return string|wp_error file path name
 	 */
-	public function minifyString(string $content,$stripNL=true): string
+	public function get_output_file(string $filePath, bool $create=true, string $firstRecord='')
 	{
-		$search =
-			[
-				'|/\*\s[\s\S\t\n\r]*?\*/|',		// remove comment blocks	(/* ... */)
-				'|//\s[\s\S]*?$|m',				// remove line-ending comments (//{space}...)
-				'|^\s*|m',						// remove leading whitespace
-				'|\s*$|m',						// remove trailing whitespace
-				'|\t|',							// remove tabs
-			];
-		$search[] = ($stripNL)
-			?	'|\R|m'							// remove line-endings
-			:	'|^\R|m';						// remove blank lines
-		return preg_replace( $search, '', str_replace('&amp;&amp;','&&',$this->wp_kses($content,[])) );
+		if	(! ($fs = $this->fs->load_wp_filesystem()) ) return '';
+
+		$pathParts 	= explode(DIRECTORY_SEPARATOR,trim($filePath,DIRECTORY_SEPARATOR));
+		$filePath 	= (! str_ends_with($filePath,'/'))
+					  ? array_pop($pathParts)
+					  : false;
+
+		// find the folder to use
+		$pathName 	= (defined('WP_DEBUG_LOG') && is_string(WP_DEBUG_LOG))
+						? realpath(dirname(WP_DEBUG_LOG))
+						: wp_get_upload_dir()['basedir'];
+
+		// create the directory
+		foreach($pathParts as $pathFolder)
+		{
+			$pathName .= DIRECTORY_SEPARATOR.$pathFolder;
+			if (!is_dir($pathName) && $create)
+			{
+				if (($fsPath = $fs->find_folder(dirname($pathName))) && $fs->is_writable($fsPath)) {
+					$fsPath .= basename($pathName);
+					// since we write to this not using $fs, we need onwner & group write access
+					$fs->mkdir($fsPath,FS_CHMOD_DIR|0660);
+				}
+			}
+		}
+
+		// make sure the folder is writeable
+		if (!$fs->is_writable($pathName)) {
+			$error = sprintf("Unable to access %s for file %s",basename($pathName),func_get_arg(0));
+			return $this->error('write_acces_required',$error,func_get_arg(0));
+		}
+
+		if (!$filePath) return $pathName;
+
+		$filePath = $pathName . DIRECTORY_SEPARATOR . $filePath;
+
+		// create the file
+		if (!$fs->exists($filePath) && $create)
+		{
+			if (($fsPath = $fs->find_folder(dirname($filePath))) && $fs->is_writable($fsPath)) {
+				$fsPath .= basename($filePath);
+				// since we write to this not using $fs, we need onwner & group write access
+				$fs->put_contents($fsPath,$firstRecord,FS_CHMOD_FILE|0660);
+			}
+		}
+
+		// make sure we can write to the file (without using $fs)
+		if (!$filePath || !$fs->exists($filePath) || !is_writable($filePath)) {
+			$error = sprintf("Unable to access %s",func_get_arg(0));
+			return $this->error('write_acces_required',$error,func_get_arg(0));
+		}
+
+		return $filePath;
 	}
 
-
-	/**
-	 * Increases or decreases the brightness of a color by a percentage of the current brightness.
-	 *
-	 * @param	string	$hexCode		Supported formats: `#FFF`, `#FFFFFF`, `FFF`, `FFFFFF`
-	 * @param	float	$adjustPercent	A number between -1 and 1. E.g. 0.3 = 30% lighter; -0.4 = 40% darker.
-	 *
-	 * @author	maliayas (https://stackoverflow.com/questions/3512311/how-to-generate-lighter-darker-color-with-php)
-	 *
-	 * @return	string
-	 */
-	public function modifyColor($hexCode, $adjustPercent)
-	{
-		$hexCode = ltrim($hexCode, '#');
-		if (strlen($hexCode) == 3) {
-			$hexCode = $hexCode[0] . $hexCode[0] . $hexCode[1] . $hexCode[1] . $hexCode[2] . $hexCode[2];
-		}
-		$hexCode = array_map('hexdec', str_split($hexCode, 2));
-		foreach ($hexCode as & $color) {
-			$adjustableLimit = $adjustPercent < 0 ? $color : 255 - $color;
-			$adjustAmount = ceil($adjustableLimit * $adjustPercent);
-			$color = str_pad(dechex($color + $adjustAmount), 2, '0', STR_PAD_LEFT);
-		}
-		return '#' . implode($hexCode);
-	}
 
 	/*
 	 *
 	 * get filtered superglobals imput
 	 *
 	 */
+
 
 	/**
 	 * Safely get $_COOKIE data using PHP filter.
@@ -3100,13 +2854,13 @@ abstract class abstract_core
 				unset($this->extensionTransient[$id]);
 			} else {
 				// get extensions on disk, save to transient (front-end)
-				$extensions = $this->loadExtensions_fromDisk($id,$source);
+				$extensions = $this->loadExtensionsFromDisk($id,$source);
 				$this->extensionTransient[$id] = $extensions;
 			}
 		}
 		else
 		{
-			$extensions = $this->loadExtensions_fromDisk($id,$source);
+			$extensions = $this->loadExtensionsFromDisk($id,$source);
 		}
 
 		foreach ($extensions as $slug => $dirs)
@@ -3141,7 +2895,7 @@ abstract class abstract_core
 			return 0;
 		}
 
-		$className	= $this->getClassName($object);					// classname_extension
+		$className	= $object->getClassName();						// classname_extension (short name)
 		$this->extension_objects[ $className ] = $object;
 
 		$aliasName	= basename($className,'_extension');			// classname
@@ -3153,14 +2907,11 @@ abstract class abstract_core
 		}
 
 		$extVersion = $object->getVersion() ?: 'unknown';
-		if ($this->is_backend()) {
+		if ($this->is_backend()) {									// abstract_backend
 			$this->checkExtensionUpgrade($className, $extVersion);	// check for upgraded extension
 		}
-		$extVersion = 'version '. $extVersion;
-		if (!$object->isEnabled()) {
-			$extVersion .= ' (disabled)';							// disabled in constructor
-		}
-		$this->logInfo($extVersion, $className);
+		if (!$object->isEnabled()) $extVersion .= ' (disabled)';	// disabled in constructor
+		$this->logInfo('version '. $extVersion, $className);
 		return 1;
 	}
 
@@ -3173,7 +2924,7 @@ abstract class abstract_core
 	 * @param	array	$source - the source directory(s)
 	 * @return	array	slug => [dir => [extensions]]
 	 */
-	private function loadExtensions_fromDisk(string $id, array $source): array
+	private function loadExtensionsFromDisk(string $id, array $source): array
 	{
 		if ( empty($source) && $id == $this->PLUGIN_SLUG )
 		{
@@ -3181,9 +2932,7 @@ abstract class abstract_core
 		}
 
 		$dirNames	= $this->addExtensionSubDirectories( [ $id => $source ] );
-
 		$fileTypes	= array("extension");						// <something>.extension.php
-
 		$extensions = array();
 
 		foreach ($dirNames as $slug => $dirs)
@@ -3192,18 +2941,11 @@ abstract class abstract_core
 			foreach ($dirs as $dir)
 			{
 				if (! $this->isLoadableExtension($dir) ) continue;	// hidden/disabled directory
-				$extensions[ $slug ][ $dir ] = array();
-				if ($files = @glob($dir."*.{".implode(',',$fileTypes)."}.php",GLOB_BRACE))
+				if ($files = glob($dir."*.{".implode(',',$fileTypes)."}.php",GLOB_BRACE))
 				{
-					foreach ($files as $file)
-					{
-						if ($this->isLoadableExtension($file) ) {
-							$extensions[ $slug ][ $dir ][] = $file;
-						}
-					}
-				}
-				if (empty($extensions[ $slug ][ $dir ])) {
-					unset($extensions[ $slug ][ $dir ]);
+					$extensions[ $slug ][ $dir ] = array_filter($files, function($file) {
+						return ($this->isLoadableExtension($file));
+					});
 				}
 			}
 		}
@@ -3219,34 +2961,22 @@ abstract class abstract_core
 	 */
 	private function defaultExtensionDirectories(): array
 	{
-		$directories = [];
-
 		$pluginDir = $this->pluginHeader('PluginDir');
 		$vendorDir = $this->pluginHeader('VendorDir');
 
-		// built-in vendor extensions - plugin-dir/vendor/extensions
-		$extDir = $vendorDir . '/Extensions';
-		if (is_dir($extDir)) $directories[] = $extDir;
-
-		// default extensions - plugin-dir/extensions
-		$extDir = $pluginDir . '/Extensions';
-		if (is_dir($extDir)) $directories[] = $extDir;
-
-		// default extensions - plugin-dir/namespace/extensions
-		$extDir = $pluginDir . '/'.__NAMESPACE__.'/Extensions';
-		if (is_dir($extDir)) $directories[] = $extDir;
-
-		// class namespace may be different than this namespace, look for a corresponding folder
-		$extDir = explode('\\',get_class($this));
-		$extDir = $pluginDir . '/'.$extDir[0].'/Extensions';
-		if (is_dir($extDir)) $directories[] = $extDir;
-
-		// custom site extensions - plugin-dir/site-name ('My WordPress Site' == 'my-wordpress-site')
-		$extDir = \sanitize_key(str_replace(' ','-',\get_option('blogname')));
-		$extDir = $pluginDir . '/'.$extDir.'/Extensions';
-		if (is_dir($extDir)) $directories[] = $extDir;
-
-		return array_unique($directories);
+		$directories = array_unique([
+			// default extensions - plugin-dir/extensions
+			$pluginDir . '/Extensions',
+			// built-in vendor extensions - plugin-dir/vendor/extensions
+			$vendorDir . '/Extensions',
+			// default extensions - plugin-dir/namespace/extensions
+			$pluginDir . '/' . __NAMESPACE__ . '/Extensions',
+			// class namespace may be different than this namespace, look for a corresponding folder
+			$pluginDir . '/' . strtok(get_class($this), '\\') . '/Extensions',
+			// custom site extensions - plugin-dir/site-name ('My WordPress Site' == 'my-wordpress-site')
+			$pluginDir . '/' . $this->toKeyString(\get_option('blogname')) . '/Extensions',
+		]);
+		return array_filter($directories, function($dir){return is_dir($dir);});
 	}
 
 
@@ -3303,7 +3033,7 @@ abstract class abstract_core
 		$className = explode('.',$name);										// if the file name matches the class name, check for '_enabled' option
 		if ($className[0] == 'class') array_shift($className);					// ignore 'class.' prefix
 
-		$optionName = basename(sanitize_key(str_replace(' ','_',$className[0])),'_extension'); // sanitized sans '_extension'
+		$optionName = basename($this->toKeyString($className[0],'_'),'_extension'); // sanitized sans '_extension'
 
 		$enabled = $this->get_option( $optionName.'_extension_enabled' );		// (<classname>_extension_enabled) - as set in abstract_extension
 		if ($enabled !== false) return ($enabled != '');						// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
@@ -3313,7 +3043,7 @@ abstract class abstract_core
 
 		if ($className[1] != 'extension' && $className[2] == 'extension')		// check for <something>.<somethingelse>.extension.php and use <somethingelse>
 		{
-			$optionName = basename(sanitize_key(str_replace(' ','_',$className[1])),'_extension'); // sanitized sans '_extension'
+			$optionName = basename($this->toKeyString($className[1],'_'),'_extension'); // sanitized sans '_extension'
 
 			$enabled = $this->get_option( $optionName.'_extension_enabled' );	// (<classname>_extension_enabled) - as set in abstract_extension
 			if ($enabled !== false) return ($enabled != '');					// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
@@ -3323,41 +3053,6 @@ abstract class abstract_core
 		}
 
 		return true;															// default to enabled when no '_enabled' option found
-	}
-
-
-	/**
-	 * is this an updated extension
-	 *
-	 * @param	string	$className extension name
-	 * @param	string	$extVersion extension version loaded
-	 * @return	void
-	 */
-	private function checkExtensionUpgrade(string $className, string $extVersion): void
-	{
-		if ($extVersion == 'unknown') return;
-
-		$curVersion = $this->extensionVersions[$className] ?? '0.0';
-
-		if (version_compare($curVersion, $extVersion) !== 0)					// version change
-		{
-			$this->logInfo('updated from version '.$curVersion.' to '.$extVersion, $className);
-			/**
-			 * action {classname}_version_updated_<extension> when <extension> version changes
-			 * @param	string	$curVersion currently installed version
-			 * @param	string	$extVersion newly installed version
-			 * @return	void
-			 */
-			$this->do_action( "version_updated_{$className}", $curVersion, $extVersion );
-			/**
-			 * OR - use a direct call method
-			 */
-			if (method_exists($this->extension_objects[ $className ], 'adminVersionUpdate'))
-			{
-				call_user_func([$this->extension_objects[ $className ], 'adminVersionUpdate'], $curVersion, $extVersion);
-			}
-		}
-		$this->extensionVersions[$className] = $extVersion;
 	}
 
 
@@ -3400,7 +3095,7 @@ abstract class abstract_core
 	 */
 	public function __get($property)
 	{
-		if ($object = $this->isExtension($property))
+		if ($object = $this->getExtension($property))
 		{
 			return $object;
 		}
@@ -3444,7 +3139,7 @@ abstract class abstract_core
 	{
 		if (is_array( $method ))
 		{
-			if ( ($object = $this->isExtension( $method[0] )) && (method_exists( $object, $method[1] )) )
+			if ( ($object = $this->getExtension( $method[0] )) && (method_exists( $object, $method[1] )) )
 			{
 				return call_user_func( [$object, $method[1]], ...$arguments );
 			}
@@ -3472,7 +3167,7 @@ abstract class abstract_core
 		{
 			return call_user_func( [$this, $method], ...$arguments);
 		}
-		if ( ($object = $this->isExtension( $extension )) && (method_exists( $object, $method )) )
+		if ( ($object = $this->getExtension( $extension )) && (method_exists( $object, $method )) )
 		{
 			return call_user_func( [$object, $method], ...$arguments);
 		}
@@ -3516,14 +3211,6 @@ abstract class abstract_core
 		{
 			$object = $this;
 		}
-	//	else if (isset($this->extensions[$className]))
-	//	{
-	//		$object = $this->extensions[$className];
-	//	}
-	//	else if (isset($this->extensions[$className.'_extension']))
-	//	{
-	//		$object = $this->extensions[$className.'_extension'];
-	//	}
 		else
 		{
 			$object = $this->extension_objects[$className] ?? $this->extension_aliases[$className] ?? null;
@@ -3534,13 +3221,13 @@ abstract class abstract_core
 
 
 	/**
-	 * is extension loaded and enabled
+	 * get extension, loaded and enabled
 	 *
 	 * @param	object|string	$extension extension class or name
 	 * @param	bool			$checkEnabled check isEnabled()
 	 * @return	bool|object		false or extension object
 	 */
-	public function isExtension($extension, bool $checkEnabled=true)
+	public function getExtension($extension, bool $checkEnabled=true)
 	{
 		$object = (is_object($extension)) ? $extension : $this->getClassObject($extension);
 		if (is_a($object,self::EXTENSION_BASE_CLASS))
@@ -3553,15 +3240,15 @@ abstract class abstract_core
 
 
 	/**
-	 * alias to isExtension - get enabled extension object
+	 * alias to getExtension - is extension loaded and enabled
 	 *
 	 * @param	object|string	$extension extension class or name
 	 * @param	bool			$checkEnabled check isEnabled()
 	 * @return	bool|object		false or extension object
 	 */
-	public function getExtension($extension, bool $checkEnabled=true)
+	public function isExtension($extension, bool $checkEnabled=true)
 	{
-		return $this->isExtension($extension, $checkEnabled);
+		return $this->getExtension($extension, $checkEnabled);
 	}
 
 
@@ -3590,8 +3277,8 @@ abstract class abstract_core
 		if (is_array($optionGroup))
 		{
 			return [
-					esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[0]))),$this->PLUGIN_TEXTDOMAIN),
-					esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[1]))),$this->PLUGIN_TEXTDOMAIN),
+				esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[0]))),$this->PLUGIN_TEXTDOMAIN),
+				esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[1]))),$this->PLUGIN_TEXTDOMAIN),
 			];
 		}
 		return esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup))),$this->PLUGIN_TEXTDOMAIN);
@@ -4422,61 +4109,26 @@ abstract class abstract_core
 
 
 	/**
-	 * get the option prefix
-	 *
-	 * @param	string	$prefix override default prefix
-	 * @return	string	short_classname_
-	 */
-	public function getOptionNamePrefix($prefix=null): string
-	{
-		return ($prefix ?: $this->className) . '_';
-	}
-
-
-	/**
-	 * Get the prefixed version input $name suitable for storing in WP options
+	 * Get the prefixed version of the option name
 	 *
 	 * @param	string	$optionName option name
-	 * @param	string	$prefix override default prefix
-	 * @return	string	option name with prefix
+	 * @return	string	$optionName with prefix
 	 */
-	public function prefixOptionName(string $name, $prefix=null): string
+	public function prefixOptionName(string $optionName): string
 	{
-		$optionNamePrefix = $this->getOptionNamePrefix($prefix);
-		if (stripos($name, $optionNamePrefix) === 0) { // 0 but not false
-			return trim($name); // already prefixed
-		}
-		return $optionNamePrefix . trim($name);
+		return $this->addClassNamePrefix($optionName);
 	}
 
 
 	/**
-	 * Remove the prefix from the input $name
+	 * Get the un-prefixed version of the option name
 	 *
-	 * @param	string	$optionName option name
-	 * @param	string	$prefix override default prefix
-	 * @return	string	option name without prefix
+	 * @param	string	$optionName prefixed option name
+	 * @return	string	$optionName without prefix
 	 */
-	public function unprefixOptionName(string $name, $prefix=null): string
+	public function unprefixOptionName(string $optionName): string
 	{
-		$optionNamePrefix = $this->getOptionNamePrefix($prefix);
-		if (stripos($name, $optionNamePrefix) === 0) { // 0 but not false
-			return substr($name, strlen($optionNamePrefix));
-		}
-		return $name;
-	}
-
-
-	/**
-	 * Prefix the table name with wpdb prefix and our class prefix (wpdb_classname_tablename)
-	 *
-	 * @param	string	name of a database table
-	 * @param	string	$prefix override default prefix
-	 * @return	string	full table name
-	 */
-	public function prefixTableName(string $name, $prefix=null): string
-	{
-		return $this->wpdb->prefix . strtolower( $this->prefixOptionName($name,$prefix) );
+		return $this->removeClassNamePrefix($optionName);
 	}
 
 
@@ -4645,6 +4297,91 @@ abstract class abstract_core
 	 */
 	public function prefixTransientName(string $transientName, $prefix=null): string
 	{
-		return strtolower( $this->prefixOptionName($transientName,$prefix) );
+		return strtolower( $this->addClassNamePrefix($transientName,$prefix) );
+	}
+
+
+	/*
+	 *
+	 * option/hook/table (etc.) name prefixed with short class name
+	 *
+	 */
+
+
+	/**
+	 * Get the prefix to the input $name suitable for storing
+	 *
+	 * @param	string	$name option/hook/table name
+	 * @param	string	$prefix override default prefix
+	 * @return	string	option/hook/table name with prefix
+	 */
+	public function addClassNamePrefix(string $name, $prefix=null): string
+	{
+		$classNamePrefix = $this->getClassNamePrefix($prefix);
+		return (stripos($name, $classNamePrefix) === 0)
+			? trim($name)
+			: $classNamePrefix . trim($name);
+	}
+
+
+	/**
+	 * Remove the prefix from the input $name
+	 *
+	 * @param	string	$name option/hook/table name
+	 * @param	string	$prefix override default prefix
+	 * @return	string	option/hook/table name without prefix
+	 */
+	public function removeClassNamePrefix(string $name, $prefix=null): string
+	{
+		$classNamePrefix = $this->getClassNamePrefix($prefix);
+		return (stripos($name, $classNamePrefix) === 0)
+			? substr($name, strlen($classNamePrefix))
+			: trim($name);
+	}
+
+
+	/**
+	 * get the class name prefix
+	 *
+	 * @param	string	$prefix override default prefix
+	 * @return	string	short_classname_
+	 */
+	public function getClassNamePrefix($prefix=null): string
+	{
+		return ($prefix ?: $this->className) . '_';
+	}
+
+
+	/**
+	 * has the class name prefix
+	 *
+	 * @param	string	$name option/hook/table name
+	 * @param	string	$prefix override default prefix
+	 * @return	bool
+	 */
+	public function hasClassNamePrefix(string $name, $prefix=null): bool
+	{
+		$classNamePrefix = $this->getClassNamePrefix($prefix);
+		return (stripos($name, $classNamePrefix) === 0);
+	}
+
+
+	/*
+	 *
+	 * prefix custom table name(s)
+	 *
+	 */
+
+
+	/**
+	 * Prefix the table name with wpdb prefix and our class prefix (wpdb_classname_tablename)
+	 *
+	 * @param	string	name of a database table
+	 * @param	string	$prefix override default prefix
+	 * @return	string	full table name
+	 */
+	public function prefixTableName(string $name, $prefix=null): string
+	{
+		return $this->wpdb->prefix . strtolower( $this->addClassNamePrefix($name,$prefix) );
 	}
 }

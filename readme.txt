@@ -1,11 +1,11 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             2.7.0
-Last Updated:           07-Oct-2024
+Stable tag:             3.0.0-beta1+24.1101.1
+Last Updated:           1-Nov-2024
 Requires at least:      5.8
-Tested up to:           6.6
-Requires PHP:           7.4
+Tested up to:           6.7
+Requires PHP:           8.1
 Contributors:           earthasylum@github,kevinburkholder@wordpress
 License:                EarthAsylum Consulting Proprietary License - {eac}PLv1
 License URI:            https://eacDoojigger.earthasylum.com/end-user-license-agreement/
@@ -51,7 +51,10 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   ---------------------------------   |   ----------------    |
 |   *file system access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *security*                          | Adds a number of security/firewall options to your WordPress installation including changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, set global cookie flags, and more. |
+|   *security*                          | Adds a number of security/firewall options to your WordPress installation including server-side CORS, changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, set global cookie flags, and more. |
+|   *AbuseIPDB API*                     | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com) 'Abuse Confidence Level'. |
+|   *FraudGuard API*                    | Ability to block access by IP address based on [FruadGuard](https://www.fraudguard.io) 'Risk Level'. |
+|   *IpGeoLocation API*                 | Ability to block access by IP address based on [IpGeoLocation](https://www.ipgeolocation.io) 'Threat Score'. |
 |   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
@@ -396,6 +399,12 @@ _Kevin Burkholder_
 
 == Upgrade Notice ==
 
+= 3.0 =
+
+As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1+
+
+= 2.7.0
+
 Future versions (starting with 3.0) of {eac}Doojigger will drop support for PHP versions prior to 8.1.
 
 
@@ -417,37 +426,47 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 2.7.0 – October 7, 2024 =
+= Version 3.0 – November 1, 2024 =
 
-+   Enhanced security extensions...
-    +   Add custom secure nonce on login and lost password pages.
-    +   Block REST index list, WP core REST routes, non-rest json requests.
-    +   Required and/or blocked http header(s) (prevent CDN bypass).
-+   Do not assume session IP is correct in getVisitorIP().
-+   Fixed getVisitorIP() when proxied (i.e. before cloud flare).
-+   Fixed isNewVisitor() set with visitor cookie.
-+   Check Cf-Ipcountry for visitor country code.
-+   Fixed (load) admin css when extension is disabled.
-+   Bumped v2.6.2 (never released) to v2.7.0
-+   Removed Ajax device fingerprinting.
-+   Purge expired transients on cache clearing and automatically (daily).
-    +   Force minimum transient expiration with transient sessions.
-+   New `text_to_array()` function to split textarea to array of lines.
-+   Updated wpconfig-transformer to v1.3.6
-+   Reworked/simplified installed mu autoloader and autoloader class with new 'autoload.php'.
-+   Removed `setEmailNotification()` from autoloader and emailFatalNotice standard option.
-+   Changed advanced mode link on settings page (essentials|advanced).
-+   Reworked debugging extension and logging with new logger helper compatible with PSR-3 logging.
-    +   See : https://eacdoojigger.earthasylum.com/how-to/#use-debugging-logger-methods
-    +   New PSR-3 logging method : `$this->log( $level, $message, $context )`
-    +   Or e.g. : `eacDoojigger->log('error', $message, $context )`
-+   Support/compliance with WP Consent API.
-+   has_cookie_consent() method to check consent.
-+   New cookie methods supporting WP Consent API (if active).
-    +   See: https://eacdoojigger.earthasylum.com/how-to/#wp-consent-api-and-cookies
-    +   `set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[])`
-+   Allow/default session access from derivative plugins when using `setVariable()` and `getVariable()`.
-+   Added action `{pluginname}_startup` after `plugins_loaded`, before loading extensions.
-+   Session debugging filter for `eacDoojigger_debugging`.
++   Tested with WordPress 6.7.
++   Dropped support for PHP < 8.1.
++   New Risk Assessment security module using 3rd-party API extensions as well as internal actions and filters to assess and track security risks by IP address.
+    +   Implemented server-side CORS security.
+        +   Apply CORS rules to rest, xml, and admin-ajax.php requests.
+        +   Options to use referer or reverse DNS to get origin.
+        +   Validate local server host IP when passed as origin.
+        +   Origin white-list and excluded URIs.
+    +   New `register_[fraud|threat|abuse|risk]` hooks used to tag risky actions and, possibly, block access.
+        +   Added `register_threat` action to several security checks.
+    +   New AbuseIPDB api extension to block by IP address based on abuse score.
+        +   See : https://www.abuseipdb.com 
+    +   New FraudGuard api extension to block by IP address based on risk level.
+        +   See : https://www.fraudguard.io 
+    +   New IpGeoLocation api extension to block by IP address based on threat score.
+        +   See : https://www.ipgeolocation.io
++   New `access_denied()` method used to block fraudulent requests.
++   Reworked admin options menu(s).
++   Improved extension loader methods.
++   Added user roles to advanced mode arrays and allow array of OR'd options.
+    +   `$this->isAdvancedMode('global','administrator')`
+    +   `$this->isAdvancedMode('global',['administrator','editor'])`
++   Standard methods for option, hook, table names with prefix.
+    +   `addClassNamePrefix()`, `removeClassNamePrefix()`, `getClassNamePrefix()`, `hasClassNamePrefix()`
++   New ipUtil helper to check IP address against list of addresses and/or subnets (cidr).
+    +   New `isIpInList()` method using ipUtil.
++   New `get_output_file()` to create/write a file in appropriate WP path.
+	 +  a. where the WP debug log is stored.
+	 +  b. in the upload folder.
+	 +  Uses wp_filesystem for proper access.
++   Debugging extension uses `get_output_file()` and changes log file name.
++   New hooks trait includes all prefixed action and filter functions.
+    +   New `has_filter_count()`, `has_action_count()`
+    +   New `wp_filter_count()`, `wp_action_count()` (not prefixed).
++   Added `ENABLE_OPTION` constant to extensions to allow override of the enable option used in an admin tab section.
++   Added `TAB_NAME` constant to extensions to allow setting the default tab name.
++   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
++   Suppress shutdown error for not-called parent methods.
++   Check additional headers in `getVisitorIP()`.
++   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).
 
 = See changelog.md for more =
