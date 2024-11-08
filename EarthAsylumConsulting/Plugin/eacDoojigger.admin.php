@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Plugin;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.0823.1
+ * @version		24.1107.1
  */
 
 trait eacDoojigger_admin_traits
@@ -123,6 +123,17 @@ trait eacDoojigger_admin_traits
 		$options = $this->standard_options(['adminSettingsMenu','uninstallOptions'/*,'emailFatalNotice'*/]);
 		$options['adminSettingsMenu']['options'][] = 'Menu Bar';
 		$options['adminSettingsMenu']['default'][] = 'Menu Bar';
+		$options['optimize_options'] = array(
+				'type'		=>	'checkbox',
+				'label'		=>	'Optimizations',
+				'options'	=>	[
+					"<abbr title='Add early hints link header for style sheets'>CSS Early Hints</abbr>"	=>	'style',
+					"<abbr title='Add early hints link header for JavaScript'>JS Early Hints</abbr>"	=>	'script',
+					"<abbr title='Add async attribute to non-deferred JavaScript tags'>Asynchronous JS</abbr>"	=>	'async',
+				],
+				'default'	=>	['style','script'],
+				'info'		=> 	'Add browser optimizations: early-hints and Asynchronous loading.',
+		);
 
 		// WP Environment setting
 		if ( $this->isAdvancedMode('settings') && function_exists('\wp_get_environment_type') )

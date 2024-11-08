@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.0921.1';
+		const 	VERSION	= '24.1105.1';
 
 		/**
 		 * @var string supported session managers
@@ -147,7 +147,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					return;
 			}
 
-			//add_action( 'init', 								array( $this, 'session_start'), -1 );
+		//	add_action( 'init', 								array( $this, 'session_start'), -1 );
 			add_action( 'shutdown', 							array( $this, 'session_save_data'), 8 );				// save the session data (before WC_Session @20)
 
 			/*
@@ -174,14 +174,14 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			/*
 			 * filter {classname}_get_variable get a stored value
 			 *  $value = apply_filters( '{className}_get_variable', default, key );
-			 * @return	string	sourcing value
+			 * @return	string	session value
 			 */
 			$this->add_filter( 'get_variable', 					array($this,'get_session_variable'), 10, 2 );
 
 			/*
 			 * filter {classname}_set_variable set a stored value
 			 *  $value = apply_filters( '{className}_set_variable', value, key );
-			 * @return	string	sourcing value
+			 * @return	string	session value
 			 */
 			$this->add_filter( 'set_variable', 					array($this,'set_session_variable'), 10, 2 );
 

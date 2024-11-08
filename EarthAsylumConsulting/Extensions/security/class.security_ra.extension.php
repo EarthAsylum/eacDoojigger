@@ -19,12 +19,17 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1025.1';
+		const VERSION 			= '24.1107.1';
 
 		/**
 		 * @var string alias
 		 */
 		const ALIAS 			= 'risk_assessment';
+
+		/**
+		 * @var string extension version
+		 */
+		const TAB_NAME 			= 'Security';
 
 		/**
 		 * @var string|array|bool to set (or disable) default group display/switch
@@ -71,14 +76,14 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 			if ($this->is_admin())
 			{
-				$this->registerExtension( [ $this->className, 'security' ] );
+				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
 			}
 
-			if ($this->plugin->isSettingsPage('Security'))
+			if ($this->plugin->isSettingsPage(self::TAB_NAME))
 			{
 				$this->add_action('admin_enqueue_styles', function($styleId)
 				{
@@ -136,7 +141,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function admin_options_help()
 		{
-		//	if (!$this->plugin->isSettingsPage('Security')) return;
+		//	if (!$this->plugin->isSettingsPage(self::TAB_NAME)) return;
 		}
 
 

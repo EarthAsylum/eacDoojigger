@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_fraudguard', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1026.1';
+		const VERSION 			= '24.1107.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -67,7 +67,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_fraudguard', false) )
 		 */
 		public function admin_options_help()
 		{
-		//	if (!$this->plugin->isSettingsPage('Security')) return;
+		//	if (!$this->plugin->isSettingsPage(self::TAB_NAME)) return;
 		}
 
 

@@ -9,7 +9,7 @@ require "eacDoojigger.trait.php";
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
- * @version		2.x
+ * @version		3.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @uses		\EarthAsylumConsulting\abstract_context
@@ -35,6 +35,18 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	 * @deprecated
 	 */
 	const FILE_PERMISSION			= 0664; //FS_CHMOD_FILE;
+
+	/**
+	 * @var array script handles excluded from async-ing
+	 */
+	const JS_ASYNC_EXCLUDE 	= [
+			'jquery-core',
+	];
+
+	/**
+	 * @var array preload sources
+	 */
+	private $optimize_preload = [];
 
 	/**
 	 * @var object wp-config-transformer
@@ -83,6 +95,17 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 		//	\add_action( 'admin_bar_init', 				array( $this, 'get_admin_bar_menu') );
 			\add_action( 'admin_bar_menu', 				array( $this, 'set_admin_bar_menu') );
 		}
+
+		if ($this->is_option('optimize_options','style')) {
+			add_filter('style_loader_src',	array($this, 'optimize_hints'),100,2);
+		}
+		if ($this->is_option('optimize_options','script')) {
+			add_filter('script_loader_src', array($this, 'optimize_hints'),100,2);
+		}
+		if ($this->is_option('optimize_options','async')) {
+			add_filter('script_loader_tag', array($this, 'optimize_async'),100,3);
+		}
+		//add_action('wp_head', 			array($this, 'optimize_preload'));
 	}
 
 
@@ -225,6 +248,79 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 			]
 		);
 	}
+
+
+	/**
+	 * Pre-load headers for js & css
+	 *
+	 * @param string $src tag src= or href=
+	 * @param string $handle script/style name
+	 */
+	public function optimize_hints(string $src, string $handle): string
+	{
+		if (strpos($src, home_url()) === false || headers_sent()) return $src;
+		// limit the size of the headers
+		$headerSize = strlen(implode('	', headers_list()));
+		if ($headerSize > 3072) return $src;
+
+		$src	= (substr($src, 0, 2) == '//')
+					? preg_replace('/^\/\/([^\/]*)\//', '/', $src)
+					: preg_replace('/^http(s)?:\/\/[^\/]*/', '', $src);
+		$type	= strtok(current_filter(),'_');
+
+		//if (str_starts_with($src,'/wp-includes')) {
+		//	$this->optimize_preload[$type][] = $src;
+		//}
+
+		$linkHeader = sprintf('Link: <%s>; rel=preload; as=%s',esc_url($src),$type);
+		header($linkHeader, false);
+
+		return $src;
+	}
+
+
+	/**
+	 * Make js async
+	 *
+	 * @param string $tab script tag
+	 * @param string $handle script/style name
+	 * @param string $src tag src= or href=
+	 */
+	public function optimize_async(string $tag, string $handle, string $src): string
+	{
+		if (str_contains($tag,' async')) return $tag;
+		if (str_contains($tag,' defer')) return $tag;
+
+		/**
+		 * filter {pluginname}_exclude_js_async js handles to exclude from async-ing
+		 * @param array handle name(s)
+		 */
+		$excluded = $this->apply_filters('exclude_js_async',self::JS_ASYNC_EXCLUDE);
+
+		foreach ($excluded as $exclude) {
+			if (str_starts_with($handle,$exclude)) return $tag;
+		}
+
+		$tag = str_replace('<script ','<script async ',$tag);
+		return $tag;
+	}
+
+
+	/**
+	 * Pre-load meta tags for js & css
+	 *
+	 */
+	/*
+	public function optimize_preload($src)
+	{
+		foreach ($this->optimize_preload as $type => $preloads) {
+			array_walk($preloads, function ($src) use ($type) {
+				printf("<link rel='preload' href='%s' as='%s'>\n", esc_url($src), $type);
+			});
+		}
+		return $src;
+	}
+	*/
 
 
 	/*

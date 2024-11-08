@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1031.1
+ * @version		24.1101.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -581,10 +581,9 @@ abstract class abstract_core
 					$header['PluginFile'] = WP_PLUGIN_DIR . '/' . $this->PLUGIN_SLUG;
 				}
 				$readme = dirname($header['PluginFile']).'/readme.txt';
-				$readme = array_filter(get_file_data($readme, $default_headers, 'readme'));
 				$pluginData = array_replace(
 					$header,
-					$readme,
+					array_filter(get_file_data($readme, $default_headers, 'readme')),
 					array_filter(get_file_data($header['PluginFile'], $default_headers, 'plugin') )
 				);
 

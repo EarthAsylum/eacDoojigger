@@ -7,8 +7,8 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.0.0-beta1+24.1101.1  
-Last Updated:           1-Nov-2024  
+Stable tag:             3.0.0-RC1+24.1107.1  
+Last Updated:           07-Nov-2024  
 Requires at least:      5.8  
 Tested up to:           6.7  
 Requires PHP:           8.1  
@@ -57,22 +57,21 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 |   Included Extensions & Traits        |                       |
 |   ---------------------------------   |   ----------------    |
-|   *file system access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
+|   *File System Access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *security*                          | Adds a number of security/firewall options to your WordPress installation including server-side CORS, changing the login url, setting password policies, limiting login attempts, disabling RSS/XML, limit REST access, set global cookie flags, and more. |
-|   *AbuseIPDB API*                     | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com) 'Abuse Confidence Level'. |
-|   *FraudGuard API*                    | Ability to block access by IP address based on [FruadGuard](https://www.fraudguard.io) 'Risk Level'. |
-|   *IpGeoLocation API*                 | Ability to block access by IP address based on [IpGeoLocation](https://www.ipgeolocation.io) 'Threat Score'. |
-|   *debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
+|   *Security*                          | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom nonce, setting password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required headers, set global cookie flags, and more. |
+|   *Threat Detection*                  | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com), [FruadGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) scores. |
+|   *Server-Side CORS*                  | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
+|   *Debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
-|   *encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
-|   *session*                           | Manages PHP sessions using well-known session managers or through WordPress transients. |
-|   *maintenance mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
-|   *admin tools*                       | Adds cache management and plugin option backup/restore, export/import. |
-|   *ajax action*                       | Adds an easy to use ajax responder (accessable from any extension). |
-|   *material icons*                    | Adds Google's Material Icons to WordPress. |
-|   *cookie compliance*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters. |
-|   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
+|   *Encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
+|   *Cookie Compliance*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters. |
+|   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for using session data. |
+|   *Maintenance Mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
+|   *Admin Tools*                       | Adds cache management and plugin option backup/restore, export/import. |
+|   *Ajax Action*                       | Adds an easy to use ajax responder (accessable from any extension). |
+|   *Material Icons*                    | Adds Google's Material Icons to WordPress. |
+|   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, html input fields, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
 
 
 |   Extras & Examples                   |   { [explore on github](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras) } { [documentation wiki](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/) } { [download zip](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip) } |
@@ -256,7 +255,7 @@ In short,
 
 {eac}Doojigger should be Network Activated on multi-site installations. Individual extensions and options may be configured on each site.
 
-Some extension may use [wp-config-transformer](https://github.com/wp-cli/wp-config-transformer/contributors) to update wp-config. Copyright 2011-2018 WP-CLI Development Group .
+Some extensions may use [wp-config-transformer](https://github.com/wp-cli/wp-config-transformer/contributors) to update wp-config. Copyright 2011-2018 WP-CLI Development Group .
 
 
 #### See Also
@@ -372,6 +371,8 @@ In developing {eac}Doojigger, and other plugins based on it, I hope to find a sm
 
 To that end, your support is greatly appreciated.
 It will enable me to continue developing quality software and provide support to current and future clients (and to enjoy a cup of coffee occasionally).
+
+*It's not just a job, it's a hobby, a craft, a passion, an art.*
 
 Learn more here...
 +   [EarthAsylum Consulting](https://www.earthasylum.com)

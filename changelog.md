@@ -1,9 +1,10 @@
 == Changelog ==
 
-= Version 3.0 – November 1, 2024 =
+= Version 3.0 – November 7, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
++   New browser optimization options (CSS Early Hints, JS Early Hints, Asynchronous JS).
 +   New Risk Assessment security module using 3rd-party API extensions as well as internal actions and filters to assess and track security risks by IP address.
     +   Implemented server-side CORS security.
         +   Apply CORS rules to rest, xml, and admin-ajax.php requests.

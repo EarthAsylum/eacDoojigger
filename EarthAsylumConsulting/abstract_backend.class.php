@@ -1842,8 +1842,8 @@ abstract class abstract_backend extends abstract_core
 
 		$h2Version = ($stable = $this->pluginHeader('StableTag'))
 			? " <small>(<abbr title='".$this->getRelease()."'>".
-				"v".$this->getVersion()."</abbr>)</small>"
-			: " <small>(v".$this->getVersion().")</small>";
+				"v".$this->getSemanticVersion()->primary."</abbr>)</small>"
+			: " <small>(v".$this->getSemanticVersion()->primary.")</small>";
 		$h2  =
 		$h2a =	"<h2 id='settings_h2'>".
 				"<span style='color:var(--eac-admin-icon)' class='dashicons dashicons-admin-settings'></span>".

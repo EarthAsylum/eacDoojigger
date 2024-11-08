@@ -30,6 +30,11 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		const VERSION 			= '24.1020.1';
 
 		/**
+		 * @var string extension version
+		 */
+		const TAB_NAME 			= 'Security';
+
+		/**
 		 * @var string|array|bool to set (or disable) default group display/switch
 		 */
 		const ENABLE_OPTION		=
@@ -57,7 +62,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 
 			if ($this->is_admin())
 			{
-				$this->registerExtension( [ $this->className, 'security' ] );
+				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
@@ -87,7 +92,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		 */
 		public function admin_options_help()
 		{
-		//	if (!$this->plugin->isSettingsPage('Security')) return;
+		//	if (!$this->plugin->isSettingsPage(self::TAB_NAME)) return;
 		}
 
 
@@ -101,7 +106,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			if ( ! parent::initialize() ) return; // disabled
 		$this->delete_option('security_server_cors_extension_enabled');
 
-			if ( $this->plugin->isSettingsPage('Security'))
+			if ( $this->plugin->isSettingsPage(self::TAB_NAME))
 			{
 				if ( is_multisite() && !is_network_admin() &&
 					(!defined( 'WP_CLI' ) && !defined( 'DOING_AJAX' ) && !defined( 'DOING_CRON' )) )

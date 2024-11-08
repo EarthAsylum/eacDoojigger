@@ -17,12 +17,17 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1029.1';
+		const VERSION 			= '24.1107.1';
 
 		/**
 		 * @var string extension alias
 		 */
 		const ALIAS 			= 'security';
+
+		/**
+		 * @var string extension version
+		 */
+		const TAB_NAME 			= 'Security';
 
 		/**
 		 * @var string path to .htaccess (allow access)
@@ -72,7 +77,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 										" <em>(Network policies may override site policies)</em>",
 					);
 				}
-				$this->registerExtension( [ $this->className, 'security' ] );
+				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
@@ -80,7 +85,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			}
 
 			// add additional css when our settings stylesheet loads.
-			if ($this->plugin->isSettingsPage('Security'))
+			if ($this->plugin->isSettingsPage(self::TAB_NAME))
 			{
 				$this->add_action('admin_enqueue_styles', function($styleId)
 				{
@@ -127,7 +132,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function admin_options_help()
 		{
-		//	if (!$this->plugin->isSettingsPage('Security')) return;
+		//	if (!$this->plugin->isSettingsPage(self::TAB_NAME)) return;
 		//	include 'includes/security.help.php';
 		}
 
@@ -139,7 +144,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function __destruct()
 		{
-			if ($this->plugin->isSettingsPage('Security') && !empty($this->security_rules))
+			if ($this->plugin->isSettingsPage(self::TAB_NAME) && !empty($this->security_rules))
 			{
 				if (!is_multisite() || is_network_admin())
 				{
@@ -159,7 +164,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			if ( ! parent::initialize() ) return; // disabled
 
-			if ( $this->plugin->isSettingsPage('Security'))
+			if ( $this->plugin->isSettingsPage(self::TAB_NAME))
 			{
 				$this->delete_option('secDisablePings'); // removed
 				$this->delete_option('secCodeEditor'); // removed

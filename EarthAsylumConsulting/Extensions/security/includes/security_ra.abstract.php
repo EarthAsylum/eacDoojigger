@@ -15,7 +15,12 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	/**
 	 * @var string extension version
 	 */
-	const VERSION 			= '24.1028.1';
+	const VERSION 			= '24.1107.1';
+
+	/**
+	 * @var string extension version
+	 */
+	const TAB_NAME 			= 'Security';
 
 	/**
 	 * @var string risk assessment provider name (display name, array key, transient id)
@@ -66,7 +71,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 
 		if ($this->is_admin())
 		{
-			$this->registerExtension( [ $this->className, 'security' ] );
+			$this->registerExtension( $this->className );
 			// Register plugin options when needed
 			$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 			// Add contextual help
