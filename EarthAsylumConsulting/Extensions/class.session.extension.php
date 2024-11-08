@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.1105.1';
+		const 	VERSION	= '24.1108.1';
 
 		/**
 		 * @var string supported session managers
@@ -54,7 +54,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		public function __construct($plugin)
 		{
 			parent::__construct($plugin, self::DEFAULT_DISABLED | self::ALLOW_ADMIN);
-			$this->session_cookie 	= sanitize_key('wp_'.$this->pluginName.'_session');
+			$this->session_cookie 	= 'wp-'.$this->pluginName.'-session';
 
 			if ($this->is_admin())
 			{
@@ -209,8 +209,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					return false;
 
 				case self::SESSION_TRANSIENT:
-					if ( isset( $_COOKIE[$this->session_cookie] ) ) {
-						$this->session_id 		= $_COOKIE[$this->session_cookie];
+					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
 						$this->session 			= $this->get_transient($this->session_id);
 					}
 					if (empty($this->session)) {

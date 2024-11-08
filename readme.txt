@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.0.0-RC1+24.1107.1
-Last Updated:           07-Nov-2024
+Stable tag:             3.0.0-RC1+24.1108.1
+Last Updated:           08-Nov-2024
 Requires at least:      5.8
 Tested up to:           6.7
 Requires PHP:           8.1
@@ -52,7 +52,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *File System Access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
 |   *Security*                          | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom nonce, setting password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required headers, set global cookie flags, and more. |
-|   *Threat Detection*                  | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com), [FruadGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) scores. |
+|   *Threat Detection*                  | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com/user/165095), [FruadGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) scores. |
 |   *Server-Side CORS*                  | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
 |   *Debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
@@ -427,7 +427,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.0 – November 7, 2024 =
+= Version 3.0 – November 8, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
@@ -441,7 +441,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
     +   New `register_[fraud|threat|abuse|risk]` hooks used to tag risky actions and, possibly, block access.
         +   Added `register_threat` action to several security checks.
     +   New AbuseIPDB api extension to block by IP address based on abuse score.
-        +   See : https://www.abuseipdb.com 
+        +   See : https://www.abuseipdb.com/user/165095 
     +   New FraudGuard api extension to block by IP address based on risk level.
         +   See : https://www.fraudguard.io 
     +   New IpGeoLocation api extension to block by IP address based on threat score.
@@ -470,5 +470,11 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 +   Suppress shutdown error for not-called parent methods.
 +   Check additional headers in `getVisitorIP()`.
 +   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).
++   Changed default session cookie name (play nice with caching utilities).
++   Changed default visitor cookie name (play nice with caching utilities).
++   Allow cookie name as array containing alternate names in `get_cookie()`.
++   Maybe serialize/unserialize cookie value in `set_cookie()` and `get_cookie()`.
++   `varCookie()` defaults to `get_cookie()` if only one argument (name).
++   Use `sanitize_key()` on cookie name but check for un-sanitized name in `get_cookie()`.
 
 = See changelog.md for more =

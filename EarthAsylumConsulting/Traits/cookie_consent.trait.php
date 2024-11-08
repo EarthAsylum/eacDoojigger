@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0909.1
+ * @version		24.1108.1
  */
 trait cookie_consent
 {
@@ -101,8 +101,8 @@ trait cookie_consent
 	/**
 	 * set a cookie supporting wp_consent if enabled
 	 *
-	 * @param string		$name the cookie name
-	 * @param string		$value the cookie value
+	 * @param string|array	$name the cookie name
+	 * @param mixed			$value the cookie value
 	 * @param string|int	$expires cookie expiration in seconds or timestamp or string
 	 * 						'delete', 'expired', 'session', 'n days', 'n months', etc.
 	 * @param array 		$options cookie parameters
@@ -111,10 +111,17 @@ trait cookie_consent
 	 *						'plugin_or_service', 'category', 'function', ...
 	 * @return bool 		success or failure (as best we can tell)
 	 */
-	public function set_cookie(string $name, string $value, $expires=0, array $options=[], $consent=[]): bool
+	public function set_cookie(string|array $name, $value, string|int $expires=0, array $options=[], $consent=[]): bool
 	{
-		$name	= sanitize_text_field($name);
-		$value 	= sanitize_text_field($value);
+		if (is_array($name)) $name = $name[0];
+
+		$name	= sanitize_key($name);
+
+		if ( is_array( $value ) || is_object( $value ) ) {
+			$value 	= serialize( $value );
+		} else {
+			$value 	= sanitize_text_field($value);
+		}
 
  		$using_consent = self::$cookie_consent_loaded;
 		if ($consent === true) {
@@ -299,13 +306,26 @@ trait cookie_consent
 	/**
 	 * get a cookie (convenience method, since we have set_cookie)
 	 *
-	 * @param string		$name the cookie name
+	 * @param string|array	$name the cookie name (and alternates)
 	 * @param string		$default if cookie not set
 	 * @return string 		cookie value
 	 */
-	public function get_cookie(string $name, $default = null)
+	public function get_cookie(string|array $name, $default = null)
 	{
-		return (isset($_COOKIE[$name])) ? sanitize_text_field($_COOKIE[$name]) : $default;
+		if (!is_array($name)) $name = array($name);
+
+		foreach ($name as $key) {
+			if (isset($_COOKIE[$key])) {
+				$default = maybe_unserialize($_COOKIE[$key]);
+				break;
+			}
+			if (isset($_COOKIE[sanitize_key($key)])) {
+				$default = maybe_unserialize($_COOKIE[sanitize_key($key)]);
+				break;
+			}
+		}
+
+		return is_string($default) ? sanitize_text_field($default) : $default;
 	}
 
 

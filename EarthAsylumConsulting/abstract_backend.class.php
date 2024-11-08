@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1101.1
+ * @version		24.1108.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -2041,7 +2041,7 @@ abstract class abstract_backend extends abstract_core
 
 		if (defined('EACDOOJIGGER_VERSION')) {
 			$info .= "<tr><td>". __('eacDoojigger Version', $this->PLUGIN_TEXTDOMAIN) ."</td>";
-			$info .= "<td>". EACDOOJIGGER_VERSION ."</td></tr>\n";
+			$info .= "<td>". $this->getRelease() ."</td></tr>\n";
 		}
 
 		$info .= "<tr><td>". __('Plugin Base', $this->PLUGIN_TEXTDOMAIN) ."</td>";

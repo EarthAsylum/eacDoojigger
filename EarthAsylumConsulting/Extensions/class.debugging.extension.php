@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.1027.1';
+		const VERSION	= '24.1108.1';
 
 		/**
 		 * @var array disable for these file extensions
@@ -508,7 +508,10 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function purge_logs($asNetAdmin=false)
 		{
-			if (!$this->setLoggingPathname(false,$asNetAdmin) || !is_dir($this->logPath)) return;
+			if (!$this->setLoggingPathname(false,$asNetAdmin) || !is_dir($this->logPath)) {
+				trigger_error('Unable to purge logs, path not found',E_USER_WARNING);
+				return;
+			}
 
 			$weeks = ($asNetAdmin)
 					? intval($this->is_network_option('debug_purge_time'))

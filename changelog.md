@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.0 – November 7, 2024 =
+= Version 3.0 – November 8, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
@@ -14,7 +14,7 @@
     +   New `register_[fraud|threat|abuse|risk]` hooks used to tag risky actions and, possibly, block access.
         +   Added `register_threat` action to several security checks.
     +   New AbuseIPDB api extension to block by IP address based on abuse score.
-        +   See : https://www.abuseipdb.com 
+        +   See : https://www.abuseipdb.com/user/165095 
     +   New FraudGuard api extension to block by IP address based on risk level.
         +   See : https://www.fraudguard.io 
     +   New IpGeoLocation api extension to block by IP address based on threat score.
@@ -43,6 +43,12 @@
 +   Suppress shutdown error for not-called parent methods.
 +   Check additional headers in `getVisitorIP()`.
 +   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).
++   Changed default session cookie name (play nice with caching utilities).
++   Changed default visitor cookie name (play nice with caching utilities).
++   Allow cookie name as array containing alternate names in `get_cookie()`.
++   Maybe serialize/unserialize cookie value in `set_cookie()` and `get_cookie()`.
++   `varCookie()` defaults to `get_cookie()` if only one argument (name).
++   Use `sanitize_key()` on cookie name but check for un-sanitized name in `get_cookie()`.
 
 = Version 2.7.0 – October 7, 2024 =
 

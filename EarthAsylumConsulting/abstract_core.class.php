@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1101.1
+ * @version		24.1108.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -2060,16 +2060,16 @@ abstract class abstract_core
 	 */
 	public function getVisitorId(bool $forRequest=false): string
 	{
-		$cookieName = $this->className.'id';
+		$cookieName = ['wp-'.$this->className.'-id',$this->className.'id'];
 		/**
 		 * filter {classname}_visitor_cookie_name set the visitor cookie name
 		 * @param	string	visitor cookie name
 		 * @return	string
 		 */
-		$cookieName = $this->apply_filters( 'visitor_cookie_name', $cookieName );
+		$cookieName[0] = $this->apply_filters( 'visitor_cookie_name', $cookieName[0] );
 
 		$value = (!$forRequest)
-			? $this->get_cookie($cookieName) ?: $this->getVariable($cookieName)
+			? $this->get_cookie($cookieName) ?: $this->getVariable($cookieName[0])
 			: null;
 
 		if (!$value)
@@ -2091,7 +2091,7 @@ abstract class abstract_core
 			 * @param	string	visitor cookie name
 			 * @return	string	id
 			 */
-			$value = $this->apply_filters( 'set_visitor_id', $value, $cookieName );
+			$value = $this->apply_filters( 'set_visitor_id', $value, $cookieName[0] );
 
 			$value = sha1($value);
 		}
@@ -2102,18 +2102,18 @@ abstract class abstract_core
 		 * @param	string		visitor cookie name
 		 * @return	bool|int	true|false or #days (30)
 		 */
-		$setCookie = ($forRequest) ? false : $this->apply_filters( 'enable_visitor_cookie', false, $cookieName );
+		$setCookie = ($forRequest) ? false : $this->apply_filters( 'enable_visitor_cookie', false, $cookieName[0] );
 		if ($setCookie && !headers_sent())
 		{
 			if (!is_int($setCookie)) $setCookie = 30;
-			$this->set_cookie($cookieName, $value, "{$setCookie} Days", [/* default options */],
+			$this->set_cookie($cookieName[0], $value, "{$setCookie} Days", [/* default options */],
 				[
 					'category' => 'preferences',
 					'function' => __( '%s sets this cookie to assign a unique visitor ID to track preferences and activity.', $this->PLUGIN_TEXTDOMAIN )
 				]
 			);
 		}
-		$this->setVariable($cookieName,$value);
+		$this->setVariable($cookieName[0],$value);
 		return $value;
 	}
 
@@ -2590,6 +2590,7 @@ abstract class abstract_core
 	 */
 	public function varCookie( string $name, $filter = FILTER_CALLBACK, $options = null )
 	{
+		if (func_num_args() == 1) return $this->get_cookie($name);
 		$filter = $this->getFilterCallback($filter,$options);
 		return filter_input(INPUT_COOKIE, $name, ...$filter);
 	}
