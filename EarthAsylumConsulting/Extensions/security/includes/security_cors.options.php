@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1003.1
+ * @version 	24.1111.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -19,9 +19,10 @@ $this->registerExtensionOptions( $this->className,
 				'type'		=>	'switch',
 				'label'		=>	"<abbr title='Cross-Origin Resource Sharing'>CORS</abbr> Options",
 				'options'	=>	array(
-					["Apply CORS to <abbr title='REpresentational State Transfer (e.g. /wp-json)'>REST</abbr> requests"	=>'rest'],
+					["Apply CORS to <abbr title='REpresentational State Transfer (e.g. /wp-json)'>REST</abbr> requests" =>'rest'],
 					["Apply CORS to <abbr title='eXtensible Markup Language - Remote Procedure Call (e.g. /xmlrpc.php)'>XML-RPC</abbr> requests" =>'xml'],
 					["Apply CORS to <abbr title='Asynchronous JavaScript and XML (e.g. /admin-ajax.php)'>AJAX</abbr> requests" =>'ajax'],
+					["Apply CORS to <abbr title='Form Posts (as well as put or delete) requests'>Other Post</abbr> requests" =>'post'],
 					["Use <abbr title='Get origin from the http referer header'>referring URL</abbr> if no origin" =>'referer'],
 					["Use <abbr title='Get origin by reverse DNS lookup'>IP address</abbr> if no origin" =>'ip_address'],
 					["<abbr title='Verify IP address of incoming requests with origin=".$this->plugin->varServer('host')." to prevent spoofing'>Validate</abbr> this site's origin to its IP address" => 'host_origin'],

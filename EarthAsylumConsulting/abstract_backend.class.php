@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1108.1
+ * @version		24.1110.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -554,14 +554,14 @@ abstract class abstract_backend extends abstract_core
 		 */
 		$scheduledTime = new \DateTime( wp_date('Y-m-d H:00:00'), wp_timezone() );
 		$scheduledTime->modify('next hour');
-		wp_schedule_event( $scheduledTime->getTimestamp(), 'hourly', $this->prefixOptionName('hourly_event') );
+		wp_schedule_event( $scheduledTime->getTimestamp(), 'hourly', $this->prefixHookName('hourly_event') );
 
 		/**
 		 * action {pluginname}_daily_event to run daily
 		 * @return	void
 		 */
 		$scheduledTime = new \DateTime( 'tomorrow 1am', wp_timezone() );
-		wp_schedule_event( $scheduledTime->getTimestamp(), 'daily', $this->prefixOptionName('daily_event') );
+		wp_schedule_event( $scheduledTime->getTimestamp(), 'daily', $this->prefixHookName('daily_event') );
 
 		/**
 		 * action {pluginname}_weekly_event to run start of week
@@ -570,7 +570,7 @@ abstract class abstract_backend extends abstract_core
 		$startOfWeekDay = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 		$startOfWeekDay = $startOfWeekDay[ get_option( 'start_of_week' ) ];
 		$scheduledTime = new \DateTime( 'next '.$startOfWeekDay.' midnight', wp_timezone() );
-		wp_schedule_event( $scheduledTime->getTimestamp(), 'weekly', $this->prefixOptionName('weekly_event') );
+		wp_schedule_event( $scheduledTime->getTimestamp(), 'weekly', $this->prefixHookName('weekly_event') );
 	}
 
 
@@ -585,7 +585,7 @@ abstract class abstract_backend extends abstract_core
 	{
 		foreach ( ['hourly_event','daily_event','weekly_event'] as $eventName)
 		{
-			$eventName = $this->prefixOptionName($eventName);
+			$eventName = $this->prefixHookName($eventName);
 			wp_unschedule_hook($eventName);
 		}
 	}
@@ -1846,7 +1846,7 @@ abstract class abstract_backend extends abstract_core
 			: " <small>(v".$this->getSemanticVersion()->primary.")</small>";
 		$h2  =
 		$h2a =	"<h2 id='settings_h2'>".
-				"<span style='color:var(--eac-admin-icon)' class='dashicons dashicons-admin-settings'></span>".
+				"(<span style='color:var(--eac-admin-icon)' class='dashicons dashicons-admin-settings'></span>) ".
 				__( $this->pluginHeader('Name'), $this->PLUGIN_TEXTDOMAIN ).
 				$h2Version.' - '.
 				__( $currentTab, $this->PLUGIN_TEXTDOMAIN ).
@@ -1854,22 +1854,13 @@ abstract class abstract_backend extends abstract_core
 		// add clickable link to enable/disable advanced mode
 		if ($this->allowAdvancedMode())
 		{
-			$switchTo = ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
-			$href = $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' );
-/*
+			$switchTo 	= ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
+			$href 		= $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' );
 			$h2a = preg_replace("|<span.*></span>|",
 					"<a href='{$href}'>".
-					"(<span class='tooltip dashicons dashicons-admin-settings' ".
+					"<span class='tooltip dashicons dashicons-admin-settings'".
 					"title='{$switchTo} advanced mode'>".
-					"</span>)</a>&nbsp;",
-					$h2a
-			);
-*/
-			$switchFr = ($this->isAdvancedMode()) ? 'Advanced' : 'Essentials';
-			$h2a = preg_replace("|</h2>|",
-					"<span style='float:right;font-size:.75em;font-weight:normal'>".
-					"( <a href='{$href}' data-tooltip title='{$switchTo} advanced mode'>{$switchFr}</a> )".
-					"</span></h2>",
+					"</span></a>",
 					$h2a
 			);
 		}
@@ -2860,7 +2851,13 @@ abstract class abstract_backend extends abstract_core
 	 */
 	public function options_settings_page_style(): string
 	{
-		// CSS for the page
+		$styleId = sanitize_title($this->className.'-palette');
+		wp_enqueue_style( $styleId,
+			plugins_url( 'eacDoojigger/assets/css/color-palette.css' ),
+			[],
+			EACDOOJIGGER_VERSION
+		);
+
 		$styleId = sanitize_title($this->className.'-settings');
 		wp_enqueue_style( $styleId,
 			plugins_url( 'eacDoojigger/assets/css/admin-options.css' ),
@@ -2883,29 +2880,17 @@ abstract class abstract_backend extends abstract_core
 	 * Get admin color variables
 	 *
 	 * @see https://make.wordpress.org/core/2021/02/23/standardization-of-wp-admin-colors-in-wordpress-5-7/
+	 * superseded by https://make.wordpress.org/design/handbook/design-guide/foundations/colors/
 	 *
 	 * @return	string the root style variables
 	 */
 	public function options_settings_page_admin_style(): string
 	{
-		$style = ":root {\n";
-		$style .= "\t--eac-wp-blue:#0073AA;".
-					"--eac-wp-medium:#00A0D2;";
-		$style .= "\n\t";
+		$style = ":root {";
 		foreach ($this->admin_color_scheme() as $id => $code) {
 			$style .= "--eac-admin-{$id}:{$code};";
 		}
-		$style .= "\n";
-		$style .= "\t--eac-admin-gray-0:#f6f7f7;".
-					"--eac-admin-gray-20:#a7aaad;".
-					"--eac-admin-gray-60:#50575e;\n";
-		$style .= "\t--eac-admin-blue-30:#4f94d4;".
-					"--eac-admin-blue-50:#2271b1;".
-					"--eac-admin-yellow-0:#fcf9e8;\n";
-		$style .= "\t--eac-logo-gray:#8c8f94;".
-					"--eac-logo-green:#6e9882;".
-					"--eac-logo-orange:#da821d;\n";
-		$style .= "}\n";
+		$style .= "}";
 		return $style;
 	}
 

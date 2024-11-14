@@ -10,7 +10,6 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -20,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0517.1';
+		const VERSION	= '24.1108.1';
 
 		/**
 		 * @var string additional styling
@@ -111,7 +110,8 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 
 			\add_action( ($this->is_admin() ? 'admin' : 'wp').'_print_styles', 	function() use($addStyle)
 				{
-					wp_enqueue_style('material-icons', '//fonts.googleapis.com/icon?family=Material+Icons' );
+					wp_register_style('material-icons', '//fonts.googleapis.com/icon?family=Material+Icons', [], null );
+					wp_enqueue_style('material-icons');
 					wp_add_inline_style('material-icons', $addStyle);
 				}
 			);

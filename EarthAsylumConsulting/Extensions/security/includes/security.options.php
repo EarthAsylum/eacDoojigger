@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1029.1
+ * @version 	24.1113.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -128,7 +128,7 @@ $this->registerExtensionOptions( $this->className,
 		),
 		'secFileChanges' 	=> array(
 				'type'		=>	'switch',
-				'label'		=>	"Disable File Changes ",
+				'label'		=>	"Disable File Changes",
 				'options'	=>	[
 					"<abbr title='Disables the WordPress code editor only.'>Code Editor</abbr> Disabled" => 'no-code',
 					"<abbr title='Disables all file modifications and updates'>File Changes</abbr> Disabled" => 'no-mods'

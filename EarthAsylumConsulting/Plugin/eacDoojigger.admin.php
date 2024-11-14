@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Plugin;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1107.1
+ * @version		24.1109.1
  */
 
 trait eacDoojigger_admin_traits
@@ -119,6 +119,24 @@ trait eacDoojigger_admin_traits
 			}
 		);
 
+		$this->add_filter("options_form_h2_html", function($h2a,$h2)
+			{
+				if ($this->allowAdvancedMode())
+				{
+					$switchTo 	= ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
+					$switchFr 	= ($this->isAdvancedMode()) ? 'Advanced' : 'Essentials';
+					$href 		= $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' );
+					return preg_replace("|</h2>|",
+							"<span style='float:right;font-size:.75em;font-weight:normal'>".
+							"( <a href='{$href}'><abbr title='{$switchTo} advanced mode'>{$switchFr}</abbr></a> )".
+							"</span></h2>",
+							$h2
+					);
+				}
+				return $h2a;
+			},10,2
+		);
+
 		// from standard_options
 		$options = $this->standard_options(['adminSettingsMenu','uninstallOptions'/*,'emailFatalNotice'*/]);
 		$options['adminSettingsMenu']['options'][] = 'Menu Bar';
@@ -128,11 +146,18 @@ trait eacDoojigger_admin_traits
 				'label'		=>	'Optimizations',
 				'options'	=>	[
 					"<abbr title='Add early hints link header for style sheets'>CSS Early Hints</abbr>"	=>	'style',
+					"<abbr title='Preload stylesheets asynchronously'>Asynchronous CSS</abbr>"	=>	'style-async',
 					"<abbr title='Add early hints link header for JavaScript'>JS Early Hints</abbr>"	=>	'script',
-					"<abbr title='Add async attribute to non-deferred JavaScript tags'>Asynchronous JS</abbr>"	=>	'async',
+					"<abbr title='Add async attribute to non-deferred JavaScript tags'>Asynchronous JS</abbr>"	=>	'script-async',
 				],
 				'default'	=>	['style','script'],
-				'info'		=> 	'Add browser optimizations: early-hints and Asynchronous loading.',
+				'info'		=> 	'Add browser optimizations: early-hints and asynchronous loading.',
+				'help'		=>	"[info] Use ".
+								"`eacDoojigger_style_preload_exclude`, ".
+								"`eacDoojigger_style_async_exclude` ".
+								"`eacDoojigger_script_preload_exclude`, or ".
+								"`eacDoojigger_script_async_exclude` ".
+								"filters to exclude specific handles from these optimizations.",
 		);
 
 		// WP Environment setting

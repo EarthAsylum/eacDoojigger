@@ -1,10 +1,10 @@
 == Changelog ==
 
-= Version 3.0 – November 8, 2024 =
+= Version 3.0 – November 13, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
-+   New browser optimization options (CSS Early Hints, JS Early Hints, Asynchronous JS).
++   New browser optimization options (CSS Early Hints, Asynchronous CSS, JS Early Hints, Asynchronous JS).
 +   New Risk Assessment security module using 3rd-party API extensions as well as internal actions and filters to assess and track security risks by IP address.
     +   Implemented server-side CORS security.
         +   Apply CORS rules to rest, xml, and admin-ajax.php requests.
@@ -19,6 +19,16 @@
         +   See : https://www.fraudguard.io 
     +   New IpGeoLocation api extension to block by IP address based on threat score.
         +   See : https://www.ipgeolocation.io
++   New 'Content Security Assistant' (Add Script nonce, Add Style nonce, Do CSP Action).
+    +   Add `nonce=xxx`  to `script` and style `link` tags.
+    +   New `eacDoojigger_security_nonce` filter gets security nonce.
+    +   New `eacDoojigger_content_security_policy` action passes security nonce to facilitate `Content-Security-Policy` creation.
++   New ipUtil helper to check IP address against list of addresses and/or subnets (cidr).
+    +   New `isIpInList()` method using ipUtil.
++   New `get_output_file()` to create/write a file in appropriate WP path.
+	 +  a. where the WP debug log is stored.
+	 +  b. in the upload folder.
+	 +  Uses wp_filesystem for proper access.
 +   New `access_denied()` method used to block fraudulent requests.
 +   Reworked admin options menu(s).
 +   Improved extension loader methods.
@@ -27,12 +37,6 @@
     +   `$this->isAdvancedMode('global',['administrator','editor'])`
 +   Standard methods for option, hook, table names with prefix.
     +   `addClassNamePrefix()`, `removeClassNamePrefix()`, `getClassNamePrefix()`, `hasClassNamePrefix()`
-+   New ipUtil helper to check IP address against list of addresses and/or subnets (cidr).
-    +   New `isIpInList()` method using ipUtil.
-+   New `get_output_file()` to create/write a file in appropriate WP path.
-	 +  a. where the WP debug log is stored.
-	 +  b. in the upload folder.
-	 +  Uses wp_filesystem for proper access.
 +   Debugging extension uses `get_output_file()` and changes log file name.
 +   New hooks trait includes all prefixed action and filter functions.
     +   New `has_filter_count()`, `has_action_count()`
@@ -40,8 +44,9 @@
 +   Added `ENABLE_OPTION` constant to extensions to allow override of the enable option used in an admin tab section.
 +   Added `TAB_NAME` constant to extensions to allow setting the default tab name.
 +   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
++   New `getRequestOrigin()` gets origin from header or referrer or reverse DNS lookup.
 +   Suppress shutdown error for not-called parent methods.
-+   Check additional headers in `getVisitorIP()`.
++   Check additional http headers in `getVisitorIP()`.
 +   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).
 +   Changed default session cookie name (play nice with caching utilities).
 +   Changed default visitor cookie name (play nice with caching utilities).
@@ -49,6 +54,8 @@
 +   Maybe serialize/unserialize cookie value in `set_cookie()` and `get_cookie()`.
 +   `varCookie()` defaults to `get_cookie()` if only one argument (name).
 +   Use `sanitize_key()` on cookie name but check for un-sanitized name in `get_cookie()`.
++   Removed `scheduleEvent()` method. Not used, didn't work. Use `wp_schedule_single_event()`.
++   New `color-palette.css` loaded on admin pages.
 
 = Version 2.7.0 – October 7, 2024 =
 

@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1108.1
+ * @version		24.1112.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -273,7 +273,6 @@ abstract class abstract_core
 	 */
 	public function _plugin_startup()
 	{
-
 		// initialize 'advanced mode' settings
 		$this->advanced_mode_init();
 
@@ -480,16 +479,22 @@ abstract class abstract_core
 		$this->add_action( 'ready',				array($this, 'plugin_ready') );
 
 		/**
+		 * action {classname}_hourly_event to run hourly
+		 * @return	void
+		 */
+		//$this->add_action( 'hourly_event', 	array($this, 'plugin_hourly_event') );
+
+		/**
 		 * action {classname}_daily_event to run daily
 		 * @return	void
 		 */
 		$this->add_action( 'daily_event',		array($this, 'plugin_daily_event') );
 
 		/**
-		 * action {classname}_hourly_event to run hourly
+		 * action {classname}_weekly_event to run hourly
 		 * @return	void
 		 */
-		//$this->add_action( 'hourly_event', 	array($this, 'plugin_hourly_event') );
+		//$this->add_action( 'weekly_event', 	array($this, 'plugin_weekly_event') );
 
 		/**
 		 * action {classname}_flush_caches tell others to clear caches/transient data
@@ -599,7 +604,7 @@ abstract class abstract_core
 			},
 			HOUR_IN_SECONDS
 		);
-		$this->pluginData['RequestTime'] = WP_START_TIMESTAMP; //$this->varServer("REQUEST_TIME_FLOAT")3 ?: microtime(true);
+		$this->pluginData['RequestTime'] 		= WP_START_TIMESTAMP;
 		$this->PLUGIN_TEXTDOMAIN = $this->pluginData['TextDomain'];
 	}
 
@@ -982,26 +987,6 @@ abstract class abstract_core
 			mt_rand( 0, 0x0fff ) | 0x4000,
 			mt_rand( 0, 0x3fff ) | 0x8000,
 			mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ) );
-	}
-
-
-	/**
-	 * schedule a single event with callback
-	 *
-	 * @param string $eventName
-	 * @param int $secondsFromNow time in seconds in the future
-	 * @param array $arguments passed to callback
-	 * @param callable method callback
-	 * @return void
-	 */
-	public function scheduleEvent(string $eventName, int $secondsFromNow, array $arguments, $callback): void
-	{
-		if (wp_next_scheduled( $eventName ) !== false)
-		{
-			wp_clear_scheduled_hook( $eventName );
-		}
-		wp_schedule_single_event( time()+$secondsFromNow, $eventName, $arguments );
-		add_action( $eventName, $callback, 10, count($arguments) );
 	}
 
 
@@ -1505,6 +1490,7 @@ abstract class abstract_core
 	/**
 	 * detect an ajax request
 	 *
+	 * @since 2.6.1
 	 * @return	bool
 	 */
 	public function doing_ajax(): bool
@@ -1525,13 +1511,14 @@ abstract class abstract_core
 	 */
 	public function isAjaxRequest(): bool
 	{
-	//	\_deprecated_function( __FUNCTION__, '2.6.1', 'doing_ajax()');
+		\_deprecated_function( __FUNCTION__, '2.6.1', 'doing_ajax()');
 		return $this->doing_ajax();
 	}
 
 
 	/**
 	 * get the current url based on WP request
+	 * @since 3.0
 	 */
 	public function getRequestURL(): string
 	{
@@ -1548,6 +1535,7 @@ abstract class abstract_core
 	/**
 	 * get the current url part(s) based on WP request
 	 *
+	 * @since 3.0
 	 * @param int PHP url part constant
 	 */
 	public function getRequestParts($part): string
@@ -1563,6 +1551,7 @@ abstract class abstract_core
 
 	/**
 	 * Returns the local host from home_url
+	 * @since 3.0
 	 */
 	public function getRequestHost(): string
 	{
@@ -1577,8 +1566,7 @@ abstract class abstract_core
 
 	/**
 	 * get the current url path based on WP request
-	 *
-	 * @return	string the full url of the current request
+	 * @since 3.0
 	 */
 	public function getRequestPath(): string
 	{
@@ -1588,6 +1576,30 @@ abstract class abstract_core
 			$url_path = $this->getRequestParts( PHP_URL_PATH );
 		}
 		return $url_path;
+	}
+
+
+	/**
+	 * get the the request origin
+	 *
+	 * @since 3.0
+	 * @return	string the origin host
+	 */
+	public function getRequestOrigin(): string
+	{
+		static $origin = false;
+		if ( $origin === false )
+		{
+			if ($origin = $this->varServer('HTTP_ORIGIN')) {
+			} else if ($origin = $this->varServer('HTTP_REFERER')) {
+				$origin = parse_url($origin);
+				$origin = $origin['scheme'].'://'.$origin['host'];
+			} else {
+				$origin  = (is_ssl()) ? 'https://' : 'http://';
+				$origin .= gethostbyaddr($this->getVisitorIP());
+			}
+		}
+		return $origin;
 	}
 
 

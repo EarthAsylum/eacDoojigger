@@ -8,7 +8,7 @@ require "eacDoojigger.trait.php";
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
  * @version		3.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
@@ -37,16 +37,51 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	const FILE_PERMISSION			= 0664; //FS_CHMOD_FILE;
 
 	/**
+	 * @var array style handles excluded from preloading
+	 */
+	private $style_preload_exclude 	= [
+	//		'woocommerce',
+			'debug-bar',
+			'query-monitor',
+	];
+
+	/**
+	 * @var array style handles excluded from async-ing
+	 */
+	private $style_async_exclude 	= [
+			'woocommerce',
+			'colors',
+			'debug-bar',
+			'query-monitor',
+	];
+
+	/**
+	 * @var array script handles excluded from preloading
+	 */
+	private $script_preload_exclude = [
+			'wpemoji',
+			'concatemoji',
+			'debug-bar',
+			'query-monitor',
+	];
+
+	/**
 	 * @var array script handles excluded from async-ing
 	 */
-	const JS_ASYNC_EXCLUDE 	= [
+	private $script_async_exclude 	= [
+			'wp-i18n',
+			'wpemoji',
+			'concatemoji',
 			'jquery-core',
+			'jquery-migrate',
+			'debug-bar',
+			'query-monitor',
 	];
 
 	/**
 	 * @var array preload sources
 	 */
-	private $optimize_preload = [];
+	private $optimize_preload 		= [];
 
 	/**
 	 * @var object wp-config-transformer
@@ -97,13 +132,37 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 		}
 
 		if ($this->is_option('optimize_options','style')) {
+			/**
+			 * filter {pluginname}_exclude_style_preload css handles to exclude from preloading
+			 * @param array handle name(s)
+			 */
+			$this->style_preload_exclude = $this->apply_filters('exclude_style_preload',$this->style_preload_exclude);
 			add_filter('style_loader_src',	array($this, 'optimize_hints'),100,2);
 		}
+		if ($this->is_option('optimize_options','style-async')) {
+			/**
+			 * filter {pluginname}_exclude_style_async css handles to exclude from async-ing
+			 * @param array handle name(s)
+			 */
+			$this->style_async_exclude = $this->apply_filters('exclude_style_async',$this->style_async_exclude);
+			add_filter('style_loader_tag', array($this, 'optimize_async_style'),100,4);
+		}
+
 		if ($this->is_option('optimize_options','script')) {
+			/**
+			 * filter {pluginname}_exclude_script_preload js handles to exclude from preloading
+			 * @param array handle name(s)
+			 */
+			$this->script_preload_exclude = $this->apply_filters('exclude_script_preload',$this->script_preload_exclude);
 			add_filter('script_loader_src', array($this, 'optimize_hints'),100,2);
 		}
-		if ($this->is_option('optimize_options','async')) {
-			add_filter('script_loader_tag', array($this, 'optimize_async'),100,3);
+		if ($this->is_option('optimize_options','script-async')) {
+			/**
+			 * filter {pluginname}_exclude_script_async js handles to exclude from async-ing
+			 * @param array handle name(s)
+			 */
+			$this->script_async_exclude = $this->apply_filters('exclude_script_async',$this->script_async_exclude);
+			add_filter('script_loader_tag', array($this, 'optimize_async_script'),100,3);
 		}
 		//add_action('wp_head', 			array($this, 'optimize_preload'));
 	}
@@ -263,10 +322,16 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 		$headerSize = strlen(implode('	', headers_list()));
 		if ($headerSize > 3072) return $src;
 
+		$type	= strtok(current_filter(),'_');
+
+		$excluded = "{$type}_preload_exclude";
+		foreach ($this->{$excluded} as $exclude) {
+			if (str_starts_with($handle,$exclude)) return $src;
+		}
+
 		$src	= (substr($src, 0, 2) == '//')
 					? preg_replace('/^\/\/([^\/]*)\//', '/', $src)
 					: preg_replace('/^http(s)?:\/\/[^\/]*/', '', $src);
-		$type	= strtok(current_filter(),'_');
 
 		//if (str_starts_with($src,'/wp-includes')) {
 		//	$this->optimize_preload[$type][] = $src;
@@ -280,28 +345,47 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 
 
 	/**
+	 * Make css async
+	 *
+	 * @param string $tab style tag
+	 * @param string $handle script/style name
+	 * @param string $src tag src= or href=
+	 * @param string $media tag media=
+	 */
+	public function optimize_async_style(string $tag, string $handle, string $src, string $media): string
+	{
+		foreach ($this->style_async_exclude as $exclude) {
+			if (str_starts_with($handle,$exclude)) return $tag;
+		}
+
+		$nonce = $this->apply_filters('security_nonce',null);
+		$nonce = ($nonce) ? " nonce='{$nonce}'" : "";
+		$tag = "<link rel='preload' id='{$handle}-css' href='{$src}' as='style' media='{$media}'{$nonce}>\n".
+				"<script{$nonce}>document.getElementById('{$handle}-css').addEventListener(".
+					"'load',(e)=>{e.currentTarget.rel='stylesheet';},{once:true});".
+				"</script><noscript>" . trim($tag) . "</noscript>\n";
+
+		return $tag;
+	}
+
+
+	/**
 	 * Make js async
 	 *
 	 * @param string $tab script tag
 	 * @param string $handle script/style name
 	 * @param string $src tag src= or href=
 	 */
-	public function optimize_async(string $tag, string $handle, string $src): string
+	public function optimize_async_script(string $tag, string $handle, string $src): string
 	{
 		if (str_contains($tag,' async')) return $tag;
 		if (str_contains($tag,' defer')) return $tag;
 
-		/**
-		 * filter {pluginname}_exclude_js_async js handles to exclude from async-ing
-		 * @param array handle name(s)
-		 */
-		$excluded = $this->apply_filters('exclude_js_async',self::JS_ASYNC_EXCLUDE);
-
-		foreach ($excluded as $exclude) {
+		foreach ($this->script_async_exclude as $exclude) {
 			if (str_starts_with($handle,$exclude)) return $tag;
 		}
 
-		$tag = str_replace('<script ','<script async ',$tag);
+		$tag = str_replace("<script ","<script async ",$tag);
 		return $tag;
 	}
 

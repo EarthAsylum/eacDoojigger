@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.0.0-RC1+24.1108.1
-Last Updated:           08-Nov-2024
+Stable tag:             3.0.0-RC1+24.1113.1
+Last Updated:           13-Nov-2024
 Requires at least:      5.8
 Tested up to:           6.7
 Requires PHP:           8.1
@@ -51,14 +51,15 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   ---------------------------------   |   ----------------    |
 |   *File System Access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *Security*                          | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom nonce, setting password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required headers, set global cookie flags, and more. |
-|   *Threat Detection*                  | Ability to block access by IP address based on [AbuseIPDB](https://www.abuseipdb.com/user/165095), [FruadGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) scores. |
+|   *Security*                          | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
+|   *Content Security Assistant*        | Adds security nonce to `script` and style `link` tags to facilitate creation of comprehensive *Content Security Policy* (CSP) | 
 |   *Server-Side CORS*                  | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
+|   *Threat Detection*                  | Ability to block access by IP address based on *security* and *CORS* violations as well as [AbuseIPDB](https://www.abuseipdb.com/user/165095), [FraudGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) threat scores. |
 |   *Debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *Encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
 |   *Cookie Compliance*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters. |
-|   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for using session data. |
+|   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for accessing session data. |
 |   *Maintenance Mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
 |   *Admin Tools*                       | Adds cache management and plugin option backup/restore, export/import. |
 |   *Ajax Action*                       | Adds an easy to use ajax responder (accessable from any extension). |
@@ -335,7 +336,7 @@ When uninstalled, the plugin will delete custom tables, settings, and transient 
 
 = Is {eac}Doojigger stable and reliable? =
 
-__Version 2__ has been meticulously updated to provide not only new features and efficiencies, but many other improvements, including stability and reliability. The code base of {eac}Doojigger has been in proprietary use (and in development) over years and on several websites. However, there is a nearly infinte number of website configurations and uses that can't possibly be tested. If you run into any issues, problems, bugs or simply change requests, I'd be more than happy to address them and to work with you.
+Since version 2, {eac}Doojigger has been meticulously updated to provide not only new features and efficiencies, but many other improvements, including stability and reliability. The code base of {eac}Doojigger has been in proprietary use (and in development) over several years and on several websites. However, there is a nearly infinte number of website configurations and uses that can't possibly be tested. If you run into any issues, problems, bugs or simply change requests, I'd be more than happy to address them and to work with you.
 
 = Where can I find more information about ... =
 
@@ -359,12 +360,12 @@ I have some 30 years experience in technology and software development for a dis
 
 Currently, and for the last decade or more, my focus has been on internet-based business software & technology management.
 
-In developing {eac}Doojigger, and other plugins based on it, I hope to find a small revenue stream to help keep me going.
+In developing {eac}Doojigger, and other plugins based on it, I hope to maintain a small revenue stream to help keep me going.
 
 To that end, your support is greatly appreciated.
 It will enable me to continue developing quality software and provide support to current and future clients (and to enjoy a cup of coffee occasionally).
 
-*It's not just a job, it's a hobby, a craft, a passion, an art.*
+*It's not just a job, it's a hobby, a craft, a passion, and an art.*
 
 Learn more here...
 +   [EarthAsylum Consulting](https://www.earthasylum.com)
@@ -404,7 +405,7 @@ _Kevin Burkholder_
 
 As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1+
 
-= 2.7.0
+= 2.7.0 =
 
 Future versions (starting with 3.0) of {eac}Doojigger will drop support for PHP versions prior to 8.1.
 
@@ -427,11 +428,11 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.0 – November 8, 2024 =
+= Version 3.0 – November 13, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
-+   New browser optimization options (CSS Early Hints, JS Early Hints, Asynchronous JS).
++   New browser optimization options (CSS Early Hints, Asynchronous CSS, JS Early Hints, Asynchronous JS).
 +   New Risk Assessment security module using 3rd-party API extensions as well as internal actions and filters to assess and track security risks by IP address.
     +   Implemented server-side CORS security.
         +   Apply CORS rules to rest, xml, and admin-ajax.php requests.
@@ -446,6 +447,16 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
         +   See : https://www.fraudguard.io 
     +   New IpGeoLocation api extension to block by IP address based on threat score.
         +   See : https://www.ipgeolocation.io
++   New 'Content Security Assistant' (Add Script nonce, Add Style nonce, Do CSP Action).
+    +   Add `nonce=xxx`  to `script` and style `link` tags.
+    +   New `eacDoojigger_security_nonce` filter gets security nonce.
+    +   New `eacDoojigger_content_security_policy` action passes security nonce to facilitate `Content-Security-Policy` creation.
++   New ipUtil helper to check IP address against list of addresses and/or subnets (cidr).
+    +   New `isIpInList()` method using ipUtil.
++   New `get_output_file()` to create/write a file in appropriate WP path.
+	 +  a. where the WP debug log is stored.
+	 +  b. in the upload folder.
+	 +  Uses wp_filesystem for proper access.
 +   New `access_denied()` method used to block fraudulent requests.
 +   Reworked admin options menu(s).
 +   Improved extension loader methods.
@@ -454,12 +465,6 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
     +   `$this->isAdvancedMode('global',['administrator','editor'])`
 +   Standard methods for option, hook, table names with prefix.
     +   `addClassNamePrefix()`, `removeClassNamePrefix()`, `getClassNamePrefix()`, `hasClassNamePrefix()`
-+   New ipUtil helper to check IP address against list of addresses and/or subnets (cidr).
-    +   New `isIpInList()` method using ipUtil.
-+   New `get_output_file()` to create/write a file in appropriate WP path.
-	 +  a. where the WP debug log is stored.
-	 +  b. in the upload folder.
-	 +  Uses wp_filesystem for proper access.
 +   Debugging extension uses `get_output_file()` and changes log file name.
 +   New hooks trait includes all prefixed action and filter functions.
     +   New `has_filter_count()`, `has_action_count()`
@@ -467,8 +472,9 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 +   Added `ENABLE_OPTION` constant to extensions to allow override of the enable option used in an admin tab section.
 +   Added `TAB_NAME` constant to extensions to allow setting the default tab name.
 +   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
++   New `getRequestOrigin()` gets origin from header or referrer or reverse DNS lookup.
 +   Suppress shutdown error for not-called parent methods.
-+   Check additional headers in `getVisitorIP()`.
++   Check additional http headers in `getVisitorIP()`.
 +   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).
 +   Changed default session cookie name (play nice with caching utilities).
 +   Changed default visitor cookie name (play nice with caching utilities).
@@ -476,5 +482,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 +   Maybe serialize/unserialize cookie value in `set_cookie()` and `get_cookie()`.
 +   `varCookie()` defaults to `get_cookie()` if only one argument (name).
 +   Use `sanitize_key()` on cookie name but check for un-sanitized name in `get_cookie()`.
++   Removed `scheduleEvent()` method. Not used, didn't work. Use `wp_schedule_single_event()`.
++   New `color-palette.css` loaded on admin pages.
 
 = See changelog.md for more =

@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1107.1';
+		const VERSION 			= '24.1112.1';
 
 		/**
 		 * @var string alias
@@ -177,7 +177,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				add_action('wp',						array($this, 'risk_assessment_result'),99);
 				add_action('login_init',				array($this, 'risk_assessment_result'),99);
 			}
-			add_action('xmlrpc_enabled',				array($this, 'risk_assessment_result'));
+			add_action('xmlrpc_enabled',				array($this, 'risk_assessment_result'),99);
 			add_action('rest_pre_serve_request',		array($this, 'risk_assessment_result'),99);
 
 			/**

@@ -1,6 +1,15 @@
 /**
  * {eac}Doojigger for WordPress - Administrator options screen stylesheet
- * @version 24.0507.1
+ * @version 24.1110.1
+ */
+
+/*
+ *	wp_enqueue_style(
+ * 		sanitize_title($this->className.'-settings'),
+ *		plugins_url( 'eacDoojigger/assets/css/admin-options.css' ),
+ *		[],
+ *		EACDOOJIGGER_VERSION
+ *	);
  */
 
 @keyframes settings-easeIn {
@@ -29,7 +38,7 @@
 }
 .tab-content {
 	padding: 1em;
-	border: 1px solid var(--eac-admin-gray-20);
+	border: 1px solid var(--eac-wp-medium-gray);
 	background: var(--eac-admin-subtle); border-top: none;
 }
 
@@ -77,7 +86,7 @@ details.settings-grid-head summary > * {display: inline;}
 
 /* fieldset div */
 .settings-grid-item {
-	color: black; background: var(--eac-admin-gray-0);
+	color: black; background: var(--eac-wp-subtle-gray);
 	padding: 1em 1.5em;
 	position: relative;
 }
@@ -120,11 +129,11 @@ details.settings-grid-head summary > * {display: inline;}
 	position: absolute; z-index: 9999;
 	font-size: .9em;
 	max-width: 400px; padding: .5em;
-	color: var(--eac-admin-gray-60); background: var(--eac-admin-yellow-0);
+	color: var(--eac-wp-base-gray); background: var(--eac-wp-subtle-yellow);
 /*	border: 1px solid var(--eac-admin-icon); */
 	border-radius: 4px;
 	border-left: 4px solid  var(--eac-admin-highlight);
-	box-shadow: 1px 1px 10px var(--eac-admin-gray-20);
+	box-shadow: 1px 1px 10px var(--eac-wp-medium-gray);
 }
 
 /* [title] */
@@ -133,7 +142,7 @@ details.settings-grid-head summary > * {display: inline;}
 }
 /* [info] */
 .settings-grid-item cite {
-	color: var(--eac-admin-gray-60); padding-left: 1em; display: block;
+	color: var(--eac-wp-base-gray); padding-left: 1em; display: block;
 }
 
 /* within [title] or [info] */
@@ -212,10 +221,10 @@ details.settings-grid-head summary > * {display: inline;}
 .settings-grid-container .input-switch-wrap label {margin-right: .75em;}
 .settings-grid-container .input-switch-slider {
 	position: absolute; top: 0; bottom: 0; left: 0; right: 0;
-	background-color: var(--eac-admin-gray-20);
+	background-color: var(--eac-wp-medium-gray);
 	width: 3em;
 	cursor: pointer;
-	border: .5px solid var(--eac-admin-gray-60); border-radius: 4px;
+	border: .5px solid var(--eac-wp-base-gray); border-radius: 4px;
 	transition: .4s;
 }
 .settings-grid-container .input-switch-slider:before {
@@ -223,7 +232,7 @@ details.settings-grid-head summary > * {display: inline;}
 	position: absolute; top: .2em; bottom: .2em; left: .23em;
 	background-color: white;
 	width: 1em;
-	border: .5px solid var(--eac-admin-gray-60); border-radius: 4px;
+	border: .5px solid var(--eac-wp-base-gray); border-radius: 4px;
 	transition: .4s;
 }
 /* push original input down and over (including label text) */
@@ -250,7 +259,7 @@ details.settings-grid-head summary > * {display: inline;}
 	margin-right: 1em;
 }
 .settings-grid-item .input-file-wrap input[type='file'] {
-	font-size: smaller; color: var(--eac-admin-gray-60);
+	font-size: smaller; color: var(--eac-wp-base-gray);
 }
 .settings-grid-item .input-file-wrap input[type='file']::-webkit-file-upload-button,
 .settings-grid-item .input-file-wrap input[type='file']::file-selector-button {

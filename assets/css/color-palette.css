@@ -1,0 +1,62 @@
+/**
+ * {eac}Doojigger for WordPress - WP Color Pallete
+ * @version 24.1110.1
+ */
+
+/*
+ *	wp_enqueue_style(
+ * 		sanitize_title($this->className.'-palette'),
+ *		plugins_url( 'eacDoojigger/assets/css/color-palette.css' ),
+ *		[],
+ *		EACDOOJIGGER_VERSION
+ *	);
+ */
+
+:root {
+
+/* WordPress color palette */
+
+	--eac-wp-base-gray: #32373c;
+	--eac-wp-medium-gray: #a2aab2;
+	--eac-wp-light-gray: #f3f4f5;
+	--eac-wp-subtle-gray: #fbfbfc;
+
+	--eac-wp-base-red: #9a2323;
+	--eac-wp-medium-red: #dc3232;
+	--eac-wp-light-red: #f1adad;
+	--eac-wp-subtle-red: #fbeaea;
+
+	--eac-wp-base-orange: #bf461d;
+	--eac-wp-medium-orange: #f56e28;
+	--eac-wp-light-orange: #fbc5a9;
+	--eac-wp-subtle-orange: #fef0e9;
+
+	--eac-wp-base-yellow: #ee8e0d;
+	--eac-wp-medium-yellow: #ffb900;
+	--eac-wp-light-yellow: #ffe399;
+	--eac-wp-subtle-yellow: #fff8e5;
+
+	--eac-wp-base-green: #31843f;
+	--eac-wp-medium-green: #46b450;
+	--eac-wp-light-green: #c7e8ca;
+	--eac-wp-subtle-green: #ecf7ed;
+
+	--eac-wp-base-blue: #006799;
+	--eac-wp-medium-blue: #00a0d2;
+	--eac-wp-light-blue: #99d9ed;
+	--eac-wp-subtle-blue: #e5f5fa;
+	/* WordPress Blue */
+	--eac-wp-blue: #0073aa;
+
+	--eac-wp-base-purple: #4e426c;
+	--eac-wp-medium-purple: #826eb4;
+	--eac-wp-light-purple: #cdc5e1;
+	--eac-wp-subtle-purple: #f2f0f7;
+
+/* EarthAsylumConsulting logo colors */
+
+	--eac-logo-gray: #8c8f94;
+	--eac-logo-green: #6e9882;
+	--eac-logo-orange: #da821d;
+
+}

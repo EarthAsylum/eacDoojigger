@@ -17,32 +17,32 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1107.1';
+		const VERSION			= '24.1113.1';
 
 		/**
 		 * @var string extension alias
 		 */
-		const ALIAS 			= 'security';
+		const ALIAS				= 'security';
 
 		/**
 		 * @var string extension version
 		 */
-		const TAB_NAME 			= 'Security';
+		const TAB_NAME			= 'Security';
 
 		/**
 		 * @var string path to .htaccess (allow access)
 		 */
-		private $htaccess 		= false;
+		private $htaccess		= false;
 
 		/**
 		 * @var object wp-config-transformer
 		 */
-		private $wpConfig 		= false;
+		private $wpConfig		= false;
 
 		/**
 		 * @var string path to .user.ini (allow access)
 		 */
-		private $userIni 		= false;
+		private $userIni		= false;
 
 		/**
 		 * @var array what .htaccess rules are set
@@ -52,14 +52,14 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string replacement login uri
 		 */
-		private $login_uri 		= null;
+		private $login_uri		= null;
 
 
 		/**
 		 * constructor method
 		 *
-		 * @param 	object	$plugin main plugin object
-		 * @return 	void
+		 * @param	object	$plugin main plugin object
+		 * @return	void
 		 */
 		public function __construct($plugin)
 		{
@@ -140,7 +140,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * destructor method
 		 *
-		 * @return 	void
+		 * @return	void
 		 */
 		public function __destruct()
 		{
@@ -158,7 +158,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * initialize method - called from main plugin
 		 *
-		 * @return 	void
+		 * @return	void
 		 */
 		public function initialize()
 		{
@@ -171,24 +171,24 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				// see if we can get to the config files (only single site or network admin)
 				$this->htaccess = $this->plugin->htaccess_handle();
 				$this->wpConfig = $this->plugin->wpconfig_handle();
-				$this->userIni 	= $this->plugin->userini_handle();
+				$this->userIni	= $this->plugin->userini_handle();
 
 				if ( is_multisite() && !is_network_admin() &&
 					(!defined( 'WP_CLI' ) && !defined( 'DOING_AJAX' ) && !defined( 'DOING_CRON' )) )
 				{
-					if ($this->isNetworkPolicy('secLoginNonce')) 	$this->delete_option('secLoginNonce');
-					if ($this->isNetworkPolicy('secDisableRSS')) 	$this->delete_option('secDisableRSS');
-					if ($this->isNetworkPolicy('secUnAuthRest')) 	$this->delete_option('secUnAuthRest');
-					if ($this->isNetworkPolicy('secDisableXML')) 	$this->delete_option('secDisableXML');
-					if ($this->isNetworkPolicy('secFileChanges')) 	$this->delete_option('secFileChanges');
-				//	if ($this->isNetworkPolicy('secHeartbeat')) 	$this->delete_option('secHeartbeat');
-				//	if ($this->isNetworkPolicy('secHeartbeatFE')) 	$this->delete_option('secHeartbeatFE');
+					if ($this->isNetworkPolicy('secLoginNonce'))	$this->delete_option('secLoginNonce');
+					if ($this->isNetworkPolicy('secDisableRSS'))	$this->delete_option('secDisableRSS');
+					if ($this->isNetworkPolicy('secUnAuthRest'))	$this->delete_option('secUnAuthRest');
+					if ($this->isNetworkPolicy('secDisableXML'))	$this->delete_option('secDisableXML');
+					if ($this->isNetworkPolicy('secFileChanges'))	$this->delete_option('secFileChanges');
+				//	if ($this->isNetworkPolicy('secHeartbeat'))		$this->delete_option('secHeartbeat');
+				//	if ($this->isNetworkPolicy('secHeartbeatFE'))	$this->delete_option('secHeartbeatFE');
 
 					if ($this->isNetworkPolicy('secPassPolicy')) {
-						$this->update_option('secPassPolicy', 		$this->mergePolicies('secPassPolicy'));
+						$this->update_option('secPassPolicy',		$this->mergePolicies('secPassPolicy'));
 					}
 					if ($this->isNetworkPolicy('secCookies')) {
-						$this->update_option('secCookies', 			$this->mergePolicies('secCookies'));
+						$this->update_option('secCookies',			$this->mergePolicies('secCookies'));
 					}
 					// only use site_option
 					$this->delete_option('secLoginUri');
@@ -244,18 +244,18 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			// custom nonce on login page(s)
 			if ($this->isPolicyEnabled('secLoginNonce'))
 			{
-				add_action( 'login_form', 					array($this, 'wp_login_form') );
-				add_filter( 'wp_authenticate_user', 		array($this, 'wp_login_authenticate'), 5, 2 );
+				add_action( 'login_form',					array($this, 'wp_login_form') );
+				add_filter( 'wp_authenticate_user',			array($this, 'wp_login_authenticate'), 5, 2 );
 
-				add_action( 'register_form', 				array($this, 'wp_login_form') );
-				add_filter( 'registration_errors', 			array($this, 'wp_login_authenticate'), 5, 2 );
+				add_action( 'register_form',				array($this, 'wp_login_form') );
+				add_filter( 'registration_errors',			array($this, 'wp_login_authenticate'), 5, 2 );
 
-				add_action( 'lostpassword_form', 			array($this, 'wp_login_form') );
+				add_action( 'lostpassword_form',			array($this, 'wp_login_form') );
 				add_action( 'lostpassword_post',			array($this, 'wp_login_authenticate'), 5, 2 );
 
 				add_action( 'woocommerce_login_form',		array($this, 'wp_login_form') );
-				add_action( 'woocommerce_register_form', 	array($this, 'wp_login_form'));
-				add_action( 'woocommerce_register_post', 	array($this, 'wp_login_authenticate'), 5, 2 );
+				add_action( 'woocommerce_register_form',	array($this, 'wp_login_form'));
+				add_action( 'woocommerce_register_post',	array($this, 'wp_login_authenticate'), 5, 2 );
 				add_action( 'woocommerce_lostpassword_form',array($this, 'wp_login_form'));
 			}
 		}
@@ -277,7 +277,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				if (!is_user_logged_in())
 				{
 					$this->validate_http_header(true);	// required
-					$this->validate_http_header(false);	// blocked
+					$this->validate_http_header(false); // blocked
 
 					// disabled site uris
 					if ($this->isPolicyEnabled('secDisableURIs'))
@@ -298,41 +298,41 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			});
 
 			// this seems to trigger too many false-positives
-			//add_action('wp_verify_nonce_failed', 			array($this, 'wp_nonce_failure'));
+			//add_action('wp_verify_nonce_failed',			array($this, 'wp_nonce_failure'));
 
 			// change login uri (wp-login)
 			if ($this->login_uri = $this->get_site_option('secLoginUri'))
 			{
-				add_filter( 'site_url', 					array($this, 'wp_login_filter'), 10, 4 );
-				add_filter( 'network_site_url', 			array($this, 'wp_login_filter'), 10, 4 );
-				add_action( 'login_init', 					array($this, 'wp_login_init') );
-				add_filter( 'wp_redirect', 					array($this, 'wp_login_redirect' ), 10, 2 );
-				add_filter( 'site_option_welcome_email', 	array($this, 'welcome_email_filter') );
+				add_filter( 'site_url',						array($this, 'wp_login_filter'), 10, 4 );
+				add_filter( 'network_site_url',				array($this, 'wp_login_filter'), 10, 4 );
+				add_action( 'login_init',					array($this, 'wp_login_init') );
+				add_filter( 'wp_redirect',					array($this, 'wp_login_redirect' ), 10, 2 );
+				add_filter( 'site_option_welcome_email',	array($this, 'welcome_email_filter') );
 			}
 
 			// password policy
 			if ($this->isPolicyEnabled('secPassPolicy'))
 			{
-				add_action( 'user_profile_update_errors', 	array($this, 'validate_password_policy'), 10, 3 );
-				add_filter( 'registration_errors', 			array($this, 'validate_password_policy'), 10, 3 );
-				add_action( 'validate_password_reset', 		array($this, 'validate_password_policy'), 10, 2 );
+				add_action( 'user_profile_update_errors',	array($this, 'validate_password_policy'), 10, 3 );
+				add_filter( 'registration_errors',			array($this, 'validate_password_policy'), 10, 3 );
+				add_action( 'validate_password_reset',		array($this, 'validate_password_policy'), 10, 2 );
 
-				add_action( 'woocommerce_save_account_details_errors', 	array($this, 'validate_password_policy'), 10, 2 );
-				add_action( 'woocommerce_password_reset', 				array($this, 'validate_password_policy'), 10, 2 );
+				add_action( 'woocommerce_save_account_details_errors',	array($this, 'validate_password_policy'), 10, 2 );
+				add_action( 'woocommerce_password_reset',				array($this, 'validate_password_policy'), 10, 2 );
 			}
 
 			// lock account after x attempts
 			if ($this->isPolicyEnabled('secPassLock'))
 			{
-				add_filter( 'wp_authenticate_user', 		array($this, 'validate_authentication_attempts'), 5, 2 );
-				add_action( 'wp_login', 					function( $uername, $user ) {
+				add_filter( 'wp_authenticate_user',			array($this, 'validate_authentication_attempts'), 5, 2 );
+				add_action( 'wp_login',						function( $uername, $user ) {
 					$this->delete_transient('login_attempt_'.$user->ID);
 					$this->do_action('clear_risk');
 				}, 10, 2 );
 			}
 
 			// login attempt with invalid user name
-			add_action( 'wp_login_failed', 					function( $uername, $error ) {
+			add_action( 'wp_login_failed',					function( $uername, $error ) {
 				if ($error->get_error_code() == 'invalid_username') {
 					$this->do_action('register_threat','login attempt with invalid user name');
 				}
@@ -349,27 +349,27 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				if ($this->isPolicyEnabled('secDisableXML','no-xml'))
 				{
-					add_filter( 'xmlrpc_methods', 			array($this, "disable_xml"), 998 );
-					remove_action('xmlrpc_rsd_apis', 		'rest_output_rsd');
-					remove_action('wp_head', 				'rsd_link');
+					add_filter( 'xmlrpc_methods',			array($this, "disable_xml"), 998 );
+					remove_action('xmlrpc_rsd_apis',		'rest_output_rsd');
+					remove_action('wp_head',				'rsd_link');
 				}
 				/*
 				if ($this->isPolicyEnabled('secDisableXML','no-ping'))
 				{
 					// remove x-pingback HTTP header
-					add_filter('wp_headers', 				function($headers) {
+					add_filter('wp_headers',				function($headers) {
 						unset($headers['X-Pingback']);
 						return $headers;
 					});
-					add_action('wp', 						function() {
+					add_action('wp',						function() {
 						header_remove('X-Pingback');
 					});
 					// disable pingbacks
-					add_filter( 'xmlrpc_methods', 			array($this, "disable_pings"), 999 );
+					add_filter( 'xmlrpc_methods',			array($this, "disable_pings"), 999 );
 				}
 				*/
 				if ($this->isPolicyEnabled('secDisableXML','no-rpc')) {
-					add_action('wp_headers', 				array($this, 'disable_invalid_xml'));
+					add_action('wp_headers',				array($this, 'disable_invalid_xml'));
 				}
 			}
 
@@ -394,12 +394,12 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			// WP heartbeat
 			if ($this->isPolicyEnabled('secHeartbeat'))
 			{
-				add_filter( 'heartbeat_settings', 			array($this, "set_heartbeat")  );
+				add_filter( 'heartbeat_settings',			array($this, "set_heartbeat")  );
 			}
 
 			if ($this->isPolicyEnabled('secHeartbeatFE'))
 			{
-				add_action( 'wp_enqueue_scripts', 			function() {wp_deregister_script( 'heartbeat' );} );
+				add_action( 'wp_enqueue_scripts',			function() {wp_deregister_script( 'heartbeat' );} );
 			}
 		}
 
@@ -414,13 +414,13 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function register_risk_action($message='',$score=0,$http_status=403)
 		{
-			static $limit 		= 100;	// max
-			static $threshold 	= 25;	// max
-			static $maxScore 	= 0;
-			static $count 		= 0;
+			static $limit		= 100;	// max
+			static $threshold	= 25;	// max
+			static $maxScore	= 0;
+			static $count		= 0;
 
-			//if (! $limit)		$limit 		= $this->isPolicyEnabled('risk_assessment_limit') ?: 80;
-			//if (! $threshold)	$threshold 	= $this->isPolicyEnabled('risk_assessment_threshold') ?: 5;
+			//if (! $limit)		$limit		= $this->isPolicyEnabled('risk_assessment_limit') ?: 80;
+			//if (! $threshold) $threshold	= $this->isPolicyEnabled('risk_assessment_threshold') ?: 5;
 
 			$maxScore += intval( $score ?: $limit / $threshold );
 			$count++;
@@ -465,9 +465,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 * wp_login filter
 		 *
 		 * @param string	$url complete url
-		 * @param string  	$path path of url
-		 * @param string  	$scheme http|https
-		 * @param int|null  $blogId site id or null (current)
+		 * @param string	$path path of url
+		 * @param string	$scheme http|https
+		 * @param int|null	$blogId site id or null (current)
 		 * @return	string url
 		 */
 		public function wp_login_filter( $url, $path, $scheme, $blogId=null )
@@ -486,7 +486,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function wp_login_init()
 		{
-		    global $wp_query;
+			global $wp_query;
 
 			if (strpos( $_SERVER["REQUEST_URI"], $this->login_uri ) === false)
 			{
@@ -553,7 +553,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				remove_action('wp_verify_nonce_failed', array($this, 'wp_nonce_failure'));
 				$action = '_eac_'.wp_create_nonce(date('Ymd'));
-				$nonce 	= $_REQUEST[$action] ?? null;
+				$nonce	= $_REQUEST[$action] ?? null;
 				if ( ! wp_verify_nonce( $nonce, $action ) ) {
 					if (is_wp_error($user)) {
 						$user->add( 'eac_login_nonce',__( 'Invalid form submission.' ) );
@@ -589,7 +589,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 * validate password policy
 		 *
 		 * @param	WP_Error $wpErrors
-		 * @param 	$userData
+		 * @param	$userData
 		 * @return	WP_Error
 		 */
 		public function validate_password_policy( $wpErrors, ...$args )
@@ -751,14 +751,14 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		public function disable_rest()
 		{
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest')) {
-				add_filter( 'rest_jsonp_enabled', 		'__return_false' );
-				add_filter( 'rest_endpoints', 			array($this, "disable_rest_all"), 999 );
+				add_filter( 'rest_jsonp_enabled',		'__return_false' );
+				add_filter( 'rest_endpoints',			array($this, "disable_rest_all"), 999 );
 			}
 
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest-index')) {
-				add_filter( 'rest_index', 				array($this, 'disable_rest_list'), 999 );
-				add_filter( 'rest_namespace_index', 	array($this, 'disable_rest_list'), 999 );
-				add_filter( 'rest_route_data', 			'__return_empty_array', 999);
+				add_filter( 'rest_index',				array($this, 'disable_rest_list'), 999 );
+				add_filter( 'rest_namespace_index',		array($this, 'disable_rest_list'), 999 );
+				add_filter( 'rest_route_data',			'__return_empty_array', 999);
 			}
 
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest-core')) {
@@ -766,7 +766,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			}
 
 			if ($this->isPolicyEnabled('secUnAuthRest','no-rest-unauth')) {
-	  			add_filter( 'rest_authentication_errors', array($this, 'invalid_rest_auth'), 999);
+				add_filter( 'rest_authentication_errors', array($this, 'invalid_rest_auth'), 999);
 				add_filter( 'rest_endpoints',			array($this, 'disable_rest_auth'));
 			//	if (! is_user_logged_in()) {
 			//		add_filter( 'rest_pre_serve_request', array($this, "disable_rest_auth") );
@@ -774,12 +774,12 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			}
 
 			add_action( 'after_setup_theme',			function() {
-				remove_action( 'wp_head', 				'rest_output_link_wp_head',10,0);
-				remove_action( 'template_redirect', 	'rest_output_link_header',11,0);
+				remove_action( 'wp_head',				'rest_output_link_wp_head',10,0);
+				remove_action( 'template_redirect',		'rest_output_link_header',11,0);
 			});
 
 			if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
-				add_action('wp_headers', 				array($this, 'disable_invalid_json'));
+				add_action('wp_headers',				array($this, 'disable_invalid_json'));
 			}
 		}
 
@@ -817,7 +817,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					{
 						foreach ($endpoint as $key => &$ep) {
 							if (is_array($ep) && is_int($key)) {
-								$ep['permission_callback'] 	= [$this,'invalid_rest'];
+								$ep['permission_callback']	= [$this,'invalid_rest'];
 							}
 						}
 					}
@@ -841,7 +841,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 						if (str_starts_with($route, '/wp/v')) {
 							foreach ($endpoint as $key => &$ep) {
 								if (is_array($ep) && is_int($key)) {
-									$ep['permission_callback'] 	= [$this,'invalid_rest'];
+									$ep['permission_callback']	= [$this,'invalid_rest'];
 								}
 							}
 						}
@@ -884,7 +884,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 						foreach ($endpoint as $key => &$ep) {
 							if (is_array($ep) && is_int($key)) {
 								if (!isset($ep['permission_callback']) || $ep['permission_callback'] == '__return_true') {
-									$ep['permission_callback'] 	= [$this,'unauthorized_rest'];
+									$ep['permission_callback']	= [$this,'unauthorized_rest'];
 								}
 							}
 						}
@@ -1036,21 +1036,21 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function disable_rss_feeds()
 		{
-			add_action( 'init', 						function()
+			add_action( 'init',							function()
 			{
-				remove_action( 'do_feed_rdf', 			'do_feed_rdf', 10, 0 );
-				remove_action( 'do_feed_rss', 			'do_feed_rss', 10, 0 );
-				remove_action( 'do_feed_rss2', 			'do_feed_rss2', 10, 1 );
-				remove_action( 'do_feed_atom', 			'do_feed_atom', 10, 1 );
+				remove_action( 'do_feed_rdf',			'do_feed_rdf', 10, 0 );
+				remove_action( 'do_feed_rss',			'do_feed_rss', 10, 0 );
+				remove_action( 'do_feed_rss2',			'do_feed_rss2', 10, 1 );
+				remove_action( 'do_feed_atom',			'do_feed_atom', 10, 1 );
 
-				remove_action( 'wp_head', 				'rsd_link' );
-				remove_action( 'wp_head', 				'feed_links', 2 );
-				remove_action( 'wp_head', 				'feed_links_extra', 3 );
+				remove_action( 'wp_head',				'rsd_link' );
+				remove_action( 'wp_head',				'feed_links', 2 );
+				remove_action( 'wp_head',				'feed_links_extra', 3 );
 			});
 
-			add_action( 'do_feed', 						array($this, "disable_rss_response"), 1 );
-			add_action( 'do_feed_rdf', 					array($this, "disable_rss_response"), 1 );
-			add_action( 'do_feed_rss', 					array($this, "disable_rss_response"), 1 );
+			add_action( 'do_feed',						array($this, "disable_rss_response"), 1 );
+			add_action( 'do_feed_rdf',					array($this, "disable_rss_response"), 1 );
+			add_action( 'do_feed_rss',					array($this, "disable_rss_response"), 1 );
 			add_action( 'do_feed_rss2',					array($this, "disable_rss_response"), 1 );
 			add_action( 'do_feed_atom',					array($this, "disable_rss_response"), 1 );
 			add_action( 'do_feed_rss2_comments',		array($this, "disable_rss_response"), 1 );
@@ -1149,14 +1149,14 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function match_disabled_uris($optionName)
 		{
-			$request 	= explode('?',$_SERVER['REQUEST_URI']);
-			$request 	= trim($request[0],'/');
+			$request	= explode('?',$_SERVER['REQUEST_URI']);
+			$request	= trim($request[0],'/');
 
 			if (empty($request)) return;
 
-			$request 	= '/'.$request;
+			$request	= '/'.$request;
 
-			$uriList 	= $this->mergePolicies($optionName);
+			$uriList	= $this->mergePolicies($optionName);
 
 			if (empty($uriList)) return;
 
@@ -1174,8 +1174,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function block_ip_address()
 		{
-			$request 	= $this->plugin->getVisitorIP();
-			$ipList 	= $this->mergePolicies('secBlockIP');
+			$request	= $this->plugin->getVisitorIP();
+			$ipList		= $this->mergePolicies('secBlockIP');
 			if (empty($ipList)) return;
 
 			if (!$this->plugin->isIpInList($request,$ipList))
@@ -1201,13 +1201,13 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function checkCookieFlags()
 		{
-			$policy 	= $this->mergePolicies('secCookies');
+			$policy		= $this->mergePolicies('secCookies');
 
-			$httpOnly 	= in_array('httponly',$policy);
-			$secure 	= in_array('secure',$policy) && is_ssl();
-			$strict 	= in_array('strict',$policy);
+			$httpOnly	= in_array('httponly',$policy);
+			$secure		= in_array('secure',$policy) && is_ssl();
+			$strict		= in_array('strict',$policy);
 
-			$exclude 	= $this->mergePolicies('secCookiesExc');
+			$exclude	= $this->mergePolicies('secCookiesExc');
 
 			$newHeaders = [];
 			foreach (headers_list() as $header)

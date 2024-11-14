@@ -27,7 +27,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1020.1';
+		const VERSION 			= '24.1112.1';
 
 		/**
 		 * @var string extension version
@@ -150,17 +150,29 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		public function addActionsAndFilters()
 		{
 			if ($this->security->isPolicyEnabled('secCorsOpt','rest')) {
-				add_action('rest_api_init', 					array($this,'rest_api_cors'), 900);
+				add_action('rest_api_init', 					array($this,'validate_cors_origin'), 50);
 			}
 			if ($this->security->isPolicyEnabled('secCorsOpt','xml')) {
-				add_action('xmlrpc_enabled', 					array($this,'rest_api_cors'), 900);
+				add_action('xmlrpc_enabled', 					array($this,'validate_cors_origin'), 50);
 			}
-			if ($this->security->isPolicyEnabled('secCorsOpt','ajax')) {
-				if ($this->plugin->doing_ajax()) {
+
+			if ($this->plugin->doing_ajax()) {
+				if ($this->security->isPolicyEnabled('secCorsOpt','ajax')) {
 					if (!$this->plugin->varServer('X-Requested-With')) {
+						$this->do_action('report_threat','Invalid XMLHttp Request',100);
 						wp_die( $this->plugin->access_denied('Invalid XMLHttp Request') );
 					}
-					add_action('init', 							array($this,'rest_api_cors'), 900);
+					add_action('init', 							array($this,'validate_cors_origin'), 50);
+				}
+			}
+			else
+			if ($this->security->isPolicyEnabled('secCorsOpt','post')) {
+				if (in_array($_SERVER['REQUEST_METHOD'],['POST','PUT','PATCH','DELETE'])) {
+					add_action('wp', 							function() {
+						if (!defined('REST_REQUEST') && !defined('XMLRPC_REQUEST')) {
+							$this->validate_cors_origin();
+						}
+					}, 50);
 				}
 			}
 		}
@@ -190,13 +202,16 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 
 
 		/**
-		 * Set origin-specific CORS headers (rest_api_init -> rest_pre_serve_request)
+		 * Set origin-specific CORS headers
 		 *
-		 * @param	mixed $filterArg filter argument
-		 * @return	$filterArg
 		 */
-		public function rest_api_cors($filterArg = null)
+		public function validate_cors_origin(): void
 		{
+			static $once = false;
+			if ($once) return;
+			$once = true;
+
+
 			// should we trust browser sec headers?
 		//	if ( ($this->plugin->varServer('Sec-Fetch-Mode') == 'cors') &&
 		//	     ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') ) return;
@@ -228,7 +243,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 						}
 					}
 					return $origin;
-				});
+				},101);
 			}
 
 			// should we trust IP address headers?
@@ -239,7 +254,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 						$origin .= gethostbyaddr($this->plugin->getVisitorIP());
 					}
 					return $origin;
-				});
+				},102);
 			}
 
 			// is this origin allowed? Match origin ends with allowed
@@ -247,7 +262,6 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 				if (empty($origin) && !empty($origin_arg)) {	// $origin not allowed (so far)
 					foreach(get_allowed_http_origins() as $allowed) {
 						if (str_ends_with($origin_arg,$allowed)) {
-					//	if (substr_compare($origin_arg, $allowed, - strlen($allowed)) === 0) {
 							return $origin_arg;
 						}
 					};
@@ -262,7 +276,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 
 			$action = (current_action() == 'rest_api_init') ? 'rest_pre_serve_request' : current_action();
 			remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-			add_filter( $action, function($value) {
+		//	add_filter( $action, function($value) {
 				$origin = get_http_origin();
 				if ($this->security->match_disabled_uris('secExcludeCors') || is_allowed_http_origin($origin)) {
 					header( 'Access-Control-Allow-Origin: ' . $origin );
@@ -274,12 +288,12 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 				} else {
 					header( 'Access-Control-Allow-Origin: ' . site_url() );
 					$this->do_action('report_threat','cross-origin access denied from '.$origin,100);
-
+					wp_die( $this->plugin->access_denied('cross-origin access denied from '.$origin) );
 				}
-				return $value;
-			},1000);
+		//		return $value;
+		//	},1000);
 
-			return $filterArg;
+			return;
 		}
 	}
 }
