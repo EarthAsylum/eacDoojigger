@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1110.1
+ * @version		24.1114.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -1852,6 +1852,7 @@ abstract class abstract_backend extends abstract_core
 				__( $currentTab, $this->PLUGIN_TEXTDOMAIN ).
 				"</h2>\n";
 		// add clickable link to enable/disable advanced mode
+	/*
 		if ($this->allowAdvancedMode())
 		{
 			$switchTo 	= ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
@@ -1862,6 +1863,19 @@ abstract class abstract_backend extends abstract_core
 					"title='{$switchTo} advanced mode'>".
 					"</span></a>",
 					$h2a
+			);
+		}
+	*/
+		if ($this->allowAdvancedMode())
+		{
+			$switchTo 	= ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
+			$switchFr 	= ($this->isAdvancedMode()) ? 'Advanced' : 'Essentials';
+			$href 		= $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' );
+			$h2a = preg_replace("|</h2>|",
+					"<span style='float:right;font-size:.75em;font-weight:normal'>".
+					"( <a href='{$href}'><abbr title='{$switchTo} advanced mode'>{$switchFr}</abbr></a> )".
+					"</span></h2>",
+					$h2
 			);
 		}
 		/**

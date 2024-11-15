@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_csp_assistant', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1113.1';
+		const VERSION 			= '24.1115.1';
 
 		/**
 		 * @var string extension version
@@ -98,7 +98,12 @@ if (! class_exists(__NAMESPACE__.'\security_csp_assistant', false) )
 
 			if ($this->security->isPolicyEnabled('sec_CSP_nonce'))
 			{
+				// load scripts individually so we can access the tags
+				if (!defined('CONCATENATE_SCRIPTS')) define('CONCATENATE_SCRIPTS',false);
+
+				// create the nonce we'll use
 				$this->csp_nonce = $this->apply_filters('set_security_nonce',wp_create_nonce());
+
 				/**
 				 * filter {pluginname}_security_nonce - get CSP security nonce for this request
 				 */

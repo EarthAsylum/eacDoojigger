@@ -50,9 +50,6 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	 */
 	private $style_async_exclude 	= [
 			'woocommerce',
-			'colors',
-			'debug-bar',
-			'query-monitor',
 	];
 
 	/**
@@ -61,8 +58,6 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	private $script_preload_exclude = [
 			'wpemoji',
 			'concatemoji',
-			'debug-bar',
-			'query-monitor',
 	];
 
 	/**
@@ -72,10 +67,7 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 			'wp-i18n',
 			'wpemoji',
 			'concatemoji',
-			'jquery-core',
-			'jquery-migrate',
-			'debug-bar',
-			'query-monitor',
+			'jquery',
 	];
 
 	/**
@@ -131,40 +123,43 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 			\add_action( 'admin_bar_menu', 				array( $this, 'set_admin_bar_menu') );
 		}
 
-		if ($this->is_option('optimize_options','style')) {
-			/**
-			 * filter {pluginname}_exclude_style_preload css handles to exclude from preloading
-			 * @param array handle name(s)
-			 */
-			$this->style_preload_exclude = $this->apply_filters('exclude_style_preload',$this->style_preload_exclude);
-			add_filter('style_loader_src',	array($this, 'optimize_hints'),100,2);
-		}
-		if ($this->is_option('optimize_options','style-async')) {
-			/**
-			 * filter {pluginname}_exclude_style_async css handles to exclude from async-ing
-			 * @param array handle name(s)
-			 */
-			$this->style_async_exclude = $this->apply_filters('exclude_style_async',$this->style_async_exclude);
-			add_filter('style_loader_tag', array($this, 'optimize_async_style'),100,4);
-		}
+		if (! is_admin() )
+		{
+			if ($this->is_option('optimize_options','style')) {
+				/**
+				 * filter {pluginname}_exclude_style_preload css handles to exclude from preloading
+				 * @param array handle name(s)
+				 */
+				$this->style_preload_exclude = $this->apply_filters('exclude_style_preload',$this->style_preload_exclude);
+				add_filter('style_loader_src',	array($this, 'optimize_hints'),100,2);
+			}
+			if ($this->is_option('optimize_options','style-async')) {
+				/**
+				 * filter {pluginname}_exclude_style_async css handles to exclude from async-ing
+				 * @param array handle name(s)
+				 */
+				$this->style_async_exclude = $this->apply_filters('exclude_style_async',$this->style_async_exclude);
+				add_filter('style_loader_tag', array($this, 'optimize_async_style'),100,4);
+			}
 
-		if ($this->is_option('optimize_options','script')) {
-			/**
-			 * filter {pluginname}_exclude_script_preload js handles to exclude from preloading
-			 * @param array handle name(s)
-			 */
-			$this->script_preload_exclude = $this->apply_filters('exclude_script_preload',$this->script_preload_exclude);
-			add_filter('script_loader_src', array($this, 'optimize_hints'),100,2);
+			if ($this->is_option('optimize_options','script')) {
+				/**
+				 * filter {pluginname}_exclude_script_preload js handles to exclude from preloading
+				 * @param array handle name(s)
+				 */
+				$this->script_preload_exclude = $this->apply_filters('exclude_script_preload',$this->script_preload_exclude);
+				add_filter('script_loader_src', array($this, 'optimize_hints'),100,2);
+			}
+			if ($this->is_option('optimize_options','script-async')) {
+				/**
+				 * filter {pluginname}_exclude_script_async js handles to exclude from async-ing
+				 * @param array handle name(s)
+				 */
+				$this->script_async_exclude = $this->apply_filters('exclude_script_async',$this->script_async_exclude);
+				add_filter('script_loader_tag', array($this, 'optimize_async_script'),100,3);
+			}
+			//add_action('wp_head', 			array($this, 'optimize_preload'));
 		}
-		if ($this->is_option('optimize_options','script-async')) {
-			/**
-			 * filter {pluginname}_exclude_script_async js handles to exclude from async-ing
-			 * @param array handle name(s)
-			 */
-			$this->script_async_exclude = $this->apply_filters('exclude_script_async',$this->script_async_exclude);
-			add_filter('script_loader_tag', array($this, 'optimize_async_script'),100,3);
-		}
-		//add_action('wp_head', 			array($this, 'optimize_preload'));
 	}
 
 

@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.1108.1';
+		const VERSION	= '24.1115.1';
 
 		/**
 		 * @var array disable for these file extensions
@@ -66,7 +66,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin, (self::ALLOW_ALL | self::ALLOW_NON_PHP | self::DEFAULT_DISABLED) & ~self::ALLOW_CRON);
+			parent::__construct($plugin, (self::ALLOW_ALL | self::ALLOW_NON_PHP | self::DEFAULT_DISABLED)/* & ~self::ALLOW_CRON*/);
 
 			$ext = explode('?',$_SERVER['REQUEST_URI']);
 			$ext = pathinfo(trim($ext[0],'/'),PATHINFO_EXTENSION);
@@ -198,7 +198,9 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			// subscribe to Logger action - file output
 			if ( ($this->is_option('debug_to_file','plugin') && $this->setLoggingPathname(true)) || $this->is_option('debug_to_file','server') )
 			{
-				$this->plugin->Log()->subscribe([$this,'file_log_data']);
+				if (!wp_doing_cron()) {
+					$this->plugin->Log()->subscribe([$this,'file_log_data']);
+				}
 			}
 
 			// subscribe to Logger action - page output
@@ -657,7 +659,6 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			if (!$asArray) {
 				$errLevels = implode(', ',$errLevels);
 			}
-			//$this->plugin->logDebug($errLevels,'error reporting');
 			return $errLevels;
 		}
 
@@ -1102,7 +1103,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			{
 				$headers['Response Headers'] = array_merge(
 					[$_SERVER['SERVER_PROTOCOL'].' Status: '.http_response_code().' '.get_status_header_desc(http_response_code())],
-					$headers['Response Headers']
+					array_filter($headers['Response Headers'],function($h) {return !str_starts_with($h,'Link:');})
 				);
 			}
 

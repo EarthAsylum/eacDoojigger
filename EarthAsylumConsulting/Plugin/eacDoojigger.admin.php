@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Plugin;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1109.1
+ * @version		24.1114.1
  */
 
 trait eacDoojigger_admin_traits
@@ -117,24 +117,6 @@ trait eacDoojigger_admin_traits
 
 						"</div></div>";
 			}
-		);
-
-		$this->add_filter("options_form_h2_html", function($h2a,$h2)
-			{
-				if ($this->allowAdvancedMode())
-				{
-					$switchTo 	= ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
-					$switchFr 	= ($this->isAdvancedMode()) ? 'Advanced' : 'Essentials';
-					$href 		= $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' );
-					return preg_replace("|</h2>|",
-							"<span style='float:right;font-size:.75em;font-weight:normal'>".
-							"( <a href='{$href}'><abbr title='{$switchTo} advanced mode'>{$switchFr}</abbr></a> )".
-							"</span></h2>",
-							$h2
-					);
-				}
-				return $h2a;
-			},10,2
 		);
 
 		// from standard_options

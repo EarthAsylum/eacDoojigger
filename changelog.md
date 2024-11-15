@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.0 – November 13, 2024 =
+= Version 3.0 – November 15, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
