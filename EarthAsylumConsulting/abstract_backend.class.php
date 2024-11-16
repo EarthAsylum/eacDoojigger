@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1114.1
+ * @version		24.1115.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -1642,7 +1642,14 @@ abstract class abstract_backend extends abstract_core
 		{
 			$optionTab 		= $optionGroup[1];
 			$optionGroup 	= $optionGroup[0];
-			$this->optionTabNames[$optionGroup] = $optionTab;
+			/**
+			 * filter {classname}_settings_tab_name - change tab name for option group
+			 *
+			 * @param string $optionTab
+			 * @param string $optionGroup
+			 * @param bool $isNetworkSettings
+			 */
+			$this->optionTabNames[$optionGroup] = $this->apply_filters('settings_tab_name',$optionTab,$optionGroup,false);
 		}
 
 		$optionMeta = array_merge($this->getOptionMetaData($optionGroup),$optionMeta);
@@ -1666,7 +1673,14 @@ abstract class abstract_backend extends abstract_core
 		{
 			$optionTab 		= $optionGroup[1];
 			$optionGroup 	= $optionGroup[0];
-			$this->networkTabNames[$optionGroup] = $optionTab;
+			/**
+			 * filter {classname}_settings_tab_name - change tab name for option group
+			 *
+			 * @param string $optionTab
+			 * @param string $optionGroup
+			 * @param bool $isNetworkSettings
+			 */
+			$this->networkTabNames[$optionGroup] = $this->apply_filters('settings_tab_name',$optionTab,$optionGroup,true);
 		}
 
 		$optionMeta = array_merge($this->getNetworkMetaData($optionGroup),$optionMeta);
@@ -2380,9 +2394,16 @@ abstract class abstract_backend extends abstract_core
 		$optionValue 	= ($optionData)
 			? ($optionData['value'] ?? $this->get_option($optionKey))
 			: false;
-		$displayName 	= ($optionData)
-			? $optionData['label'] ?: $groupName
-			: $groupName;
+		/**
+		 * filter {classname}_settings_group_label - change display label for option group
+		 *
+		 * @param string $groupLabel
+		 * @param string $groupName
+		 */
+		$displayName 	= $this->apply_filters('settings_group_label',
+			($optionData) ? $optionData['label'] ?: $groupName : $groupName,
+			$groupName,
+		);
 
 		echo "<header class='settings-grid-container {$groupClass}' data-name='{$groupClass}'>\n";
 

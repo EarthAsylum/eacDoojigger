@@ -25,7 +25,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		const ALIAS				= 'security';
 
 		/**
-		 * @var string extension version
+		 * @var string extension tab name
 		 */
 		const TAB_NAME			= 'Security';
 

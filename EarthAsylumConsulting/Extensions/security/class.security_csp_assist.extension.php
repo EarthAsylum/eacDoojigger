@@ -20,7 +20,7 @@ if (! class_exists(__NAMESPACE__.'\security_csp_assistant', false) )
 		const VERSION 			= '24.1115.1';
 
 		/**
-		 * @var string extension version
+		 * @var string extension tab name
 		 */
 		const TAB_NAME 			= 'Security';
 

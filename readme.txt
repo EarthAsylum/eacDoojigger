@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.0.0-RC1+24.1115.1
-Last Updated:           15-Nov-2024
+Stable tag:             3.0.0-RC1+24.1116.1
+Last Updated:           16-Nov-2024
 Requires at least:      5.8
 Tested up to:           6.7
 Requires PHP:           8.1
@@ -405,10 +405,6 @@ _Kevin Burkholder_
 
 As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1+
 
-= 2.7.0 =
-
-Future versions (starting with 3.0) of {eac}Doojigger will drop support for PHP versions prior to 8.1.
-
 
 == Copyright ==
 
@@ -428,7 +424,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.0 – November 15, 2024 =
+= Version 3.0 – November 16, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
@@ -471,6 +467,9 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
     +   New `wp_filter_count()`, `wp_action_count()` (not prefixed).
 +   Added `ENABLE_OPTION` constant to extensions to allow override of the enable option used in an admin tab section.
 +   Added `TAB_NAME` constant to extensions to allow setting the default tab name.
++   Added filters to change a settings group label or tab name.
+    +   `$this->apply_filters('settings_group_label',$groupLabel,$optionGroup)`
+    +   `$this->apply_filters('settings_tab_name',$optionTab,$optionGroup,$isNetworkSettings)`
 +   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
 +   New `getRequestOrigin()` gets origin from header or referrer or reverse DNS lookup.
 +   Suppress shutdown error for not-called parent methods.

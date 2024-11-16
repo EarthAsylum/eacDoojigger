@@ -30,7 +30,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		const VERSION 			= '24.1112.1';
 
 		/**
-		 * @var string extension version
+		 * @var string extension tab name
 		 */
 		const TAB_NAME 			= 'Security';
 

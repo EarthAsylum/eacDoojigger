@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.0 – November 15, 2024 =
+= Version 3.0 – November 16, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
@@ -43,6 +43,9 @@
     +   New `wp_filter_count()`, `wp_action_count()` (not prefixed).
 +   Added `ENABLE_OPTION` constant to extensions to allow override of the enable option used in an admin tab section.
 +   Added `TAB_NAME` constant to extensions to allow setting the default tab name.
++   Added filters to change a settings group label or tab name.
+    +   `$this->apply_filters('settings_group_label',$groupLabel,$optionGroup)`
+    +   `$this->apply_filters('settings_tab_name',$optionTab,$optionGroup,$isNetworkSettings)`
 +   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
 +   New `getRequestOrigin()` gets origin from header or referrer or reverse DNS lookup.
 +   Suppress shutdown error for not-called parent methods.
