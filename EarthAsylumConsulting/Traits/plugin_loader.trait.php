@@ -3,7 +3,7 @@ namespace EarthAsylumConsulting
 {
 	if (!class_exists('\\EarthAsylumConsulting\\eacDoojiggerAutoloader'))
 	{
-		require dirname(__DIR__).'/Utilities/eacDoojiggerAutoloader.class.php';
+		require  WP_PLUGIN_DIR.'/eacDoojigger/autoload.php';
 	}
 }
 
@@ -21,7 +21,7 @@ namespace EarthAsylumConsulting\Traits
 	 * @package		{eac}Doojigger\Traits
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
-	 * @version		24.0817.1
+	 * @version		24.1120.1
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -55,9 +55,9 @@ namespace EarthAsylumConsulting\Traits
 		 * Convenience method to get existing instance of the plugin object.
 		 * @example MyPlugin()->myMethod(...)
 		 *
-		 * @return object
+		 * @return object (null if not instantiated)
 		 */
-		public static function getInstance(): object
+		public static function getInstance(): ?object
 		{
 			return self::$instance;
 		}
@@ -260,13 +260,7 @@ namespace EarthAsylumConsulting\Traits
 		 */
 		public static function isPHP(): bool
 		{
-			if (array_key_exists('REQUEST_URI', $_SERVER))
-			{
-				$ext = explode('?',$_SERVER['REQUEST_URI']);
-				$ext = pathinfo(trim($ext[0],'/'),PATHINFO_EXTENSION);
-				if (!empty($ext) && $ext != 'php') return false;
-			}
-			return true;
+			return \EarthAsylumConsulting\is_php_request();
 		}
 	} // trait
 } // namespace

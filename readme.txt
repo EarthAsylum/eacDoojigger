@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.0.0-RC1+24.1116.1
-Last Updated:           16-Nov-2024
+Stable tag:             3.0.0-RC1+24.1120.1
+Last Updated:           20-Nov-2024
 Requires at least:      5.8
 Tested up to:           6.7
 Requires PHP:           8.1
@@ -424,7 +424,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.0 – November 16, 2024 =
+= Version 3.0 – November 20, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
@@ -454,8 +454,11 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 	 +  b. in the upload folder.
 	 +  Uses wp_filesystem for proper access.
 +   New `access_denied()` method used to block fraudulent requests.
++   Move `is_admin_request()` and `is_network_admin_request()` from abstract_context to autoload.php.
++   Added `is_request_type()` and `is_php_request()` to autoload.php (\EarthAsylumConsulting namespace).
 +   Reworked admin options menu(s).
 +   Improved extension loader methods.
++   Allow null instance in plugin_loader::getInstance().
 +   Added user roles to advanced mode arrays and allow array of OR'd options.
     +   `$this->isAdvancedMode('global','administrator')`
     +   `$this->isAdvancedMode('global',['administrator','editor'])`
@@ -472,6 +475,8 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
     +   `$this->apply_filters('settings_tab_name',$optionTab,$optionGroup,$isNetworkSettings)`
 +   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
 +   New `getRequestOrigin()` gets origin from header or referrer or reverse DNS lookup.
++   New `options_settings_page_footer` action after settings form before closing div.
++   Use `options_settings_page_footer` action in swRegistrationUI.
 +   Suppress shutdown error for not-called parent methods.
 +   Check additional http headers in `getVisitorIP()`.
 +   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).

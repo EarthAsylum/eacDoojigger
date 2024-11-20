@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.0 – November 16, 2024 =
+= Version 3.0 – November 20, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
@@ -30,8 +30,11 @@
 	 +  b. in the upload folder.
 	 +  Uses wp_filesystem for proper access.
 +   New `access_denied()` method used to block fraudulent requests.
++   Move `is_admin_request()` and `is_network_admin_request()` from abstract_context to autoload.php.
++   Added `is_request_type()` and `is_php_request()` to autoload.php (\EarthAsylumConsulting namespace).
 +   Reworked admin options menu(s).
 +   Improved extension loader methods.
++   Allow null instance in plugin_loader::getInstance().
 +   Added user roles to advanced mode arrays and allow array of OR'd options.
     +   `$this->isAdvancedMode('global','administrator')`
     +   `$this->isAdvancedMode('global',['administrator','editor'])`
@@ -48,6 +51,8 @@
     +   `$this->apply_filters('settings_tab_name',$optionTab,$optionGroup,$isNetworkSettings)`
 +   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
 +   New `getRequestOrigin()` gets origin from header or referrer or reverse DNS lookup.
++   New `options_settings_page_footer` action after settings form before closing div.
++   Use `options_settings_page_footer` action in swRegistrationUI.
 +   Suppress shutdown error for not-called parent methods.
 +   Check additional http headers in `getVisitorIP()`.
 +   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).

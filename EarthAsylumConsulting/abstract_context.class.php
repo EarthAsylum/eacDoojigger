@@ -11,67 +11,23 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		24.1120.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @uses		\EarthAsylumConsulting\abstract_backend
  * @uses		\EarthAsylumConsulting\abstract_frontend
  */
 
-if (!function_exists(__NAMESPACE__.'\is_admin_request'))
-{
-	/**
-	 * admin-ajax & admin-post request always return is_admin() == true
-	 * are we calling for the frontend or backend?
-	 */
-	function is_admin_request(): bool
-	{
-		static $is_admin = null;
+/*
+ * @since Ver 3.0 - moved is_admin_request() to autoload.php
+ */
+//if (!function_exists(__NAMESPACE__.'\is_admin_request')) {}
 
-		if (!is_bool($is_admin))
-		{
-			if (wp_doing_ajax() || (isset($_SERVER['SCRIPT_NAME']) && strpos($_SERVER['SCRIPT_NAME'], '/admin-post.php') !== false))
-			{
-				$is_admin = (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], admin_url()) !== false);
-			}
-			else
-			{
-				$is_admin = is_admin();
-			}
-		}
-		return $is_admin;
-	}
-}
-
-if (!function_exists(__NAMESPACE__.'\is_network_admin_request'))
-{
-	/**
-	 * admin-ajax & admin-post request always return is_network_admin() == false
-	 * are we calling for network admin?
-	 */
-	function is_network_admin_request(): bool
-	{
-		static $is_network_admin = null;
-
-		if (!is_bool($is_network_admin))
-		{
-			if (! is_multisite())
-			{
-				$is_network_admin = false;
-			}
-			else if (wp_doing_ajax() || (isset($_SERVER['SCRIPT_NAME']) && strpos($_SERVER['SCRIPT_NAME'], '/admin-post.php') !== false))
-			{
-				$is_network_admin = (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], network_admin_url()) !== false);
-			}
-			else
-			{
-				$is_network_admin = (is_multisite() && is_network_admin());
-			}
-		}
-		return $is_network_admin;
-	}
-}
+/*
+ * @since Ver 3.0 - moved is_network_admin_request() to autoload.php
+ */
+//if (!function_exists(__NAMESPACE__.'\is_network_admin_request')) {}
 
 
 /*

@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1112.1
+ * @version		24.1120.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -2446,7 +2446,8 @@ abstract class abstract_core
 	 */
 	public function insert_with_markers(string $filename, string $marker, $insertion, string $commentBegin='#', string $commentEnd='', bool $insertAtTop=false): bool
 	{
-		if ($fs = apply_filters('eacDoojigger_load_filesystem',false))
+		global $wp_filesystem;
+		if ($fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem))
 		{
 			if ( ! $fs->exists( $filename ) ) {
 				if ( ! $fs->is_writable( dirname( $filename ) ) ) {
@@ -2526,7 +2527,8 @@ abstract class abstract_core
 	 */
 	public function get_output_file(string $filePath, bool $create=true, string $firstRecord='')
 	{
-		if	(! ($fs = $this->fs->load_wp_filesystem()) ) return '';
+		global $wp_filesystem;
+		if (! ($fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem))) return '';
 
 		$pathParts 	= explode(DIRECTORY_SEPARATOR,trim($filePath,DIRECTORY_SEPARATOR));
 		$filePath 	= (! str_ends_with($filePath,'/'))

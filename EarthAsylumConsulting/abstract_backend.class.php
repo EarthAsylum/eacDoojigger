@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1115.1
+ * @version		24.1120.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -674,6 +674,7 @@ abstract class abstract_backend extends abstract_core
 	 */
 	public function get_config_path($filePath=null,$fileId='',$useWPfs=true)
 	{
+		global $wp_filesystem;
 		// see if we can get to the config file (only single site or network admin)
 		if ($this->is_admin() && (!is_multisite() || $this->is_network_admin()))
 		{
@@ -686,8 +687,7 @@ abstract class abstract_backend extends abstract_core
 			 */
 			if ($filePath = $this->apply_filters("{$fileId}_path}",$filePath))
 			{
-				if ($useWPfs && ($fs = apply_filters('eacDoojigger_load_filesystem',false)))
-			//	if ($useWPfs && ($fs = \eacDoojigger()->fs->load_wp_filesystem()))
+				if ($useWPfs && ($fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem)))
 				{
 					$fsFilePath = $filePath;
 					if (! $fs->exists($filePath)) {
@@ -1993,6 +1993,12 @@ abstract class abstract_backend extends abstract_core
 			}
 
 		echo "</form>\n";
+
+		/**
+		 * action {classname}_options_settings_page_footer - end of options settings page
+		 * @return	void
+		 */
+		$this->do_action( 'options_settings_page_footer' );
 		echo "</div>\n";	// wrap
 	}
 

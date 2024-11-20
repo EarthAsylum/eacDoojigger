@@ -317,6 +317,7 @@ trait eacDoojigger_admin_traits
 						"if (is_file(EACDOOJIGGER_HOME .'/autoload.php')) {",
 						"    define('EACDOOJIGGER_VERSION','".$this->getVersion()."'); // preferred",
 						"    define('EAC_DOOJIGGER_VERSION',EACDOOJIGGER_VERSION); // deprecated",
+						"    define('EACDOOJIGGER_LICENSE','".$this->Registration->isRegistryValue('license'),
 						"    include EACDOOJIGGER_HOME .'/autoload.php';",
 						"}",
 					/*

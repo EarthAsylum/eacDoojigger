@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0905.1
+ * @version 	24.1119.1
  */
 
 trait swRegistrationUI
@@ -159,6 +159,15 @@ trait swRegistrationUI
 		$this->add_filter( 'options_form_post__activate_registration', 	array($this, 'form_request_activate'), 10, 4 );
 		$this->add_filter( 'options_form_post__refresh_registration', 	array($this, 'form_request_refresh'), 10, 4 );
 		$this->add_filter( 'options_form_post__delete_registration', 	array($this, 'form_request_delete'), 10, 4 );
+
+		$this->add_action('options_settings_page_footer', function()
+			{
+				if ($supp = $this->getRegistrySupplemental()) {
+					echo "<div id='settings-page-footer' class='supplemental-content'>".$supp."</div>\n";
+				}
+			},
+			100
+		);
 	}
 
 
@@ -519,7 +528,26 @@ trait swRegistrationUI
 		{
 			$html .= "<div class='registration-message'>".$currentRegistry->registrar->message."</div>";
 		}
-		$html .= $currentRegistry->registryHtml;
+		$html .= $currentRegistry->registryHtml ?: '';
+		return wp_kses_post($html);
+	}
+
+
+	/**
+	 * get registry information - in html table
+	 *
+	 * @param string $registrationKey registry key
+	 * @return string
+	 */
+	protected function getRegistrySupplemental(string $registrationKey=null)
+	{
+		$currentRegistry = $this->getCurrentRegistration($registrationKey);
+
+		if (empty($currentRegistry))
+		{
+			return '';
+		}
+		$html = $currentRegistry->supplemental ?? '';
 		return wp_kses_post($html);
 	}
 
