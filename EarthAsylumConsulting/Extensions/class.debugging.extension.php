@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.1115.1';
+		const VERSION	= '24.1120.1';
 
 		/**
 		 * @var array disable for these file extensions
@@ -997,7 +997,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		{
 			if (!$this->isEnabled() || empty($this->logPath)) return false;
 
-			$file = $this->logPath."/debug.".wp_date('Y-m-d').".log";
+			$file = $this->logPath."/".$this->pluginName.".".wp_date('Y-m-d').".log";
 
 			if ($fs = $this->fs->load_wp_filesystem())
 			{
