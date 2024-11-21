@@ -88,7 +88,7 @@ function is_network_admin_request(): bool
 		}
 		else
 		{
-			$is_network_admin = \is_network_admin());
+			$is_network_admin = \is_network_admin();
 		}
 	}
 	return $is_network_admin;
