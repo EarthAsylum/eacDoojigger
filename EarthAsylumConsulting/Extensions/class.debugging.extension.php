@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.1120.1';
+		const VERSION	= '24.1121.1';
 
 		/**
 		 * @var array disable for these file extensions
@@ -1234,8 +1234,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			if (is_wp_error($logPath))
 			{
 				$this->plugin->add_admin_notice($this->pluginName.' Debugging: Unable to access log path','error',
-					$logPath->get_error_data().'<br>File logging has been disabled');
-				trigger_error($this->pluginName.': unable to access log path '.$logPath->get_error_data(),E_USER_WARNING);
+					$logPath->get_error_message().'<br>File logging has been disabled');
+				trigger_error($this->pluginName.': unable to access log path '.$logPath->get_error_message(),E_USER_WARNING);
 				$this->update_option('debug_to_file_allowed','no');
 				return false;
 			}

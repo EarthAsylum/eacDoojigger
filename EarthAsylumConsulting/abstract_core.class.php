@@ -2528,7 +2528,9 @@ abstract class abstract_core
 	public function get_output_file(string $filePath, bool $create=true, string $firstRecord='')
 	{
 		global $wp_filesystem;
-		if (! ($fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem))) return '';
+		if (! ($fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem))) {
+			return $this->error('wp_filesystem_error','Unable to load wp_filesystem');
+		}
 
 		$pathParts 	= explode(DIRECTORY_SEPARATOR,trim($filePath,DIRECTORY_SEPARATOR));
 		$filePath 	= (! str_ends_with($filePath,'/'))
@@ -2537,8 +2539,12 @@ abstract class abstract_core
 
 		// find the folder to use
 		$pathName 	= (defined('WP_DEBUG_LOG') && is_string(WP_DEBUG_LOG))
-						? realpath(dirname(WP_DEBUG_LOG))
+						? realpath(dirname(WP_DEBUG_LOG)) ?: dirname(WP_DEBUG_LOG)
 						: wp_get_upload_dir()['basedir'];
+
+		if (str_starts_with($pathName,'./')) {
+			$pathName = ABSPATH.substr($pathName,1);
+		}
 
 		// create the directory
 		foreach($pathParts as $pathFolder)
