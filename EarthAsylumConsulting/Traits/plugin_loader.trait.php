@@ -21,7 +21,7 @@ namespace EarthAsylumConsulting\Traits
 	 * @package		{eac}Doojigger\Traits
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
-	 * @version		24.1120.1
+	 * @version		24.1121.1
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -93,7 +93,12 @@ namespace EarthAsylumConsulting\Traits
 			{
 				self::$plugin_detail['TextDomain'] = basename(str_replace('\\', '/', $_className));
 			}
-			load_plugin_textdomain(self::$plugin_detail['TextDomain'], false, dirname(plugin_basename( $_pluginfile )) . '/languages');
+			$_textDomain = self::$plugin_detail['TextDomain'];
+			add_action('init',function() use ($_textDomain,$_pluginfile)
+				{
+					load_plugin_textdomain($_textDomain, false, dirname(plugin_basename( $_pluginfile )) . '/languages');
+				}
+			);
 
 			/*
 			 * run the version check (if trait was USEd)

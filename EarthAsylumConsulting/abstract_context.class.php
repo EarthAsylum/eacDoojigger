@@ -12,7 +12,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1120.1
+ * @version		24.1121.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @uses		\EarthAsylumConsulting\abstract_backend
@@ -20,12 +20,12 @@ namespace EarthAsylumConsulting;
  */
 
 /*
- * @since Ver 3.0 - moved is_admin_request() to autoload.php
+ * @since Ver 3.0 - moved is_admin_request() to Helpers/functions.php (in autoload.php)
  */
 //if (!function_exists(__NAMESPACE__.'\is_admin_request')) {}
 
 /*
- * @since Ver 3.0 - moved is_network_admin_request() to autoload.php
+ * @since Ver 3.0 - moved is_network_admin_request() to Helpers/functions.php (in autoload.php)
  */
 //if (!function_exists(__NAMESPACE__.'\is_network_admin_request')) {}
 
@@ -37,7 +37,7 @@ namespace EarthAsylumConsulting;
 
 if ( is_network_admin_request() )
 {
-	/*
+	/**
 	 * Back-End Network Administration context
      * @ignore
 	 */
@@ -53,7 +53,7 @@ if ( is_network_admin_request() )
 }
 else if ( is_admin_request() )
 {
-	/*
+	/**
 	 * Back-End Administration context
      * @ignore
 	 */
@@ -75,8 +75,7 @@ else
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2022 EarthAsylum Consulting <www.earthasylum.com>
-	 * @version		2.x
+	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
 	 * @uses		EarthAsylumConsulting\abstract_backend
 	 * @uses		EarthAsylumConsulting\abstract_frontend
 	 */

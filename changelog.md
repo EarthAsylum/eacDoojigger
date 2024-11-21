@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.0 – November 20, 2024 =
+= Version 3.0 – November 21, 2024 =
 
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
@@ -30,8 +30,8 @@
 	 +  b. in the upload folder.
 	 +  Uses wp_filesystem for proper access.
 +   New `access_denied()` method used to block fraudulent requests.
-+   Move `is_admin_request()` and `is_network_admin_request()` from abstract_context to autoload.php.
-+   Added `is_request_type()` and `is_php_request()` to autoload.php (\EarthAsylumConsulting namespace).
++   Move `is_admin_request()` and `is_network_admin_request()` from abstract_context to Helpers/functions.php.
++   Added `is_request_type()` and `is_php_request()` to functions.php (\EarthAsylumConsulting namespace).
 +   Reworked admin options menu(s).
 +   Improved extension loader methods.
 +   Allow null instance in plugin_loader::getInstance().
@@ -64,6 +64,7 @@
 +   Use `sanitize_key()` on cookie name but check for un-sanitized name in `get_cookie()`.
 +   Removed `scheduleEvent()` method. Not used, didn't work. Use `wp_schedule_single_event()`.
 +   New `color-palette.css` loaded on admin pages.
++   Load TextDomain on `init` (as per WP v6.7).
 
 = Version 2.7.0 – October 7, 2024 =
 

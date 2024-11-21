@@ -148,7 +148,7 @@ abstract class abstract_extension
 		// check request uri for .php
 		if ( ! ($flags & self::ALLOW_NON_PHP) )
 		{
-			if ( ! eacDoojigger::isPHP() ) {
+			if ( ! \EarthAsylumConsulting\is_php_request() ) {
 				return $this->isEnabled(false);
 			}
 		}
