@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1107.1';
+		const VERSION 			= '24.1122.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -251,10 +251,12 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 		 */
 		private function report_to_provider_file(array $report)
 		{
-			if ($file = $this->plugin->get_output_file(
-						static::PROVIDER."/ip_report.".date('Y-m-d').".csv",
-						"IP,Categories,ReportDate,Comment\n")
-			) {
+			$file = $this->plugin->get_output_file(
+				static::PROVIDER."/ip_report.".date('Y-m-d').".csv",
+				true,
+				"IP,Categories,ReportDate,Comment\n"
+			);
+			if (! is_wp_error($file)) {
 				$fp = fopen($file, 'a');
 				fputcsv($fp, $report);
 				fclose($fp);

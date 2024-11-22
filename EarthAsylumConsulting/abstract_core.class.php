@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1120.1
+ * @version		24.1122.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -2520,7 +2520,7 @@ abstract class abstract_core
 	 * a. where the debug log is stored
 	 * b. in the upload folder
 	 *
-	 * @param string relative file path name
+	 * @param string relative file path name or directory (end with /)
 	 * @param bool $create create path/file
 	 * @param string first record when creating file
 	 * @return string|wp_error file path name
@@ -2533,18 +2533,39 @@ abstract class abstract_core
 		}
 
 		$pathParts 	= explode(DIRECTORY_SEPARATOR,trim($filePath,DIRECTORY_SEPARATOR));
-		$filePath 	= (! str_ends_with($filePath,'/'))
+		$filePath 	= (! str_ends_with($filePath,DIRECTORY_SEPARATOR))
 					  ? array_pop($pathParts)
 					  : false;
 
-		// find the folder to use
-		$pathName 	= (defined('WP_DEBUG_LOG') && is_string(WP_DEBUG_LOG))
-						? realpath(dirname(WP_DEBUG_LOG)) ?: dirname(WP_DEBUG_LOG)
-						: wp_get_upload_dir()['basedir'];
+		// look for {PLUGINNAME}_OUTPUT_PATH
+		$const 		= strtoupper($this->pluginName).'_OUTPUT_PATH';
+		$pathName 	= (defined($const) && is_string(constant($const)))
+					? realpath(constant($const)) ?: constant($const) : '';
 
-		if (str_starts_with($pathName,'./')) {
-			$pathName = ABSPATH.substr($pathName,1);
+		// look for WP_DEBUG_LOG
+		if (empty($pathName))
+		{
+			$pathName = (defined('WP_DEBUG_LOG') && is_string(WP_DEBUG_LOG) && dirname(WP_DEBUG_LOG))
+					? realpath(dirname(WP_DEBUG_LOG)) ?: dirname(WP_DEBUG_LOG) : '';
 		}
+
+		// look for upload directory or ABSPATH
+		if (empty($pathName))
+		{
+			$pathName = wp_get_upload_dir()['basedir'];
+		}
+		else if (str_starts_with($pathName,'.'.DIRECTORY_SEPARATOR))
+		{
+			$pathName = ABSPATH.substr($pathName,2);
+		}
+
+		/**
+		 * filter {pluginName}_get_output_path - get pathname (directory) for output files
+		 * @param string pathname
+		 */
+		$pathname = $this->apply_filters('get_output_path',$pathname);
+
+		$pathName = rtrim($pathName,DIRECTORY_SEPARATOR);
 
 		// create the directory
 		foreach($pathParts as $pathFolder)

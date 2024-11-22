@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1112.1';
+		const VERSION 			= '24.1122.1';
 
 		/**
 		 * @var string alias
@@ -484,15 +484,17 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			{
 				return $this->plugin->access_denied("Register Risk authentication failed",401);
 			}
-			/*
+
 			// allow origin in CORS
-			add_filter( 'allowed_http_origins', function ($allowed) {
-				$origin  = (is_ssl()) ? 'https://' : 'http://';
-				$origin .= gethostbyaddr($this->plugin->getVisitorIP());
+			$origin = $this->plugin->getRequestOrigin();
+			add_filter( 'http_origin', function() use ($origin) {
+				return $origin;
+			});
+			add_filter( 'allowed_http_origins', function ($allowed) use ($origin) {
 				$allowed[] = $origin;
 				return $allowed;
 			});
-			*/
+
 			return true;
 		}
 
