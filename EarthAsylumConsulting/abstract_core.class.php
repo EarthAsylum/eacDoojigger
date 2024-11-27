@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1122.1
+ * @version		24.1126.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -792,7 +792,7 @@ abstract class abstract_core
 
 
 	/**
-	 * Add admin notice, noop when not admin/backend
+	 * Add admin notice, log when not admin/backend
 	 *
 	 * @param string $message message text
 	 * @param string $errorType 'error', 'warning', 'notice', 'success'
@@ -801,6 +801,14 @@ abstract class abstract_core
 	 */
 	public function add_admin_notice(string $message, string $errorType='notice', string $moreInfo=''): void
 	{
+		switch ($errorType) {
+			case 'warning':
+			case 'error':
+				$this->log($errorType,rtrim($message.'; '.$moreInfo,' ;'));
+				break;
+			default:
+				return;
+		}
 	}
 
 
@@ -2563,7 +2571,7 @@ abstract class abstract_core
 		 * filter {pluginName}_get_output_path - get pathname (directory) for output files
 		 * @param string pathname
 		 */
-		$pathname = $this->apply_filters('get_output_path',$pathname);
+		$pathName = $this->apply_filters('get_output_path',$pathName);
 
 		$pathName = rtrim($pathName,DIRECTORY_SEPARATOR);
 

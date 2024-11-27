@@ -1,6 +1,6 @@
 /**
  * {eac}Doojigger for WordPress - Administrator options screen stylesheet
- * @version 24.1119.1
+ * @version 24.1126.1
  */
 
 /*
@@ -41,9 +41,8 @@
 	border: 1px solid var(--eac-wp-medium-gray);
 	background: var(--eac-admin-subtle);
 }
-.tab-content {
-	border-top: none;
-}
+.tab-content {border-top: none;}
+.supplemental-content {float: right;}
 
 /*
 	<section class='settings-grid'>

@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1120.1
+ * @version		24.1124.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -2326,8 +2326,15 @@ abstract class abstract_backend extends abstract_core
 			case 'codeedit-css':
 			case 'codeedit-html':
 			case 'codeedit-php':
-			case 'html':
 				$values = $this->wp_kses( $values );
+				break;
+			case 'html':
+				// the wp_editor forces code format incompatible with wp_kses
+				$result = $this->wp_kses( $values );
+				if (str_replace([';',' '],'',$values) == str_replace([';',' '],'',$result)) {
+					$_POST[$optionKey] = $result;
+				}
+				$values = $result;
 				break;
 			case 'file':
 				$values = wp_handle_upload( $_FILES["{$optionKey}_file"], ['test_form' => false] );

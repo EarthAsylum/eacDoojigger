@@ -7,8 +7,8 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.0.0-RC2+24.1122.1  
-Last Updated:           22-Nov-2024  
+Stable tag:             3.0.0-RC3+24.1126.1  
+Last Updated:           26-Nov-2024  
 Requires at least:      5.8  
 Tested up to:           6.7  
 Requires PHP:           8.1  
@@ -26,7 +26,7 @@ GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki
 
 #### Summary
 
-**{eac}Doojigger** by {EarthAsylum Consulting} is a multi functional and highly extensible WordPress plugin that provides existing extensions covering file access, security, debugging, encryption, session management, maintenance mode, administration tools, and more.
+**{EarthAsylum Consulting} DooJigger** ( **{eac}Doojigger** ) is a multi functional and highly extensible WordPress plugin that includes several doohickeys (extensions) providing file access, security, debugging, encryption, session management, maintenance mode, administration tools, and more.
 
 _{eac}Doojigger_ is not only a fully functional plugin, but more so, an architectural development platform (using shared/abstract code) enabling the effortless creation of full featured...
 
@@ -67,9 +67,9 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *Encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
 |   *Cookie Compliance*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters. |
-|   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for accessing session data. |
+|   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for reading/writing session variables. |
 |   *Maintenance Mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
-|   *Admin Tools*                       | Adds cache management and plugin option backup/restore, export/import. |
+|   *Admin Tools*                       | Adds cache management and plugin settings backup/restore, export/import. |
 |   *Ajax Action*                       | Adds an easy to use ajax responder (accessable from any extension). |
 |   *Material Icons*                    | Adds Google's Material Icons to WordPress. |
 |   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, html input fields, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
