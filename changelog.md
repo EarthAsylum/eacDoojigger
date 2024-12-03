@@ -1,7 +1,8 @@
 == Changelog ==
 
-= Version 3.0 – November 26, 2024 =
+= Version 3.0 – December 2, 2024 =
 
++   Introducing `Doojiggers`, `Doolollys`, `Doohickeys`, and `Doodads`.
 +   Tested with WordPress 6.7.
 +   Dropped support for PHP < 8.1.
 +   New browser optimization options (CSS Early Hints, Asynchronous CSS, JS Early Hints, Asynchronous JS).

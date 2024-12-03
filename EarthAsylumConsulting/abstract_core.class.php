@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1126.1
+ * @version		24.1202.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -2948,6 +2948,7 @@ abstract class abstract_core
 		$this->extension_objects[ $className ] = $object;
 
 		$aliasName	= basename($className,'_extension');			// classname
+		$aliasName	= basename($aliasName,'_doololly');				// classname
 		if ($aliasName != $className ) {
 			$this->extension_aliases[ $aliasName ] = $object;
 		}
@@ -2981,7 +2982,7 @@ abstract class abstract_core
 		}
 
 		$dirNames	= $this->addExtensionSubDirectories( [ $id => $source ] );
-		$fileTypes	= array("extension");						// <something>.extension.php
+		$fileTypes	= array('extension','doololly');					// <something>.extension.php
 		$extensions = array();
 
 		foreach ($dirNames as $slug => $dirs)
@@ -3010,20 +3011,26 @@ abstract class abstract_core
 	 */
 	private function defaultExtensionDirectories(): array
 	{
-		$pluginDir = $this->pluginHeader('PluginDir');
-		$vendorDir = $this->pluginHeader('VendorDir');
+		$pluginDir 	= $this->pluginHeader('PluginDir');
+		$vendorDir 	= $this->pluginHeader('VendorDir');
+		$classNs 	= strtok(get_class($this), '\\');
 
 		$directories = array_unique([
 			// default extensions - plugin-dir/extensions
 			$pluginDir . '/Extensions',
+			$pluginDir . '/Doolollys',
 			// built-in vendor extensions - plugin-dir/vendor/extensions
 			$vendorDir . '/Extensions',
+			$vendorDir . '/Doolollys',
 			// default extensions - plugin-dir/namespace/extensions
 			$pluginDir . '/' . __NAMESPACE__ . '/Extensions',
+			$pluginDir . '/' . __NAMESPACE__ . '/Doolollys',
 			// class namespace may be different than this namespace, look for a corresponding folder
-			$pluginDir . '/' . strtok(get_class($this), '\\') . '/Extensions',
+			$pluginDir . '/' . $classNs . '/Extensions',
+			$pluginDir . '/' . $classNs . '/Doolollys',
 			// custom site extensions - plugin-dir/site-name ('My WordPress Site' == 'my-wordpress-site')
 			$pluginDir . '/' . $this->toKeyString(\get_option('blogname')) . '/Extensions',
+			$pluginDir . '/' . $this->toKeyString(\get_option('blogname')) . '/Doolollys',
 		]);
 		return array_filter($directories, function($dir){return is_dir($dir);});
 	}

@@ -9,7 +9,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger\Utilities\{eac}DoojiggerAutoloader
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * Version: 	24.0904.1
+ * Version: 	24.1202.1
  * @link		https://eacDoojigger.earthasylum.com/
  */
 
@@ -73,6 +73,10 @@ class eacDoojiggerAutoloader
 		'Traits'			=> 'trait',
 		'Interfaces'		=> 'interface',
 		'Exceptions'		=> 'exception',
+		'Doojigger'			=> 'doojigger',	// deriviative plugins
+		'Doojiggers'		=> 'doojigger',
+		'Doolollys'			=> 'doololly',	// extensions
+		'Doodads'			=> 'doodad',	// classes
 	];
 
 	/**
