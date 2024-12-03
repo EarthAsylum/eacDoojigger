@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1202.1
+ * @version		24.1203.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -414,10 +414,13 @@ abstract class abstract_core
 			$dirNames = [];
 
 			// check theme directory
-			$themeDir = \get_stylesheet_directory() . "/{$this->className}/Extensions";
-			if (is_dir($themeDir))
+			foreach([ "Extensions", "Doolollys" ] as $themeType)
 			{
-				$dirNames[$this->toKeyString(\get_stylesheet())] = [$themeDir];
+				$themeDir = \get_stylesheet_directory() . "/{$this->className}/{$themeType}";
+				if (is_dir($themeDir))
+				{
+					$dirNames[$this->toKeyString(\get_stylesheet().'-'.$themeType)] = [$themeDir];
+				}
 			}
 
 			/**
@@ -3013,7 +3016,8 @@ abstract class abstract_core
 	{
 		$pluginDir 	= $this->pluginHeader('PluginDir');
 		$vendorDir 	= $this->pluginHeader('VendorDir');
-		$classNs 	= strtok(get_class($this), '\\');
+		$classDir 	= strtok(get_class($this), '\\');
+		$blogDir 	= $this->toKeyString(\get_option('blogname'));
 
 		$directories = array_unique([
 			// default extensions - plugin-dir/extensions
@@ -3026,11 +3030,11 @@ abstract class abstract_core
 			$pluginDir . '/' . __NAMESPACE__ . '/Extensions',
 			$pluginDir . '/' . __NAMESPACE__ . '/Doolollys',
 			// class namespace may be different than this namespace, look for a corresponding folder
-			$pluginDir . '/' . $classNs . '/Extensions',
-			$pluginDir . '/' . $classNs . '/Doolollys',
+			$pluginDir . '/' . $classDir . '/Extensions',
+			$pluginDir . '/' . $classDir . '/Doolollys',
 			// custom site extensions - plugin-dir/site-name ('My WordPress Site' == 'my-wordpress-site')
-			$pluginDir . '/' . $this->toKeyString(\get_option('blogname')) . '/Extensions',
-			$pluginDir . '/' . $this->toKeyString(\get_option('blogname')) . '/Doolollys',
+			$pluginDir . '/' . $blogDir . '/Extensions',
+			$pluginDir . '/' . $blogDir . '/Doolollys',
 		]);
 		return array_filter($directories, function($dir){return is_dir($dir);});
 	}

@@ -7,8 +7,8 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.0.0-RC3+24.1202.1  
-Last Updated:           02-Dec-2024  
+Stable tag:             3.0.0  
+Last Updated:           03-Dec-2024  
 Requires at least:      5.8  
 Tested up to:           6.7  
 Requires PHP:           8.1  
@@ -26,24 +26,20 @@ GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki
 
 #### Summary
 
-{EarthAsylum Consulting} **{eac}Doojigger** is a multi functional and highly extensible WordPress plugin that eases and advances WordPress development and includes several *Doolollys* (extensions) providing file access, security, debugging, encryption, session management, maintenance mode, administration tools, and more.
+{EarthAsylum Consulting} **{eac}Doojigger** is a multi functional and highly extensible WordPress plugin that eases and advances WordPress development and includes several 'Doolollys' (extensions) providing file access, security, debugging, encryption, session management, maintenance mode, administration tools, and more.
 
 *{eac}Doojigger* is not only a fully functional plugin, but more so, an architectural development platform (using shared/abstract code) enabling the effortless creation of full featured...
 
-1.  [Custom *Doojiggers* (Plugins derived from {eac}Doojigger)](#custom-derivative-plugins).
+1.  [Custom 'Doojiggers' (Plugins derived from {eac}Doojigger)](#custom-derivative-plugins).
     +   Create your own plugin with {eac}Doojigger as a robust, efficient, and clean foundation.
 
-2.  [Custom *Doolollys* (Doojigger Extensions)](#custom-eacdoojigger-extensions).
-    +   Add easy-to-code, task-oriented extensions installed or included in the "Extensions" folder of your Doojigger plugin or WordPress theme.
+2.  [Custom 'Doolollys' (Doojigger Extensions)](#custom-eacdoojigger-extensions).
+    +   Add easy-to-code, task-oriented extensions installed or included in the "Extensions" folder of your 'Doojigger' plugin or WordPress theme.
 
-3.  [Custom *Doohickeys* (Doololly Plugins)](#custom-extension-plugins).
-    +   Load your plugin extensions (*Doolollys*) as their own WordPress plugins with their own installation folder.
+3.  [Custom 'Doohickeys' (Doololly Plugins)](#custom-extension-plugins).
+    +   Load your plugin extensions ('Doolollys') as their own WordPress plugins with their own installation folder.
 
->   *Doojiggers* and *Doohickeys* (plugins) have their own activation and deactivation processes whereas *Doolollys* (extensions) are activated or deactivated along with their parent *Doojigger*. *Doohickeys* remain active but perform no function if their parent *Doojigger* is deactivated.
-
->   {eac}Doojigger is the ancestrial parent of all *Doojiggers*, *Doolollys*, and *Doohickeys*.
-
-Rather than updating or customizing themes and functions, it is often best to isolate your custom code in a plugin or plugin extension so that code is not lost when the theme is changed or updated. Themes should only be used and customized with code pertinent to the look and feel of your site. Any code that should be retained after changing a theme belongs in a plugin or plugin extension. This keeps your code reusable and theme independent.
+Rather than updating or customizing themes and functions, it is often best to isolate your custom code in a plugin ('Doojigger') or extension ('Doololly') so that code is not lost when the theme is changed or updated. Themes should only be used and customized with code pertinent to the look and feel of your site. Any code that should be retained after changing a theme belongs in a 'Doojigger' or 'Doololly'. This keeps your code reusable and theme independent.
 
 _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable, and efficient code easy to create and maintain._
 
@@ -61,7 +57,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 #### Provided With {eac}Doojigger
 
-|   Included Doolollys & Doodads        | (Extensions, helpers & Traits) |
+|   Included 'Doolollys' & 'Doodads'    | (Extensions, helpers & Traits) |
 |   ---------------------------------   |   ----------------    |
 |   *File System Access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
@@ -83,10 +79,10 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 |   Extras & Examples                   |   { [explore on github](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras) } { [documentation wiki](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/) } { [download zip](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip) } |
 |   ---------------------------------   |   ----------------    |
-|   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first Doojigger plugin.* |
-|   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first Doololly extension.* |
-|   *myFunctions*                       | A functional skeleton Doohickey (extension plugin) intended to replace (or augment) custom theme `functions.php`, including custom stylesheet and javascript. |
-|   *myOptionsTest*                     | A functional example Doohickey that produces a settings screen with all input field types. Includes example input field filters and sanitization. |
+|   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first 'Doojigger' plugin.* |
+|   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first 'Doololly' extension.* |
+|   *myFunctions*                       | A functional skeleton 'Doohickey' (extension plugin) intended to replace (or augment) custom theme `functions.php`, including custom stylesheet and javascript. |
+|   *myOptionsTest*                     | A functional example 'Doohickey' that produces a settings screen with all input field types. Includes example input field filters and sanitization. |
 |   A debugging test api                | Extension that provides testing via url through the debugging extension (not intended for production sites). |
 
 
@@ -97,12 +93,12 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *{eac}DoojiggerActionTimer*         | A timer/tracking utility to track the load/execution timing of WordPress actions and filters (as well as custom events) when WordPress loads. |
 
 
-|   Available Doojiggers | (Derivative Plugins) |
+|   Available 'Doojiggers' | (Derivative Plugins) |
 |   ---------------------------------   |   ----------------    |
 |   [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/) | A full-featured Software Registration/Licensing Server (used by {eac}Doojigger). |
 
 
-|   Available Doohickies | (Extension Plugins) [WordPress Repository](https://wordpress.org/plugins/search/earthasylum/) |
+|   Available 'Doohickies' | (Extension Plugins) [WordPress Repository](https://wordpress.org/plugins/search/earthasylum/) |
 |   ---------------------------------   |   ----------------    |
 |   [{eac}SimpleSMTP](https://eacdoojigger.earthasylum.com/eacsimplesmtp/)  | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
 |   [{eac}SimpleAWS](https://eacdoojigger.earthasylum.com/eacsimpleaws/)    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
@@ -113,7 +109,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   [{eac}MetaPixel](https://eacdoojigger.earthasylum.com/eacmetapixel/)    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
 
 
-#### Doojiggers - Custom Derivative Plugins
+#### 'Doojiggers' - Custom Derivative Plugins
 
 Once {eac}Doojigger is installed and registered, you, the developer, can create your own plugin using the abstract classes and traits provided.
 
@@ -130,7 +126,7 @@ Your plugin code need only focus on your particular requirements. The WordPress 
 >   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/derivatives/) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/Plugins/* folder).
 
 
-#### Doolollys - Custom Doojigger Extensions
+#### 'Doolollys' - Custom Doojigger Extensions
 
 An extension is a PHP program class that adds functionality to the base plugin. Extensions can be coded for specific needs and can be as simple or complex as needed.
 
@@ -142,7 +138,7 @@ An extension is a PHP program class that adds functionality to the base plugin. 
 >   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/extensions/) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/Extensions/* folder).
 
 
-#### Doohickeys - Custom Extension Plugins
+#### 'Doohickeys' - Custom Extension Plugins
 
 Since uploading extensions to the plugin or theme folder risks overwriting those extensions when upgrading or re-installing the plugin or theme, it is very easy to add extensions as their own WordPress plugin. The plugin simply answers a filter from the base plugin telling it where to load additional extensions. These extensions then exist in their own plugin folder with no risk of being overwritten.
 
@@ -262,23 +258,29 @@ In short,
 
 {eac}Doojigger should be Network Activated on multi-site installations. Individual extensions and options may be configured on each site.
 
-### Definitions
+#### Definitions
 
-_doojigger_ n
+_doojigger_ (n)
 1. Something unspecified whose name is either forgotten or not known.
-2. A Wordpress Plugin built with {eac}Doojigger.
+2. *A Wordpress Plugin built with {eac}Doojigger.*
 
-_doololly_ n
+_doololly_ (n)
 1. Any nameless small object, typically some form of gadget.
-2. An extension to a Doojigger plugin.
+2. *An extension to a Doojigger plugin.*
 
-_doohickey_ n
+_doohickey_ (n)
 1. A thing (used in a vague way to refer to something whose name one does not know or cannot recall).
-2. A plugin used to load a Doololly extension.
+2. *A plugin used to load a Doololly extension.*
 
-_doodad_ n
+_doodad_ (n)
 1. Something, especially a small device or part, whose name is unknown or forgotten.
-2. A helper or trait included with a Doojigger plugin.
+2. *A helper or trait included with a Doojigger plugin.*
+
+---
+
+>   'Doojiggers' and 'Doohickeys' (plugins) have their own activation and deactivation processes whereas 'Doolollys' (extensions) are activated or deactivated along with their parent 'Doojigger'. 'Doohickeys' remain active but perform no function if their parent 'Doojigger' is deactivated.
+
+>   {eac}Doojigger is the ancestrial parent of all 'Doojiggers', 'Doolollys', and 'Doohickeys'.
 
 #### See Also
 
@@ -295,7 +297,7 @@ _doodad_ n
 
 +   [{eac}Doojigger How-To...](https://eacDoojigger.earthasylum.com/how-to/)
 
-*Doohickeys (plugins) and Doolollys (extensions) built with {eac}Doojigger*
+*'Doohickeys' (plugins) and 'Doolollys' (extensions) built with {eac}Doojigger*
 
 +   [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/)
 A full-featured Software Registration/Licensing Server built on {eac}Doojigger.
