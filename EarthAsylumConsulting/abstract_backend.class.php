@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1124.1
+ * @version		24.1215.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -1581,11 +1581,37 @@ abstract class abstract_backend extends abstract_core
 				$optionName = $this->standardizeOptionName($optionName,false); // retain case of option name
 				$optionMetaData[$optionName] = array_merge(self::OPTION_META_KEYS,$optionMeta);
 
-				if ($optionMetaData[$optionName]['advanced']) {
+				// advanced mode setting
+				if ($optionMetaData[$optionName]['advanced'])
+				{
 					$level = ($this->isTrue($optionMetaData[$optionName]['advanced']))
 						? 'default'
 						: $optionMetaData[$optionName]['advanced'];
-					if (!$this->isAdvancedMode('settings',$level)) {
+					if (!$this->isAdvancedMode('settings',$level))
+					{
+						$levels = (array)$level;
+						foreach ($levels as $level)
+						{
+							if ($level != 'default' && $level[0] != '-' && !in_array($optionMetaData[$optionName]['type'],['display','hidden'])) {
+								$level = ltrim($level,'-');
+								/**
+								 * filter {classname}_advanced_mode_field - add field to show (not) advanced enabled
+								 *
+								 * @param array field metadata [type,label,default,advancedMode]
+								 * @param string field name
+								 */
+								if ($advanced = $this->apply_filters('advanced_mode_field',
+									array_merge(self::OPTION_META_KEYS,[
+										'type' 			=> 'advanced-mode',
+										'label' 		=> $optionMetaData[$optionName]['label'],
+										'default'		=> (str_word_count($level) > 1) ? $level : ucfirst($level).' Level Feature',
+										'advancedMode' 	=> $level,
+									]),$optionName)
+								) {
+									$optionMetaData["-advanced-{$optionName}"] = $advanced;
+								}
+							}
+						}
 						unset($optionMetaData[$optionName]);
 					}
 				}
@@ -1637,6 +1663,35 @@ abstract class abstract_backend extends abstract_core
 	 */
 	public function registerPluginOptions($optionGroup, array $optionMeta = []): void
 	{
+		if ($this->isSettingsPage())
+		{
+			if (did_action( 'set_current_user' ))
+		//	if ($this->did_action( 'options_settings_page' ))
+			{
+				$this->registerPluginOptionsForUser($optionGroup, $optionMeta);
+			}
+			else
+			{
+				add_action( 'set_current_user', function() use($optionGroup, $optionMeta)
+		//		$this->add_action( 'options_settings_page', function() use($optionGroup, $optionMeta)
+					{
+						$this->registerPluginOptionsForUser($optionGroup, $optionMeta);
+					}
+				);
+			}
+		}
+	}
+
+
+	/**
+	 * add additional options (meta) for the plugin (or extension)
+	 *
+	 * @param	string|array 	$optionGroup group name or [groupname, tabname]]
+	 * @param	array 			$optionMeta group option meta
+	 * @return	void
+	 */
+	public function registerPluginOptionsForUser($optionGroup, array $optionMeta = []): void
+	{
 		$optionGroup = $this->standardizeOptionGroup($optionGroup);
 		if (is_array($optionGroup))
 		{
@@ -1666,6 +1721,33 @@ abstract class abstract_backend extends abstract_core
 	 * @return	void
 	 */
 	public function registerNetworkOptions($optionGroup, array $optionMeta = []): void
+	{
+		if ($this->isSettingsPage())
+		{
+			if (did_action( 'set_current_user' ))
+			{
+				$this->registerNetworkOptionsForUser($optionGroup, $optionMeta);
+			}
+			else
+			{
+				add_action( 'set_current_user', function() use($optionGroup, $optionMeta)
+					{
+						$this->registerNetworkOptionsForUser($optionGroup, $optionMeta);
+					}
+				);
+			}
+		}
+	}
+
+
+	/**
+	 * add network options (meta) for the plugin
+	 *
+	 * @param	string|array 	$optionGroup group name or [groupname, tabname]]
+	 * @param	array 			$optionMeta group option meta
+	 * @return	void
+	 */
+	public function registerNetworkOptionsForUser($optionGroup, array $optionMeta = []): void
 	{
 		if ( !is_multisite() ) return;
 		$optionGroup = $this->standardizeOptionGroup($optionGroup);
@@ -2784,6 +2866,13 @@ abstract class abstract_backend extends abstract_core
 						 "<label for='{$optionKey}_file' class='button button-small input-file-label'>Choose File</label>".
 						 "<input class='{$inputClass}' type='{$optionMeta['type']}' name='{$optionKey}_file' id='{$optionKey}_file'{$attributes} />".
 						 "</div>";
+				break;
+
+			case 'advanced-mode':
+				$advanced = $this->toKeyString($optionMeta['advancedMode']);
+				$html .= $tab."<div class='{$inputClass} {$advanced}' id='{$optionKey}'>";
+				$html .= $optionMeta['default'];
+				$html .= "</div>";
 				break;
 
 			case 'disabled':

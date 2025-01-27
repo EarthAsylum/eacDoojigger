@@ -8,7 +8,8 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.1030.1
+ * @version		24.1215.1
+ * @see 		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To#implementing-and-using-advanced-mode
  */
 trait advanced_mode
 {
@@ -39,7 +40,7 @@ trait advanced_mode
 	private function advanced_mode_init(): void
 	{
 		$this->config_advanced_mode(); 	// before user loaded - backward compatible with define(plugin_ADVANCED_MODE)
-		add_action( 'set_current_user', array ($this, 'config_advanced_mode' ) );
+		add_action( 'set_current_user', array ($this, 'config_advanced_mode' ), 5 );
 
 		/**
 		 * filter {classname}_is_advanced_mode check for advanced mode
@@ -91,21 +92,26 @@ trait advanced_mode
 		// user preference
 		$user 	= false;
 		$option = $this->addClassNamePrefix('advanced_mode');
-		if (function_exists('\wp_get_current_user') && ($user = \wp_get_current_user())) {
+		if (function_exists('\wp_get_current_user') && ($user = \wp_get_current_user()))
+		{
 			$option = $this->isTrue(\get_user_meta($user->ID,$option,true));
 			$this->setAdvancedMode($option,'global');
 			$this->setAdvancedMode($option,'settings');
 		}
+
 		// wp-config constant allows and overrides advanced mode
 		$option = strtoupper($this->pluginName).'_ADVANCED_MODE';
-		if ( defined( $option ) ) {
+		if ( defined( $option ) )
+		{
 			$option = $this->isTrue(constant($option));
 			$this->allowAdvancedMode(true);
 			$this->setAdvancedMode($option,'global');
 			$this->setAdvancedMode($option,'settings');
 		}
-		// set user role
-		if ($user) {
+
+		// set user role(s)
+		if ($user)
+		{
 			$roles = \wp_roles()->get_names();
 			foreach ($roles as $role=>$name) {
 				$is = in_array($role,$user->roles);
@@ -146,14 +152,14 @@ trait advanced_mode
 	 * @example: $this->setAdvancedMode(true,'settings');
 	 *
 	 * @param bool $is - is or is not
-	 * @param string $what - what is in advanced mode (global, settings, ...)
+	 * @param string $what - what is in advanced mode (global, settings, custom ...)
 	 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
 	 * @return	void
 	 */
-	public function setAdvancedMode( $is = true, string $what = null,string $level = null): void
+	public function setAdvancedMode( $is = true, string $what = null, string $level = null): void
 	{
 		$what	= strtolower($what ?? 'global');
-		$level	= strtolower($level ?? 'default');
+		$level	= ltrim(strtolower($level ?? 'default'),'-');
 		$is		= $this->isTrue($is);
 
 		$this->advanced_mode[$what][$level] = $is;
@@ -177,7 +183,6 @@ trait advanced_mode
 	public function isAdvancedMode(string $what = null, string|array $level = null): bool
 	{
 		$what	= strtolower($what ?? 'global');
-		$level	= strtolower($level ?? 'default');
 
 		if (is_array($level))
 		{
@@ -187,6 +192,8 @@ trait advanced_mode
 			}
 			return $is;
 		}
+
+		$level	= ltrim(strtolower($level ?? 'default'),'-');
 
 		foreach ([$what,'global'] as $w)
 		{

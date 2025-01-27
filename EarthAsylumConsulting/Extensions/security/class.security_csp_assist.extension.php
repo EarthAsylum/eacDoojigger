@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_csp_assistant', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1115.1';
+		const VERSION 			= '24.1215.1';
 
 		/**
 		 * @var string extension tab name
@@ -27,9 +27,11 @@ if (! class_exists(__NAMESPACE__.'\security_csp_assistant', false) )
 		/**
 		 * @var string|array|bool to set (or disable) default group display/switch
 		 */
-		const ENABLE_OPTION		=
-			"<abbr title='Facilitates the creation of a comprehensive <em>Content Security Policy</em> (CSP) ".
-			"by adding a security nonce to script and style link tags.'>Content Security Assistant</abbr>";
+		const ENABLE_OPTION		= [
+			'label'		=> 	"<abbr title='Facilitates the creation of a comprehensive <em>Content Security Policy</em> (CSP) ".
+							"by adding a security nonce to script and style link tags.'>Content Security Assistant</abbr>",
+			'advanced'	=> 	true,
+		];
 
 		/**
 		 * @var string content security nonce

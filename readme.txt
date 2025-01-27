@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.0.0
-Last Updated:           03-Dec-2024
+Stable tag:             3.0.1
+Last Updated:           14-Dec-2024
 Requires at least:      5.8
 Tested up to:           6.7
 Requires PHP:           8.1
@@ -446,6 +446,17 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.0.1 – December 14, 2024 =
+
++   Settings are not registered until `set_current_user` action and only when `isSettingsPage()`.
++   Non-standard "advanced mode" (i.e. "professional")
+    +   Display "__ Level Feature" instead of hiding the feature/option.
+        +   If level has multiple words (i.e. "Professional Mode Only"), display level only, else display "{level} Level Feature".
+    +   If level starts with "-" (i.e. "-professional"), don't display.
+    +   Filter `{classname}_advanced_mode_field` to filter above display field.
++   Fix wp_filter_count(), wp_action_count().
+
 
 = Version 3.0 – December 3, 2024 =
 

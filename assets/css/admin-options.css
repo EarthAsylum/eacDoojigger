@@ -1,6 +1,6 @@
 /**
  * {eac}Doojigger for WordPress - Administrator options screen stylesheet
- * @version 24.1126.1
+ * @version 24.1214.1
  */
 
 /*
@@ -280,6 +280,19 @@ details.settings-grid-head summary > * {display: inline;}
 .settings-grid fieldset.settings-opened {
 	display: grid !important;
     animation: settings-easeIn 0.75s ease-in;
+}
+
+.input-advanced-mode {
+	font-style: italic;
+	color: var(--eac-admin-highlight);
+}
+.input-advanced-mode:before {
+	font-family: dashicons;
+	font-style: normal;
+	color: var(--eac-admin-icon);
+	width: 1.25em;
+	display: inline-block;
+	content: "\f160";
 }
 
 /* for banner and nag-notice (if present) */

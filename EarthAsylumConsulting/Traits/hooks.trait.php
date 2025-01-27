@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.1029.1
+ * @version		24.1212.1
  */
 trait hooks
 {
@@ -22,7 +22,6 @@ trait hooks
 	public function wp_filter_count(string $hookName, $callback = false)
 	{
 		global $wp_filter;
-		$hookName 	= $this->prefixHookName($hookName);
 		$hookCount 	= 0;
 		if ( isset( $wp_filter[ $hookName ] ) )
 		{

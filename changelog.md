@@ -1,5 +1,15 @@
 == Changelog ==
 
+= Version 3.0.1 – December 14, 2024 =
+
++   Settings are not registered until `set_current_user` action and only when `isSettingsPage()`.
++   Non-standard "advanced mode" (i.e. "professional")
+    +   Display "__ Level Feature" instead of hiding the feature/option.
+        +   If level has multiple words (i.e. "Professional Mode Only"), display level only, else display "{level} Level Feature".
+    +   If level starts with "-" (i.e. "-professional"), don't display.
+    +   Filter `{classname}_advanced_mode_field` to filter above display field.
++   Fix wp_filter_count(), wp_action_count().
+
 = Version 3.0 – December 3, 2024 =
 
 +   Introducing 'Doojiggers', 'Doolollys', 'Doohickeys', and 'Doodads'.
