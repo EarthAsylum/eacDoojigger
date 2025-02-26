@@ -11,7 +11,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see			https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.1121.1';
+		const VERSION	= '25.0225.1';
 
 		/**
 		 * @var array disable for these file extensions
@@ -157,7 +157,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		public function initialize()
 		{
 			if ( ! parent::initialize() ) return; // disabled
-			if (wp_doing_ajax() && $_REQUEST['action'] == 'heartbeat')
+			if (wp_doing_ajax() && isset($_REQUEST['action']) && $_REQUEST['action'] == 'heartbeat')
 			{
 				if (!$this->is_option('debug_heartbeat')) {
 					return $this->isEnabled(false);

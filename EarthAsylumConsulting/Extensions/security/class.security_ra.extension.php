@@ -11,7 +11,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
 	class security_ra_extension extends \EarthAsylumConsulting\abstract_extension
@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1122.1';
+		const VERSION 			= '25.0226.1';
 
 		/**
 		 * @var string alias
@@ -170,7 +170,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
-			if (! current_user_can('edit_pages') ) // not editor or better
+			if ($this->isEnabled() && ! current_user_can('edit_pages') ) // not editor or better
 			{
 				add_action('init',						array($this, 'check_for_blocks'));
 				// do this late, but before output, so other rules may process
@@ -261,7 +261,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		{
 			$ipAddress 	= $this->getVisitorIP();
 			$method 	= $this->security->isPolicyEnabled('risk_assessment_method');
-			$limit 		= $this->security->isPolicyEnabled('risk_assessment_limit');
+			$limit 		= intval($this->security->isPolicyEnabled('risk_assessment_limit'));
 
 			if (! ($data = $this->transient_provider($ipAddress,true)) )
 			{
@@ -304,7 +304,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			);
 
 			// block request if we've reached the limit
-			if ($data['RiskAssessmentScore'] >= $limit)
+			if ($limit && $data['RiskAssessmentScore'] >= $limit)
 			{
 				$this->plugin->logDebug($data['RiskAssessmentScores'],__FUNCTION__);
 				$this->risk_assessment_abort($ipAddress, $data['RiskAssessmentScore'], $limit);

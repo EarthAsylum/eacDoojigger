@@ -1,5 +1,13 @@
 == Changelog ==
 
+= Version 3.0.2 – February 26, 2025 =
+
++   Validate `risk_assessment_limit` in `risk_assessment()`.
++   Check `headers_sent()` in `access_denied()`.
++   Use `is_file()` rather than `file_exists()` in `insert_with_markers()`.
++   Validate `$_REQUEST['action']` in debugging extension.
++   Make `$userIni` public in security extension.
+
 = Version 3.0.1 – December 14, 2024 =
 
 +   Settings are not registered until `set_current_user` action and only when `isSettingsPage()`.

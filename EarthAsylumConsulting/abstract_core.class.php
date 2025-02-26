@@ -1316,10 +1316,13 @@ abstract class abstract_core
 		}
 
 		while (ob_get_level()) {ob_end_clean();}
-		nocache_headers();
-		header_remove('Set-Cookie');
-		header_remove('Link');
-		http_response_code( $status );
+		if (! headers_sent())
+		{
+			nocache_headers();
+			header_remove('Set-Cookie');
+			header_remove('Link');
+			http_response_code( $status );
+		}
 		return new \WP_Error(__FUNCTION__, $message, ['status' => $status]);
 	}
 
@@ -2492,7 +2495,7 @@ abstract class abstract_core
 		$start_marker = trim( $commentBegin." BEGIN " . $marker . ' ' . $commentEnd );
 		$end_marker	  = trim( $commentBegin." END " . $marker . ' ' . $commentEnd );
 
-		if ( file_exists( $filename ) ) {
+		if ( is_file( $filename ) ) {
 			$content = trim(file_get_contents($filename));
 		}
 

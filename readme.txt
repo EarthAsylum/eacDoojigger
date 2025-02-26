@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.0.1
-Last Updated:           14-Dec-2024
+Stable tag:             3.0.2
+Last Updated:           26-Feb-2025
 Requires at least:      5.8
 Tested up to:           6.7
 Requires PHP:           8.1
@@ -446,6 +446,14 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.0.2 – February 26, 2025 =
+
++   Validate `risk_assessment_limit` in `risk_assessment()`.
++   Check `headers_sent()` in `access_denied()`.
++   Use `is_file()` rather than `file_exists()` in `insert_with_markers()`.
++   Validate `$_REQUEST['action']` in debugging extension.
++   Make `$userIni` public in security extension.
 
 = Version 3.0.1 – December 14, 2024 =
 

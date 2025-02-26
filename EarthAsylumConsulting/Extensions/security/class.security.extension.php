@@ -9,7 +9,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
 	class security_extension extends \EarthAsylumConsulting\abstract_extension
@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '24.1113.1';
+		const VERSION			= '25.0225.1';
 
 		/**
 		 * @var string extension alias
@@ -32,17 +32,17 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string path to .htaccess (allow access)
 		 */
-		private $htaccess		= false;
+		public $htaccess		= false;
 
 		/**
 		 * @var object wp-config-transformer
 		 */
-		private $wpConfig		= false;
+		public $wpConfig		= false;
 
 		/**
 		 * @var string path to .user.ini (allow access)
 		 */
-		private $userIni		= false;
+		public $userIni			= false;
 
 		/**
 		 * @var array what .htaccess rules are set
