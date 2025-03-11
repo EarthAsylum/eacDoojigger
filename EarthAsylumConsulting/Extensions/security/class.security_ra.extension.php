@@ -1,8 +1,6 @@
 <?php
 namespace EarthAsylumConsulting\Extensions;
 
-require_once 'includes/security_ra.abstract.php';
-
 if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 {
 	/**
@@ -19,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0226.1';
+		const VERSION 			= '25.0311.1';
 
 		/**
 		 * @var string alias

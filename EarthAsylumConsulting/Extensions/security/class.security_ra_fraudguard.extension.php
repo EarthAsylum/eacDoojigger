@@ -3,6 +3,8 @@ namespace EarthAsylumConsulting\Extensions;
 
 if (! class_exists(__NAMESPACE__.'\security_ra_fraudguard', false) )
 {
+	require_once 'includes/security_ra.abstract.php';
+
 	/**
 	 * Extension: fraudguard - FraudGuard API - {eac}Doojigger for WordPress
 	 *
@@ -17,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_fraudguard', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1107.1';
+		const VERSION 			= '25.0311.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)

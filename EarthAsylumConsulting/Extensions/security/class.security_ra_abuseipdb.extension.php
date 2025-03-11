@@ -3,6 +3,8 @@ namespace EarthAsylumConsulting\Extensions;
 
 if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 {
+	require_once 'includes/security_ra.abstract.php';
+
 	/**
 	 * Extension: Risk Assessment - AbuseIPDB API - {eac}Doojigger for WordPress
 	 *
@@ -17,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1122.1';
+		const VERSION 			= '25.0311.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)

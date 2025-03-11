@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.0.2
-Last Updated:           26-Feb-2025
+Stable tag:             3.0.3
+Last Updated:           11-Mar-2025
 Requires at least:      5.8
 Tested up to:           6.7
 Requires PHP:           8.1
@@ -446,6 +446,11 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.0.3 – March 11, 2025 =
+
++   Remove check for 'X-Requested-With' in ajax request (cors).
++   Fix inclusion of `security_ra.abstract.php`.
 
 = Version 3.0.2 – February 26, 2025 =
 

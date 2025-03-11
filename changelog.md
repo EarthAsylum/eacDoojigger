@@ -1,5 +1,10 @@
 == Changelog ==
 
+= Version 3.0.3 – March 11, 2025 =
+
++   Remove check for 'X-Requested-With' in ajax request (cors).
++   Fix inclusion of `security_ra.abstract.php`.
+
 = Version 3.0.2 – February 26, 2025 =
 
 +   Validate `risk_assessment_limit` in `risk_assessment()`.

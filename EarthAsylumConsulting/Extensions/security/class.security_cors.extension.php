@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
 	class security_cors extends \EarthAsylumConsulting\abstract_extension
@@ -27,7 +27,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1121.1';
+		const VERSION 			= '25.0303.1';
 
 		/**
 		 * @var string extension tab name
@@ -158,10 +158,10 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 
 			if ($this->plugin->doing_ajax()) {
 				if ($this->security->isPolicyEnabled('secCorsOpt','ajax')) {
-					if (!$this->plugin->varServer('X-Requested-With')) {
-						$this->do_action('report_threat','Invalid XMLHttp Request',100);
-						wp_die( $this->plugin->access_denied('Invalid XMLHttp Request') );
-					}
+				//	if (!$this->plugin->varServer('X-Requested-With')) {
+				//		$this->do_action('report_threat','Invalid XMLHttp Request',100);
+				//		wp_die( $this->plugin->access_denied('Invalid XMLHttp Request') );
+				//	}
 					add_action('init', 							array($this,'validate_cors_origin'), 50);
 				}
 			}
