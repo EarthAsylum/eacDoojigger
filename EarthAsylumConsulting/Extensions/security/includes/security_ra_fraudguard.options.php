@@ -13,8 +13,6 @@
 
 defined( 'ABSPATH' ) or exit;
 
-$this->delete_option('fraudguard_version');
-
 $accountTypes = array_combine(
 	array_column(self::ACCOUNT_LIMITS, 0),
 	array_keys(self::ACCOUNT_LIMITS)

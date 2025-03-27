@@ -9,8 +9,8 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1215.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		25.0327.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -317,6 +317,15 @@ abstract class abstract_backend extends abstract_core
 
 		$this->deleteTransients( ($isNetwork===true) );
 		$this->createScheduledEvents();
+
+		/**
+		 * action {classname}_plugin_activated when plugin is activated
+		 * @param	bool	$$isNetwork activated network-wide
+		 * @param	bool	$asNetworkAdmin running as network admin
+		 * @return	void
+		 */
+		$this->do_action( 'plugin_activated', $isNetwork, $this->is_network_admin() );
+
 		// WP 6.4+ - autoload our option array
 		if (function_exists('wp_set_options_autoload'))
 		{
@@ -355,6 +364,15 @@ abstract class abstract_backend extends abstract_core
 
 		$this->deleteTransients( ($isNetwork===true) );
 		$this->removeScheduledEvents();
+
+		/**
+		 * action {classname}_plugin_deactivated when plugin is deactivated
+		 * @param	bool	$$isNetwork activated network-wide
+		 * @param	bool	$asNetworkAdmin running as network admin
+		 * @return	void
+		 */
+		$this->do_action( 'plugin_deactivated', $isNetwork, $this->is_network_admin() );
+
 		// WP 6.4+ - don't autoload our option array
 		if (function_exists('wp_set_options_autoload'))
 		{
@@ -546,31 +564,33 @@ abstract class abstract_backend extends abstract_core
 	 */
 	protected function createScheduledEvents(): void
 	{
-		$this->removeScheduledEvents();
+	/* -- now handled through event_scheduler extension */
 
-		/**
-		 * action {pluginname}_hourly_event to run hourly
-		 * @return	void
-		 */
-		$scheduledTime = new \DateTime( wp_date('Y-m-d H:00:00'), wp_timezone() );
-		$scheduledTime->modify('next hour');
-		wp_schedule_event( $scheduledTime->getTimestamp(), 'hourly', $this->prefixHookName('hourly_event') );
+	//	$this->removeScheduledEvents();
 
-		/**
-		 * action {pluginname}_daily_event to run daily
-		 * @return	void
-		 */
-		$scheduledTime = new \DateTime( 'tomorrow 1am', wp_timezone() );
-		wp_schedule_event( $scheduledTime->getTimestamp(), 'daily', $this->prefixHookName('daily_event') );
+	//	/**
+	//	 * action {pluginname}_hourly_event to run hourly
+	//	 * @return	void
+	//	 */
+	//	$scheduledTime = new \DateTime( wp_date('Y-m-d H:00:00'), wp_timezone() );
+	//	$scheduledTime->modify('next hour');
+	//	wp_schedule_event( $scheduledTime->getTimestamp(), 'hourly', $this->prefixHookName('hourly_event') );
 
-		/**
-		 * action {pluginname}_weekly_event to run start of week
-		 * @return	void
-		 */
-		$startOfWeekDay = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-		$startOfWeekDay = $startOfWeekDay[ get_option( 'start_of_week' ) ];
-		$scheduledTime = new \DateTime( 'next '.$startOfWeekDay.' midnight', wp_timezone() );
-		wp_schedule_event( $scheduledTime->getTimestamp(), 'weekly', $this->prefixHookName('weekly_event') );
+	//	/**
+	//	 * action {pluginname}_daily_event to run daily
+	//	 * @return	void
+	//	 */
+	//	$scheduledTime = new \DateTime( 'tomorrow 1am', wp_timezone() );
+	//	wp_schedule_event( $scheduledTime->getTimestamp(), 'daily', $this->prefixHookName('daily_event') );
+
+	//	/**
+	//	 * action {pluginname}_weekly_event to run start of week
+	//	 * @return	void
+	//	 */
+	//	$startOfWeekDay = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+	//	$startOfWeekDay = $startOfWeekDay[ get_option( 'start_of_week' ) ];
+	//	$scheduledTime = new \DateTime( 'next '.$startOfWeekDay.' midnight', wp_timezone() );
+	//	wp_schedule_event( $scheduledTime->getTimestamp(), 'weekly', $this->prefixHookName('weekly_event') );
 	}
 
 
@@ -583,11 +603,13 @@ abstract class abstract_backend extends abstract_core
 	 */
 	protected function removeScheduledEvents(): void
 	{
-		foreach ( ['hourly_event','daily_event','weekly_event'] as $eventName)
-		{
-			$eventName = $this->prefixHookName($eventName);
-			wp_unschedule_hook($eventName);
-		}
+	/* -- now handled through event_scheduler extension */
+
+	//	foreach ( ['hourly_event','daily_event','weekly_event'] as $eventName)
+	//	{
+	//		$eventName = $this->prefixHookName($eventName);
+	//		wp_unschedule_hook($eventName);
+	//	}
 	}
 
 

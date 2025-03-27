@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting\Plugin;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1114.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		25.0327.1
  */
 
 trait eacDoojigger_admin_traits
@@ -311,6 +311,9 @@ trait eacDoojigger_admin_traits
 				],
 				function($action,$installOptions): bool		// callback onSuccess
 				{
+					// set recurring daily event
+					if (! $this->cron->isEvent('daily')) $this->cron->setEvent('daily','12:15 am');
+					// set autoloader
 					$eacHomeDir  	= str_replace(WP_PLUGIN_DIR,'',$this->pluginHeader('PluginDir'));
 					$lines	= [
 						"define('EACDOOJIGGER_HOME',WP_PLUGIN_DIR.'{$eacHomeDir}');",

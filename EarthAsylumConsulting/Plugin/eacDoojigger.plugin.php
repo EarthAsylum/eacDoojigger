@@ -8,7 +8,7 @@ require "eacDoojigger.trait.php";
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
  * @version		3.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
@@ -122,6 +122,16 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 		//	\add_action( 'admin_bar_init', 				array( $this, 'get_admin_bar_menu') );
 			\add_action( 'admin_bar_menu', 				array( $this, 'set_admin_bar_menu') );
 		}
+
+		/**
+		 * add logging actions
+		 */
+		$this->add_action('log_info',					array($this,'logInfo'),10,3);
+		$this->add_action('log_notice',					array($this,'logNotice'),10,3);
+		$this->add_action('log_warning',				array($this,'logWarning'),10,3);
+		$this->add_action('log_error',					array($this,'logError'),10,3);
+		$this->add_action('log_debug',					array($this,'logDebug'),10,3);
+		$this->add_action('log_always',					array($this,'logAlways'),10,3);
 
 		if (! is_admin() )
 		{

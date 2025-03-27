@@ -27,7 +27,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0303.1';
+		const VERSION 			= '25.0314.1';
 
 		/**
 		 * @var string extension tab name
@@ -104,7 +104,6 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		public function initialize()
 		{
 			if ( ! parent::initialize() ) return; // disabled
-		$this->delete_option('security_server_cors_extension_enabled');
 
 			if ( $this->plugin->isSettingsPage(self::TAB_NAME))
 			{

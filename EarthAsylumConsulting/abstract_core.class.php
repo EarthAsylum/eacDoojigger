@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1203.1
+ * @version		25.0320.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -491,7 +491,7 @@ abstract class abstract_core
 		 * action {classname}_daily_event to run daily
 		 * @return	void
 		 */
-		$this->add_action( 'daily_event',		array($this, 'plugin_daily_event') );
+		//$this->add_action( 'daily_event',		array($this, 'plugin_daily_event') );
 
 		/**
 		 * action {classname}_weekly_event to run hourly
@@ -878,7 +878,10 @@ abstract class abstract_core
 		if ($this->is_network_admin())
 		{
 			$this->is_network_admin(false);
-			$siteIds = \get_sites( ['fields' => 'ids', 'orderby' => 'id'] );
+			$current_blog 	= get_current_blog_id();
+			$switched_stack = $GLOBALS[ '_wp_switched_stack' ];
+			$switched 		= $GLOBALS[ 'switched' ];
+			$siteIds 		= \get_sites( ['fields' => 'ids', 'orderby' => 'id'] );
 			foreach($siteIds as $siteId)
 			{
 				$this->switch_to_blog( $siteId );
@@ -886,8 +889,11 @@ abstract class abstract_core
 				{
 					call_user_func( $callback, ...$arguments );
 				}
-				$this->restore_current_blog();
+				//$this->restore_current_blog();
 			}
+			$this->switch_to_blog( $current_blog );
+			$GLOBALS[ '_wp_switched_stack' ] 	= $switched_stack;
+			$GLOBALS[ 'switched' ] 				= $switched;
 			$this->is_network_admin(true);
 		}
 		return $this->is_network_admin();
@@ -1018,7 +1024,8 @@ abstract class abstract_core
 	 */
 	public function plugin_daily_event(): void
 	{
-		$this->purge_expired_transients();
+		// WP does this with delete_expired_transients
+		//$this->purge_expired_transients();
 	}
 
 
@@ -1385,11 +1392,13 @@ abstract class abstract_core
 
 		$caches = array();
 
-		$this->purge_expired_transients();
+		//$this->purge_expired_transients();
+		// use WP function
+		\delete_expired_transients(true);
 		$caches[] ='Expired Transients';
 
 		// WP object cache and plugins that use the api
-		if (function_exists('\wp_cache_flush')) {
+		if (!wp_using_ext_object_cache() && function_exists('\wp_cache_flush')) {
 			\wp_cache_flush();
 			$caches[] = 'WP Object Cache';
 			$this->logDebug('wp_cache_flush',__METHOD__);
@@ -1453,6 +1462,7 @@ abstract class abstract_core
 	 */
 	public function purge_expired_transients()
 	{
+	/*
 		global $wpdb;
 
 		$expired    = time() - HOUR_IN_SECONDS;
@@ -1474,6 +1484,8 @@ abstract class abstract_core
 				  and option_value < '$expired'
 		";
 		$wpdb->query($sql);
+	*/
+		\delete_expired_transients(true);
 	}
 
 
@@ -2297,14 +2309,23 @@ abstract class abstract_core
 	/**
 	 * explode a string into an associative array
 	 *
-	 * @param	string	$separator the glue value
-	 * @param	string	$string the string value to explode
-	 * @param	string	$delimiter the key=value delimiter
-	 * @return	array	the exploded array
+	 * @param	string		$separator the glue value
+	 * @param	string[]	$string the string value to explode | array of $string
+	 * @param	string		$delimiter the key=value delimiter
+	 * @return	array		the exploded array
 	 */
-	public function explode_with_keys(string $separator, string $string, string $delimiter='='): array
+	public function explode_with_keys(string $separator, string|array $string, string $delimiter='='): array
 	{
 		$output = array();
+		if (is_array($string))
+		{
+			foreach ($string as $value) {
+				$value = $this->explode_with_keys($separator,$value,$delimiter);
+				foreach ($value as $k=>$v) $output[$k] = $v;
+			}
+			return $output;
+		}
+
 		foreach (explode($separator, $string) as $key => $value)
 		{
 			if (strpos($value,$delimiter) > 0) {

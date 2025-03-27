@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0225.1';
+		const VERSION	= '25.0320.1';
 
 		/**
 		 * @var array disable for these file extensions
@@ -41,8 +41,6 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		private $logPath		= null;		// directory path to logs
 		private $logFile		= null;		// log file resource
 		private $logLength		= 8192;		// error_log max length
-
-		private $reqType		= '';		// ajax, cron, rest, xml, http(s)
 
 		private $logData		= null;		// log data on page output
 		private $logText		= null;		// log data on file output
@@ -199,22 +197,33 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			if ( ($this->is_option('debug_to_file','plugin') && $this->setLoggingPathname(true)) || $this->is_option('debug_to_file','server') )
 			{
 				if (!wp_doing_cron()) {
+					$this->logOpen(); // force output
 					$this->plugin->Log()->subscribe([$this,'file_log_data']);
 				}
 			}
 
-			// subscribe to Logger action - page output
-			if ($this->is_option('debug_on_page') && user_can($this->current_user, 'manage_options'))
+			if ($this->is_option('debug_on_page') && user_can($this->current_user, 'manage_options') && !wp_doing_cron())
 			{
-				$this->plugin->Log()->subscribe([$this,'page_log_data']);
-				if ($this->plugin->pluginHelpEnabled())
+				// subscribe to Logger action - Queue Monitor
+				if ( class_exists( 'QueryMonitor', false ) )
 				{
-					add_action( 'current_screen',		array( $this, 'page_debugging_help'), PHP_INT_MAX);
+					$this->qm_log_data();
+					$this->plugin->Log()->subscribe([$this,'qm_log_data']);
+					\add_action( 'shutdown', array($this,'qm_shutdown'),8 ); // before qm (9)
 				}
 				else
 				{
-					add_action( ($this->is_admin() ? 'admin_' : 'wp_').'footer',
+				// subscribe to Logger action - page output
+					$this->plugin->Log()->subscribe([$this,'page_log_data']);
+					if ($this->plugin->pluginHelpEnabled())
+					{
+						add_action( 'current_screen',	array( $this, 'page_debugging_help'), PHP_INT_MAX);
+					}
+					else
+					{
+						add_action( ($this->is_admin() ? 'admin_' : 'wp_').'footer',
 														array($this, 'page_debugging_output'), PHP_INT_MAX);
+					}
 				}
 			}
 
@@ -511,7 +520,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		public function purge_logs($asNetAdmin=false)
 		{
 			if (!$this->setLoggingPathname(false,$asNetAdmin) || !is_dir($this->logPath)) {
-				trigger_error('Unable to purge logs, path not found',E_USER_WARNING);
+			//	trigger_error('Unable to purge logs, path not found',E_USER_WARNING);
 				return;
 			}
 
@@ -823,22 +832,108 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			return $caller;
 		}
 
+
+		/**
+		 * log data to Queue Monitor
+		 *
+		 * @param array [level, message, context, code]
+		 * @return bool
+		 */
+		public function qm_log_data(array $data=array())
+		{
+			static $first = true;
+
+			if ($first) {
+				$first = false;
+				$this->logToQM(
+					LogLevel::LOG_ALWAYS,
+					'',
+					'IP:'.$this->plugin->getVisitorIP().' '.$this->requestURL(),
+					$this->plugin->pluginHeader('RequestTime'),
+					'via '.$this->requestType(),
+				);
+				if ($request_data = $this->requestData()) {
+					do_action( "qm/debug", $request_data );
+				}
+			}
+
+			if (!empty($data)) {
+				$this->logToQM(
+					$data['level'],
+					$data['context']['@variable'] 	?? '',
+					$data['message'],
+					$data['context']['@time'] 		?? microtime(true),
+					$data['context']['@source'] 	?? '',
+					$data['print_code'],
+				);
+			}
+		}
+
+
+		/**
+		 * Log the dataa to Queue Monitor.
+		 *
+		 * @param int		 $level - log level (LogLevel::LOG_*)
+		 * @param mixed		 $var - variable being logged
+		 * @param string	 $message - message/context string
+		 * @param float		 $mtime - mico-time (optional)
+		 * @param string	 $source - source of log call or  internally set string
+		 * @param int|string $code - print_code (text)
+		 * @return bool
+		 */
+		private function logToQM($level, $var, $message='', $mtime=null, $source='', $code='notice')
+		{
+			if ( !($this->logLevel & $level) )
+			{
+				return;
+			}
+
+			if ($level == LogLevel::LOG_ALWAYS) $code = 'info';
+
+			$time = $this->requestTime($mtime);
+
+			$logLine 		= 	sprintf('%s [%s] - ', $source, $time) .
+								trim( $message.": ".$this->logVariable($var,false), ' :' );
+
+			do_action( "qm/{$code}", $logLine );
+		}
+
+
+		/**
+		 * log data to Queue Monitor on shutdown
+		 *
+		 * @return bool
+		 */
+		public function qm_shutdown()
+		{
+			$data 		= $this->on_shutdown();
+			$headers 	= $data[1];
+			$data[1] 	= '';
+			$this->logToQM(...$data);
+			if ($headers) {
+				do_action( "qm/debug", $headers );
+			}
+		}
+
+
 		/**
 		 * save data to output on page footer
 		 *
 		 * @param array [level, message, context, code]
 		 * @return bool
 		 */
-		public function page_log_data(array $data)
+		public function page_log_data(array $data=array())
 		{
-			$this->logToPage(
-				$data['level'],
-				$data['context']['@variable'] 	?? '',
-				$data['message'],
-				$data['context']['@time'] 		?? microtime(true),
-				$data['context']['@source'] 	?? '',
-				$data['print_code'],
-			);
+			if (!empty($data)) {
+				$this->logToPage(
+					$data['level'],
+					$data['context']['@variable'] 	?? '',
+					$data['message'],
+					$data['context']['@time'] 		?? microtime(true),
+					$data['context']['@source'] 	?? '',
+					$data['print_code'],
+				);
+			}
 		}
 
 
@@ -854,7 +949,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 * @param int|string $code - print_code (text)
 		 * @return bool
 		 */
-		private function logToPage($level, $var, $message='', $mtime=null, $source='', $code = '')
+		private function logToPage($level, $var, $message='', $mtime=null, $source='', $code='')
 		{
 			if ( !($this->logLevel & $level) || $source == 'phpErrorHandler')
 			{
@@ -871,16 +966,18 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 * @param array [level, message, context, code]
 		 * @return bool
 		 */
-		public function file_log_data(array $data)
+		public function file_log_data(array $data=array())
 		{
-			$this->logToFile(
-				$data['level'],
-				$data['context']['@variable'] 	?? '',
-				$data['message'],
-				$data['context']['@time'] 		?? microtime(true),
-				$data['context']['@source'] 	?? '',
-				$data['print_code'],
-			);
+			if (!empty($data)) {
+				$this->logToFile(
+					$data['level'],
+					$data['context']['@variable'] 	?? '',
+					$data['message'],
+					$data['context']['@time'] 		?? microtime(true),
+					$data['context']['@source'] 	?? '',
+					$data['print_code'],
+				);
+			}
 		}
 
 
@@ -896,7 +993,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 * @param int|string $code - print_code (text)
 		 * @return bool
 		 */
-		private function logToFile($level, $var, $message='', $mtime=null, $source='', $code = '')
+		private function logToFile($level, $var, $message='', $mtime=null, $source='', $code='')
 		{
 			if ( !($this->logLevel & $level) )
 			{
@@ -918,10 +1015,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					return ($this->logPath = false);
 				}
 
-				if (!$mtime) $mtime = microtime(true);
-				$time = new \DateTime("@{$mtime}");
-				$time->setTimezone(wp_timezone());
-				$time = substr($time->format("H:i:s.u"),0,13);
+				$time = $this->requestTime($mtime);
 
 				$logLine 		= 	sprintf('%-20.20s %-10.10s [%s] - ', $source, $code, $time) .
 									trim( $message.": ".$this->logVariable($var,true), ' :' );
@@ -979,11 +1073,222 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					// no break;
 				default:
 					if (!$detailed) {
-						return ucfirst(\gettype($var));
+						return ucfirst(\gettype($var)).
+							(is_countable($var)) ? '(...'.count($var).'...)' : '';
 					}
 					return str_replace("\n\n","\n",trim(print_r($var,true)));
 					break;
 			}
+		}
+
+
+		/**
+		 * Assign/get formatted request time.
+		 *
+		 * @param float $mtime microtime(true)
+		 * @return string
+		 */
+		private function requestTime($mtime=null)
+		{
+			if (!$mtime) $mtime = microtime(true);
+			$time = new \DateTime("@{$mtime}");
+			$time->setTimezone(wp_timezone());
+			return substr($time->format("H:i:s.u"),0,13);
+		}
+
+
+		/**
+		 * Assign/get request type.
+		 *
+		 * @return string
+		 */
+		private function requestType()
+		{
+			static $reqType = null;
+			if (empty($reqType))
+			{
+				if ($this->plugin->doing_ajax()) {
+					$reqType = 'ajax';
+				} else if (wp_doing_cron()) {
+					$reqType = 'cron';
+				} else if (defined('REST_REQUEST') && REST_REQUEST) {			// may not be set yet
+					$reqType = 'rest';
+				} else if (str_starts_with($_SERVER['REQUEST_URI'], '/wp-json')) {
+					$reqType = 'rest';
+				} else if ( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ) {		// may not be set yet
+					$reqType = 'xmlrpc';
+				} else if (str_starts_with($_SERVER['REQUEST_URI'], '/xmlrpc')) {
+					$reqType = 'xmlrpc';
+				} else if (wp_is_json_request()) {
+					$reqType = 'json';
+				} else if (wp_is_jsonp_request()) {
+					$reqType = 'jsonp';
+				} else if (wp_is_xml_request()) {
+					$reqType = 'xml';
+				} else {
+					$reqType = is_ssl() ? 'https' : 'http';
+				}
+			}
+			return $reqType;
+		}
+
+
+		/**
+		 * Assign/get request type.
+		 *
+		 * @return string
+		 */
+		private function requestData()
+		{
+			static $reqData = null;
+			if (empty($reqData))
+			{
+				$reqData = [];
+				if ($this->logLevel & LogLevel::LOG_DEBUG)
+				{
+					if ($headers = $this->requestHeaders()) {
+						$reqData['Request Headers']	= $headers;
+					}
+					if (!empty($_REQUEST)) {
+						$reqData['Request Values']	= $this->sanitize_array($_REQUEST,true);
+					}
+					if ($input = file_get_contents('php://input')) {
+						$reqData['Input Stream']	= $input;
+					}
+				}
+			}
+			return $reqData;
+		}
+
+
+		/**
+		 * Log request server values
+		 *
+		 * @return void
+		 */
+		public function requestURL()
+		{
+			global $argv;
+			$http = (is_ssl()) ? "https://" : "http://";
+
+			if ( (PHP_SAPI === 'cli') || (defined('WP_CLI') && WP_CLI) ) {
+				$_SERVER['REQUEST_METHOD']	= 'CLI';
+				$_SERVER['HTTP_HOST']		= parse_url(home_url(),PHP_URL_HOST);
+				$_SERVER['SERVER_NAME']		= gethostname();
+				$_SERVER['REQUEST_URI']		= (!empty($argv)) ? implode(' ',$argv) : '';
+			}
+
+			return sanitize_text_field( $_SERVER['SERVER_PROTOCOL'].' '.$_SERVER['REQUEST_METHOD'].' '.$http.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'] );
+		}
+
+
+		/**
+		 * get all request headers (maybe)
+		 *
+		 * @return array
+		 */
+		private function requestHeaders()
+		{
+			if (function_exists('getallheaders')) {		// apache_request_headers
+				$headers = getallheaders();
+			} else {
+				$headers = [];
+				foreach ($_SERVER as $name => $value) {
+					$name = explode('_' ,$name);
+					if (array_shift($name) == 'HTTP') {
+						array_walk($name,function(&$v){$v=ucfirst(strtolower($v));});
+						$headers[implode('-',$name)] = $value;
+					}
+				}
+			}
+
+			return ($headers)
+				? $this->sanitize_array($headers)
+				: '';
+		}
+
+
+		/**
+		 * get all responce headers (maybe)
+		 *
+		 * @return array
+		 */
+		private function responseHeaders()
+		{
+			if ($headers = ($this->logLevel & LogLevel::LOG_DEBUG)
+				? headers_list() : false)
+			{
+				$headers = array_merge(
+					[$_SERVER['SERVER_PROTOCOL'].' Status: '.http_response_code().' '.get_status_header_desc(http_response_code())],
+					array_filter($headers,function($h) {return !str_starts_with($h,'Link:');})
+				);
+			}
+
+			return ($headers)
+				? $this->sanitize_array($this->plugin->explode_with_keys("\n",$headers,': '))
+				: '';
+		}
+
+
+		/**
+		 * santize a key=value array
+		 *
+		 * @param array $array
+		 * @param bool $asKV return an array of k=>v
+		 * @param bool $asText return a text block
+		 * @return array
+		 */
+		private function sanitize_array(array $array, $asKV=false, $asText=false)
+		{
+			$result = [];
+			foreach ($array as $name => $value) {
+				if ($asKV) {
+					$result[ esc_attr($name) ] = sanitize_text_field($value);
+				} else {
+					$result[] = esc_attr($name).": ".sanitize_text_field($value);
+				}
+			}
+
+			if ($asText) {
+				if ($asKV) {
+					return ($result) ? "\n\t".$this->plugin->implode_with_keys("\n\t",$result) : '';
+				} else {
+					return ($result) ? "\n\t".implode("\n\t",$result) : '';
+				}
+			} else {
+				return ($result) ? $result : '';
+			}
+		}
+
+
+		/**
+		 * get shutdown array
+		 *
+		 * @return array
+		 */
+		private function on_shutdown()
+		{
+			if ($headers = $this->responseHeaders()) $headers = ['Response Headers'=>$headers];
+			$startTime	= $this->plugin->pluginHeader('RequestTime');
+			$stopTime	= microtime(true);
+
+			$unit=array('b','K','M','G');
+			$memory = memory_get_peak_usage(true);
+			$memory = round($memory / pow(1024,($i=floor(log($memory,1024)))),2).$unit[$i];
+
+			return [
+				LogLevel::LOG_ALWAYS,
+				$headers,
+				sprintf("Status: %s, Duration: %01.4f Seconds, Peak Memory Used: %s of %s",
+					http_response_code(),
+					($stopTime - $startTime),
+					$memory,
+					ini_get('memory_limit'),
+				),
+				$stopTime,
+				"exit ".$this->requestType(),
+				LogLevel::PHP_TO_PRINT[ E_ALL ],
+			];
 		}
 
 
@@ -1022,47 +1327,13 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 			$this->logFile = $file;
 
-			if ($this->plugin->doing_ajax()) {
-				$this->reqType = 'ajax';
-			} else if (wp_doing_cron()) {
-				$this->reqType = 'cron';
-			} else if (defined('REST_REQUEST') && REST_REQUEST) {			// may not be set yet
-				$this->reqType = 'rest';
-			} else if (strpos($_SERVER['REQUEST_URI'], '/wp-json') === 0) {
-				$this->reqType = 'rest';
-			} else if ( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ) {		// may not be set yet
-				$this->reqType = 'xmlrpc';
-			} else if (strpos($_SERVER['REQUEST_URI'], '/xmlrpc') === 0) {
-				$this->reqType = 'xmlrpc';
-			} else if (wp_is_json_request()) {
-				$this->reqType = 'json';
-			} else if (wp_is_jsonp_request()) {
-				$this->reqType = 'jsonp';
-			} else if (wp_is_xml_request()) {
-				$this->reqType = 'xml';
-			} else {
-				$this->reqType = is_ssl() ? 'https' : 'http';
-			}
-
 			$startTime = $this->plugin->pluginHeader('RequestTime');
 
 			$date = new \DateTime("@{$startTime}");
 			$date->setTimezone(wp_timezone());
 			$date = $date->format("D M d Y T");
 
-			$request_data = [];
-			if ($this->logLevel & LogLevel::LOG_DEBUG)
-			{
-				if ($headers = $this->getHeaders()) {
-					$request_data['Request Headers']	= $headers;
-				}
-				if (!empty($_REQUEST)) {
-					$request_data['Request Values']		= $_REQUEST;
-				}
-				if ($input = file_get_contents('php://input')) {
-					$request_data['Input Stream']		= $input;
-				}
-			}
+			$request_data = $this->requestData();
 
 			$this->logToFile(
 				LogLevel::LOG_ALWAYS,
@@ -1070,7 +1341,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				'IP:'.$this->plugin->getVisitorIP().' '.$this->requestURL(),
 				$startTime,
 				$date,
-				'via '.$this->reqType,
+				'via '.$this->requestType(),
+				LogLevel::PHP_TO_PRINT[ E_ALL ],
 			);
 
 			\add_action( 'shutdown', array($this,'logClose'),PHP_INT_MAX );
@@ -1090,6 +1362,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 			$stopTime = microtime(true);
 
+			// get action timer array (if installed)
 			if (class_exists('\EarthAsylumConsulting\eacDoojiggerActionTimer',false)) {
 				$this->logToFile(
 					LogLevel::LOG_DEBUG,
@@ -1099,88 +1372,13 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				);
 			}
 
-			if ($headers = ($this->logLevel & LogLevel::LOG_DEBUG) ? ['Response Headers' => headers_list()] : '')
-			{
-				$headers['Response Headers'] = array_merge(
-					[$_SERVER['SERVER_PROTOCOL'].' Status: '.http_response_code().' '.get_status_header_desc(http_response_code())],
-					array_filter($headers['Response Headers'],function($h) {return !str_starts_with($h,'Link:');})
-				);
-			}
-
-			$startTime	= $this->plugin->pluginHeader('RequestTime');
-			$stopTime	= microtime(true);
-
-			$unit=array('b','K','M','G');
-			$memory = memory_get_peak_usage(true);
-			$memory = round($memory / pow(1024,($i=floor(log($memory,1024)))),2).$unit[$i];
-
-			$this->logToFile(
-				LogLevel::LOG_ALWAYS,
-				$headers,
-				sprintf("Status: %s, Duration: %01.4f Seconds, Peak Memory Used: %s of %s",
-					http_response_code(),
-					($stopTime - $startTime),
-					$memory,
-					ini_get('memory_limit'),
-				),
-				$stopTime,
-				"exit ".$this->reqType
-			);
+			$this->logToFile(...$this->on_shutdown());
 
 			$this->logText .= str_repeat('-',100)."\n";
 
 			// wp_filesystem has no way to append to a file
 			file_put_contents($this->logFile, $this->logText."\n", FILE_APPEND|LOCK_EX);
 			$this->logFile = $this->logPath = $this->logText = false;
-		}
-
-
-		/**
-		 * Log request server values
-		 *
-		 * @return void
-		 */
-		public function requestURL()
-		{
-			global $argv;
-			$http = (is_ssl()) ? "https://" : "http://";
-
-			if ( (PHP_SAPI === 'cli') || (defined('WP_CLI') && WP_CLI) ) {
-				$_SERVER['REQUEST_METHOD']	= 'CLI';
-				$_SERVER['HTTP_HOST']		= parse_url(home_url(),PHP_URL_HOST);
-				$_SERVER['SERVER_NAME']		= gethostname();
-				$_SERVER['REQUEST_URI']		= (!empty($argv)) ? implode(' ',$argv) : '';
-			}
-
-			return sanitize_text_field( $_SERVER['SERVER_PROTOCOL'].' '.$_SERVER['REQUEST_METHOD'].' '.$http.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'] );
-		}
-
-
-		/**
-		 * get all request headers (maybe)
-		 *
-		 * @return array
-		 */
-		private function getHeaders()
-		{
-			if (function_exists('getallheaders')) {		// apache_request_headers
-				$headers = getallheaders();
-			} else {
-				$headers = [];
-				foreach ($_SERVER as $name => $value) {
-					$name = explode('_' ,$name);
-					if (array_shift($name) == 'HTTP') {
-						array_walk($name,function(&$v){$v=ucfirst(strtolower($v));});
-						$headers[implode('-',$name)] = $value;
-					}
-				}
-			}
-
-			$result = [];
-			foreach ($headers as $name => $value) {
-				$result[] = "{$name}: {$value}";
-			}
-			return $result;
 		}
 
 

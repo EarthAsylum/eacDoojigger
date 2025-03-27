@@ -7,8 +7,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0830.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	25.0319.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -25,6 +25,7 @@ if ($this->isSettingsPage('debugging'))
 // see if we can get to the wp-config file (only single site or network admin)
 $this->wpConfig = $this->wpconfig_handle();
 
+/*
 $this->plugin->rename_option('debugLevel',		'debug_log_level');
 $this->plugin->rename_option('debugToFile',		'debug_to_file');
 $this->plugin->rename_option('debugPHP',		'debug_php_errors');
@@ -34,6 +35,7 @@ $this->plugin->rename_option('debugDeprecated',	'debug_depricated');
 $this->plugin->rename_option('debugPurge',		'debug_purge_time');
 $this->plugin->rename_option('debugOnPage',		'debug_on_page');
 $this->plugin->rename_option('debugTestApi',	'debug_test_api');
+*/
 
 $debug_wp_debugging = [];
 foreach (['WP_DEBUG','WP_DEBUG_DISPLAY','WP_DEBUG_LOG'] as $wpdebug)
@@ -182,7 +184,7 @@ $this->registerExtensionOptions( $this->className,
 								'type'		=> 	'checkbox',
 								'label'		=> 	'On Page Debugging',
 								'options'	=> 	['Enabled'],
-								'info'		=>	'Show debugging information in the help tab or in a floating window at the bottom of the page.'
+								'info'		=>	'Show debugging information in the Query Monitor tab, the help tab, or in a floating window at the bottom of the page.'
 							),
 	]
 );

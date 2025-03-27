@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '25.0225.1';
+		const VERSION			= '25.0314.1';
 
 		/**
 		 * @var string extension alias
@@ -166,8 +166,6 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if ( $this->plugin->isSettingsPage(self::TAB_NAME))
 			{
-				$this->delete_option('secDisablePings'); // removed
-				$this->delete_option('secCodeEditor'); // removed
 				// see if we can get to the config files (only single site or network admin)
 				$this->htaccess = $this->plugin->htaccess_handle();
 				$this->wpConfig = $this->plugin->wpconfig_handle();

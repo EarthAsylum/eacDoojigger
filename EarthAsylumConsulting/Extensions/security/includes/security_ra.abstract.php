@@ -7,7 +7,7 @@ namespace EarthAsylumConsulting\Extensions;
 * @category		WordPress Plugin
 * @package		{eac}Doojigger\Extensions
 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-* @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+* @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 */
 
 abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_extension
@@ -15,7 +15,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	/**
 	 * @var string extension version
 	 */
-	const VERSION 			= '24.1107.1';
+	const VERSION 			= '25.0314.1';
 
 	/**
 	 * @var string extension tab name
@@ -106,17 +106,6 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	 */
 	public function initialize()
 	{
-		$this->delete_option('security_abuseipdb_extension_enabled');
-		$this->delete_option('abuse_ipdb_bans');
-		$this->delete_option('abuse_ipdb_level');
-		$this->delete_option('abuse_ipdb_threshold');
-		$this->delete_option('abuse_ipdb_plan');
-
-		$this->delete_option('security_fraudguard_extension_enabled');
-		$this->delete_option('fraudguard_level');
-
-		$this->delete_option('security_rm_ipgeolocation_extension_enabled');
-
 		return parent::initialize();
 	}
 

@@ -13,16 +13,6 @@
 
 defined( 'ABSPATH' ) or exit;
 
-$this->delete_option('risk_assesment_level');
-$this->delete_option('risk_assesment_convergence');
-$this->delete_option('risk_assesment_quality');
-$this->delete_option('risk_assesment_limit');
-$this->delete_option('risk_assesment_type');
-$this->delete_option('risk_assessment_type');
-$this->delete_option('risk_assesment_api');
-$this->delete_option('risk_assesment_threshold');
-$this->delete_option('risk_assesment_banned');
-
 $this->registerExtensionOptions( $this->className,
 	[
 		'risk_assessment_limit'	=> array(

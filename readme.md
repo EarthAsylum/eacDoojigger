@@ -7,8 +7,8 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.0.3  
-Last Updated:           11-Mar-2025  
+Stable tag:             3.0.4  
+Last Updated:           27-Mar-2025  
 Requires at least:      5.8  
 Tested up to:           6.7  
 Requires PHP:           8.1  
@@ -65,6 +65,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *Content Security Assistant*        | Adds security nonce to `script` and style `link` tags to facilitate creation of comprehensive *Content Security Policy* (CSP) | 
 |   *Server-Side CORS*                  | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
 |   *Threat Detection*                  | Ability to block access by IP address based on *security* and *CORS* violations as well as [AbuseIPDB](https://www.abuseipdb.com/user/165095), [FraudGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) threat scores. |
+|   *Event Scheduler*                   | Easily set and enable WordPress and custom CRON schedules (intervals), events, and tasks (actions). |
 |   *Debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *Encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
