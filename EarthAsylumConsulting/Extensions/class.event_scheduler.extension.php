@@ -18,7 +18,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION		= '25.0327.1';
+		const VERSION		= '25.0329.1';
 
 		/**
 		 * @var string alias class name
@@ -37,7 +37,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 * 		array 		override options for the 'Enabled' option (label,help,title,info, etc.)
 		 */
 		const ENABLE_OPTION	= [
-		//		'type'			=> 	'hidden',
+				'type'			=> 	'hidden',
 				'label'			=> 	"<abbr title='Set regularly scheduled, recurring events. These events do nothing by ".
 									"themselves but can be used to trigger other actions by hooking into the event action name.'>".
 									"Scheduled Events</abbr>"
@@ -64,7 +64,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin, self::ALLOW_ALL | self::DEFAULT_DISABLED);
+			parent::__construct($plugin, self::ALLOW_ALL );
 
 			if ($this->is_admin())
 			{
@@ -540,7 +540,10 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 */
 		public function setEvent(string $name, \DateTime|int|string $scheduledTime = null, string $interval = null, array $args = []): int|bool
 		{
-			if (empty($interval)) $interval = $name;
+			if (empty($interval)) {
+				$interval = $name;
+			}
+
 			if (! $interval = $this->intervalName($interval)) {
 				$this->add_admin_notice("Invalid interval name for event '{$name}'",'error');
 				return false;
@@ -747,8 +750,10 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 			if ($scheduledTime->getTimestamp() <= time()) {
 				$scheduledTime->modify('today '.$scheduledTime->format('H:i'));
 			}
-			while ($scheduledTime->getTimestamp() <= time()) {
-				$scheduledTime->modify('+'.$modify.' seconds');
+			if ($modify) {
+				while ($scheduledTime->getTimestamp() <= time()) {
+					$scheduledTime->modify('+'.$modify.' seconds');
+				}
 			}
 			return ($formatted)
 				? substr( $scheduledTime->format('c'), 0,-6 )

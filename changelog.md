@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.0.4 – March 27, 2025 =
+= Version 3.0.4 – March 29, 2025 =
 
 +   New event_scheduler (cron) extension.
     +   Intervals - Manage custom intervals (aka schedules).

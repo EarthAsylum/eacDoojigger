@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0320.1
+ * @version		25.0327.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -804,6 +804,7 @@ abstract class abstract_core
 	 */
 	public function add_admin_notice(string $message, string $errorType='notice', string $moreInfo=''): void
 	{
+		do_action( "qm/{$errorType}", $message );
 		switch ($errorType) {
 			case 'warning':
 			case 'error':

@@ -1063,6 +1063,7 @@ abstract class abstract_backend extends abstract_core
 	{
 		static $adminNoticeCount = 1;
 		$optionName = 'admin-notice-'.$adminNoticeCount++;
+		do_action( "qm/{$errorType}", $message );
 		$this->add_settings_error(
 			'admin-notice',
 			$optionName.'-'.$errorType,

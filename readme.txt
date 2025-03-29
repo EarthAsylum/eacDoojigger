@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             3.0.4
-Last Updated:           27-Mar-2025
+Last Updated:           29-Mar-2025
 Requires at least:      5.8
 Tested up to:           6.7
 Requires PHP:           8.1
@@ -448,7 +448,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.0.4 – March 27, 2025 =
+= Version 3.0.4 – March 29, 2025 =
 
 +   New event_scheduler (cron) extension.
     +   Intervals - Manage custom intervals (aka schedules).
