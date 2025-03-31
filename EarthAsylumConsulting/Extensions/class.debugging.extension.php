@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0320.1';
+		const VERSION	= '25.0330.1';
 
 		/**
 		 * @var array disable for these file extensions
@@ -157,8 +157,22 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			if ( ! parent::initialize() ) return; // disabled
 			if (wp_doing_ajax() && isset($_REQUEST['action']) && $_REQUEST['action'] == 'heartbeat')
 			{
-				if (!$this->is_option('debug_heartbeat')) {
+				if (!$this->is_option('debug_options','heartbeat')) {
 					return $this->isEnabled(false);
+				}
+			}
+			if (wp_doing_cron())
+			{
+				if (!$this->is_option('debug_options','wp_cron')) {
+					return $this->isEnabled(false);
+				}
+				$crons = wp_get_ready_cron_jobs();
+				foreach ( $crons as $timestamp => $cronhooks ) {
+					foreach ( $cronhooks as $hook => $keys ) {
+						\add_action($hook, function() use ($timestamp,$hook) {
+							$this->plugin->logAlways(sprintf('%-6.6s %s',wp_date('H:i',$timestamp),$hook),'WP-CRON');
+						},1000);
+					}
 				}
 			}
 
@@ -196,13 +210,11 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			// subscribe to Logger action - file output
 			if ( ($this->is_option('debug_to_file','plugin') && $this->setLoggingPathname(true)) || $this->is_option('debug_to_file','server') )
 			{
-				if (!wp_doing_cron()) {
-					$this->logOpen(); // force output
-					$this->plugin->Log()->subscribe([$this,'file_log_data']);
-				}
+				$this->logOpen(); // force output
+				$this->plugin->Log()->subscribe([$this,'file_log_data']);
 			}
 
-			if ($this->is_option('debug_on_page') && user_can($this->current_user, 'manage_options') && !wp_doing_cron())
+			if ($this->is_option('debug_options','on_page') && user_can($this->current_user, 'manage_options') && !wp_doing_cron())
 			{
 				// subscribe to Logger action - Queue Monitor
 				if ( class_exists( 'QueryMonitor', false ) )
@@ -227,17 +239,17 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				}
 			}
 
-			if ($this->is_option('debug_wp_errors'))
+			if ($this->is_option('debug_options','wp_errors'))
 			{
 				add_action( 'wp_error_added',			array($this, 'capture_wp_error'), 10, 4);
 			}
 
-			if ($this->is_option('debug_heartbeat'))
+			if ($this->is_option('debug_options','heartbeat'))
 			{
 				add_filter( 'heartbeat_received',		array($this, 'capture_heartbeat'), PHP_INT_MAX, 3);
 			}
 
-			if ($this->is_option('debug_depricated') &&
+			if ($this->is_option('debug_options','depricated') &&
 				! (defined('WP_DEBUG_LOG') && WP_DEBUG && $this->logLevel & LogLevel::LOG_NOTICE))
 			{
 				// if logging notices, wp_trigger_error will catch these
@@ -254,7 +266,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			 * action {pluginname}_daily_event to run daily	 - (never runs for network_admin)
 			 * @return	void
 			 */
-			$this->add_action( 'daily_event',			array($this, 'purge_logs'), 10, 1 );
+			//$this->add_action( 'daily_event',			array($this, 'purge_logs'), 10, 1 );
+			$this->do_action( 'add_event_task', 'daily', array($this, 'purge_logs'));
 
 			/**
 			 * filter {classname}_debugging add to the debugging arrays
@@ -849,7 +862,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					LogLevel::LOG_ALWAYS,
 					'',
 					'IP:'.$this->plugin->getVisitorIP().' '.$this->requestURL(),
-					$this->plugin->pluginHeader('RequestTime'),
+					\WP_START_TIMESTAMP,
 					'via '.$this->requestType(),
 				);
 				if ($request_data = $this->requestData()) {
@@ -883,6 +896,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		private function logToQM($level, $var, $message='', $mtime=null, $source='', $code='notice')
 		{
+			static $lastTime = \WP_START_TIMESTAMP;
+
 			if ( !($this->logLevel & $level) )
 			{
 				return;
@@ -890,7 +905,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 			if ($level == LogLevel::LOG_ALWAYS) $code = 'info';
 
-			$time = $this->requestTime($mtime);
+			$time = $this->requestTime($mtime,$lastTime);
+			$lastTime = $mtime;
 
 			$logLine 		= 	sprintf('%s [%s] - ', $source, $time) .
 								trim( $message.": ".$this->logVariable($var,false), ' :' );
@@ -995,6 +1011,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		private function logToFile($level, $var, $message='', $mtime=null, $source='', $code='')
 		{
+			static $lastTime = \WP_START_TIMESTAMP;
+
 			if ( !($this->logLevel & $level) )
 			{
 				return;
@@ -1015,7 +1033,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					return ($this->logPath = false);
 				}
 
-				$time = $this->requestTime($mtime);
+				$time = $this->requestTime($mtime,$lastTime);
+				$lastTime = $mtime;
 
 				$logLine 		= 	sprintf('%-20.20s %-10.10s [%s] - ', $source, $code, $time) .
 									trim( $message.": ".$this->logVariable($var,true), ' :' );
@@ -1088,12 +1107,12 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 * @param float $mtime microtime(true)
 		 * @return string
 		 */
-		private function requestTime($mtime=null)
+		private function requestTime($mtime,$lastTime)
 		{
-			if (!$mtime) $mtime = microtime(true);
+			$elapsed = $mtime - $lastTime;
 			$time = new \DateTime("@{$mtime}");
 			$time->setTimezone(wp_timezone());
-			return substr($time->format("H:i:s.u"),0,13);
+			return sprintf('%s (%01.4f)' ,substr($time->format("H:i:s.u"),0,13),$elapsed);
 		}
 
 
@@ -1269,7 +1288,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		private function on_shutdown()
 		{
 			if ($headers = $this->responseHeaders()) $headers = ['Response Headers'=>$headers];
-			$startTime	= $this->plugin->pluginHeader('RequestTime');
+			$startTime	= \WP_START_TIMESTAMP;
 			$stopTime	= microtime(true);
 
 			$unit=array('b','K','M','G');
@@ -1327,7 +1346,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 			$this->logFile = $file;
 
-			$startTime = $this->plugin->pluginHeader('RequestTime');
+			$startTime = \WP_START_TIMESTAMP;
 
 			$date = new \DateTime("@{$startTime}");
 			$date->setTimezone(wp_timezone());
@@ -1338,7 +1357,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			$this->logToFile(
 				LogLevel::LOG_ALWAYS,
 				$request_data ?: '',
-				'IP:'.$this->plugin->getVisitorIP().' '.$this->requestURL(),
+				'IP:'.$this->plugin->getVisitorIP().PHP_EOL.'    '.$this->requestURL(),
 				$startTime,
 				$date,
 				'via '.$this->requestType(),

@@ -1,19 +1,25 @@
 == Changelog ==
 
-= Version 3.0.4 – March 29, 2025 =
+= Version 3.0.4 – March 31, 2025 =
 
++   Tested with WordPress 6.8.
 +   New event_scheduler (cron) extension.
     +   Intervals - Manage custom intervals (aka schedules).
     +   Events - Schedule WP Core or custom interval events.
     +   Tasks - Add tasks (actions) to scheduled events.
 +   `createScheduledEvents()` and `removeScheduledEvents()` called on plugin install/update now do nothing.
 +   Added `plugin_activated` and `plugin_deactivated` actions.
++   Session extension - wait for WP 'init' before setting cookie.
++   Visitor Id - wait for WP 'init' before setting cookie.
 +   Removed obsolete `delete_option(...)` statements.
 +   Optimized `forEachNetworkSite()` method.
 +   Removed schedule to purge transients, WP will do it (delete_expired_transients).
 +   Don't flush object cache (`wp_cache_flush()`) when using external cache.
 +   Added eacDoojigger_log_info|notice|warning|error|debug|always actions.
-+   Added support for Queue Monitor in debugging extension.
++   Debugging extension enhancements.
+    +   Added wp-cron debugging options.
+    +   Added support for Queue Monitor.
+    +   Combined settings to single switch option.
 +   `explode_with_keys()` now accepts array of strings to explode.
 
 = Version 3.0.3 – March 11, 2025 =

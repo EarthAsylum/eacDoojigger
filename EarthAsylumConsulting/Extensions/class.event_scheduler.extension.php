@@ -18,7 +18,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION		= '25.0329.1';
+		const VERSION		= '25.0330.1';
 
 		/**
 		 * @var string alias class name
@@ -88,6 +88,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 			if (!$this->plugin->isSettingsPage(self::TAB_NAME)) return;
 
 			$setting = [];
+			$this->verify_active_events();
 			// get core intervals (schedules) and our custom intervals
 			foreach ($this->getIntervals('core+self') as $eventName => $interval) {
 				// keep dates current - update to next schedule time
@@ -173,10 +174,12 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		{
 			if ( ! parent::initialize() ) return; // disabled
 
-			if ( wp_doing_cron() )
-			{
-				$this->verify_active_events();
-			}
+			$this->addActionsAndFilters_early();
+
+			//if ( wp_doing_cron() )
+			//{
+			//	$this->verify_active_events();
+			//}
 		}
 
 
@@ -234,10 +237,8 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 *
 		 * @return	void
 		 */
-		public function addActionsAndFilters()
+		public function addActionsAndFilters_early()
 		{
-			parent::addActionsAndFilters();
-
 			//add our custom intervals to wp
 			\add_filter('cron_schedules',				function($cron_intervals) {
 				$days_this_month = (int)wp_date('t');
@@ -269,6 +270,11 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 			 * action '{pluginName}_delete_cron_event' - allow actors to delete a custom event
 			 */
 			$this->add_action('delete_cron_event',		[$this,'unsetEvent'],10,1);
+
+			/**
+			 * action '{pluginName}_add_event_task' - allow actors to add a custom event and task
+			 */
+			$this->add_action('add_event_task',			[$this,'addEventTask'],10,4);
 
 			/**
 			 * action '{pluginName}_add_cron_task' - allow actors to add a custom task
@@ -651,11 +657,11 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		{
 			if ($eventName = $this->eventName($name))
 			{
-				if (\has_action($eventName, ...$args)) return false;
-
 				if (! $this->isEvent($name)) {
 					$this->setEvent($name);
 				}
+
+				if (\has_action($eventName, ...$args)) return false;
 
 				return \add_action($eventName, ...$args);
 			}
@@ -703,6 +709,14 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 				}
 			}
 
+			if ($current = $this->get_option("event_start_{$interval}"))
+			{
+				$scheduledTime = new \DateTime( $current, wp_timezone() );
+				if (is_a($scheduledTime,'DateTime')) {
+					return $this->futureTime($interval,$scheduledTime,$formatted);
+				}
+			}
+
 			switch ($interval)
 			{
 				case 'hourly':
@@ -710,11 +724,11 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 					break;
 
 				case 'daily':
-					$scheduledTime = new \DateTime( 'midnight', wp_timezone() );
+					$scheduledTime = new \DateTime( '12:15 am', wp_timezone() );
 					break;
 
 				case 'twicedaily':
-					$scheduledTime = new \DateTime( '4am', wp_timezone() );
+					$scheduledTime = new \DateTime( '5am', wp_timezone() );
 					break;
 
 				case 'weekly':

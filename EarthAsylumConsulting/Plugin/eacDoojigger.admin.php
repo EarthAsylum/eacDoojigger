@@ -311,8 +311,6 @@ trait eacDoojigger_admin_traits
 				],
 				function($action,$installOptions): bool		// callback onSuccess
 				{
-					// set recurring daily event
-					if (! $this->cron->isEvent('daily')) $this->cron->setEvent('daily','12:15 am');
 					// set autoloader
 					$eacHomeDir  	= str_replace(WP_PLUGIN_DIR,'',$this->pluginHeader('PluginDir'));
 					$lines	= [

@@ -9,8 +9,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -20,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '24.1108.1';
+		const 	VERSION	= '25.0331.1';
 
 		/**
 		 * @var string supported session managers
@@ -150,46 +149,45 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		//	add_action( 'init', 								array( $this, 'session_start'), -1 );
 			add_action( 'shutdown', 							array( $this, 'session_save_data'), 8 );				// save the session data (before WC_Session @20)
 
-			/*
+			/**
 			 * filter {classname}_get_session get the session array
 			 *  $value = apply_filter( {className}_get_session', [] );
 			 * @return	array	session array
 			 */
 			$this->add_filter( 'get_session', 					array($this, 'get_session'), 10, 2);
 
-			/*
+			/**
 			 * filter {classname}_get_session_id get the session id
 			 *  $value = apply_filter( {className}_get_session_id', false );
 			 * @return	array	session array
 			 */
 			$this->add_filter( 'get_session_id', 				array($this, 'sessionId'));
 
-			/*
+			/**
 			 * filter {classname}_is_new_session
 			 *  $value = apply_filter( {className}_is_new_session', false );
 			 * @return	array	session array
 			 */
 			$this->add_filter( 'is_new_session', 				array($this, 'isNewSession'));
 
-			/*
+			/**
 			 * filter {classname}_get_variable get a stored value
 			 *  $value = apply_filters( '{className}_get_variable', default, key );
 			 * @return	string	session value
 			 */
 			$this->add_filter( 'get_variable', 					array($this,'get_session_variable'), 10, 2 );
 
-			/*
+			/**
 			 * filter {classname}_set_variable set a stored value
 			 *  $value = apply_filters( '{className}_set_variable', value, key );
 			 * @return	string	session value
 			 */
 			$this->add_filter( 'set_variable', 					array($this,'set_session_variable'), 10, 2 );
 
-			/*
-			 * filter {classname}_debugging add the session array to debugging array (see debugging extension)
+			/**
+			 * filter eacDoojigger_debugging add the session array to debugging array (see debugging extension)
 			 * @return	array	extended array with [ extension_name => [key=>value array] ]
 			 */
-			//$this->add_filter( 'debugging', 					array($this, 'session_debugging'));
 			add_filter( 'eacDoojigger_debugging', 				array($this, 'session_debugging'));
 		}
 
@@ -201,7 +199,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		 */
 		public function session_start()
 		{
-			if ( ! empty( $this->session_id ) ) return true;
+			if ( ! empty( $this->session ) ) return true;
 
 			switch ($this->get_option('session_manager'))
 			{
@@ -216,12 +214,6 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 						$this->session_id 		= bin2hex(random_bytes(16));
 						$this->session 			= new \stdclass();
 					}
-					$this->set_cookie( $this->session_cookie, $this->session_id, $this->get_session_expiration(), [/* default options */],
-						[
-							'category' => 'necessary',
-							'function' => __( '%s sets this cookie to store a unique session ID', $this->plugin->PLUGIN_TEXTDOMAIN )
-						]
-					);
 					break;
 
 				case self::SESSION_GENERIC:
@@ -236,47 +228,77 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 							'httponly' 	=> true,
 							'samesite' 	=> 'strict'
 						]));
-						session_start();
 					}
-					if ( ! isset($_SESSION[$this->pluginName]) ) {
-						$_SESSION[$this->pluginName] = new \stdclass();
-					}
-					$this->session_id 			= session_id();
-					$this->session 				=& $_SESSION[$this->pluginName];		// direct access, no __get
+					$this->session 				= new \stdclass();
 					break;
 
 				case self::SESSION_WOOCOMMERCE:
-					if (function_exists('WC')) {
-						$WC = \WC();
-						$WC->initialize_session();
-						if ( ! $WC->session->has_session() ) {
-							$WC->session->set_customer_session_cookie( true );
-						}
-						if ( ! isset($WC->session->{$this->pluginName}) ) {
-							$WC->session->set($this->pluginName,new \stdclass());
-						}
-						$this->session_id 		= $WC->session->get_customer_id();
-						$this->session 			= $WC->session->get($this->pluginName);	// copy of object due to __get
-					}
+					$this->session 				= new \stdclass();
 					break;
 			}
 
-			if ($this->session)
+			$this->session->session_manager	= $this->get_option('session_manager');
+
+			/*
+			 * action {classname}_session_start start the session
+			 * @return	void
+			 */
+			$this->do_action( 'session_start' );
+
+			return (\did_action('init'))
+				? $this->session_init()
+				: \add_action('init', array($this,'session_init'));
+		}
+
+
+		/**
+		 * set session cookie (on or after WP init)
+		 *
+		 * @return	bool
+		 */
+		public function session_init()
+		{
+			switch ($this->get_option('session_manager'))
 			{
-				$this->session->session_id		= $this->session_id;
-				$this->session->session_manager	= $this->get_option('session_manager');
-				$this->session->session_is_new	= (!isset($this->session->session_is_new));
+				case self::SESSION_TRANSIENT:
+					$this->set_cookie( $this->session_cookie, $this->session_id, $this->get_session_expiration(), [/* default options */],
+						[
+							'category' => 'necessary',
+							'function' => __( '%s sets this cookie to store a unique session ID', $this->plugin->PLUGIN_TEXTDOMAIN )
+						]
+					);
+					break;
 
-				/*
-				 * action {classname}_session_start start the session
-				 * @return	void
-				 */
-				$this->do_action( 'session_start' );
+				case self::SESSION_GENERIC:
+				case self::SESSION_PANTHION:
+					session_start();
+					$this->session = (object) array_merge(
+						(array) $_SESSION[$this->pluginName] ?? [],
+						(array) $this->session
+					);
+					$_SESSION[$this->pluginName] =& $this->session;
+					$this->session_id 			= session_id();
+					break;
 
-				return true;
+				case self::SESSION_WOOCOMMERCE:
+					if (!function_exists('WC')) return false;
+					$WC = \WC();
+					$WC->initialize_session();
+					if ( ! $WC->session->has_session() ) {
+						$WC->session->set_customer_session_cookie( true );
+					}
+					if ( ! isset($WC->session->{$this->pluginName}) ) {
+						$WC->session->set($this->pluginName,new \stdclass());
+					}
+					$this->session_id 			= $WC->session->get_customer_id();
+					$this->session = (object) array_merge(
+						(array) $WC->session->get($this->pluginName),
+						(array) $this->session
+					);
+					break;
 			}
 
-			return false;
+			$this->session->session_is_new	= (!isset($this->session->session_is_new));
 		}
 
 
@@ -288,7 +310,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		public function isNewSession()
 		{
 			if ( ! $this->session_start() ) return false;
-			return $this->session->session_is_new;
+			return $this->session->session_is_new ?? true;
 		}
 
 

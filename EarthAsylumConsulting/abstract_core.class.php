@@ -2099,6 +2099,9 @@ abstract class abstract_core
 	 */
 	public function getVisitorId(bool $forRequest=false): string
 	{
+		static $setCookie = true;
+
+		// allow array for old cookie name
 		$cookieName = ['wp-'.$this->className.'-id',$this->className.'id'];
 		/**
 		 * filter {classname}_visitor_cookie_name set the visitor cookie name
@@ -2108,8 +2111,10 @@ abstract class abstract_core
 		$cookieName[0] = $this->apply_filters( 'visitor_cookie_name', $cookieName[0] );
 
 		$value = (!$forRequest)
-			? $this->get_cookie($cookieName) ?: $this->getVariable($cookieName[0])
+			? $this->getVariable($cookieName[0] ?: $this->get_cookie($cookieName))
 			: null;
+
+		$cookieName = $cookieName[0];
 
 		if (!$value)
 		{
@@ -2130,7 +2135,7 @@ abstract class abstract_core
 			 * @param	string	visitor cookie name
 			 * @return	string	id
 			 */
-			$value = $this->apply_filters( 'set_visitor_id', $value, $cookieName[0] );
+			$value = $this->apply_filters( 'set_visitor_id', $value, $cookieName );
 
 			$value = sha1($value);
 		}
@@ -2141,48 +2146,70 @@ abstract class abstract_core
 		 * @param	string		visitor cookie name
 		 * @return	bool|int	true|false or #days (30)
 		 */
-		$setCookie = ($forRequest) ? false : $this->apply_filters( 'enable_visitor_cookie', false, $cookieName[0] );
-		if ($setCookie && !headers_sent())
+		$setCookie = ($setCookie && $this->apply_filters( 'enable_visitor_cookie', false, $cookieName ));
+
+		if ($setCookie && !$forRequest)
 		{
-			if (!is_int($setCookie)) $setCookie = 30;
-			$this->set_cookie($cookieName[0], $value, "{$setCookie} Days", [/* default options */],
+			$days = (is_int($setCookie)) ? $setCookie : 30;
+			if (\did_action('init')) {
+				$this->setVisitorCookie($cookieName,$value,$days);
+			} else {
+				\add_action('init', function() use ($cookieName,$value,$days) {
+					$this->setVisitorCookie($cookieName,$value,$days);
+				});
+			}
+			$setCookie = false;
+		}
+		$this->setVariable($cookieName,$value);
+		return $value;
+	}
+
+
+	/**
+	 * Set the visitor cookie (on or after WP init)
+	 *
+	 * @param string $cookieName
+	 * @param string $value
+	 * @param int $days
+	 * @return	void
+	 */
+	private function setVisitorCookie(string $cookieName, string $value, int $days): void
+	{
+		if (!headers_sent())
+		{
+			$this->set_cookie($cookieName, $value, "{$days} Days", [/* default options */],
 				[
 					'category' => 'preferences',
 					'function' => __( '%s sets this cookie to assign a unique visitor ID to track preferences and activity.', $this->PLUGIN_TEXTDOMAIN )
 				]
 			);
 		}
-		$this->setVariable($cookieName[0],$value);
-		return $value;
 	}
 
 
 	/**
 	 * Check visitor cookie
 	 *
-	 * @return	string	ID
+	 * @return bool
 	 */
 	public function isNewVisitor(): bool
 	{
-		$cookieName = $this->className.'id';
-		/**
-		 * filter {classname}_visitor_cookie_name set the visitor cookie name
-		 * @param	string	visitor cookie name
-		 * @return	string
-		 */
-		$cookieName = $this->apply_filters( 'visitor_cookie_name', $cookieName );
+		static $isNew = null;
+		if (!is_null($isNew)) return $isNew;
+
+		$this->getVisitorId();
 
 		// get/set per-session (if session manager active)
-		$isNew	= $this->getVariable('is_new_visitor')
-					?: (!isset($_COOKIE[$cookieName]) && !$this->getVariable($cookieName));
-		$this->setVariable('is_new_visitor',$isNew);
+		$isNew	= $this->getVariable('is_new_visitor');
 		/**
 		 * filter {classname}_is_new_visitor is this a new visitor
 		 * @param	bool
 		 * @param	string	visitor cookie name
 		 * @return	bool
 		 */
-		return $this->apply_filters( 'is_new_visitor', $isNew, $cookieName );
+		$isNew = $this->apply_filters( 'is_new_visitor', $isNew, $cookieName );
+		$this->setVariable('is_new_visitor',$isNew);
+		return ($isNew) ? true : false;
 	}
 
 

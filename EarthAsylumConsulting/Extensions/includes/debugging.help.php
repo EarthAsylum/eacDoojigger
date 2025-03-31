@@ -7,8 +7,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	23.1028.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	25.0330.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -31,8 +31,8 @@ eacDoojigger()->logError( {any_data_structure}, 'log error label' );
 eacDoojigger()->logDebug( {any_data_structure}, 'log debug label' );
 </pre>
 
-	When 'On Page Debugging' is enabled you can see (some of) the logging detail either in the 'Help' tab of
-	any administration screen or in a floating tab at the bottom of any front-end-page.<br>
+	When 'On Page Debugging' is enabled you can see (some of) the logging detail either in the 'Queue Monitor' window
+	(if installed), the 'Help' tab of any administration screen or in a floating tab at the bottom of any front-end-page.<br>
 
 	<details><summary>Requirements</summary>
 		When initially loaded, this extension creates a log folder, by default, within the 'wp-content' folder.
@@ -43,15 +43,14 @@ eacDoojigger()->logDebug( {any_data_structure}, 'log debug label' );
 			<li>Write access to the WordPress 'wp-content' folder <em>(%1$s)</em>.
 			<li>Write access to the log folder <em>(%1$s/%2$s)</em>.
 		</ul>
-		If necessary, you may manually create the log folder <em>('%2$s')</em>
-		in either the 'wp-content' or 'wp-content/uploads' folder.
+		If necessary, you may manually create the log folder <em>('%2$s')</em>.
 
 		If you have defined 'WP_DEBUG_LOG' as a file path in your wp-config.php,
 		that folder will be used as the root folder for '%2$s'.
 	</details>
 <?php
 $wp_folder = str_replace(ABSPATH,'.../',WP_CONTENT_DIR);
-$log_folder = sanitize_key($this->pluginName.'_logs');
+$log_folder = sanitize_key($this->pluginName);
 $content = sprintf(ob_get_clean(),$wp_folder,$log_folder);
 
 $this->addPluginHelpTab('Debugging',$content,['Debugging Extension','open']);

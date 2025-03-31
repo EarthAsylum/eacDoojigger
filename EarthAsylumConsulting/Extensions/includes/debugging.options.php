@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	25.0319.1
+ * @version 	25.0330.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -36,6 +36,10 @@ $this->plugin->rename_option('debugPurge',		'debug_purge_time');
 $this->plugin->rename_option('debugOnPage',		'debug_on_page');
 $this->plugin->rename_option('debugTestApi',	'debug_test_api');
 */
+$this->plugin->delete_option('debug_depricated');
+$this->plugin->delete_option('debug_wp_errors');
+$this->plugin->delete_option('debug_heartbeat');
+$this->plugin->delete_option('debug_on_page');
 
 $debug_wp_debugging = [];
 foreach (['WP_DEBUG','WP_DEBUG_DISPLAY','WP_DEBUG_LOG'] as $wpdebug)
@@ -74,6 +78,33 @@ $this->registerExtensionOptions( $this->className,
 								'help'		=> 	'The server log is quicker and less detrimental to web site performace but also shows less detail mixed with all other server-wide log entries. '.
 												'The '.$this->pluginName.' log provides more detail and structure but may be detrimental to site performance due to memory usage (particularly with debugging information). ',
 							),
+		'debug_options' 	=> array(
+								'type'		=> 	'switch',
+								'label'		=> 	'Debugging Options',
+								'options'	=> 	[
+									"<abbr title='".
+										"Show debugging information in the Query Monitor tab, the help tab, ".
+										"or in a floating window at the bottom of the page.".
+									"'>On-Page Debugging</abbr>"			=> 'on_page',
+									"<abbr title='".
+										"Not all WP_Error messages are actually errors ".
+										"but may be pre-loaded in anticipation of possible error conditions.".
+									"'>Capture &amp; Log WP Errors</abbr>"	=>'wp_errors',
+									"<abbr title='".
+										"Messages often occur when invalid or outdated functions are called or invalid parameters are used. ".
+										"This option makes it easier to debug these errors.".
+									"'>Backtrace WP 'deprecated' &amp; 'doing it wrong' Messages</abbr>"	=>'deprecated',
+									"<abbr title='".
+										"WordPress scheduled events (wp-cron) may run frequently to check for and execute background processes. ".
+										"This option logs those request and the processes that run.".
+									"'>Log WP-Cron Requests</abbr>" 		=> 'wp_cron',
+									"<abbr title='".
+										"The WordPress Heartbeat API pings the server every 15 to 60 (or more) seconds. ".
+										"This option logs those request so you can determine the use, effectivness, and overhead.".
+									"'>Log Heartbeat Polling</abbr>" 		=> 'heartbeat',
+								],
+								'info'		=>	'Debugging options assist in finding and tracing potential error conditions in WordPress.',
+							),
 		'debug_php_errors' 	=> array(
 								'type'		=> 	'radio',
 								'label'		=> 	'Capture PHP Errors',
@@ -87,6 +118,7 @@ $this->registerExtensionOptions( $this->className,
 								'help'		=> 	'When capturing PHP errors, capture all errors or only those designated by the PHP error reporting setting.',
 								'advanced'	=> 	true,
 							),
+/*
 		'debug_depricated' 	=> array(
 								'type'		=> 	'checkbox',
 								'label'		=> 	'Capture WordPress Coding Messages',
@@ -98,6 +130,7 @@ $this->registerExtensionOptions( $this->className,
 								'help'		=>	'[info] Note: \'Notices &amp; Information\' along with \'Capture PHP Errors\' &amp; \'WP_DEBUG\' will also catch these as <em>notices</em>.',
 								'advanced'	=> 	true,
 							),
+*/
 		'debug_backtrace' 	=> array(
 								'type'		=> 	'range',
 								'label'		=> 	'Backtrace Levels',
@@ -125,6 +158,7 @@ $this->registerExtensionOptions( $this->className,
 												'oninput'=>"debug_backtrace_show.value = this.value"],
 								'advanced'	=> 	true,
 							),
+/*
 		'debug_wp_errors' 	=> array(
 								'type'		=> 	'checkbox',
 								'label'		=> 	'Capture WordPress Errors',
@@ -145,6 +179,7 @@ $this->registerExtensionOptions( $this->className,
 												'This option logs those request so you can determine the use, effectivness, and overhead.',
 								'advanced'	=> 	true,
 							),
+*/
 /*
 		'debug_purge_time' 	=> array(
 								'type'		=> 	'select',
@@ -180,12 +215,14 @@ $this->registerExtensionOptions( $this->className,
 												'min=0','max=12','step=1',
 												'oninput'=>"debug_purge_time_show.value = this.value"],
 							),
+/*
 		'debug_on_page' 	=> array(
 								'type'		=> 	'checkbox',
 								'label'		=> 	'On Page Debugging',
 								'options'	=> 	['Enabled'],
 								'info'		=>	'Show debugging information in the Query Monitor tab, the help tab, or in a floating window at the bottom of the page.'
 							),
+*/
 	]
 );
 
