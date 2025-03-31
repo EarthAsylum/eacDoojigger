@@ -1,5 +1,10 @@
 == Changelog ==
 
+= Version 3.1 – March 31, 2025 =
+
++   Due to new extension (event_scheduler) and external dependencies, version set to 3.1.0.
+    +   Version 3.0.4 not released.
+
 = Version 3.0.4 – March 31, 2025 =
 
 +   Tested with WordPress 6.8.
