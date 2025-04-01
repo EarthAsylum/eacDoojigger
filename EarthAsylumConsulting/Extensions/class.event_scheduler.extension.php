@@ -9,11 +9,23 @@ namespace EarthAsylumConsulting\Extensions;
  *
  * Core Schedules allowed: [ 'hourly', 'twicedaily', 'daily', 'weekly', 'monthly' ]
  * * although 'monthly' is not core, it is added and treated as such.
+ *
+ *	if (!defined('EAC_ALLOWED_WP_SCHEDULES')) {
+ *		define ('EAC_ALLOWED_WP_SCHEDULES',['hourly', 'daily']);
+ *	}
+ *
+ * See also `{pluginname}_allowed_schedules` filter to filter out any schedule/interval.
+ * 	$this->add_filter('allowed_schedules', function($schedules)
+ * 		{
+ * 			unset(
+ * 				$schedules['twicedaily'],
+ * 				$schedules['weekly'],
+ * 				$schedules['monthly']
+ * 			);
+ * 			return $schedules;
+ * 		}
+ * 	);
  */
-
-//	if (!defined('EAC_ALLOWED_WP_SCHEDULES')) {
-//		define ('EAC_ALLOWED_WP_SCHEDULES',['hourly', 'daily']);
-//	}
 
 
 if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
@@ -472,7 +484,8 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 			switch ($include)
 			{
 				case 'core+self':
-					return array_merge( $this->getIntervals('core'), $this->getIntervals('self') );
+					$cron_schedules = array_merge( $this->getIntervals('core'), $this->getIntervals('self') );
+					break;
 
 				case 'all':
 					$cron_schedules = wp_get_schedules();
@@ -506,7 +519,13 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 					break;
 			}
 
-			return $this->sortIntervals( $cron_schedules );
+			/**
+			 * filter {pluginname}_apply_filters - filter allowed intervals/schedules
+			 *
+			 * @param array $intervals [name=>interval,...]
+			 * @return array
+			 */
+			return $this->apply_filters( 'allowed_schedules', $this->sortIntervals( $cron_schedules ) );
 		}
 
 

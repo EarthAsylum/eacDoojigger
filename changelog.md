@@ -5,6 +5,7 @@
 +   Due to new extension (event_scheduler) and external dependencies, version set to 3.1.0.
     +   Version 3.0.4 not released.
 +   Added `EAC_ALLOWED_WP_SCHEDULES` to limit intervals shown on admin screen.
++   Added `allowed_schedules` filter to filter out any unwanted schedules/intervals.
 
 = Version 3.0.4 – March 31, 2025 =
 
