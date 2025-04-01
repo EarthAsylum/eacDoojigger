@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             3.1.0
-Last Updated:           31-Mar-2025
+Last Updated:           01-Apr-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -448,10 +448,11 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.1 – March 31, 2025 =
+= Version 3.1 – April 1, 2025 =
 
 +   Due to new extension (event_scheduler) and external dependencies, version set to 3.1.0.
     +   Version 3.0.4 not released.
++   Added `EAC_ALLOWED_WP_SCHEDULES` to limit intervals shown on admin screen.
 
 = Version 3.0.4 – March 31, 2025 =
 

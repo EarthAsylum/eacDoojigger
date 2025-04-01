@@ -1,6 +1,21 @@
 <?php
 namespace EarthAsylumConsulting\Extensions;
 
+/*
+ * By defining EAC_ALLOWED_WP_SCHEDULES as an array of allowed core schedules (intervals)
+ * the intervals can be limited in the admin 'Scheduled Events' settings page so that
+ * excluded intervals can not be used to set an event time.
+ * Schedules are still available/usable elsewhere.
+ *
+ * Core Schedules allowed: [ 'hourly', 'twicedaily', 'daily', 'weekly', 'monthly' ]
+ * * although 'monthly' is not core, it is added and treated as such.
+ */
+
+//	if (!defined('EAC_ALLOWED_WP_SCHEDULES')) {
+//		define ('EAC_ALLOWED_WP_SCHEDULES',['hourly', 'daily']);
+//	}
+
+
 if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 {
 	/**
@@ -18,7 +33,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION		= '25.0330.1';
+		const VERSION		= '25.0401.1';
 
 		/**
 		 * @var string alias class name
@@ -47,7 +62,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 * @var array WordPress schedule/interval keys
 		 * 		because plugins may redefine, making it look not-core
 		 */
-		const wp_core_schedules = [
+		const WP_CORE_SCHEDULES = [
 				'hourly'		=> 'Hourly',
 				'twicedaily'	=> 'Twice Daily',
 				'daily'			=> 'Daily',
@@ -91,6 +106,11 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 			$this->verify_active_events();
 			// get core intervals (schedules) and our custom intervals
 			foreach ($this->getIntervals('core+self') as $eventName => $interval) {
+				if (defined('EAC_ALLOWED_WP_SCHEDULES')
+				&& is_array(EAC_ALLOWED_WP_SCHEDULES)
+				&& !in_array($eventName,EAC_ALLOWED_WP_SCHEDULES)) {
+					continue;
+				}
 				// keep dates current - update to next schedule time
 				$event = $this->plugin->removeClassNamePrefix($eventName);
 				$scheduledTime = $this->get_option("event_start_{$event}");
@@ -103,7 +123,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 
 				$action = $this->eventName($event);
 				$count = $this->has_action_count($action);
-				$name = self::wp_core_schedules[$event] ?? $event;
+				$name = self::WP_CORE_SCHEDULES[$event] ?? $event;
 				$settings["event_start_{$event}"] = array(
 							'type'		=>	'datetime-local',
 							'label'		=>	"<abbr title='Event action name: {$action}'>{$name}</abbr>",
@@ -461,7 +481,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 				case 'cron':
 					// get external plugin defined intervals
 					$exclude = array_merge(
-						array_keys(self::wp_core_schedules),
+						array_keys(self::WP_CORE_SCHEDULES),
 						array_keys($this->get_option('event_intervals',[]))
 					);
 					$cron_schedules = apply_filters( 'cron_schedules', array() );
@@ -472,7 +492,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 
 				case 'core':
 					// get wp core defined intervals
-					$include = array_keys(self::wp_core_schedules);
+					$include = array_keys(self::WP_CORE_SCHEDULES);
 					$cron_schedules = wp_get_schedules();
 					$cron_schedules = array_filter($cron_schedules, function($key) use ($include) {
 								return in_array($key,$include);
