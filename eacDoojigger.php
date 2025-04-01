@@ -37,7 +37,7 @@
 namespace EarthAsylumConsulting
 {
 	/* prefered (as of 2.6.0) */
-	if (!defined('EACDOOJIGGER_VERSION')) define('EACDOOJIGGER_VERSION','3.0.3');
+	if (!defined('EACDOOJIGGER_VERSION')) define('EACDOOJIGGER_VERSION','3.1.0');
 
 	/* deprecated (may be referenced in derivatives and extensions) */
 	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION',\EACDOOJIGGER_VERSION);
