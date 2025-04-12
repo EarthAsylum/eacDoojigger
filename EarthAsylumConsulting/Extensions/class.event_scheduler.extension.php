@@ -45,7 +45,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION		= '25.0401.1';
+		const VERSION		= '25.0408.1';
 
 		/**
 		 * @var string alias class name
@@ -64,10 +64,11 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 * 		array 		override options for the 'Enabled' option (label,help,title,info, etc.)
 		 */
 		const ENABLE_OPTION	= [
-				'type'			=> 	'hidden',
-				'label'			=> 	"<abbr title='Set regularly scheduled, recurring events. These events do nothing by ".
-									"themselves but can be used to trigger other actions by hooking into the event action name.'>".
-									"Scheduled Events</abbr>"
+				'type'		=> 	'hidden',
+				'label'		=> 	"<abbr title='Set regularly scheduled, recurring events. These events do nothing by ".
+								"themselves but can be used to trigger other actions by hooking into the event action name.'>".
+								"Scheduled Events</abbr>",
+				'advanced'	=> true,
 		];
 
 		/*

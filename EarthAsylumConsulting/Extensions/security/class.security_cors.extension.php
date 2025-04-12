@@ -27,7 +27,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0314.1';
+		const VERSION 			= '25.0412.1';
 
 		/**
 		 * @var string extension tab name
@@ -58,7 +58,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			parent::__construct($plugin, self::ALLOW_ADMIN | self::ALLOW_NETWORK | self::ALLOW_NON_PHP );
 
 			// must have security extension enabled
-			if (! $this->isEnabled('security')) return false;
+			if (! $this->isEnabled('security')) return $this->isEnabled(false);
 
 			if ($this->is_admin())
 			{
@@ -116,29 +116,59 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 
 			if ($this->security->isPolicyEnabled('secCorsOpt','host_origin'))
 			{
-				$this->host_ips = $this->get_transient('host_ips',[]);
-				if (! ($this->host_ips && is_array($this->host_ips)) )
-				{
-					$this->host_ips = [];
-					$host = dns_get_record($this->plugin->varServer('host'),DNS_A+DNS_AAAA);
-					foreach ($host as $ip) {
-						$this->host_ips[] = $ip['ipv6'] ?? $ip['ip'];
+				// piggyback on daily event (if scheduled)
+				$this->do_action('add_cron_task', 'daily', function()
+					{
+						$this->delete_transient('host_ips');
+						$this->initialize_hostIP(1.1);
 					}
-					if ($host = file_get_contents('https://ipv4.icanhazip.com/')) {
-						$this->host_ips[] = trim($host);
-					}
-					if ($host = file_get_contents('https://ipv6.icanhazip.com/')) {
-						$this->host_ips[] = trim($host);
-					}
-					$this->host_ips = array_unique($this->host_ips);
-					$this->set_transient('host_ips',$this->host_ips,DAY_IN_SECONDS);
-					$this->logDebug($this->host_ips,$this->plugin->varServer('Host').' Host IP Address');
-				}
+				);
+				// get (create) host ip transient
+				$this->initialize_hostIP();
 			}
 			else
 			{
 				$this->delete_transient('host_ips');
 			}
+		}
+
+
+		/**
+		 * get host IP address(es)
+		 *
+		 * @param float $days number of days for transient lifetime
+		 * @return 	void
+		 */
+		public function initialize_hostIP(float $days = 1.0)
+		{
+			$this->host_ips = $this->get_transient('host_ips', function() use ($days)
+			{
+				$this->host_ips = [];
+				// get DNS IPv4/IPv6
+				$host = dns_get_record($this->plugin->varServer('host'),DNS_A+DNS_AAAA);
+				foreach ($host as $ip) {
+					$this->host_ips[] = $ip['ipv6'] ?? $ip['ip'];
+				}
+				// get public IPv4
+				for ($i = 0; $i < 3; $i++) {
+					if ($host = file_get_contents('https://ipv4.icanhazip.com/')) {
+						$this->host_ips[] = trim($host);
+						break;
+					}
+					usleep(100000); // 1/10th
+				}
+				// get public IPv6
+				for ($i = 0; $i < 3; $i++) {
+					if ($host = file_get_contents('https://ipv6.icanhazip.com/')) {
+						$this->host_ips[] = trim($host);
+						break;
+					}
+					usleep(100000); // 1/10th
+				}
+				$this->host_ips = array_unique($this->host_ips);
+				$this->set_transient('host_ips',$this->host_ips,DAY_IN_SECONDS * (float)$days);
+				$this->logDebug($this->host_ips,$this->plugin->varServer('Host').' Host IP Address');
+			});
 		}
 
 
@@ -237,8 +267,10 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 					if (empty($origin)) {
 						if ($origin = $this->plugin->varServer('HTTP_REFERER')) {
 							$origin = parse_url($origin);
-							$this->validate_local_origin($origin['host']);
-							$origin = $origin['scheme'].'://'.$origin['host'];
+							if (isset($origin['host'])) {
+								$this->validate_local_origin($origin['host']);
+								$origin = $origin['scheme'].'://'.$origin['host'];
+							}
 						}
 					}
 					return $origin;

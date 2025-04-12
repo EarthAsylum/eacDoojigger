@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0327.1
+ * @version		25.0411.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -163,7 +163,7 @@ abstract class abstract_backend extends abstract_core
 		// when upgrade completes (old version is active)
 		add_action( 'upgrader_process_complete',			array( $this, 'plugin_admin_upgraded'), 10, 2 );
 		// Register admin_init to check for new install or upgraded version of the plugin
-		add_action('admin_init',							array( $this, 'plugin_admin_installed') );
+		add_action( 'admin_init',							array( $this, 'plugin_admin_installed') );
 	}
 
 
@@ -289,14 +289,9 @@ abstract class abstract_backend extends abstract_core
 	{
 		if ( $hook_extra['type'] === 'plugin' && in_array($hook_extra['action'], ['install','update']) )
 		{
-			if ( ! array_key_exists('plugins',$hook_extra) || in_array($this->PLUGIN_SLUG, $hook_extra['plugins']) )
+			if ( array_key_exists('plugins',$hook_extra) && in_array($this->PLUGIN_SLUG, $hook_extra['plugins']) )
 			{
 				$this->delete_site_transient( self::PLUGIN_HEADER_TRANSIENT );
-				$this->forEachNetworkSite(function()
-					{
-						$this->delete_site_transient( self::PLUGIN_HEADER_TRANSIENT );
-					}
-				);
 			}
 		}
 	}

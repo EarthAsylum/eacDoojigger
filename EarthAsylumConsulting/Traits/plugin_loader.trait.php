@@ -20,8 +20,8 @@ namespace EarthAsylumConsulting\Traits
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Traits
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
-	 * @version		24.1121.1
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
+	 * @version		25.0411.1
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -85,15 +85,12 @@ namespace EarthAsylumConsulting\Traits
 			$_pluginfile 	= self::$plugin_detail['PluginFile'];
 			$_namespace 	= self::$plugin_detail['NameSpace'];
 			$_className 	= self::$plugin_detail['PluginClass'];
+			$_slugName 		= basename(str_replace('\\', '/', $_className));
+			$_textDomain 	= self::$plugin_detail['TextDomain'] ?? $_slugName;
 
 			/*
-			 * initialize i18n
+			 * initialize i18n on init
 			 */
-			if (!isset(self::$plugin_detail['TextDomain']))
-			{
-				self::$plugin_detail['TextDomain'] = basename(str_replace('\\', '/', $_className));
-			}
-			$_textDomain = self::$plugin_detail['TextDomain'];
 			add_action('init',function() use ($_textDomain,$_pluginfile)
 				{
 					load_plugin_textdomain($_textDomain, false, dirname(plugin_basename( $_pluginfile )) . '/languages');
@@ -105,7 +102,8 @@ namespace EarthAsylumConsulting\Traits
 			 */
 			if (is_admin())
 			{
-				if (method_exists(self::class,'check_loader_environment') && !self::check_loader_environment())
+				if (method_exists(self::class,'check_plugin_environment')
+				&& !self::check_plugin_environment($_slugName,$_textDomain))
 				{
 					return;
 				}
@@ -193,7 +191,7 @@ namespace EarthAsylumConsulting\Traits
 
 		/**
 		 * Load object (once) for automatic updates.
-		 * Now (as of v2.6) only used by extensions.
+		 * Now (as of v2.6) only used by extensions plugins (Doolollys).
 		 *
 		 * @param string $pluginFile plugin file pathname ($plugin_detail['PluginFile'])
 		 * @param string $updateType auto-update type ('self' | 'wp') ($plugin_detail['AutoUpdate'])

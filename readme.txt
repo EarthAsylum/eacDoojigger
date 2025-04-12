@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             3.1.0
-Last Updated:           01-Apr-2025
+Last Updated:           12-Apr-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -448,14 +448,17 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.1 – April 1, 2025 =
+= Version 3.1 – April 12, 2025 =
 
++   Rework plugin environment check - limit when checked (on activate, updates, or daily).
 +   Due to new extension (event_scheduler) and external dependencies, version set to 3.1.0.
-    +   Version 3.0.4 not released.
+    +   Version 3.0.4 was not released.
 +   Added `EAC_ALLOWED_WP_SCHEDULES` to limit intervals shown on admin screen.
 +   Added `allowed_schedules` filter to filter out any unwanted schedules/intervals.
++   security_cors: Use daily cron (if scheduled) to get host IP addresses.
++   security_cors: Suppress scheme/host warning.
 
-= Version 3.0.4 – March 31, 2025 =
+= ~~Version 3.0.4 – March 31, 2025~~ =
 
 +   Tested with WordPress 6.8.
 +   New event_scheduler (cron) extension.

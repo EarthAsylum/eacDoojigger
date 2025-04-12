@@ -2,7 +2,7 @@
 namespace EarthAsylumConsulting\Traits;
 
 /*
- * loader/initialization trait with environment check
+ * loader/initialization trait with environment check - before plugin class instantiation
  *
  * Usage:
  *
@@ -36,8 +36,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.earthasylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		25.0411.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -45,23 +45,117 @@ namespace EarthAsylumConsulting\Traits;
 trait plugin_environment
 {
 	/**
-	 * Check versions and give an error message if the user's version is less than the required version
+	 * @var string transient name
+	 */
+	protected static $check_env_transient;
+
+	/**
+	 * Check versions and display an error notification if the user's version is less than the required version.
+	 * Called from plugin_loader before plugin is instantiated.
+	 *
+	 * @param string $_slugName short plugin name
+	 * @param string $_textDomain text domain
+	 * @return bool
+	 */
+	protected static function check_plugin_environment($_slugName,$_textDomain): bool
+	{
+		self::$check_env_transient = "{$_slugName}_environment_check";
+
+		// force check on activation
+		register_activation_hook(
+			self::$plugin_detail['PluginFile'],
+			self::class.'::do_plugin_environment_check'
+		);
+		// force check when something is updated (maybe running the old version here)
+		add_action(
+			'upgrader_process_complete',
+			function() {delete_site_transient(self::$check_env_transient);}
+		);
+
+		// check previously done, maybe output/deactivate on error
+		if ($environment = get_site_transient(self::$check_env_transient))
+		{
+			if (isset($environment['error'])) {
+				if (!wp_doing_ajax() && !wp_doing_cron()) {
+					self::output_plugin_environment_check($environment['error'],$_textDomain);
+					delete_site_transient(self::$check_env_transient);
+				}
+				return false;
+			}
+			return true;
+		}
+
+		// if no transient
+		return self::do_plugin_environment_check();
+	}
+
+
+	/**
+	 * admin notice for module version
+	 *
+	 * @param array $error $environment['error'] from transient
+	 * @param string $_textDomain text domain
+	 * @return void
+	 */
+	private static function output_plugin_environment_check(array $error, string $_textDomain): void
+	{
+		if (isset($error['module']))
+		{
+			$notice  = "This plugin requires %s version %s or greater";
+			$notice .= ($error['module']['current'])
+				? ", "."your server is running version %s." : ".";
+		}
+		else if (isset($error['network']))
+		{
+			$notice  = ($error['network']['active'])
+				? "This plugin is not intended to be activated or used by the network administrator."
+				: "This plugin must be network-activated by the network administrator.";
+		}
+
+		\add_action( 'all_admin_notices', function() use($error,$notice,$_textDomain)
+			{
+				$notice  = sprintf(__("Error from %s:",$_textDomain),
+								basename(dirname(self::$plugin_detail['PluginFile']))
+							) . "<br>" .
+						   sprintf(__($notice,$_textDomain),
+						   		$error['module']['name'],
+						   		$error['module']['required'],
+						   		$error['module']['current']
+						   	);
+				add_action( 'admin_footer', function() use ($notice)
+					{
+						echo '<div class="notice notice-error"><p><strong>' .
+							 $notice  .
+							 "</strong></p><p>Plugin deactivated.</p></div>";
+					}
+				);
+				require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+				deactivate_plugins(plugin_basename(self::$plugin_detail['PluginFile']));
+			},
+			PHP_INT_MAX
+		);
+	}
+
+
+	/**
+	 * The actual checks triggered by above hooks.
+	 * Check versions and display an error notification if the user's version is less than the required version.
 	 *
 	 * @return bool
 	 */
-	private static function check_loader_environment(): bool
+	public static function do_plugin_environment_check(): bool
 	{
 		/*
 		 * Check PHP version
 		 */
-		if (isset(self::$plugin_detail['RequiresPHP']))		// check PHP version
+		if (isset(self::$plugin_detail['RequiresPHP']))
 		{
 			if (! is_php_version_compatible(self::$plugin_detail['RequiresPHP']))
 			{
-				\add_action( 'all_admin_notices', function()
-					{
-						self::output_version_notice('PHP', self::$plugin_detail['RequiresPHP'], PHP_VERSION);
-					}
+				self::set_plugin_environment_version_error(
+					'PHP',
+					self::$plugin_detail['RequiresPHP'],
+					PHP_VERSION
 				);
 				return false;
 			}
@@ -70,14 +164,14 @@ trait plugin_environment
 		/*
 		 * Check WordPress version
 		 */
-		if (isset(self::$plugin_detail['RequiresWP']))		// check WordPress version
+		if (isset(self::$plugin_detail['RequiresWP']))
 		{
 			if (! is_wp_version_compatible(self::$plugin_detail['RequiresWP']))
 			{
-				\add_action( 'all_admin_notices', function()
-					{
-						self::output_version_notice('WordPress', self::$plugin_detail['RequiresWP'], get_bloginfo('version'));
-					}
+				self::set_plugin_environment_version_error(
+					'WordPress',
+					self::$plugin_detail['RequiresWP'],
+					get_bloginfo('version')
 				);
 				return false;
 			}
@@ -86,124 +180,103 @@ trait plugin_environment
 		/*
 		 * Check WooCommerce version
 		 */
-		if (isset(self::$plugin_detail['RequiresWC']))		// check WooCommerce version
+		if (isset(self::$plugin_detail['RequiresWC']))
 		{
-			\add_action('plugins_loaded', function()
-				{
-					if (! defined('WC_VERSION') || version_compare(WC_VERSION, self::$plugin_detail['RequiresWC'], '<') )
-					{
-						\add_action( 'all_admin_notices', function()
-							{
-								$wcVersion = defined('WC_VERSION') ? WC_VERSION : false;
-								self::output_version_notice('WooCommerce', self::$plugin_detail['RequiresWC'], $wcVersion);
-							}
-						);
-						return false;
-					}
-				}
-			);
-		}
-
-		/*
-		 * Check eacDoojigger version
-		 */
-		if (isset(self::$plugin_detail['RequiresEAC']))		// check eacDoojigger version
-		{
-			if (! defined('EACDOOJIGGER_VERSION') || version_compare(EACDOOJIGGER_VERSION, self::$plugin_detail['RequiresEAC'], '<') )
+			if (! defined('WC_VERSION') || version_compare(WC_VERSION, self::$plugin_detail['RequiresWC'], '<') )
 			{
-				\add_action( 'all_admin_notices', function()
-					{
-						$eacVersion = defined('EACDOOJIGGER_VERSION') ? EACDOOJIGGER_VERSION : false;
-						self::output_version_notice('{eac}Doojigger', self::$plugin_detail['RequiresEAC'], $eacVersion);
-					}
+				$wcVersion = defined('WC_VERSION') ? WC_VERSION : false;
+				self::set_plugin_environment_version_error(
+					'WooCommerce',
+					self::$plugin_detail['RequiresWC'],
+					$wcVersion
 				);
 				return false;
 			}
 		}
 
 		/*
-		 * Check Network Activation
+		 * Check eacDoojigger version
+		 */
+		if (isset(self::$plugin_detail['RequiresEAC']))
+		{
+			if (! defined('EACDOOJIGGER_VERSION') || version_compare(EACDOOJIGGER_VERSION, self::$plugin_detail['RequiresEAC'], '<') )
+			{
+				$eacVersion = defined('EACDOOJIGGER_VERSION') ? EACDOOJIGGER_VERSION : false;
+				self::set_plugin_environment_version_error(
+					'{eac}Doojigger',
+					self::$plugin_detail['RequiresEAC'],
+					$eacVersion
+				);
+				return false;
+			}
+		}
+
+		/**
+		 * Check network activation
 		 */
 		if (is_multisite() && isset(self::$plugin_detail['NetworkActivate']))
 		{
-			register_activation_hook(self::$plugin_detail['PluginFile'], self::class.'::check_network_activation');
+			if ( is_network_admin() )
+			{
+				if (self::$plugin_detail['NetworkActivate'] === false)
+				{
+					self::set_plugin_environment_network_error(true,false);
+					return false;
+				}
+			}
+			else
+			{
+				if (self::$plugin_detail['NetworkActivate'] === true)
+				{
+					self::set_plugin_environment_network_error(false,true);
+					return false;
+				}
+			}
 		}
 
+		set_site_transient(self::$check_env_transient,['check' => true],DAY_IN_SECONDS);
 		return true;
 	}
 
 
 	/**
-	 * admin notice for module version
+	 * save environmen_check_transient on error
 	 *
+	 * @param string $moduleName the software name
+	 * @param string $required	the required version
+	 * @param string $version the current version
 	 * @return void
 	 */
-	private static function output_version_notice(string $moduleName, string $required, string $version): void
+	private static function set_plugin_environment_version_error(string $moduleName, string $required, string $version): void
 	{
-		$notice  = __("This plugin requires %s version %s or greater",self::$plugin_detail['TextDomain']);
-		$notice .= ($version) ? ", ".__("your server is running version %s.",self::$plugin_detail['TextDomain']) : ".";
-
-		echo  '<div class="notice notice-error"><h4>' .
-			sprintf("Error from %s:<br>".$notice,
-					plugin_basename(self::$plugin_detail['PluginFile']),
-					$moduleName,
-					$required,
-					$version
-			) . "</h4><p>Plugin deactivated.</p></div>";
-
-		require_once(ABSPATH . 'wp-admin/includes/plugin.php');
-		deactivate_plugins(plugin_basename(self::$plugin_detail['PluginFile']));
-	}
-
-
-	/**
-	 * Check network activation
-	 *
-	 * @return bool
-	 */
-	public static function check_network_activation(): bool
-	{
-		if ( is_network_admin() )
-		{
-			if (self::$plugin_detail['NetworkActivate'] === false)
-			{
-				self::output_network_error(true);
-			}
-		}
-		else
-		{
-			if (self::$plugin_detail['NetworkActivate'] === true)
-			{
-				self::output_network_error(false);
-			}
-		}
-		// When WP does its "error scrape", it's no longer as network admin
-		// so if we made it here and we're scraping, must be network activation failure
-		if ($_REQUEST['action'] == 'error_scrape' &&
-			$_REQUEST['plugin'] == plugin_basename(self::$plugin_detail['PluginFile']))
-		{
-			self::output_network_error(true);
-		}
-
-		return  true;
+		set_site_transient(self::$check_env_transient,[
+			'error'	=> [
+				'module' => [
+					'name' 		=> $moduleName,
+					'required' 	=> $required,
+					'current' 	=> $version
+				]
+			]
+		],HOUR_IN_SECONDS);
 	}
 
 
 	/**
 	 * admin error for network activation
 	 *
-	 * @return void
+	 * @param bool $isNetwork activated by network admin
+	 * @param bool $required network activation required
+	 * @return bool
 	 */
-	public static function output_network_error($isNetwork): void
+	private static function set_plugin_environment_network_error(bool $isNetwork, bool $required): bool
 	{
-		$notice  = ($isNetwork)
-			? __("This plugin is not intended to be activated or used by the network administrator.",self::$plugin_detail['TextDomain'])
-			: __("This plugin must be network-activated by the network administrator.",self::$plugin_detail['TextDomain']);
-
-		trigger_error(
-				sprintf("from %s >> ".$notice, plugin_basename(self::$plugin_detail['PluginFile'])).
-				'<div style="display:none;">', // swallows up the remaining PHP error "in {file} on line n"
-				E_USER_ERROR
-		);
+		set_site_transient(self::$check_env_transient,[
+			'error'	=> [
+				'network' => [
+					'active'	=> $isNetwork,
+					'required'	=> $required
+				]
+			]
+		],HOUR_IN_SECONDS);
 	}
 } // trait

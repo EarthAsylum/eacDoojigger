@@ -1,13 +1,16 @@
 == Changelog ==
 
-= Version 3.1 – April 1, 2025 =
+= Version 3.1 – April 12, 2025 =
 
++   Rework plugin environment check - limit when checked (on activate, updates, or daily).
 +   Due to new extension (event_scheduler) and external dependencies, version set to 3.1.0.
-    +   Version 3.0.4 not released.
+    +   Version 3.0.4 was not released.
 +   Added `EAC_ALLOWED_WP_SCHEDULES` to limit intervals shown on admin screen.
 +   Added `allowed_schedules` filter to filter out any unwanted schedules/intervals.
++   security_cors: Use daily cron (if scheduled) to get host IP addresses.
++   security_cors: Suppress scheme/host warning.
 
-= Version 3.0.4 – March 31, 2025 =
+= ~~Version 3.0.4 – March 31, 2025~~ =
 
 +   Tested with WordPress 6.8.
 +   New event_scheduler (cron) extension.

@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0327.1
+ * @version		25.0411.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -605,7 +605,7 @@ abstract class abstract_core
 
 				return $pluginData;
 			},
-			HOUR_IN_SECONDS
+			HOUR_IN_SECONDS * 12
 		);
 		$this->pluginData['RequestTime'] 		= WP_START_TIMESTAMP;
 		$this->PLUGIN_TEXTDOMAIN = $this->pluginData['TextDomain'];
