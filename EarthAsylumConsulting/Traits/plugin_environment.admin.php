@@ -182,13 +182,13 @@ trait plugin_environment
 		 */
 		if (isset(self::$plugin_detail['RequiresWC']))
 		{
-			if (! defined('WC_VERSION') || version_compare(WC_VERSION, self::$plugin_detail['RequiresWC'], '<') )
+			$wc_version = (defined('WC_VERSION')) ? WC_VERSION : get_option( 'woocommerce_version' );
+			if (! $wc_version || version_compare($wc_version, self::$plugin_detail['RequiresWC'], '<') )
 			{
-				$wcVersion = defined('WC_VERSION') ? WC_VERSION : false;
 				self::set_plugin_environment_version_error(
 					'WooCommerce',
 					self::$plugin_detail['RequiresWC'],
-					$wcVersion
+					$wc_version
 				);
 				return false;
 			}
