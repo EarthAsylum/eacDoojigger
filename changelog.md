@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.1 – April 12, 2025 =
+= Version 3.1 – April 13, 2025 =
 
 +   Rework plugin environment check - limit when checked (on activate, updates, or daily).
 +   Due to new extension (event_scheduler) and external dependencies, version set to 3.1.0.

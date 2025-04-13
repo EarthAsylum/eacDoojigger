@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0411.1
+ * @version		25.0413.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -382,7 +382,7 @@ abstract class abstract_backend extends abstract_core
 
 		if ($isNetwork)
 		{
-			$this->forEachNetworkSite(function()
+			$this->forEachNetworkSite(function() use ($isNetwork)
 				{
 					$this->plugin_admin_deactivated( ($isNetwork===true) );
 				}

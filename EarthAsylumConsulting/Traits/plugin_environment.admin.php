@@ -37,7 +37,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0411.1
+ * @version		25.0413.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -86,7 +86,7 @@ trait plugin_environment
 		}
 
 		// if no transient
-		return self::do_plugin_environment_check();
+		return self::do_plugin_environment_check(false);
 	}
 
 
@@ -118,9 +118,9 @@ trait plugin_environment
 								basename(dirname(self::$plugin_detail['PluginFile']))
 							) . "<br>" .
 						   sprintf(__($notice,$_textDomain),
-						   		$error['module']['name'],
-						   		$error['module']['required'],
-						   		$error['module']['current']
+						   		$error['module']['name'] 		?? '',
+						   		$error['module']['required']	?? '',
+						   		$error['module']['current']		?? ''
 						   	);
 				add_action( 'admin_footer', function() use ($notice)
 					{
@@ -141,9 +141,10 @@ trait plugin_environment
 	 * The actual checks triggered by above hooks.
 	 * Check versions and display an error notification if the user's version is less than the required version.
 	 *
+	 * @param bool $do_nw_check check for network activation (on activation hook)
 	 * @return bool
 	 */
-	public static function do_plugin_environment_check(): bool
+	public static function do_plugin_environment_check($do_nw_check = true): bool
 	{
 		/*
 		 * Check PHP version
@@ -214,7 +215,7 @@ trait plugin_environment
 		/**
 		 * Check network activation
 		 */
-		if (is_multisite() && isset(self::$plugin_detail['NetworkActivate']))
+		if ($do_nw_check && is_multisite() && isset(self::$plugin_detail['NetworkActivate']))
 		{
 			if ( is_network_admin() )
 			{
@@ -266,9 +267,9 @@ trait plugin_environment
 	 *
 	 * @param bool $isNetwork activated by network admin
 	 * @param bool $required network activation required
-	 * @return bool
+	 * @return void
 	 */
-	private static function set_plugin_environment_network_error(bool $isNetwork, bool $required): bool
+	private static function set_plugin_environment_network_error(bool $isNetwork, bool $required): void
 	{
 		set_site_transient(self::$check_env_transient,[
 			'error'	=> [
