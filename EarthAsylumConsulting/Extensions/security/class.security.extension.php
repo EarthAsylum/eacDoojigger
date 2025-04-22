@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '25.0419.1';
+		const VERSION			= '25.0422.1';
 
 		/**
 		 * @var string extension alias
@@ -65,19 +65,20 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			parent::__construct($plugin, self::ALLOW_ALL | self::ALLOW_NON_PHP);
 
+			// disable 'enabled' option on sites when network activated
+			if (is_multisite() && !$this->plugin->is_network_admin() && $this->plugin->is_network_enabled() )
+			{
+				$this->enable_option = array(
+					'type'		=> 'hidden',
+					'value'		=>	($this->is_network_enabled()) ? 'Enabled' : '',
+					'info'		=>	( ($this->is_network_enabled()) ? 'Network Enabled' : 'Network Disabled' ) .
+									" <em>(Network policies may override site policies)</em>",
+				);
+			}
+
 			$this->registerExtension( $this->className );
 			add_action('admin_init', function()
 			{
-				// disable 'enabled' option on sites when network activated
-				if (is_multisite() && !$this->plugin->is_network_admin() && $this->plugin->is_network_enabled() )
-				{
-					$this->enable_option = array(
-						'type'		=> 'hidden',
-						'value'		=>	($this->is_network_enabled()) ? 'Enabled' : '',
-						'info'		=>	( ($this->is_network_enabled()) ? 'Network Enabled' : 'Network Disabled' ) .
-										" <em>(Network policies may override site policies)</em>",
-					);
-				}
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help

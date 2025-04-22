@@ -94,15 +94,20 @@ abstract class abstract_extension
 	protected $flags;
 
 	/**
-	 * @var string the option name to enable (false=no option)
+	 * @var bool is this class enabled
+	 */
+	protected $enabled = true;
+
+	/**
+	 * @var string|array the enable option label or field definition array
 	 * 		can be set (as ENABLED_OPTION) before registerExtension() to override 'Enabled' option
 	 */
 	protected $enable_option = null;
 
 	/**
-	 * @var bool is this class enabled
+	 * @var string the enable option field name
 	 */
-	protected $enabled = true;
+	protected $enable_option_name = null;
 
 	/**
 	 * @var object WordPress DB
@@ -259,17 +264,17 @@ abstract class abstract_extension
 			// untranslated sanitized key
 			$groupName = (is_array($optionGroup)) ? $optionGroup[0] : $optionGroup;
 			$groupName = esc_attr(ucwords(str_replace(['-','_'],' ',$groupName)));
-			$this->enable_option = basename($this->plugin->toKeyString($groupName,'_'),'_extension').'_extension_enabled';
+			$this->enable_option_name = basename($this->plugin->toKeyString($groupName,'_'),'_extension').'_extension_enabled';
 
 			// update the 'enabled' setting for this group
-			if ( $this->plugin->isSettingsPage() && isset($_POST[$this->enable_option]) )
+			if ( $this->plugin->isSettingsPage() && isset($_POST[$this->enable_option_name]) )
 			{
-				if ($_POST[$this->enable_option] == '')
+				if ($_POST[$this->enable_option_name] == '')
 				{
 					$this->isEnabled(false);
 				}
 			}
-			else if (!$this->plugin->is_option($this->enable_option))
+			else if (!$this->plugin->is_option($this->enable_option_name))
 			{
 				$this->isEnabled(false);
 			}
@@ -297,7 +302,7 @@ abstract class abstract_extension
 		else
 		{
 			// set default enable option name (since we do this on admin_init)
-			$this->update_option($this->className.'_enable_option_name',$this->enable_option);
+			$this->update_option($this->className.'_enable_option_name',$this->enable_option_name);
 
 			$enabledOption = [
 					'label'			=> $groupName,
@@ -305,7 +310,7 @@ abstract class abstract_extension
 					'options'		=> ['Enabled'],
 					'default'		=> ($this->flags & self::DEFAULT_DISABLED) ? '' : 'Enabled',
 			];
-			if ($override = static::ENABLE_OPTION)
+			if ($override = $this->enable_option ?: static::ENABLE_OPTION)
 			{
 				if (is_array($override)) {
 					$enabledOption = array_replace($enabledOption,$override);
@@ -313,7 +318,8 @@ abstract class abstract_extension
 					$enabledOption['label'] = $override;
 				}
 			}
-			$enabledOption = [ $this->enable_option => $enabledOption ];
+			$enabledOption = [ $this->enable_option_name => $enabledOption ];
+			$this->enable_option = $this->enable_option_name;
 		}
 
 		$this->registerExtensionOptions($optionGroup, array_merge($enabledOption,$optionMeta));
@@ -373,25 +379,6 @@ abstract class abstract_extension
 	 */
 	public function initialize()
 	{
-	//	if (is_null($this->enable_option))
-	//	{
-	//		throw new \LogicException("Extension {$this->className} did not register with {$this->pluginName}. Use 'registerExtension(...)' to register." );
-	//	}
-
-	//	if ($this->isEnabled())
-	//	{
-	//		$plugin 	= $this->plugin;
-	//		$className 	= $this->className;
-	//		/**
-	//		 * filter {pluginName}_{className} call an extension method
-	//		 * $value = apply_filters( '{pluginName}_{className}', 'method', ...arguments );
-	//		 * @return	mixed
-	//		 */
-	//		$this->plugin->add_filter( $this->className, function($value, $method, ...$arguments) use ($plugin,$className) {
-	//			return $plugin->callExtension($className,$method,...$arguments);
-	//		}, 10, 5); // upto 5 arguments
-	//	}
-
 		return $this->enabled;
 	}
 
@@ -432,9 +419,9 @@ abstract class abstract_extension
 		if (is_bool($enabled))
 		{
 			$this->enabled = $enabled;
-			if ($perm === true && $this->enable_option)
+			if ($perm === true && $this->enable_option_name)
 			{
-				$this->plugin->update_option($this->enable_option,($enabled ? 'Enabled' : ''));
+				$this->plugin->update_option($this->enable_option_name,($enabled ? 'Enabled' : ''));
 			}
 		}
 		else if (is_string($enabled)) 	// checking another extension's 'enabled'
@@ -443,9 +430,9 @@ abstract class abstract_extension
 		}
 		else if ($this->enabled)		// constructor enabled
 		{
-			if ( !empty($this->enable_option) )
+			if ( !empty($this->enable_option_name) )
 			{
-				$this->enabled = $this->plugin->is_option($this->enable_option);
+				$this->enabled = $this->plugin->is_option($this->enable_option_name);
 			}
 		}
 
@@ -482,9 +469,9 @@ abstract class abstract_extension
 			{
 				$this->networkEnabled = false;
 			}
-			else if ($this->enable_option)
+			else if ($this->enable_option_name)
 			{
-				$this->networkEnabled = $this->plugin->is_network_option($this->enable_option);
+				$this->networkEnabled = $this->plugin->is_network_option($this->enable_option_name);
 			}
 			else if ( ! $this->enabled ) // must check above first
 			{

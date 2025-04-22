@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\maintenance_mode', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0419.1';
+		const VERSION	= '25.0422.1';
 
 		/**
 		 * @var string default maintenance_mode html
@@ -176,8 +176,10 @@ if (! class_exists(__NAMESPACE__.'\maintenance_mode', false) )
 			} else {
 				$this->active = false;
 				$this->isEnabled(false,true);
-				if ($enabled = $this->is_option($this->enable_option)) {
-					$this->network_check_enabled('',$this->enable_option,null,$enabled);
+				if ($this->enable_option) {
+					if ($enabled = $this->is_option($this->enable_option)) {
+						$this->network_check_enabled('',$this->enable_option,null,$enabled);
+					}
 				}
 				return;
 			}
