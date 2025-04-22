@@ -9,8 +9,7 @@ if (! class_exists(__NAMESPACE__.'\maintenance_mode', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2021 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -20,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\maintenance_mode', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0315.1';
+		const VERSION	= '25.0419.1';
 
 		/**
 		 * @var string default maintenance_mode html
@@ -51,13 +50,20 @@ if (! class_exists(__NAMESPACE__.'\maintenance_mode', false) )
 			parent::__construct($plugin, self::ALLOW_ALL | self::DEFAULT_DISABLED);
 
 			$this->registerExtension( $this->className );
-
-			if ($this->is_admin())
+			if (is_admin())
 			{
-				// Register plugin options when needed
-				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
-				// Add contextual help
-				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
+				add_action('admin_init', function()
+				{
+					// Register plugin options when needed
+					$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
+					// Add contextual help
+					$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
+					// check maintenance mode
+					$this->check_maintenance_mode();
+				});
+			} else {
+				// check maintenance mode
+				add_action('init', array($this,'check_maintenance_mode'));
 			}
 		}
 
@@ -95,6 +101,7 @@ if (! class_exists(__NAMESPACE__.'\maintenance_mode', false) )
 										$expire = $expire * MINUTE_IN_SECONDS;
 										$until = wp_date($this->plugin->date_time_format,time() + $expire);
 										$this->plugin->set_transient('maintenance_mode',$until,$expire);
+										$this->do_action('flush_caches');
 										$this->page_reload();
 									} else {
 										$this->plugin->delete_transient('maintenance_mode');
@@ -157,15 +164,12 @@ if (! class_exists(__NAMESPACE__.'\maintenance_mode', false) )
 
 
 		/**
-		 * Add filters and actions - called from main plugin
+		 * check maintenance mode
 		 *
 		 * @return	void
 		 */
-		public function addActionsAndFilters()
+		public function check_maintenance_mode()
 		{
-			/*
-			 * check maintenance mode
-			 */
 			if ($this->active = $this->getActiveUntil()) {
 				$this->active = 'Active Until '.$this->active;
 				$this->add_admin_notice('Maintenance Mode - '.$this->active,'success');

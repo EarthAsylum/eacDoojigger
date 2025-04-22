@@ -9,7 +9,7 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.1108.1';
+		const VERSION	= '25.0417.1';
 
 		/**
 		 * @var string additional styling
@@ -49,12 +49,12 @@ if (! class_exists(__NAMESPACE__.'\material_icons', false) )
 		{
 			parent::__construct($plugin, self::ALLOW_ADMIN | self::ALLOW_NETWORK | self::DEFAULT_DISABLED);
 
-			if ($this->is_admin())
+			$this->registerExtension( $this->className );
+			add_action('admin_init', function()
 			{
-				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
-			}
+			});
 		}
 
 

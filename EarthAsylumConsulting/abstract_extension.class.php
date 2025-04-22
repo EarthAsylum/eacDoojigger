@@ -12,7 +12,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		25.0320.1
+ * @version		25.0417.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_core
@@ -129,6 +129,7 @@ abstract class abstract_extension
 		// add automatic update through plugin_update trait (when so configured) -deprecated-
 		if ( !empty($this->update_plugin_file) && $this->plugin->isPluginsPage() )
 		{
+			\_deprecated_function( 'update_plugin_file', '2.6.0', 'loadPluginUpdater()');
 			if (file_exists($this->update_plugin_file))
 			{
 				if (method_exists($this,'addPluginUpdateHooks')) {
@@ -216,46 +217,51 @@ abstract class abstract_extension
 	/**
 	 * Register this extension and options
 	 *
+	 * @example - register with className, no options (yet)
+	 *			$this->registerExtension();
+	 * @example - register with no options (yet)
+	 *			$this->registerExtension( false );
+	 * @example - register with className, no 'enabled' option
+	 *			$this->registerExtension( false, [options] );
+	 * @example - register with className, and options
+	 *			$this->registerExtension( true, [options] );
+	 *			$this->registerExtension( $this->className, [options] );
+	 * @example - register with group name
+	 *			$this->registerExtension( 'group name', [options] );
+	 * @example - register with className and tab
+	 *			$this->registerExtension( [$this->className, 'tab name'], [options] );
+	 * @example - register with group name and tab
+	 *			$this->registerExtension( ['group name', 'tab name'], [options] );
+	 *
 	 * @param	string|array 	$optionGroup group name or [groupname, tabname]]
 	 * @param	array 			$optionMeta group option meta
 	 * @return	void
 	 */
-	protected function registerExtension($optionGroup, $optionMeta = array())
+	protected function registerExtension($optionGroup = null, $optionMeta = array())
 	{
-		if (empty($optionGroup))
+		if (is_null($optionGroup) || $optionGroup === true)
+		{
+			$optionGroup = $this->className;
+		}
+		else if ($optionGroup === false)
 		{
 			$this->enable_option = false;
-			return;
+			if (empty($optionMeta)) return;
+			$optionGroup = $this->className;
 		}
 
-		$optionGroup = $this->plugin->standardizeOptionGroup($optionGroup);
-		$groupName = (is_array($optionGroup)) ? $optionGroup[0] : $optionGroup;
-		$this->defaultTab = (is_array($optionGroup)) ? $optionGroup[1] : static::TAB_NAME;
-
-		if ( $this->enable_option === false || static::ENABLE_OPTION === false)
+		if ($this->enable_option === false || static::ENABLE_OPTION === false)
 		{
-			$enabledOption = [];
+			$this->enable_option = false;
 		}
 		else
 		{
-			$override = static::ENABLE_OPTION; // ?: $this->enable_option;
-			// group names, sanitized, suffixed with '_extension_enabled'
+			// untranslated sanitized key
+			$groupName = (is_array($optionGroup)) ? $optionGroup[0] : $optionGroup;
+			$groupName = esc_attr(ucwords(str_replace(['-','_'],' ',$groupName)));
 			$this->enable_option = basename($this->plugin->toKeyString($groupName,'_'),'_extension').'_extension_enabled';
-			$enabledOption = [
-					'type'			=> 'checkbox',
-					'options'		=> ['Enabled'],
-					'default'		=> ($this->flags & self::DEFAULT_DISABLED) ? '' : 'Enabled',
-			];
-			if ($override)
-			{
-				if (is_array($override)) {
-					$enabledOption = array_replace($enabledOption,$override);
-				} else {
-					$enabledOption['label'] = $override;
-				}
-			}
-			$enabledOption = [ $this->enable_option => $enabledOption ];
 
+			// update the 'enabled' setting for this group
 			if ( $this->plugin->isSettingsPage() && isset($_POST[$this->enable_option]) )
 			{
 				if ($_POST[$this->enable_option] == '')
@@ -267,6 +273,47 @@ abstract class abstract_extension
 			{
 				$this->isEnabled(false);
 			}
+		}
+
+		// prevent translation early load (Function _load_textdomain_just_in_time was called incorrectly)
+		if ( ! doing_action( 'admin_init' ) && ! did_action( 'admin_init' ) )
+		{
+			add_action('admin_init', function() use ($optionGroup, $optionMeta)
+			{
+				$this->registerExtension($optionGroup, $optionMeta);
+			});
+			return;
+		}
+
+		// sanitize and translate group and tab name
+		$optionGroup 		= $this->plugin->standardizeOptionGroup($optionGroup);
+		$groupName 			= (is_array($optionGroup)) ? $optionGroup[0] : $optionGroup;
+		$this->defaultTab 	= (is_array($optionGroup)) ? $optionGroup[1] : static::TAB_NAME;
+
+		if ( $this->enable_option === false )
+		{
+			$enabledOption = [];
+		}
+		else
+		{
+			// set default enable option name (since we do this on admin_init)
+			$this->update_option($this->className.'_enable_option_name',$this->enable_option);
+
+			$enabledOption = [
+					'label'			=> $groupName,
+					'type'			=> 'checkbox',
+					'options'		=> ['Enabled'],
+					'default'		=> ($this->flags & self::DEFAULT_DISABLED) ? '' : 'Enabled',
+			];
+			if ($override = static::ENABLE_OPTION)
+			{
+				if (is_array($override)) {
+					$enabledOption = array_replace($enabledOption,$override);
+				} else {
+					$enabledOption['label'] = $override;
+				}
+			}
+			$enabledOption = [ $this->enable_option => $enabledOption ];
 		}
 
 		$this->registerExtensionOptions($optionGroup, array_merge($enabledOption,$optionMeta));
@@ -284,9 +331,24 @@ abstract class abstract_extension
 	{
 		if (! $this->plugin->isSettingsPage() ) return;
 
-		if (!is_array($optionGroup) && !empty($this->defaultTab))
+		if (is_null($optionGroup) || $optionGroup === true)
 		{
-			$optionGroup = [$optionGroup,$this->defaultTab];
+			$optionGroup = $this->className;
+		}
+
+		// make sure we're doing this after registerExtension()
+		if ( ! doing_action( 'admin_init' ) && ! did_action( 'admin_init' ) )
+		{
+			add_action('admin_init', function() use ($optionGroup, $optionMeta)
+			{
+				$this->registerExtensionOptions($optionGroup, $optionMeta);
+			},11);
+			return;
+		}
+
+		if (!is_array($optionGroup) && (!empty($this->defaultTab) || !empty(static::TAB_NAME)))
+		{
+			$optionGroup = [$optionGroup,$this->defaultTab ?: static::TAB_NAME];
 		}
 
 		if ( is_multisite() && is_network_admin() )
@@ -379,9 +441,12 @@ abstract class abstract_extension
 		{
 			$this->enabled = (bool)( $this->plugin->isExtension($enabled,true) );
 		}
-		else
+		else if ($this->enabled)		// constructor enabled
 		{
-		//	$this->enabled = (bool)( $this->enable_option && $this->plugin->is_option($this->enable_option) );
+			if ( !empty($this->enable_option) )
+			{
+				$this->enabled = $this->plugin->is_option($this->enable_option);
+			}
 		}
 
 		/**

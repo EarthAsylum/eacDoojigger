@@ -1,7 +1,15 @@
 == Changelog ==
 
-= Version 3.1 – April 13, 2025 =
+= Version 3.1 – April 22, 2025 =
 
++   Added CORS override/allow by IP address or CIDR subnet.
++   Improved/fixed extension loading and registration.
+    +   Prevent `_load_textdomain_just_in_time was called incorrectly` notice from WordPress.
+        +   All extensions - delay option registration until admin_init.
+        +   swRegistrationUI - delay admin links until admin_init.
+        +   abstract_extension - force delay of `registerExtension()` until admin_init.
+    +   Fix potential 'enabled' extension that should be 'disabled'.
+    +   abstract_extension - save enable_option name when registered.
 +   Rework plugin environment check - limit when checked (on activate, updates, or daily).
 +   Due to new extension (event_scheduler) and external dependencies, version set to 3.1.0.
     +   Version 3.0.4 was not released.

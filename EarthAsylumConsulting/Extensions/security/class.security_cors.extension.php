@@ -27,7 +27,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0412.1';
+		const VERSION 			= '25.0422.1';
 
 		/**
 		 * @var string extension tab name
@@ -55,19 +55,19 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin, self::ALLOW_ADMIN | self::ALLOW_NETWORK | self::ALLOW_NON_PHP );
+			parent::__construct($plugin, self::ALLOW_ALL | self::ALLOW_NON_PHP );
 
 			// must have security extension enabled
 			if (! $this->isEnabled('security')) return $this->isEnabled(false);
 
-			if ($this->is_admin())
+			$this->registerExtension( $this->className );
+			add_action('admin_init', function()
 			{
-				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
-			}
+			});
 		}
 
 
@@ -240,25 +240,41 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			if ($once) return;
 			$once = true;
 
-
 			// should we trust browser sec headers?
 		//	if ( ($this->plugin->varServer('Sec-Fetch-Mode') == 'cors') &&
 		//	     ($this->plugin->varServer('Sec-Fetch-Site') == 'same-origin') ) return;
 
 			$allowed_origins = $this->security->mergePolicies('secAllowCors');
 			// add server IP addresses as origins
-			foreach ($this->host_ips as $host) {
-				$allowed_origins[] = 'http://'.$host;
-				$allowed_origins[] = 'https://'.$host;
+			if (!empty($this->host_ips))
+			{
+				foreach ($this->host_ips as $host) {
+					$allowed_origins[] = (is_ssl() ? 'https://' : 'http://').$host;
+				}
 			}
 			$allowed_origins = array_unique($allowed_origins);
 
 			// what origins are allowed
 			if (!empty($allowed_origins)) {
-				add_filter( 'allowed_http_origins', function ($allowed) use($allowed_origins) {
+				add_filter( 'allowed_http_origins', function ($allowed) use(&$allowed_origins) {
 					$allowed_origins = array_merge($allowed,$allowed_origins);
 					return $allowed_origins;
 				});
+			}
+
+			// override/allow specific IP addresses or subnets
+			$ip_allowed = $this->security->mergePolicies('secAllowCorsIP') ?: [];
+			if (!empty($ip_allowed)) {
+				add_filter( 'http_origin', function ($origin) use($ip_allowed,&$allowed_origins) {
+					if (empty($origin)) {
+						if ($this->plugin->isIpInList($this->getVisitorIP(),$ip_allowed))
+						{
+							$origin = (is_ssl() ? 'https://' : 'http://').$this->getVisitorIP();
+							$allowed_origins[] = $origin;
+						}
+					}
+					return $origin;
+				},101);
 			}
 
 			// should we trust browser referer header?
@@ -285,7 +301,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 						$origin .= gethostbyaddr($this->plugin->getVisitorIP());
 					}
 					return $origin;
-				},102);
+				},101);
 			}
 
 			// is this origin allowed? Match origin ends with allowed

@@ -22,7 +22,7 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '23.0915.1';
+		const VERSION	= '25.0419.1';
 
 
 		/**
@@ -36,16 +36,16 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 			$this->enable_option = false;
 			parent::__construct($plugin, self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ONLY_ADMIN);
 
-			if ($this->is_admin())
-			{
-				$this->registerExtension( ['administration_tools', 'Tools'] );
+			$this->registerExtension( ['administration_tools', 'Tools'] );
 
+			add_action('admin_init', function()
+			{
 				// used by optionExport in standard_options trait to process export url (admin_post)
 				$this->standard_options('optionExport_action');
 
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", 	array($this, 'admin_options_settings') );
-			}
+			});
 		}
 
 

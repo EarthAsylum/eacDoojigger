@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1119.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	25.0416.1
  */
 
 trait swRegistrationUI
@@ -24,6 +24,9 @@ trait swRegistrationUI
 	public function swRegistrationUI()
 	{
 		$this->plugin->isReservedOption(self::SOFTWARE_REGISTRY_OPTION,true);
+
+		$title = $this->plugin->pluginHeader('Title');
+		$this->registerExtension( [$title,'registration'] );
 
 		$registrationKey = $this->getRegistrationKey();
 		$pluginOptions = [ // hides the submit button
@@ -128,7 +131,6 @@ trait swRegistrationUI
 								);
 		}
 
-		$title = $this->plugin->pluginHeader('Title');
 		if ($this->plugin->is_network_enabled())
 		{
 			// only register from network administration
@@ -186,15 +188,6 @@ trait swRegistrationUI
 			// when updated, refresh the registration
 			$this->add_action( 'version_updated', 				array($this, 'update_request_refresh'),10,3 );
 
-			// add registration link on plugins page
-			$registrationLink = $this->plugin->getSettingsLink(true,'registration','Registration','Registration');
-
-			\add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->plugin->PLUGIN_SLUG,
-				function($pluginLinks, $pluginFile, $pluginData) use ($registrationLink) {
-					return array_merge(['registration' => $registrationLink], $pluginLinks);
-				},25,3
-			);
-
 			// pass registration key in plugin updater request (from plugin_update.trait)
 			$this->add_filter( 'plugin_update_parameters', function($parameters)
 				{
@@ -208,42 +201,62 @@ trait swRegistrationUI
 			// Add contextual help
 			$this->add_action( 'options_settings_help', 		array( $this, 'getRegistryHelp') );
 
-			if (! $this->isValidRegistration())
+			add_action('admin_init', 							array($this, 'swRegistrationAdminInit'));
+		}
+	}
+
+
+	/**
+	 * add additional actions and filters - on admin_init to allow for translations
+	 *
+	 * @return	void
+	 */
+	public function swRegistrationAdminInit(): void
+	{
+		// add registration link on plugins page
+		$registrationLink = $this->plugin->getSettingsLink(true,'registration','Registration','Registration');
+
+		\add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->plugin->PLUGIN_SLUG,
+			function($pluginLinks, $pluginFile, $pluginData) use ($registrationLink) {
+				return array_merge(['registration' => $registrationLink], $pluginLinks);
+			},25,3
+		);
+
+		if (! $this->isValidRegistration())
+		{
+			/**
+			 * filter {classname}_unregistered_notice
+			 * @param string
+			 * @return	string
+			 */
+			$notice = $this->apply_filters('unregistered_notice',
+				"%1\$s is currently unregistered or inactive.\n".
+				"You may check your %2\$s on the settings page."
+			);
+			$notice = sprintf(__($notice, $this->plugin->PLUGIN_TEXTDOMAIN),
+				'<em>'.$this->plugin->pluginHeader('Title').'</em>', $registrationLink );
+
+			if (! $this->isSettingsPage('registration'))
 			{
-				/**
-				 * filter {classname}_unregistered_notice
-				 * @param string
-				 * @return	string
-				 */
-				$notice = $this->apply_filters('unregistered_notice',
-					"%1\$s is currently unregistered or inactive.\n".
-					"You may check your %2\$s on the settings page."
-				);
-				$notice = sprintf(__($notice, $this->plugin->PLUGIN_TEXTDOMAIN),
-					'<em>'.$this->plugin->pluginHeader('Title').'</em>', $registrationLink );
-
-				if (! $this->isSettingsPage('registration'))
-				{
-					$this->add_admin_notice($notice,'error');
-				}
-
-				// display notice on plugins page
-				\add_action( 'after_plugin_row_'.$this->plugin->PLUGIN_SLUG, function($plugin_file,$plugin_data) use ($notice)
-					{
-						$wp_list_table = _get_list_table( 'WP_Plugins_List_Table', ['screen' => get_current_screen()] );
-						printf(
-							'<tr class="plugin-update-tr active" data-slug="%s" data-plugin="%s">'.
-							'<td colspan="%s" class="plugin-update colspanchange">'.
-							'<div class="update-message notice inline notice-error"><p>%s</p></div>'.
-							'</td></tr>',
-							sanitize_title($plugin_data['Name']),
-							plugin_basename($plugin_file),
-							$wp_list_table->get_column_count(),
-							$notice
-						);
-					},10,2
-				);
+				$this->add_admin_notice($notice,'error');
 			}
+
+			// display notice on plugins page
+			\add_action( 'after_plugin_row_'.$this->plugin->PLUGIN_SLUG, function($plugin_file,$plugin_data) use ($notice)
+				{
+					$wp_list_table = _get_list_table( 'WP_Plugins_List_Table', ['screen' => get_current_screen()] );
+					printf(
+						'<tr class="plugin-update-tr active" data-slug="%s" data-plugin="%s">'.
+						'<td colspan="%s" class="plugin-update colspanchange">'.
+						'<div class="update-message notice inline notice-error"><p>%s</p></div>'.
+						'</td></tr>',
+						sanitize_title($plugin_data['Name']),
+						plugin_basename($plugin_file),
+						$wp_list_table->get_column_count(),
+						$notice
+					);
+				},10,2
+			);
 		}
 	}
 

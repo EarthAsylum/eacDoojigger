@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0413.1
+ * @version		25.0418.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -1681,35 +1681,18 @@ abstract class abstract_backend extends abstract_core
 	 */
 	public function registerPluginOptions($optionGroup, array $optionMeta = []): void
 	{
-		if ($this->isSettingsPage())
+		if (!$this->isSettingsPage()) return;
+
+		if ( ! doing_action( 'set_current_user' ) && ! did_action( 'set_current_user' ) )
 		{
-			if (did_action( 'set_current_user' ))
-		//	if ($this->did_action( 'options_settings_page' ))
-			{
-				$this->registerPluginOptionsForUser($optionGroup, $optionMeta);
-			}
-			else
-			{
-				add_action( 'set_current_user', function() use($optionGroup, $optionMeta)
-		//		$this->add_action( 'options_settings_page', function() use($optionGroup, $optionMeta)
-					{
-						$this->registerPluginOptionsForUser($optionGroup, $optionMeta);
-					}
-				);
-			}
+			add_action( 'set_current_user', function() use($optionGroup, $optionMeta)
+				{
+					$this->registerPluginOptions($optionGroup, $optionMeta);
+				}
+			);
+			return;
 		}
-	}
 
-
-	/**
-	 * add additional options (meta) for the plugin (or extension)
-	 *
-	 * @param	string|array 	$optionGroup group name or [groupname, tabname]]
-	 * @param	array 			$optionMeta group option meta
-	 * @return	void
-	 */
-	public function registerPluginOptionsForUser($optionGroup, array $optionMeta = []): void
-	{
 		$optionGroup = $this->standardizeOptionGroup($optionGroup);
 		if (is_array($optionGroup))
 		{
@@ -1740,34 +1723,18 @@ abstract class abstract_backend extends abstract_core
 	 */
 	public function registerNetworkOptions($optionGroup, array $optionMeta = []): void
 	{
-		if ($this->isSettingsPage())
+		if (!$this->isSettingsPage() || !is_multisite()) return;
+
+		if ( ! doing_action( 'set_current_user' ) && ! did_action( 'set_current_user' ) )
 		{
-			if (did_action( 'set_current_user' ))
-			{
-				$this->registerNetworkOptionsForUser($optionGroup, $optionMeta);
-			}
-			else
-			{
-				add_action( 'set_current_user', function() use($optionGroup, $optionMeta)
-					{
-						$this->registerNetworkOptionsForUser($optionGroup, $optionMeta);
-					}
-				);
-			}
+			add_action( 'set_current_user', function() use($optionGroup, $optionMeta)
+				{
+					$this->registerNetworkOptions($optionGroup, $optionMeta);
+				}
+			);
+			return;
 		}
-	}
 
-
-	/**
-	 * add network options (meta) for the plugin
-	 *
-	 * @param	string|array 	$optionGroup group name or [groupname, tabname]]
-	 * @param	array 			$optionMeta group option meta
-	 * @return	void
-	 */
-	public function registerNetworkOptionsForUser($optionGroup, array $optionMeta = []): void
-	{
-		if ( !is_multisite() ) return;
 		$optionGroup = $this->standardizeOptionGroup($optionGroup);
 		if (is_array($optionGroup))
 		{

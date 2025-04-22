@@ -9,8 +9,7 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2021 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -20,7 +19,15 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0515.1';
+		const VERSION	= '25.0419.1';
+
+		/**
+		 * @var string|array|bool to set (or disable) default group display/switch
+		 * 		false 		disable the 'Enabled'' option for this group
+		 * 		string 		the label for the 'Enabled' option
+		 * 		array 		override options for the 'Enabled' option (label,help,title,info, etc.)
+		 */
+		const ENABLE_OPTION	= false;
 
 		/**
 		 * @var array key(s)
@@ -56,7 +63,6 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 		 */
 		public function __construct($plugin)
 		{
-			$this->enable_option = false;
 			parent::__construct($plugin, self::ALLOW_ALL);
 
 			if (!function_exists('openssl_encrypt'))
@@ -72,14 +78,14 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 			$this->isReservedOption('encryption_salt',true);
 			$this->isReservedOption('encryption_cipher',true);
 
-			if ($this->is_admin())
+			$this->registerExtension();
+			add_action('admin_init', function()
 			{
-				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
-			}
+			});
 		}
 
 
@@ -93,7 +99,7 @@ if (! class_exists(__NAMESPACE__.'\encryption_extension', false) )
 		{
 			$this->plugin->rename_option('encryptionKey',	'encryption_key');
 			$this->plugin->rename_option('encryptionSalt',	'encryption_salt');
-			$this->registerExtensionOptions( $this->className,
+			$this->registerExtensionOptions( true,
 				[
 					'encryption_key'	=> array(
 							'type'		=> 	'password',

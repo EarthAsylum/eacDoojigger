@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '25.0314.1';
+		const VERSION			= '25.0419.1';
 
 		/**
 		 * @var string extension alias
@@ -65,7 +65,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			parent::__construct($plugin, self::ALLOW_ALL | self::ALLOW_NON_PHP);
 
-			if ($this->is_admin())
+			$this->registerExtension( $this->className );
+			add_action('admin_init', function()
 			{
 				// disable 'enabled' option on sites when network activated
 				if (is_multisite() && !$this->plugin->is_network_admin() && $this->plugin->is_network_enabled() )
@@ -77,12 +78,11 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 										" <em>(Network policies may override site policies)</em>",
 					);
 				}
-				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
-			}
+			});
 
 			// add additional css when our settings stylesheet loads.
 			if ($this->plugin->isSettingsPage(self::TAB_NAME))

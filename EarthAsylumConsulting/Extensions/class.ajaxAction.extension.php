@@ -24,8 +24,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		24.0522.1
+	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -35,7 +34,7 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '24.0907.1';
+		const VERSION	= '25.0419.1';
 
 		/**
 		 * @var string action (script) id
@@ -53,41 +52,9 @@ if (! class_exists(__NAMESPACE__.'\ajaxAction', false) )
 		{
 			parent::__construct($plugin, (self::ALLOW_ADMIN | self::ALLOW_NETWORK) );
 
-			if ($this->is_admin())
-			{
-				$this->registerExtension( false );
-				// Register plugin options when needed
-				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
-			}
+			$this->registerExtension( false );
 
 			$this->actionId = sanitize_title($this->pluginName.'-'.$this->className);
-		}
-
-
-		/**
-		 * register options on options_settings_page
-		 *
-		 * @access public
-		 * @return void
-		 */
-		public function admin_options_settings()
-		{
-		/*
-			if ( ! $this->plugin->is_network_admin() )
-			{
-				$this->registerExtensionOptions( 'plugin_settings',
-					[
-						'ajax_device_id' 	=> array(
-								'type'		=> 	'checkbox',
-								'label'		=> 	'Device Fingerprint',
-								'options'	=> 	['Enabled'],
-								'info'		=>	'The fingerprint uses JavaScript to capture browser &amp; devices details.',
-								'advanced'	=> 	true,
-							),
-					]
-				);
-			}
-		*/
 		}
 
 

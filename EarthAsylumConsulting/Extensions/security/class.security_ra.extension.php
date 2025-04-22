@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0311.1';
+		const VERSION 			= '25.0419.1';
 
 		/**
 		 * @var string alias
@@ -72,14 +72,14 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			// must have security extension enabled
 			if (! $this->isEnabled('security')) return $this->isEnabled(false);
 
-			if ($this->is_admin())
+			$this->registerExtension( $this->className );
+			add_action('admin_init', function()
 			{
-				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
-			}
+			});
 
 			if ($this->plugin->isSettingsPage(self::TAB_NAME))
 			{

@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0411.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		25.0418.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -3142,25 +3142,37 @@ abstract class abstract_core
 
 		if ( $this->isPluginsPage() || $this->isSettingsPage() ) return true;	// always load for admin settings & plugins page
 
-		$className = explode('.',$name);										// if the file name matches the class name, check for '_enabled' option
-		if ($className[0] == 'class') array_shift($className);					// ignore 'class.' prefix
+		/*
+		 * Look for 'enable' setting based on file name.
+		 * This only works when the extension file name contains the class name.
+		 * classname.extension.php | class.classname.extension.php
+		 */
 
-		$optionName = basename($this->toKeyString($className[0],'_'),'_extension'); // sanitized sans '_extension'
+		$className = explode('.',$name);
+		if ($className[0] == 'class') array_shift($className);
 
-		$enabled = $this->get_option( $optionName.'_extension_enabled' );		// (<classname>_extension_enabled) - as set in abstract_extension
-		if ($enabled !== false) return ($enabled != '');						// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
+		$optionNames = [];
 
-		$enabled = $this->get_option( $optionName.'_enabled' );					// (<classname>_enabled)
-		if ($enabled !== false) return ($enabled != '');						// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
+		// get either saved (when registered) option name or default option name
+		$optionNames[] =
+				$this->get_option($className[0].'_enable_option_name',
+				$this->get_option(basename($className[0],'_extension').'_enable_option_name',
+				basename($this->toKeyString($className[0],'_'),'_extension')));
 
 		if ($className[1] != 'extension' && $className[2] == 'extension')		// check for <something>.<somethingelse>.extension.php and use <somethingelse>
 		{
-			$optionName = basename($this->toKeyString($className[1],'_'),'_extension'); // sanitized sans '_extension'
+			$optionNames[] =
+				$this->get_option($className[1].'_enable_option_name',
+				$this->get_option(basename($className[1],'_extension').'_enable_option_name',
+				basename($this->toKeyString($className[1],'_'),'_extension')));
+		}
 
-			$enabled = $this->get_option( $optionName.'_extension_enabled' );	// (<classname>_extension_enabled) - as set in abstract_extension
+		foreach ($optionNames as $optionName)
+		{
+			$enabled = $this->get_option( $optionName );						// (<classname>) [enable_option_name]
 			if ($enabled !== false) return ($enabled != '');					// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
 
-			$enabled = $this->get_option( $optionName.'_enabled' );				// (<classname>_enabled)
+			$enabled = $this->get_option( $optionName.'_extension_enabled' );	// (<classname>_extension_enabled) - as set in abstract_extension
 			if ($enabled !== false) return ($enabled != '');					// 'Enabled' or 'Enabled (admin)' or 'Network Enabled'
 		}
 
@@ -3386,14 +3398,31 @@ abstract class abstract_core
 	 */
 	public function standardizeOptionGroup($optionGroup)
 	{
-		if (is_array($optionGroup))
+		// prevent translation early load (Function _load_textdomain_just_in_time was called incorrectly)
+		if ( ! doing_action( 'after_setup_theme' ) && ! did_action( 'after_setup_theme' ) )
 		{
-			return [
-				esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[0]))),$this->PLUGIN_TEXTDOMAIN),
-				esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[1]))),$this->PLUGIN_TEXTDOMAIN),
-			];
+			// no translations
+			if (is_array($optionGroup))
+			{
+				return [
+					esc_attr(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[0])))),
+					esc_attr(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[1])))),
+				];
+			}
+			return esc_attr(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup))));
 		}
-		return esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup))),$this->PLUGIN_TEXTDOMAIN);
+		else
+		{
+			// with translations
+			if (is_array($optionGroup))
+			{
+				return [
+					esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[0]))),$this->PLUGIN_TEXTDOMAIN),
+					esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup[1]))),$this->PLUGIN_TEXTDOMAIN),
+				];
+			}
+			return esc_attr__(ucwords(str_replace(['-','_'],' ',$this->sanitize($optionGroup))),$this->PLUGIN_TEXTDOMAIN);
+		}
 	}
 
 

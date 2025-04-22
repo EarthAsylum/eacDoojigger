@@ -15,7 +15,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	/**
 	 * @var string extension version
 	 */
-	const VERSION 			= '25.0314.1';
+	const VERSION 			= '25.0419.1';
 
 	/**
 	 * @var string extension tab name
@@ -66,17 +66,17 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	{
 		parent::__construct($plugin, self::ALLOW_ADMIN | self::ALLOW_NETWORK | self::ALLOW_NON_PHP | self::DEFAULT_DISABLED);
 
+		$this->registerExtension( $this->className );
 		// must have risk_assessment enabled
-		if (! $this->isEnabled('risk_assessment')) return false;
+		if (! $this->isEnabled('risk_assessment')) return $this->isEnabled(false);
 
-		if ($this->is_admin())
+		add_action('admin_init', function()
 		{
-			$this->registerExtension( $this->className );
 			// Register plugin options when needed
 			$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 			// Add contextual help
 			$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
-		}
+		});
 	}
 
 

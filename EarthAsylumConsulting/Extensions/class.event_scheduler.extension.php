@@ -45,7 +45,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION		= '25.0408.1';
+		const VERSION		= '25.0419.1';
 
 		/**
 		 * @var string alias class name
@@ -94,14 +94,14 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		{
 			parent::__construct($plugin, self::ALLOW_ALL );
 
-			if ($this->is_admin())
+			$this->registerExtension( $this->className );
+			add_action('admin_init', function()
 			{
-				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
-			}
+			});
 		}
 
 

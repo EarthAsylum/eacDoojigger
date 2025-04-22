@@ -52,7 +52,7 @@ class wpmu_installer extends \EarthAsylumConsulting\abstract_extension
 	/**
 	 * @var string extension version
 	 */
-	const VERSION				= '24.0416.1';
+	const VERSION				= '24.0419.1';
 
 	/**
 	 * @var string extension alias
@@ -80,11 +80,11 @@ class wpmu_installer extends \EarthAsylumConsulting\abstract_extension
 	{
 		parent::__construct($plugin, self::ALLOW_ALL|self::ONLY_ADMIN);
 
-		$this->can_install = ( $this->is_admin() && (!is_multisite() || $this->is_network_admin()) );
+		$this->registerExtension( false );
 
+		$this->can_install = ( $this->is_admin() && (!is_multisite() || $this->is_network_admin()) );
 		if ($this->can_install)
 		{
-			$this->registerExtension( false );
 			// check/restart enqueued installation(s) - with connection form
 			\add_action('all_admin_notices', 			array( $this, 'wpmu_despool' ), 25 );
 		}

@@ -7,8 +7,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1111.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	25.0421.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -38,7 +38,7 @@ $this->registerExtensionOptions( $this->className,
 		),
 		'secAllowCors' 	=> array(
 				'type'		=>	'textarea',
-				'label'		=>	"CORS API Whitelist",
+				'label'		=>	"CORS Origin Whitelist",
 				'default'	=>	$this->is_network_option('secAllowCors'),
 				'info'		=>	"Allow API access from specific origin domains only. ".
 								"Enter origin URLs, 1 per line beginning with 'http://' or 'https://, or simply the ending domain name ".
@@ -47,6 +47,12 @@ $this->registerExtensionOptions( $this->className,
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
 				'attributes'=>	['placeholder'=>'https://origin.trusted_domain.com'],
+		),
+		'secAllowCorsIP' 	=> array(
+				'type'		=>	'textarea',
+				'label'		=>	"Allowed IP Addresses",
+				'info'		=>	"Allow these IP addresses regardless of origin domain. Enter 1 IPv4 or IPv6 address or subnet (CIDR) per line.",
+				'advanced'	=> 	true,
 		),
 		'secExcludeCors' 	=> array(
 				'type'		=>	'textarea',

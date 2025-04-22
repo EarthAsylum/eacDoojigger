@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_csp_assistant', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '24.1215.1';
+		const VERSION 			= '25.0419.1';
 
 		/**
 		 * @var string extension tab name
@@ -52,14 +52,14 @@ if (! class_exists(__NAMESPACE__.'\security_csp_assistant', false) )
 			// must have security extension enabled
 			if (! $this->isEnabled('security')) return false;
 
-			if ($this->is_admin())
+			$this->registerExtension( $this->className );
+			add_action('admin_init', function()
 			{
-				$this->registerExtension( $this->className );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
-			}
+			});
 			$this->rename_option('secContentSecurity','sec_CSP_nonce');
 		}
 

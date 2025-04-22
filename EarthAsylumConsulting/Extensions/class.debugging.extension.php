@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0330.1';
+		const VERSION	= '25.0419.1';
 
 		/**
 		 * @var array disable for these file extensions
@@ -83,14 +83,14 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				if (in_array($ext,$fileTypes)) return $this->isEnabled(false);
 			}
 
-			if ($this->is_admin())
+			$this->registerExtension( [ $this->className, 'debugging' ] );
+			add_action('admin_init', function()
 			{
-				$this->registerExtension( [ $this->className, 'debugging' ] );
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
 				// Add contextual help
 				$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
-			}
+			});
 
 			if ($this->plugin->isSettingsPage('Debugging'))
 			{
@@ -249,8 +249,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				add_filter( 'heartbeat_received',		array($this, 'capture_heartbeat'), PHP_INT_MAX, 3);
 			}
 
-			if ($this->is_option('debug_options','depricated') &&
-				! (defined('WP_DEBUG_LOG') && WP_DEBUG && $this->logLevel & LogLevel::LOG_NOTICE))
+			if ($this->is_option('debug_options','deprecated')) // &&
+			//	! (defined('WP_DEBUG_LOG') && WP_DEBUG && $this->logLevel & LogLevel::LOG_NOTICE))
 			{
 				// if logging notices, wp_trigger_error will catch these
 				add_action( 'doing_it_wrong_run',		array($this, 'capture_deprecated_wrong'), 10, 3);
@@ -381,7 +381,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			$error_trigger	= $error_source.'_trigger_error';
 			$error_message	= $error_source.'::'.implode(', ',$args);
 			$error_trace 	= [ 'trace'=>$this->print_backtrace(debug_backtrace( false )) ];
-			$this->plugin->logWrite(E_USER_DEPRECATED,$error_trace,$error_message,['@source'=>$error_source]);
+			$this->plugin->logWrite(LogLevel::LOG_NOTICE,$error_trace,$error_message,['@source'=>$error_source]);
 			$this->wpData[] = $error_message;
 		}
 

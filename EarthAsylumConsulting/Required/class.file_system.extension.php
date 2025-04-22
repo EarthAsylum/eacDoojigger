@@ -11,8 +11,7 @@ namespace EarthAsylumConsulting\Extensions;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.x
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -22,7 +21,7 @@ class file_system_extension extends \EarthAsylumConsulting\abstract_extension
 	/**
 	 * @var string extension version
 	 */
-	const VERSION	= '24.0416.1';
+	const VERSION	= '25.0416.1';
 
 	/**
 	 * @var string extension alias
@@ -65,14 +64,14 @@ class file_system_extension extends \EarthAsylumConsulting\abstract_extension
 		$this->isReservedOption('filesystem_multisite',true);
 		$this->isReservedOption('filesystem_credentials',true);
 
-		if ($this->is_admin())
+		$this->registerExtension( $this->className );
+		add_action('admin_init', function()
 		{
-			$this->registerExtension( $this->className );
 			// Register plugin options when needed
 			$this->add_action( "options_settings_page", 		array( $this, 'admin_options_settings') );
 			// Add contextual help
 			$this->add_action( 'options_settings_help', 		array( $this, 'admin_options_help') );
-		}
+		});
 
 		$this->add_filter( 'load_filesystem', function($wpfs, $useForm = false, string $notice = '', array $args = [])
 		{

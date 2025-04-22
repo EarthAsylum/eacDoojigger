@@ -7,8 +7,7 @@ namespace EarthAsylumConsulting\Extensions;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2022 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		1.x
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @uses 		\EarthAsylumConsulting\Traits\swRegistrationUI;
  */
@@ -24,12 +23,20 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 	/**
 	 * @var string extension version
 	 */
-	const VERSION	= '24.0516.1';
+	const VERSION	= '25.0419.1';
 
 	/**
 	 * @var ALIAS constant ($this->Registration->...)
 	 */
 	const ALIAS		= 'Registration';
+
+	/**
+	 * @var string|array|bool to set (or disable) default group display/switch
+	 * 		false 		disable the 'Enabled'' option for this group
+	 * 		string 		the label for the 'Enabled' option
+	 * 		array 		override options for the 'Enabled' option (label,help,title,info, etc.)
+	 */
+	const ENABLE_OPTION	= false;
 
 
 	/**
@@ -40,12 +47,11 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 	 */
 	public function __construct($plugin)
 	{
-		$this->enable_option = false;
 		parent::__construct($plugin, self::ALLOW_ALL|self::ALLOW_NON_PHP);
 
 		if ($this->is_admin())
 		{
-			// load UI (last) from swRegistrationUI trait
+			// load UI (last) from swRegistrationUI trait (includes registration)
 			$this->add_action( 'options_settings_page', [$this,'swRegistrationUI'], PHP_INT_MAX );
 			// safety check for registration refresh
 			//add_action( 'shutdown', 	[$this,'checkRegistryRefreshEvent'] );

@@ -35,18 +35,6 @@ trait eacDoojigger_admin_traits
 	 */
 	public function admin_construct(array $header)
 	{
-		// to put settings first on general tab
-		if ($this->is_network_admin()) {
-			$this->registerNetworkOptions('network_settings');
-		} else {
-			$this->registerPluginOptions('plugin_settings');
-		}
-
-		// Register plugin options
-		$this->add_action( 'options_settings_page', array( $this, 'admin_options_settings' ) );
-		// Add contextual help
-		$this->add_action( 'options_settings_help', array( $this, 'admin_options_help' ) );
-
 		// check existance of required autoloader
 		\add_action('all_admin_notices', 			array( $this, 'verify_autoloader' ), 5 );
 
@@ -62,16 +50,30 @@ trait eacDoojigger_admin_traits
 		// When the plugin is deactivated
 		register_deactivation_hook($header['PluginFile'],	array( $this, 'uninstall_autoloader') );
 
+		add_action('admin_init', function()
+		{
+			// to put settings first on general tab
+			if ($this->is_network_admin()) {
+				$this->registerNetworkOptions('network_settings');
+			} else {
+				$this->registerPluginOptions('plugin_settings');
+			}
 
-		// on plugins page, add documentation link
-		add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->PLUGIN_SLUG,
-			function($pluginLinks, $pluginFile, $pluginData) {
-				return array_merge(
-					['documentation'=>$this->getDocumentationLink($pluginData)],
-					$pluginLinks
-				);
-			},20,3
-		);
+			// Register plugin options
+			$this->add_action( 'options_settings_page', array( $this, 'admin_options_settings' ) );
+			// Add contextual help
+			$this->add_action( 'options_settings_help', array( $this, 'admin_options_help' ) );
+
+			// on plugins page, add documentation link
+			add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->PLUGIN_SLUG,
+				function($pluginLinks, $pluginFile, $pluginData) {
+					return array_merge(
+						['documentation'=>$this->getDocumentationLink($pluginData)],
+						$pluginLinks
+					);
+				},20,3
+			);
+		});
 
 		// fix plugins list title column to wrap
 		add_action('admin_print_styles',	function()
