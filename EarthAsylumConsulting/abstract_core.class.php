@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0418.1
+ * @version		25.0423.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -2204,10 +2204,9 @@ abstract class abstract_core
 		/**
 		 * filter {classname}_is_new_visitor is this a new visitor
 		 * @param	bool
-		 * @param	string	visitor cookie name
 		 * @return	bool
 		 */
-		$isNew = $this->apply_filters( 'is_new_visitor', $isNew, $cookieName );
+		$isNew = $this->apply_filters( 'is_new_visitor', $isNew );
 		$this->setVariable('is_new_visitor',$isNew);
 		return ($isNew) ? true : false;
 	}
