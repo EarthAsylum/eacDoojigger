@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             3.1.0
-Last Updated:           22-Apr-2025
+Last Updated:           29-Apr-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -448,7 +448,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.1 – April 22, 2025 =
+= Version 3.1 – April 29, 2025 =
 
 +   Added CORS override/allow by IP address or CIDR subnet.
 +   Improved/fixed extension loading and registration.

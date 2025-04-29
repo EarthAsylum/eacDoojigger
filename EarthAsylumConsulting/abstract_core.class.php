@@ -608,7 +608,7 @@ abstract class abstract_core
 			HOUR_IN_SECONDS * 12
 		);
 		$this->pluginData['RequestTime'] 		= WP_START_TIMESTAMP;
-		$this->PLUGIN_TEXTDOMAIN = $this->pluginData['TextDomain'];
+		$this->PLUGIN_TEXTDOMAIN = $this->pluginData['TextDomain'] ?? $this->className;
 	}
 
 

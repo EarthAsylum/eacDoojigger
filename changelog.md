@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.1 – April 22, 2025 =
+= Version 3.1 – April 29, 2025 =
 
 +   Added CORS override/allow by IP address or CIDR subnet.
 +   Improved/fixed extension loading and registration.

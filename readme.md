@@ -8,7 +8,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
 Stable tag:             3.1.0  
-Last Updated:           22-Apr-2025  
+Last Updated:           29-Apr-2025  
 Requires at least:      5.8  
 Tested up to:           6.8  
 Requires PHP:           8.1  

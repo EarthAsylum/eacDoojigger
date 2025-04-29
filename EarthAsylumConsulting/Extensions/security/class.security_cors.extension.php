@@ -27,7 +27,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0422.1';
+		const VERSION 			= '25.0425.1';
 
 		/**
 		 * @var string extension tab name
@@ -149,22 +149,16 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 				foreach ($host as $ip) {
 					$this->host_ips[] = $ip['ipv6'] ?? $ip['ip'];
 				}
+				$ipErrors = error_reporting(0);
 				// get public IPv4
-				for ($i = 0; $i < 3; $i++) {
-					if ($host = file_get_contents('https://ipv4.icanhazip.com/')) {
-						$this->host_ips[] = trim($host);
-						break;
-					}
-					usleep(100000); // 1/10th
+				if ($host = file_get_contents('https://ipv4.icanhazip.com/')) {
+					$this->host_ips[] = trim($host);
 				}
 				// get public IPv6
-				for ($i = 0; $i < 3; $i++) {
-					if ($host = file_get_contents('https://ipv6.icanhazip.com/')) {
-						$this->host_ips[] = trim($host);
-						break;
-					}
-					usleep(100000); // 1/10th
+				if ($host = file_get_contents('https://ipv6.icanhazip.com/')) {
+					$this->host_ips[] = trim($host);
 				}
+				error_reporting($ipErrors);
 				$this->host_ips = array_unique($this->host_ips);
 				$this->set_transient('host_ips',$this->host_ips,DAY_IN_SECONDS * (float)$days);
 				$this->logDebug($this->host_ips,$this->plugin->varServer('Host').' Host IP Address');

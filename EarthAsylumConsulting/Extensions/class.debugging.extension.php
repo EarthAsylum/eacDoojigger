@@ -21,7 +21,12 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0419.1';
+		const VERSION	= '25.0427.1';
+
+		/**
+		 * @var string extension tab name
+		 */
+		const TAB_NAME 			= 'Debugging';
 
 		/**
 		 * @var array disable for these file extensions
@@ -83,7 +88,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				if (in_array($ext,$fileTypes)) return $this->isEnabled(false);
 			}
 
-			$this->registerExtension( [ $this->className, 'debugging' ] );
+			$this->registerExtension( $this->className );
 			add_action('admin_init', function()
 			{
 				// Register plugin options when needed
