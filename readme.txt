@@ -432,7 +432,7 @@ As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1
 
 == Copyright ==
 
-= Copyright © 2019-2024, *EarthAsylum Consulting*, All rights reserved. =
+= Copyright © 2019-2025, *EarthAsylum Consulting*, All rights reserved. =
 
 __This is proprietary, copyrighted software.__
 
@@ -450,6 +450,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 = Version 3.1 – April 29, 2025 =
 
++   Tweak admin loading actions to load before extensions.
 +   Added CORS override/allow by IP address or CIDR subnet.
 +   Improved/fixed extension loading and registration.
     +   Prevent `_load_textdomain_just_in_time was called incorrectly` notice from WordPress.

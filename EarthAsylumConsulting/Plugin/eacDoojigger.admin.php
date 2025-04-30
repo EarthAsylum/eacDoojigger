@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Plugin;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0327.1
+ * @version		25.0429.1
  */
 
 trait eacDoojigger_admin_traits
@@ -59,11 +59,6 @@ trait eacDoojigger_admin_traits
 				$this->registerPluginOptions('plugin_settings');
 			}
 
-			// Register plugin options
-			$this->add_action( 'options_settings_page', array( $this, 'admin_options_settings' ) );
-			// Add contextual help
-			$this->add_action( 'options_settings_help', array( $this, 'admin_options_help' ) );
-
 			// on plugins page, add documentation link
 			add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->PLUGIN_SLUG,
 				function($pluginLinks, $pluginFile, $pluginData) {
@@ -73,7 +68,12 @@ trait eacDoojigger_admin_traits
 					);
 				},20,3
 			);
-		});
+		},1);
+
+		// Register plugin options
+		$this->add_action( 'options_settings_page', array( $this, 'admin_options_settings' ), 1 );
+		// Add contextual help
+		$this->add_action( 'options_settings_help', array( $this, 'admin_options_help' ), 1 );
 
 		// fix plugins list title column to wrap
 		add_action('admin_print_styles',	function()
