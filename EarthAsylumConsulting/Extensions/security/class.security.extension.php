@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '25.0422.1';
+		const VERSION			= '25.0502.1';
 
 		/**
 		 * @var string extension alias
@@ -63,7 +63,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin, self::ALLOW_ALL | self::ALLOW_NON_PHP);
+			parent::__construct($plugin, self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ALLOW_CRON | self::ALLOW_NON_PHP);
 
 			// disable 'enabled' option on sites when network activated
 			if (is_multisite() && !$this->plugin->is_network_admin() && $this->plugin->is_network_enabled() )

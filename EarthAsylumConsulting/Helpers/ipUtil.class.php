@@ -8,8 +8,10 @@ namespace EarthAsylumConsulting\Helpers;
  * 		Cloudflare https://github.com/cloudflare/Cloudflare-WordPress/
  * 		Symphony https://github.com/symfony/http-foundation/blob/7.1/IpUtils.php
  *
- * @example \EarthAsylumConsulting\Helpers\ipUtil::checkIp($myIP,$listOfIPs);
  * @example $remote_ip = \EarthAsylumConsulting\Helpers\ipUtil::getRemoteIP();
+ * @example \EarthAsylumConsulting\Helpers\ipUtil::checkIp($remote_ip,$listOfIPs);
+ *
+ * @version 	25.0503.1
  */
 class ipUtil
 {
@@ -35,12 +37,13 @@ class ipUtil
 	 * @var array http headers containing remote IP address
 	 */
 	public const HTTP_IP_HEADERS = [
+		'HTTP_TRUE_CLIENT_IP',
 		'HTTP_X_REAL_IP',
 		'HTTP_CF_CONNECTING_IP',
+		'HTTP_X_KINSTA_EDGE_INCOMINGIP',
 		'HTTP_AKAMAI_ORIGIN_HOP',
 		'HTTP_FASTLY_CLIENT_IP',
 		'HTTP_INCAP_CLIENT_IP',
-		'HTTP_TRUE_CLIENT_IP',
 		'HTTP_X_IP_TRAIL',
 		'HTTP_X_CLUSTER_CLIENT_IP',
 		'HTTP_X_FORWARDED_FOR',

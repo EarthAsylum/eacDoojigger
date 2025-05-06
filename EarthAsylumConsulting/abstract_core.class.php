@@ -1384,6 +1384,9 @@ abstract class abstract_core
 	 */
 	public function flush_caches(bool $fullFlush=false): void
 	{
+		if ($this->get_transient('flush_cache_lock')) return;
+		$this->set_transient('flush_cache_lock',time(),MINUTE_IN_SECONDS);
+
 		$message = 'cache';
 		if (method_exists($this,'deleteTransients') && $fullFlush && !wp_using_ext_object_cache())
 		{
@@ -1449,12 +1452,15 @@ abstract class abstract_core
 			$caches[] = 'WP Super Cache';
 			$this->logDebug('wp_cache_clear_cache',__METHOD__);
 		}
+		// $this used to be an action (with no return value)
+		//$this->do_action('after_flush_caches');
+		$actions = $this->apply_filters('after_flush_caches',$caches);
+		if (!empty($actions)) $caches = $actions;
 
 		$message	= sprintf("The %s cleanup action has been triggered.",$message);
 		$more		= 'Caches cleared: '.implode(', ',$caches);
 		$this->add_admin_notice($message,'success',$more);
 		$this->logDebug($more,$message);
-		$this->do_action('after_flush_caches');
 	}
 
 

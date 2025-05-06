@@ -1,5 +1,19 @@
 == Changelog ==
 
+= Version 3.1.1 – May 6, 2025 =
+
++   Session extension:
+    +   Add wp_cache as supported session manager.
+    +   check for doing or did `init` on session_init.
+    +   `session_init()` returns bool (required).
++   Include `debugging` filtered array in QueueMonitor (qm) output.
++   Limit `flush_caches()` to once per minute.
++   `after_flush_caches` filter allows return of cache name(s) flushed.
++   Disable security extension for WP-cli.
++   Added `X-Kinsta-Edge-Incomingip` to HTTP_IP_HEADERS.
++   Check for string when overriding enable_option in extensions.
++   Added `isExtension` flag (true) on registerExtension.
+
 = Version 3.1 – April 29, 2025 =
 
 +   Added CORS override/allow by IP address or CIDR subnet.

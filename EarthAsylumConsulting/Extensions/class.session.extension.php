@@ -19,13 +19,14 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '25.0419.1';
+		const 	VERSION	= '25.0506.1';
 
 		/**
 		 * @var string supported session managers
 		 */
 		const 	SESSION_DISABLED 	= 'disabled',
 				SESSION_GENERIC		= 'generic PHP session',
+				SESSION_OBJECTCACHE = 'persistant object cache',
 				SESSION_TRANSIENT	= 'transient storage',
 				SESSION_PANTHION	= 'wp-native-php-sessions/pantheon-sessions.php',
 				SESSION_WOOCOMMERCE = 'woocommerce/woocommerce.php';
@@ -73,17 +74,27 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		public function admin_options_settings()
 		{
 			$sessionManagers = [];
-			if (session_status() !== PHP_SESSION_DISABLED ) {
+			if (session_status() !== PHP_SESSION_DISABLED )
+			{
 				require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+
+				if (\wp_using_ext_object_cache()) {
+					$sessionManagers[self::SESSION_OBJECTCACHE]		= ucwords(self::SESSION_OBJECTCACHE);
+				}
+
 				$sessionManagers[self::SESSION_TRANSIENT]			= ucwords(self::SESSION_TRANSIENT);
 				$sessionManagers[self::SESSION_GENERIC]				= ucwords(self::SESSION_GENERIC);
+
 				if ( is_plugin_active(self::SESSION_WOOCOMMERCE) ) {
 					$sessionManagers[self::SESSION_WOOCOMMERCE] 	= 'WooCommerce Session Manager';
 				}
+
 				if ( is_plugin_active(self::SESSION_PANTHION) ) {
 					$sessionManagers[self::SESSION_PANTHION] 		= 'Panthion Native PHP Sessions';
 				}
-			} else {
+			}
+			else
+			{
 				$sessionManagers[self::SESSION_DISABLED]			= self::SESSION_DISABLED;
 			}
 
@@ -92,23 +103,25 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			$this->registerExtensionOptions( $this->className,
 				[
 					'session_manager'		=> array(
-											'type'		=> 	'select',
-											'label'		=> 	'Session Manager',
-											'options'	=> 	array_flip($sessionManagers),
-											'default'	=> 	(count($sessionManagers) > 2) ? array_keys($sessionManagers)[2] : array_keys($sessionManagers)[0],
-											'info'		=> 	'Select available method or plugin for managing sessions.',
-											'help'		=> 	'[info] <em>'.ucwords(self::SESSION_TRANSIENT).'</em> uses WordPress transients to store session data. '.
-															'<em>'.ucwords(self::SESSION_GENERIC).'</em> should work with any plugin that provides session storage via standard PHP methods. '.
-															'Other supported plugins: <em>WooCommerce</em> and <em>Panthion</em>.',
-										),
+								'type'		=> 	'select',
+								'label'		=> 	'Session Manager',
+								'options'	=> 	array_flip($sessionManagers),
+								'default'	=> 	(count($sessionManagers) > 2) ? array_keys($sessionManagers)[2] : array_keys($sessionManagers)[0],
+								'info'		=> 	'Select available method or plugin for managing sessions.',
+								'help'		=> 	'[info] '.
+												'<em>'.ucwords(self::SESSION_OBJECTCACHE).'</em> (if available) uses the installed object_cache for faster access to session data. '.
+												'<em>'.ucwords(self::SESSION_TRANSIENT).'</em> uses WordPress transients to store session data. '.
+												'<em>'.ucwords(self::SESSION_GENERIC).'</em> should work with any plugin that provides session storage via standard PHP methods. '.
+												'Other supported plugins: <em>WooCommerce</em> and <em>Panthion</em>.',
+							),
 					'session_expiration'	=> array(
-											'type'		=> 'number',
-											'label'		=> 'Session Expiration',
-											'default'	=> '1',
-											'after'		=> 'Hours',
-											'info'		=> 'In hours (from 0.5 to '.$max_session_time.'), the time to retain a session with no activity.',
-											'attributes'=> ['min=".5"', 'max="'.$max_session_time.'"','step=".5"']
-										),
+								'type'		=> 'number',
+								'label'		=> 'Session Expiration',
+								'default'	=> '1',
+								'after'		=> 'Hours',
+								'info'		=> 'In hours (from 0.5 to '.$max_session_time.'), the time to retain a session with no activity.',
+								'attributes'=> ['min=".5"', 'max="'.$max_session_time.'"','step=".5"']
+							),
 				]
 			);
 		}
@@ -129,6 +142,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			{
 				case self::SESSION_DISABLED:
 				case self::SESSION_GENERIC:
+				case self::SESSION_OBJECTCACHE:
 				case self::SESSION_TRANSIENT:
 					break;
 
@@ -206,6 +220,16 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 				case self::SESSION_DISABLED:
 					return false;
 
+				case self::SESSION_OBJECTCACHE:
+					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
+						$this->session 			= wp_cache_get($this->session_id,$this->className);
+					}
+					if (empty($this->session)) {
+						$this->session_id 		= bin2hex(random_bytes(16));
+						$this->session 			= new \stdclass();
+					}
+					break;
+
 				case self::SESSION_TRANSIENT:
 					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
 						$this->session 			= $this->get_transient($this->session_id);
@@ -245,7 +269,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			 */
 			$this->do_action( 'session_start' );
 
-			return (\did_action('init'))
+			return (\doing_action( 'init' ) || \did_action('init'))
 				? $this->session_init()
 				: \add_action('init', array($this,'session_init'));
 		}
@@ -260,6 +284,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		{
 			switch ($this->get_option('session_manager'))
 			{
+				case self::SESSION_OBJECTCACHE:
 				case self::SESSION_TRANSIENT:
 					$this->set_cookie( $this->session_cookie, $this->session_id, $this->get_session_expiration(), [/* default options */],
 						[
@@ -299,6 +324,8 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			}
 
 			$this->session->session_is_new	= (!isset($this->session->session_is_new));
+
+			return true;
 		}
 
 
@@ -457,6 +484,10 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 
 			switch ($this->session->session_manager)
 			{
+				case self::SESSION_OBJECTCACHE:
+					$exp = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);
+					wp_cache_set($this->session_id,$this->session,$this->className,$exp);
+					break;
 				case self::SESSION_TRANSIENT:
 					$exp = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);
 					$this->set_transient($this->session_id,$this->session,$exp);
@@ -497,7 +528,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		public function session_debugging($debugging_array)
 		{
 			if ( !empty( $this->session_id ) ) {
-				$debugging_array[$this->pluginName.' Session'] = (array)$this->session;
+				$debugging_array[$this->pluginName.'/Session'] = (array)$this->session;
 			}
 			return $debugging_array;
 		}

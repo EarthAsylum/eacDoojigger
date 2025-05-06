@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.1.0
-Last Updated:           29-Apr-2025
+Stable tag:             3.1.1
+Last Updated:           06-May-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -447,6 +447,20 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.1.1 – May 6, 2025 =
+
++   Session extension:
+    +   Add wp_cache as supported session manager.
+    +   check for doing or did `init` on session_init.
+    +   `session_init()` returns bool (required).
++   Include `debugging` filtered array in QueueMonitor (qm) output.
++   Limit `flush_caches()` to once per minute.
++   `after_flush_caches` filter allows return of cache name(s) flushed.
++   Disable security extension for WP-cli.
++   Added `X-Kinsta-Edge-Incomingip` to HTTP_IP_HEADERS.
++   Check for string when overriding enable_option in extensions.
++   Added `isExtension` flag (true) on registerExtension.
 
 = Version 3.1 – April 29, 2025 =
 

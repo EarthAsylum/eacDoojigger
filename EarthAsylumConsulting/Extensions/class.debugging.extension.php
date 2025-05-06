@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0427.1';
+		const VERSION	= '25.0505.1';
 
 		/**
 		 * @var string extension tab name
@@ -278,7 +278,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			 * filter {classname}_debugging add to the debugging arrays
 			 * @return	array	extended array with [ extension_name => [key=>value array] ]
 			 */
-			$this->add_filter( 'debugging',				array($this, 'debug_debugging'),5);
+			add_filter( 'eacDoojigger_debugging',		array($this, 'debug_debugging'),5);
 
 			/**
 			 * filter {classname}_debuglog get the debugging log
@@ -588,36 +588,6 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function debug_debugging($debugging_array)
 		{
-			$debugging_array['Plugin Detail'] = array_merge(
-				[ 	"Plugin Header"		=> $this->plugin->pluginHeaders() ],
-				[
-					"Plugin Updated"	=> wp_date($this->plugin->date_time_format,filemtime($this->plugin->pluginHeader('PluginDir'))),
-					"Plugin Environment"=> $this->get_option('siteEnvironment'),
-					"WP Admin"			=> (is_admin()) ? 'True' : 'false',
-					"WP Multi Site"		=> (is_multisite()) ? 'True' : 'false',
-					"WP Network Admin"	=> (is_network_admin()) ? 'True' : 'false',
-				//	"WP Current User"	=> ($this->current_user) ? $this->current_user->data : 'none',
-					"WP Page Parent"	=> (function_exists('get_admin_page_parent')) ? get_admin_page_parent() : 'undefined',
-				]
-			);
-
-			/*
-			$debugging_array['Plugin Options']	= (is_network_admin()) ? $this->plugin->networkOptions : $this->plugin->options;
-
-			if (method_exists($this->plugin, 'getOptionMetaData')) {
-				$debugging_array['Option Metadata'] = (is_network_admin()) ? $this->plugin->getNetworkMetaData() : $this->plugin->getOptionMetaData();
-			}
-			*/
-
-			$extensions = array();
-			foreach ($this->plugin->extension_objects as $name => $object) {
-				$extensions[$name] = array(
-					'Version' => $object->getVersion(),
-					'Enabled' => ($object->isEnabled()) ? 'true' : 'false',
-				);
-			}
-			$debugging_array['Plugin Extensions'] = $extensions;
-
 			if (!empty($this->phpData)) {
 				$debugging_array['PHP Errors'] = $this->phpData;
 			}
@@ -631,15 +601,40 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				$debugging_array['Log Data'][] = 'Peak Memory Used: '.round((memory_get_peak_usage(true) / 1024) / 1024).'M of '.ini_get('memory_limit');
 			}
 
+			$debugging_array[$this->pluginName.'/Plugin Detail'] = array_merge(
+				[ 	"Plugin Header"		=> $this->plugin->pluginHeaders() ],
+				[
+					"Plugin Updated"	=> wp_date($this->plugin->date_time_format,filemtime($this->plugin->pluginHeader('PluginDir'))),
+					"Plugin Environment"=> $this->get_option('siteEnvironment'),
+					"WP Admin"			=> (is_admin()) ? 'True' : 'false',
+					"WP Multi Site"		=> (is_multisite()) ? 'True' : 'false',
+					"WP Network Admin"	=> (is_network_admin()) ? 'True' : 'false',
+				//	"WP Current User"	=> ($this->current_user) ? $this->current_user->data : 'none',
+					"WP Page Parent"	=> (function_exists('get_admin_page_parent')) ? get_admin_page_parent() : 'undefined',
+				]
+			);
+
+			$extensions = array();
+			foreach ($this->plugin->extension_objects as $name => $object) {
+				$extensions[$name] = array(
+					'Version' => $object->getVersion(),
+					'Enabled' => ($object->isEnabled()) ? 'true' : 'false',
+				);
+				if ($alias = $object->getAlias()) {
+					$extensions[$name]['Alias'] = $alias;
+				}
+			}
+			$debugging_array[$this->pluginName.'/Plugin Extensions'] = $extensions;
+
 			if ( class_exists( '\WP_CONSENT_API' ) ) {
 				try {
-					$debugging_array['WP Consent'] = [
+					$debugging_array[$this->pluginName.'/WP Consent'] = [
 						'Cookie Prefix' => \WP_CONSENT_API::$config->consent_cookie_prefix(),
 						'Consent Type'	=> wp_get_consent_type(),
 						'Categories'	=> [],
 					];
 					foreach(\WP_CONSENT_API::$config->consent_categories() as $category) {
-						$debugging_array['WP Consent']['Categories'][$category] = wp_has_consent($category);
+						$debugging_array[$this->pluginName.'/WP Consent']['Categories'][$category] = wp_has_consent($category);
 					}
 				//	if ($cookies = wp_get_cookie_info()) {
 				//		$debugging_array['WP Consent']['Cookie Info'] = $cookies;
@@ -649,7 +644,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 
 		//	$debugging_array['Hooks'] = $this->getRegisteredHooks('the_content');
 			if (class_exists('\EarthAsylumConsulting\eacDoojiggerActionTimer',false)) {
-				$debugging_array['WordPress Timing'] = \EarthAsylumConsulting\eacDoojiggerActionTimer::getArray();
+				$debugging_array[$this->pluginName.'/WordPress Timing'] = \EarthAsylumConsulting\eacDoojiggerActionTimer::getArray();
 			}
 
 			return $debugging_array;
@@ -927,6 +922,11 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function qm_shutdown()
 		{
+			$response = $this->apply_filters( 'debugging', [] );
+			foreach ($response as $name => $value)
+			{
+				do_action( "qm/debug", [$name => $value] );
+			}
 			$data 		= $this->on_shutdown();
 			$headers 	= $data[1];
 			$data[1] 	= '';

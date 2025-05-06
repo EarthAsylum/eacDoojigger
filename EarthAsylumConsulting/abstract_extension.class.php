@@ -242,7 +242,7 @@ abstract class abstract_extension
 	 * @param	array 			$optionMeta group option meta
 	 * @return	void
 	 */
-	protected function registerExtension($optionGroup = null, $optionMeta = array())
+	protected function registerExtension($optionGroup = null, $optionMeta = array(), $isExtension = true)
 	{
 		if (is_null($optionGroup) || $optionGroup === true)
 		{
@@ -266,26 +266,29 @@ abstract class abstract_extension
 			$groupName = esc_attr(ucwords(str_replace(['-','_'],' ',$groupName)));
 			$this->enable_option_name = basename($this->plugin->toKeyString($groupName,'_'),'_extension').'_extension_enabled';
 
-			// update the 'enabled' setting for this group
-			if ( $this->plugin->isSettingsPage() && isset($_POST[$this->enable_option_name]) )
+			if ($isExtension)
 			{
-				if ($_POST[$this->enable_option_name] == '')
+				// update the 'enabled' setting for this group
+				if ( $this->plugin->isSettingsPage() && isset($_POST[$this->enable_option_name]) )
+				{
+					if ($_POST[$this->enable_option_name] == '')
+					{
+						$this->isEnabled(false);
+					}
+				}
+				else if (!$this->plugin->is_option($this->enable_option_name))
 				{
 					$this->isEnabled(false);
 				}
-			}
-			else if (!$this->plugin->is_option($this->enable_option_name))
-			{
-				$this->isEnabled(false);
 			}
 		}
 
 		// prevent translation early load (Function _load_textdomain_just_in_time was called incorrectly)
 		if ( ! doing_action( 'admin_init' ) && ! did_action( 'admin_init' ) )
 		{
-			add_action('admin_init', function() use ($optionGroup, $optionMeta)
+			add_action('admin_init', function() use ($optionGroup, $optionMeta, $isExtension)
 			{
-				$this->registerExtension($optionGroup, $optionMeta);
+				$this->registerExtension($optionGroup, $optionMeta, $isExtension);
 			});
 			return;
 		}
@@ -301,9 +304,6 @@ abstract class abstract_extension
 		}
 		else
 		{
-			// set default enable option name (since we do this on admin_init)
-			$this->update_option($this->className.'_enable_option_name',$this->enable_option_name);
-
 			$enabledOption = [
 					'label'			=> $groupName,
 					'type'			=> 'checkbox',
@@ -314,12 +314,18 @@ abstract class abstract_extension
 			{
 				if (is_array($override)) {
 					$enabledOption = array_replace($enabledOption,$override);
-				} else {
+				} else if (is_string($override)) {
 					$enabledOption['label'] = $override;
 				}
 			}
 			$enabledOption = [ $this->enable_option_name => $enabledOption ];
-			$this->enable_option = $this->enable_option_name;
+
+			// set default enable option name (since we do this on admin_init)
+			if ($isExtension)
+			{
+				$this->update_option($this->className.'_enable_option_name',$this->enable_option_name);
+				$this->enable_option = $this->enable_option_name;
+			}
 		}
 
 		$this->registerExtensionOptions($optionGroup, array_merge($enabledOption,$optionMeta));
