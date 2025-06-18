@@ -45,7 +45,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION		= '25.0419.1';
+		const VERSION		= '25.0530.1';
 
 		/**
 		 * @var string alias class name
@@ -272,8 +272,9 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 */
 		public function addActionsAndFilters_early()
 		{
-			//add our custom intervals to wp
-			\add_filter('cron_schedules',				function($cron_intervals) {
+			// add our custom intervals to wp
+			\add_filter('cron_schedules',				function($cron_intervals)
+			{
 				$days_this_month = (int)wp_date('t');
 				$month_in_seconds = $days_this_month * DAY_IN_SECONDS;
 				return array_merge(
@@ -285,6 +286,21 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 					$this->getIntervals()
 				);
 			},100);
+
+			// filter ready crons when running a single task (doTask()).
+			// this filter/transient is needed twice (spawn_cron & wp_cron).
+			add_filter('pre_get_ready_cron_jobs', 		function($return)
+			{
+				if ($cron = $this->get_transient('get_ready_cron_jobs'))
+				{
+					if (defined( 'DOING_CRON' ))
+					{
+						$this->delete_transient('get_ready_cron_jobs');
+					}
+					return $cron;
+				}
+				return $return;
+			});
 
 			/**
 			 * action '{pluginName}_add_cron_interval' - allow actors to add a custom interval
@@ -313,10 +329,19 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 			 * action '{pluginName}_add_cron_task' - allow actors to add a custom task
 			 */
 			$this->add_action('add_cron_task',			[$this,'setTask'],10,4);
+
 			/**
 			 * action '{pluginName}_delete_cron_task' - allow actors to delete a custom task
 			 */
 			$this->add_action('delete_cron_task',		[$this,'unsetTask'],10,4);
+
+			/**
+			 * action '{pluginName}_do_cron_task' - allow actors to run a custom task
+			 */
+			if ( !defined( 'DOING_CRON' ) )
+			{
+				$this->add_action('do_cron_task',		[$this,'doTask'],10,3);
+			}
 
 			if ($this->is_admin() && !$this->is_network_admin())
 			{
@@ -604,7 +629,18 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 
 			$this->unsetEvent($name);
 			$eventName = $this->eventName($name);
-			wp_schedule_event($scheduledTime->getTimestamp(), $interval, $eventName, $args);
+
+			// wait for 'init' before scheduling (allows routing to Action Scheduler)
+			if (did_action('init')) {
+				wp_schedule_event($scheduledTime->getTimestamp(), $interval, $eventName, $args);
+			} else {
+				add_action('init', function() use ($scheduledTime, $interval, $eventName, $args)
+				{
+					if (!wp_get_scheduled_event( $eventName )) {
+						wp_schedule_event($scheduledTime->getTimestamp(), $interval, $eventName, $args);
+					}
+				});
+			}
 			return $scheduledTime->getTimestamp();
 		}
 
@@ -709,6 +745,41 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		}
 
 
+		/**
+		 * Run (do) a single, non-recuring task
+		 *
+		 * @param string $$hook action to schedule
+		 * @param array $args arguments passed to hook
+		 * @param DateTime|int|string $scheduledTime custom start time (now)
+		 * @return	bool
+		 */
+		public function doTask(string $hook, array $args=[], \DateTime|int|string $scheduledTime = 'now'): bool
+		{
+			$scheduledTime 	= $this->defaultTime(false,$scheduledTime);
+			$event_time 	= $scheduledTime->getTimestamp();
+
+			$result = \wp_schedule_single_event( (int)$event_time, $hook, $args, true );
+
+			if (is_wp_error($result))
+			{
+				$this->add_admin_notice($hook.': '.$result->get_error_message(),'error');
+				return false;
+			}
+
+			if ($event_time <= time() && !defined('DOING_CRON') )
+			{
+				$event_args 	= ['schedule'=>false,'args'=>$args];
+				$event_key 		= md5( serialize( $event_args ) );
+				$event_cron 	= [
+					$event_time => [$hook => [$event_key => $event_args]]
+				];
+				$this->set_transient('get_ready_cron_jobs',$event_cron,5);
+				\spawn_cron( microtime( true ) );
+			}
+			return true;
+		}
+
+
 		/*
 		 * private methods
 		 */
@@ -797,16 +868,19 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 * @param bool $formatted return formatted ('c') date string
 		 * @return	datetime|string (if formatted)
 		 */
- 		private function futureTime(string $interval, \DateTime $scheduledTime, $formatted = false)
+ 		private function futureTime(string|bool $interval, \DateTime $scheduledTime, $formatted = false)
 		{
-			$schedules = wp_get_schedules();
-			$modify = $schedules[$interval]['interval'];
-			if ($scheduledTime->getTimestamp() <= time()) {
-				$scheduledTime->modify('today '.$scheduledTime->format('H:i'));
-			}
-			if ($modify) {
-				while ($scheduledTime->getTimestamp() <= time()) {
-					$scheduledTime->modify('+'.$modify.' seconds');
+			if ($interval)
+			{
+				$schedules = wp_get_schedules();
+				$modify = $schedules[$interval]['interval'];
+				if ($scheduledTime->getTimestamp() <= time()) {
+					$scheduledTime->modify('today '.$scheduledTime->format('H:i'));
+				}
+				if ($modify) {
+					while ($scheduledTime->getTimestamp() <= time()) {
+						$scheduledTime->modify('+'.$modify.' seconds');
+					}
 				}
 			}
 			return ($formatted)

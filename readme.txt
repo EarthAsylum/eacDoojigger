@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.1.1
-Last Updated:           06-May-2025
+Stable tag:             3.2.0-RC1
+Last Updated:           17-May-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -58,6 +58,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *Server-Side CORS*                  | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
 |   *Threat Detection*                  | Ability to block access by IP address based on *security* and *CORS* violations as well as [AbuseIPDB](https://www.abuseipdb.com/user/165095), [FraudGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) threat scores. |
 |   *Event Scheduler*                   | Easily set and enable WordPress and custom CRON schedules (intervals), events, and tasks (actions). |
+|   *Key/Value Storage*                 | An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. |
 |   *Debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *Encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
@@ -447,6 +448,22 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.2 – June 17, 2025 =
+
++   New `eacKeyValue` helper class for key-value pair storage.
+    +   see: https://github.com/EarthAsylum/eacKeyValue
++   Internal transient methods use key/value helper instead of WP transient API.
++   Internal options methods use key/value helper instead of WP options API.
++   Added 'Key/Value storage' as session manager option.
++   Session 'transient' option uses WP transient functions (not eacDoojigger).
++   Make sure we have FS_CHMOD_FILE/FS_CHMOD_DIR set in autoload.php.
++   Added `doTask()` method and `do_cron_task` action to event_scheduler extension.
++   Delay scheduling events until `init` action, allows routing to Action Scheduler.
++   Do Risk Assessment a bit earlier on `wp_headers` not `wp`.
++   `access_denied()` checks for `send_headers` action.
++   Strip tags when logging admin_notice warnings/error.
++   Debug log entry for Action Scheduler tasks.
 
 = Version 3.1.1 – May 6, 2025 =
 

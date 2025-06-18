@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '25.0506.1';
+		const 	VERSION	= '25.0612.1';
 
 		/**
 		 * @var string supported session managers
@@ -27,6 +27,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		const 	SESSION_DISABLED 	= 'disabled',
 				SESSION_GENERIC		= 'generic PHP session',
 				SESSION_OBJECTCACHE = 'persistant object cache',
+				SESSION_KEYVALUE	= 'Key/Value storage',
 				SESSION_TRANSIENT	= 'transient storage',
 				SESSION_PANTHION	= 'wp-native-php-sessions/pantheon-sessions.php',
 				SESSION_WOOCOMMERCE = 'woocommerce/woocommerce.php';
@@ -82,6 +83,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					$sessionManagers[self::SESSION_OBJECTCACHE]		= ucwords(self::SESSION_OBJECTCACHE);
 				}
 
+				$sessionManagers[self::SESSION_KEYVALUE]			= ucwords(self::SESSION_KEYVALUE);
 				$sessionManagers[self::SESSION_TRANSIENT]			= ucwords(self::SESSION_TRANSIENT);
 				$sessionManagers[self::SESSION_GENERIC]				= ucwords(self::SESSION_GENERIC);
 
@@ -110,6 +112,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 								'info'		=> 	'Select available method or plugin for managing sessions.',
 								'help'		=> 	'[info] '.
 												'<em>'.ucwords(self::SESSION_OBJECTCACHE).'</em> (if available) uses the installed object_cache for faster access to session data. '.
+												'<em>'.ucwords(self::SESSION_KEYVALUE).'</em> uses key/value storage mechanism for session data. '.
 												'<em>'.ucwords(self::SESSION_TRANSIENT).'</em> uses WordPress transients to store session data. '.
 												'<em>'.ucwords(self::SESSION_GENERIC).'</em> should work with any plugin that provides session storage via standard PHP methods. '.
 												'Other supported plugins: <em>WooCommerce</em> and <em>Panthion</em>.',
@@ -143,6 +146,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 				case self::SESSION_DISABLED:
 				case self::SESSION_GENERIC:
 				case self::SESSION_OBJECTCACHE:
+				case self::SESSION_KEYVALUE:
 				case self::SESSION_TRANSIENT:
 					break;
 
@@ -225,17 +229,27 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 						$this->session 			= wp_cache_get($this->session_id,$this->className);
 					}
 					if (empty($this->session)) {
-						$this->session_id 		= bin2hex(random_bytes(16));
+						$this->session_id 		= 'session_'.bin2hex(random_bytes(16));
+						$this->session 			= new \stdclass();
+					}
+					break;
+
+				case self::SESSION_KEYVALUE:
+					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
+						$this->session 			= \get_key_value($this->session_id);
+					}
+					if (empty($this->session)) {
+						$this->session_id 		= 'session_'.bin2hex(random_bytes(16));
 						$this->session 			= new \stdclass();
 					}
 					break;
 
 				case self::SESSION_TRANSIENT:
 					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
-						$this->session 			= $this->get_transient($this->session_id);
+						$this->session 			= \get_transient($this->session_id);
 					}
 					if (empty($this->session)) {
-						$this->session_id 		= bin2hex(random_bytes(16));
+						$this->session_id 		= 'session_'.bin2hex(random_bytes(16));
 						$this->session 			= new \stdclass();
 					}
 					break;
@@ -285,6 +299,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			switch ($this->get_option('session_manager'))
 			{
 				case self::SESSION_OBJECTCACHE:
+				case self::SESSION_KEYVALUE:
 				case self::SESSION_TRANSIENT:
 					$this->set_cookie( $this->session_cookie, $this->session_id, $this->get_session_expiration(), [/* default options */],
 						[
@@ -485,12 +500,16 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			switch ($this->session->session_manager)
 			{
 				case self::SESSION_OBJECTCACHE:
-					$exp = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);
-					wp_cache_set($this->session_id,$this->session,$this->className,$exp);
+					$expires = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);
+					wp_cache_set($this->session_id,$this->session,$this->className,$expires);
+					break;
+				case self::SESSION_KEYVALUE:
+					$expires = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);
+					\set_key_value($this->session_id,$this->session,$expires,'transient');
 					break;
 				case self::SESSION_TRANSIENT:
-					$exp = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);
-					$this->set_transient($this->session_id,$this->session,$exp);
+					$expires = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);
+					\set_transient($this->session_id,$this->session,$expires);
 					break;
 				case self::SESSION_WOOCOMMERCE:
 					if (function_exists('WC')) {

@@ -1,5 +1,6 @@
 <?php
 namespace EarthAsylumConsulting;
+defined( 'ABSPATH' ) or exit;
 
 /**
  * {eac}DoojiggerAutoloader - Autoloader for {eac}Doojigger and derivatives
@@ -8,7 +9,7 @@ namespace EarthAsylumConsulting;
  * @package 	{eac}Doojigger\Utilities\{eac}DoojiggerAutoloader
  * @author 		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright 	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1121.1
+ * @version 	25.0603.1
  */
 
 /*
@@ -17,7 +18,18 @@ namespace EarthAsylumConsulting;
  * Maybe included from eacDoojiggerAutoloader.class.php if eacDoojiggerAutoloader.php is outdated.
  */
 
+// Set the permission constants if not already set. WP does this only with WP_Filesystem (admin)
+if ( ! defined( 'FS_CHMOD_DIR' ) ) {
+	define( 'FS_CHMOD_DIR', ( fileperms( ABSPATH ) & 0777 | 0755 ) );
+}
+if ( ! defined( 'FS_CHMOD_FILE' ) ) {
+	define( 'FS_CHMOD_FILE', ( fileperms( ABSPATH . 'index.php' ) & 0777 | 0644 ) );
+}
+
 // common functions
+if (! class_exists('\EarthAsylumConsulting\eacKeyValue')) {
+	require_once __NAMESPACE__.'/Helpers/eacKeyValue.php';
+}
 require_once __NAMESPACE__.'/Helpers/functions.php';
 
 // should be defined in eacDoojiggerAutoloader.php mu-plugin

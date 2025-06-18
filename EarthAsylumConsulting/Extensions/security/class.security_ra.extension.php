@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0419.1';
+		const VERSION 			= '25.0514.1';
 
 		/**
 		 * @var string alias
@@ -172,7 +172,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			{
 				add_action('init',						array($this, 'check_for_blocks'));
 				// do this late, but before output, so other rules may process
-				add_action('wp',						array($this, 'risk_assessment_result'),99);
+				add_action('wp_headers',				array($this, 'risk_assessment_result'),99);
 				add_action('login_init',				array($this, 'risk_assessment_result'),99);
 			}
 			add_action('xmlrpc_enabled',				array($this, 'risk_assessment_result'),99);

@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0505.1';
+		const VERSION	= '25.0614.1';
 
 		/**
 		 * @var string extension tab name
@@ -180,6 +180,13 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 					}
 				}
 			}
+			if ($this->is_option('debug_options','wp_cron')) {
+				add_action( 'action_scheduler_after_execute', function($action_id, $action = null, $context = '')
+					{
+						$this->plugin->logAlways(sprintf('%-6.6s %s',wp_date('H:i',$action->get_schedule()->get_date()->getTimestamp()),$action->get_hook()),'AS-CRON');
+					}, 10, 3
+				);
+			}
 
 			$this->current_user = wp_get_current_user();
 
@@ -272,7 +279,9 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 			 * @return	void
 			 */
 			//$this->add_action( 'daily_event',			array($this, 'purge_logs'), 10, 1 );
-			$this->do_action( 'add_event_task', 'daily', array($this, 'purge_logs'));
+			add_action('init', function() {
+				$this->do_action( 'add_event_task', 'daily', array($this, 'purge_logs'));
+			});
 
 			/**
 			 * filter {classname}_debugging add to the debugging arrays
