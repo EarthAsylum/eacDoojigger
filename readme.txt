@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.2.0-RC1
-Last Updated:           17-May-2025
+Stable tag:             3.2.0-RC2
+Last Updated:           19-Jun-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -449,7 +449,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.2 – June 17, 2025 =
+= Version 3.2 – June 19, 2025 =
 
 +   New `eacKeyValue` helper class for key-value pair storage.
     +   see: https://github.com/EarthAsylum/eacKeyValue

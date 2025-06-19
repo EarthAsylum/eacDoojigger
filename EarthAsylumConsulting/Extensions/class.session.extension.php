@@ -26,7 +26,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		 */
 		const 	SESSION_DISABLED 	= 'disabled',
 				SESSION_GENERIC		= 'generic PHP session',
-				SESSION_OBJECTCACHE = 'persistant object cache',
+				SESSION_OBJECTCACHE = 'persistent object cache',
 				SESSION_KEYVALUE	= 'Key/Value storage',
 				SESSION_TRANSIENT	= 'transient storage',
 				SESSION_PANTHION	= 'wp-native-php-sessions/pantheon-sessions.php',

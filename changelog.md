@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.2 – June 17, 2025 =
+= Version 3.2 – June 19, 2025 =
 
 +   New `eacKeyValue` helper class for key-value pair storage.
     +   see: https://github.com/EarthAsylum/eacKeyValue

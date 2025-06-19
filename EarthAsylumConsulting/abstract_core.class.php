@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0616.1
+ * @version		25.0619.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -291,8 +291,6 @@ abstract class abstract_core
 	 */
 	public function _plugin_shutdown()
 	{
-		// saving on shutdown may be unreliable,
-		// updates now applied when array is changed so this should do nothing (v2.4.0)
 		$this->save_all_plugin_options();
 		$this->save_all_network_options();
 
@@ -3492,8 +3490,16 @@ abstract class abstract_core
 	{
 		$this->pluginOptions = array_change_key_case(\get_key_value(
 			$this->prefixOptionName(self::PLUGIN_OPTION_NAME),
-			fn($key) => \get_option($key,[]),
-			'nocache'
+			function($key) {
+				// convert from options api
+				if ($result = \get_option($key)) {
+					\delete_option($key);
+					$this->pluginOptionsUpdated = true;
+					return $result;
+				}
+				return [];
+			},
+			'nocache' 	// don't persist in object cache
 		),CASE_LOWER);
 
 	//	$this->pluginOptions = array_change_key_case(
@@ -3518,12 +3524,12 @@ abstract class abstract_core
 			\set_key_value(
 				$optionName,
 				array_filter( $this->pluginOptions, function($value) { return !is_null($value); } ),
-				'nocache'
+				'nocache' 	// don't persist in object cache
 			);
-			\update_option(
-				$this->prefixOptionName(self::PLUGIN_OPTION_NAME),
-				array_filter( $this->pluginOptions, function($value) { return !is_null($value); } )
-			);
+	//		\update_option(
+	//			$this->prefixOptionName(self::PLUGIN_OPTION_NAME),
+	//			array_filter( $this->pluginOptions, function($value) { return !is_null($value); } )
+	//		);
 			$this->pluginOptionsUpdated = false;
 		}
 	}
@@ -3540,8 +3546,16 @@ abstract class abstract_core
 		{
 			$this->pluginOptions = array_change_key_case(\get_site_key_value(
 				$this->prefixOptionName(self::NETWORK_OPTION_NAME),
-				fn($key) => \get_network_option(null,$key,[]),
-				'nocache'
+				function($key) {
+					// convert from options api
+					if ($result = \get_network_option(null,$key)) {
+						\delete_network_option(null,$key);
+						$this->networkOptionsUpdated = true;
+						return $result;
+					}
+					return [];
+				},
+				'nocache' 	// don't persist in object cache
 			),CASE_LOWER);
 
 	//		$this->networkOptions = array_change_key_case(
@@ -3566,12 +3580,12 @@ abstract class abstract_core
 			\set_site_key_value(
 				$optionName,
 				array_filter( $this->networkOptions, function($value) { return !is_null($value); } ),
-				'nocache'
+				'nocache' 	// don't persist in object cache
 			);
-			\update_network_option( null,
-				$this->prefixOptionName(self::NETWORK_OPTION_NAME),
-				array_filter( $this->networkOptions, function($value) { return !is_null($value); } )
-			);
+	//		\update_network_option( null,
+	//			$this->prefixOptionName(self::NETWORK_OPTION_NAME),
+	//			array_filter( $this->networkOptions, function($value) { return !is_null($value); } )
+	//		);
 			$this->networkOptionsUpdated = false;
 		}
 	}
@@ -3592,7 +3606,8 @@ abstract class abstract_core
 		{
 			$this->pluginOptions[$optionName] = $value;
 			$this->pluginOptionsUpdated = true;
-			$this->save_all_plugin_options();
+			// this is being over-cautious...
+			//$this->save_all_plugin_options();
 		}
 		return $value;
 	}
@@ -3613,7 +3628,8 @@ abstract class abstract_core
 		{
 			$this->networkOptions[$optionName] = $value;
 			$this->networkOptionsUpdated = true;
-			$this->save_all_network_options();
+			// this is being over-cautious...
+			//$this->save_all_network_options();
 		}
 		return $value;
 	}
@@ -3991,7 +4007,7 @@ abstract class abstract_core
 				{
 					$this->_update_network_option_array( $optionName, $value );
 					// delete pre-2.0 record
-					\delete_network_option( $preOption );
+					\delete_network_option( null, $preOption );
 				}
 			}
 			else if ( is_callable($default) )
@@ -4323,7 +4339,7 @@ abstract class abstract_core
 
 
 	/**
-	 * A wrapper function to WP get_transient() with prefixed transient name and callable function
+	 * A similar function to WP get_transient() with prefixed transient name and callable function
 	 *
 	 * @example $this->get_transient(name, function, nnn) to call function if transient is not set or has expired
 	 *
@@ -4334,40 +4350,41 @@ abstract class abstract_core
 	 */
 	public function get_transient(string $transientName, $default = false, $expiration = 0 )
 	{
-		return ($this->is_network_admin())
-			? \get_site_key_value( $this->prefixTransientName($transientName),$default,'transient' )
-			: \get_key_value( $this->prefixTransientName($transientName),$default,'transient' );
-	/*
+		$transientName = $this->prefixTransientName($transientName);
+
+		// try from key/value helper (or object cache)
 		$value = ($this->is_network_admin())
-			? \get_site_transient( $this->prefixTransientName($transientName) )
-			: \get_transient( $this->prefixTransientName($transientName) );
+			? \get_site_key_value( $transientName, null, 'transient' )
+			: \get_key_value( $transientName, null, 'transient' );
 
-		if ( $value !== false )
+		// fallback to the old fashioned way
+		// when wp cache is disabled, transients may be exported back to wp
+		if (is_null($value))
 		{
-			return maybe_unserialize($value);
-		}
+			$value = ($this->is_network_admin())
+				? \get_site_transient( $transientName )
+				: \get_transient( $transientName );
 
-		if ( is_callable($default) )
-		{
-			try {
-				$value = call_user_func($default);
-			} catch (\Throwable $e) {
-				return ! $this->logError($e,__METHOD__);
-			}
-			if (!is_wp_error($value))
+			if ( $value === false )
 			{
+				if ( is_callable($default) ) {
+					$value = call_user_func($default,$transientName);
+					if (is_wp_error($value)) return $value;
+				} else {
+					$value = $default;
+				}
+			}
+			// passing expiration shows intent
+			if ($value && $expiration) {
 				$this->set_transient($transientName,$value,$expiration);
 			}
-			return $value;
 		}
-
-		return $default;
-	*/
+		return $value;
 	}
 
 
 	/**
-	 * A wrapper function to WP set_transient() with prefixed transient name
+	 * A similar function to WP set_transient() with prefixed transient name
 	 *
 	 * @param	string	$transientName transient name
 	 * @param	mixed	$value value to save
@@ -4378,32 +4395,36 @@ abstract class abstract_core
 	{
 		if ( is_null($value) || is_wp_error($value) ) return false;
 
+		$transientName = $this->prefixTransientName($transientName);
+
 		return ($this->is_network_admin())
-			? \set_site_key_value( $this->prefixTransientName($transientName),$value,$expiration,'transient' )
-			: \set_key_value( $this->prefixTransientName($transientName),$value,$expiration,'transient' );
+			? \set_site_key_value( $transientName, $value, $expiration, 'transient' )
+			: \set_key_value( $transientName, $value, $expiration, 'transient' );
 	/*
 		return ($this->is_network_admin())
-			? \set_site_transient( $this->prefixTransientName($transientName), $value, $expiration )
-			: \set_transient( $this->prefixTransientName($transientName), $value, $expiration );
+			? \set_site_transient( $transientName, $value, $expiration )
+			: \set_transient( $transientName, $value, $expiration );
 	*/
 	}
 
 
 	/**
-	 * A wrapper function to WP delete_transient() with prefixed transient name
+	 * A similar function to WP delete_transient() with prefixed transient name
 	 *
 	 * @param	string	$transientName transient name
 	 * @return	bool
 	 */
 	public function delete_transient(string $transientName)
 	{
+		$transientName = $this->prefixTransientName($transientName);
+
 		return ($this->is_network_admin())
-			? \set_site_key_value( $this->prefixTransientName($transientName),null,'transient' )
-			: \set_key_value( $this->prefixTransientName($transientName),null,'transient' );
+			? \set_site_key_value( $transientName, null, 'transient' )
+			: \set_key_value( $transientName, null, 'transient' );
 	/*
 		return ($this->is_network_admin())
-			? \delete_site_transient( $this->prefixTransientName($transientName) )
-			: \delete_transient( $this->prefixTransientName($transientName) );
+			? \delete_site_transient( $transientName )
+			: \delete_transient( $transientName );
 	*/
 	}
 
@@ -4416,7 +4437,7 @@ abstract class abstract_core
 
 
 	/**
-	 * A wrapper function to WP get_site_transient() with prefixed transient name and callable function
+	 * A similar function to WP get_site_transient() with prefixed transient name and callable function
 	 *
 	 * @example $this->get_site_transient(name, function, nnn) to call function if transient is not set or has expired
 	 *
@@ -4427,41 +4448,42 @@ abstract class abstract_core
 	 */
 	public function get_site_transient(string $transientName, $default = false, $expiration = 0 )
 	{
-		return ($this->is_network_admin() || $this->is_network_enabled())
-			? \get_site_key_value( $this->prefixTransientName($transientName),$default,'transient' )
-			: \get_key_value( $this->prefixTransientName($transientName),$default,'transient' );
+		$transientName = $this->prefixTransientName($transientName);
 
-	/*
+		// try from key/value helper (or object cache)
 		$value = ($this->is_network_admin() || $this->is_network_enabled())
-			? \get_site_transient( $this->prefixTransientName($transientName) )
-			: \get_transient( $this->prefixTransientName($transientName) );
+			? \get_site_key_value( $transientName, null, 'transient' )
+			: \get_key_value( $transientName, null, 'transient' );
 
-		if ( $value !== false )
+		// fallback to the old fashioned way
+		// when wp cache is disabled, transients may be exported back to wp
+		if (is_null($value))
 		{
-			return maybe_unserialize($value);
-		}
+			$value = ($this->is_network_admin() || $this->is_network_enabled())
+				? \get_site_transient( $transientName )
+				: \get_transient( $transientName );
 
-		if ( is_callable($default) )
-		{
-			try {
-				$value = call_user_func($default);
-			} catch (\Throwable $e) {
-				return ! $this->logError($e,__METHOD__);
-			}
-			if (!is_wp_error($value))
+			if ( $value === false )
 			{
-				$this->set_site_transient($transientName,$value,$expiration);
+				if ( is_callable($default) ) {
+					$value = call_user_func($default,$transientName);
+					if (is_wp_error($value)) return $value;
+				} else {
+					$value = $default;
+				}
 			}
-			return $value;
+			// passing expiration shows intent
+			if ($value && $expiration) {
+				$this->set_transient($transientName,$value,$expiration);
+			}
 		}
 
-		return $default;
-	*/
+		return $value;
 	}
 
 
 	/**
-	 * A wrapper function to WP set_site_transient() with prefixed transient name
+	 * A similar function to WP set_site_transient() with prefixed transient name
 	 *
 	 * @param	string	$transientName transient name
 	 * @param	mixed	$value value to save
@@ -4472,32 +4494,36 @@ abstract class abstract_core
 	{
 		if ( is_null($value) || is_wp_error($value) ) return false;
 
+		$transientName = $this->prefixTransientName($transientName);
+
 		return ($this->is_network_admin() || $this->is_network_enabled())
-			? \set_site_key_value( $this->prefixTransientName($transientName),$value,$expiration,'transient' )
-			: \set_key_value( $this->prefixTransientName($transientName),$value,$expiration,'transient' );
+			? \set_site_key_value( $transientName, $value, $expiration, 'transient' )
+			: \set_key_value( $transientName, $value, $expiration, 'transient' );
 	/*
 		return ($this->is_network_admin() || $this->is_network_enabled())
-			? \set_site_transient( $this->prefixTransientName($transientName), $value, $expiration )
-			: \set_transient( $this->prefixTransientName($transientName), $value, $expiration );
+			? \set_site_transient( $transientName, $value, $expiration )
+			: \set_transient( $transientName, $value, $expiration );
 	*/
 	}
 
 
 	/**
-	 * A wrapper function to WP delete_site_transient() with prefixed transient name
+	 * A similar function to WP delete_site_transient() with prefixed transient name
 	 *
 	 * @param	string	$transientName transient name
 	 * @return	bool
 	 */
 	public function delete_site_transient(string $transientName)
 	{
+		$transientName = $this->prefixTransientName($transientName);
+
 		return ($this->is_network_admin() || $this->is_network_enabled())
-			? \set_site_key_value( $this->prefixTransientName($transientName),null,'transient' )
-			: \set_key_value( $this->prefixTransientName($transientName),null,'transient' );
+			? \set_site_key_value( $transientName, null, 'transient' )
+			: \set_key_value( $transientName, null, 'transient' );
 	/*
 		return ($this->is_network_admin() || $this->is_network_enabled())
-			? \delete_site_transient( $this->prefixTransientName($transientName) )
-			: \delete_transient( $this->prefixTransientName($transientName) );
+			? \delete_site_transient( $transientName )
+			: \delete_transient( $transientName );
 	*/
 	}
 
