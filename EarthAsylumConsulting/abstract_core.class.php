@@ -948,7 +948,6 @@ abstract class abstract_core
 	{
 		if ($new_blog_id != $prev_blog_id)
 		{
-		//	$this->logDebug($prev_blog_id.'->'.$new_blog_id,__FUNCTION__);
 			$this->save_all_plugin_options();
 		}
 	}
@@ -967,7 +966,6 @@ abstract class abstract_core
 	{
 		if ($new_blog_id != $prev_blog_id)
 		{
-		//	$this->logDebug($prev_blog_id.'->'.$new_blog_id,__FUNCTION__);
 			$this->load_all_plugin_options();
 		}
 	}
@@ -3488,8 +3486,10 @@ abstract class abstract_core
 	 */
 	private function load_all_plugin_options(): void
 	{
+		$optionName = $this->prefixOptionName(self::PLUGIN_OPTION_NAME);
+
 		$this->pluginOptions = array_change_key_case(\get_key_value(
-			$this->prefixOptionName(self::PLUGIN_OPTION_NAME),
+			$optionName,
 			function($key) {
 				// convert from options api
 				if ($result = \get_option($key)) {
@@ -3506,7 +3506,6 @@ abstract class abstract_core
 	//		\get_option( $this->prefixOptionName(self::PLUGIN_OPTION_NAME), [] ),
 	//		CASE_LOWER
 	//	);
-		unset( $this->pluginOptions['{timestamp}'] ); // unintentional option from option backup/restore
 	}
 
 
@@ -3523,9 +3522,10 @@ abstract class abstract_core
 
 			\set_key_value(
 				$optionName,
-				array_filter( $this->pluginOptions, function($value) { return !is_null($value); } ),
+				array_filter( $this->pluginOptions, fn($value) => !is_null($value) ),
 				'nocache' 	// don't persist in object cache
 			);
+
 	//		\update_option(
 	//			$this->prefixOptionName(self::PLUGIN_OPTION_NAME),
 	//			array_filter( $this->pluginOptions, function($value) { return !is_null($value); } )
@@ -3544,8 +3544,10 @@ abstract class abstract_core
 	{
 		if ( $this->is_network_enabled() )
 		{
-			$this->pluginOptions = array_change_key_case(\get_site_key_value(
-				$this->prefixOptionName(self::NETWORK_OPTION_NAME),
+			$optionName = $this->prefixOptionName(self::NETWORK_OPTION_NAME);
+
+			$this->networkOptions = array_change_key_case(\get_site_key_value(
+				$optionName,
 				function($key) {
 					// convert from options api
 					if ($result = \get_network_option(null,$key)) {
@@ -3579,9 +3581,10 @@ abstract class abstract_core
 
 			\set_site_key_value(
 				$optionName,
-				array_filter( $this->networkOptions, function($value) { return !is_null($value); } ),
+				array_filter( $this->networkOptions, fn($value) => !is_null($value) ),
 				'nocache' 	// don't persist in object cache
 			);
+
 	//		\update_network_option( null,
 	//			$this->prefixOptionName(self::NETWORK_OPTION_NAME),
 	//			array_filter( $this->networkOptions, function($value) { return !is_null($value); } )
@@ -3878,7 +3881,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	option value
 	 */
-	public function add_option($optionName, $value, $autoload = true)
+	public function add_option($optionName, $value, $autoload = false)
 	{
 		if ($this->is_network_admin()) {
 			return $this->add_network_option($optionName, $value, $autoload);
@@ -3901,7 +3904,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	option value
 	 */
-	public function update_option($optionName, $value, $autoload = true)
+	public function update_option($optionName, $value, $autoload = false)
 	{
 		if ($this->is_network_admin()) {
 			return $this->update_network_option($optionName, $value, $autoload);
@@ -3924,7 +3927,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function update_option_encrypt($optionName, $value, $autoload = true)
+	public function update_option_encrypt($optionName, $value, $autoload = false)
 	{
 		return $this->update_option($optionName,
 				\apply_filters( 'eacDoojigger_encrypt_string', maybe_serialize($value) ),
@@ -3941,7 +3944,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function rename_option($oldOptionName, $newOptionName, $autoload = true)
+	public function rename_option($oldOptionName, $newOptionName, $autoload = false)
 	{
 		if ($this->is_network_admin()) {
 			return $this->rename_network_option($oldOptionName, $newOptionName, $autoload);
@@ -4251,7 +4254,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from add_option
 	 */
-	public function add_site_option($optionName, $value, $autoload = true)
+	public function add_site_option($optionName, $value, $autoload = false)
 	{
 		return ($this->is_network_enabled())
 			? $this->add_network_option($optionName, $value)
@@ -4267,7 +4270,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function update_site_option($optionName, $value, $autoload = true)
+	public function update_site_option($optionName, $value, $autoload = false)
 	{
 		return ($this->is_network_enabled())
 			? $this->update_network_option($optionName, $value)
@@ -4283,7 +4286,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function update_site_option_encrypt($optionName, $value, $autoload = true)
+	public function update_site_option_encrypt($optionName, $value, $autoload = false)
 	{
 		return ($this->is_network_enabled())
 			? $this->update_network_option_encrypt($optionName, $value)
@@ -4299,7 +4302,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function rename_site_option($oldOptionName, $newOptionName, $autoload = true)
+	public function rename_site_option($oldOptionName, $newOptionName, $autoload = false)
 	{
 		return ($this->is_network_enabled())
 			? $this->rename_network_option($oldOptionName, $newOptionName)

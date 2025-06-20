@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             3.2.0-RC2
-Last Updated:           19-Jun-2025
+Last Updated:           20-Jun-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -449,14 +449,16 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.2 – June 19, 2025 =
+= Version 3.2 – June 20, 2025 =
 
-+   New `eacKeyValue` helper class for key-value pair storage.
++   New `eacKeyValue` helper class for key/value pair storage.
     +   see: https://github.com/EarthAsylum/eacKeyValue
 +   Internal transient methods use key/value helper instead of WP transient API.
 +   Internal options methods use key/value helper instead of WP options API.
++   Reserved options now default to autoload=false.
++   Reworked internal option backup/restore.
 +   Added 'Key/Value storage' as session manager option.
-+   Session 'transient' option uses WP transient functions (not eacDoojigger).
++   Session 'transient' option uses WP transient functions (not internal).
 +   Make sure we have FS_CHMOD_FILE/FS_CHMOD_DIR set in autoload.php.
 +   Added `doTask()` method and `do_cron_task` action to event_scheduler extension.
 +   Delay scheduling events until `init` action, allows routing to Action Scheduler.

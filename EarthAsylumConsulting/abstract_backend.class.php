@@ -1450,14 +1450,28 @@ abstract class abstract_backend extends abstract_core
 		$optionName = $this->option_backup_name();
 		if ($this->is_network_admin())
 		{
-			$backup = $this->getSavedNetworkOptions();
-			$backup['{timestamp}'] = time();
+			$backup = [
+				'version' 	=> $this->getSemanticVersion()->primary,
+				'timestamp'	=> time(),
+				'network' 	=> [
+					$this->networkOptions,
+					$this->getSavedNetworkOptions(),
+				],
+			];
 			\update_network_option( null, $optionName, $backup, 'no' );
 		}
 		else
 		{
-			$backup = $this->getSavedPluginOptions();
-			$backup['{timestamp}'] = time();
+			$backup = [
+				'version' 	=> $this->getSemanticVersion()->primary,
+				'timestamp'	=> time(),
+				'site'		=> [
+					get_current_blog_id() => [
+						$this->pluginOptions,
+						$this->getSavedPluginOptions(),
+					],
+				]
+			];
 			\update_option( $optionName, $backup, 'no' );
 		}
 	}
@@ -1473,10 +1487,33 @@ abstract class abstract_backend extends abstract_core
 		// get unserialized options
 		if ( $backup = $this->get_option_backup() )
 		{
-			foreach ($backup as $optionName => $optionValue)
+			if (isset($backup['{timestamp}']))		// older (pre-3.2) backup
 			{
-				if ($optionName == '{timestamp}') continue;
-				\update_option( $optionName, $optionValue );
+				foreach ($backup as $optionName => $optionValue) {
+					if ($optionName == '{timestamp}') continue;
+					$this->update_option( $this->removeClassNamePrefix($optionName), $optionValue );
+				}
+			}
+			else
+			{
+				if (isset($backup['network']) && $this->is_network_admin())
+				{
+					$options = $backup['network'];
+					$this->networkOptions  = $options[0];
+					foreach ($options[1] as $optionName => $optionValue) {
+						$this->update_network_option( $this->removeClassNamePrefix($optionName), $optionValue );
+					}
+					$this->networkOptionsUpdated = true;
+				}
+				if (isset($backup['site'],$backup['site'][get_current_blog_id()]))
+				{
+					$options = $backup['site'][get_current_blog_id()];
+					$this->pluginOptions = $options[0];
+					foreach ($options[1] as $optionName => $optionValue) {
+						$this->update_option( $this->removeClassNamePrefix($optionName), $optionValue );
+					}
+					$this->pluginOptionsUpdated = true;
+				}
 			}
 		}
 	}
@@ -1504,14 +1541,21 @@ abstract class abstract_backend extends abstract_core
 		if ($this->is_network_admin())
 		{
 			$optionName = 'network_'.$this->option_backup_name();
-			$backup = ['{network}' => $this->getSavedNetworkOptions()];
-			foreach ( \get_sites() as $site )
-			{
-				switch_to_blog( $site->blog_id );
-				$backup[$site->blog_id] = $this->getSavedPluginOptions();
-				restore_current_blog();
-			}
-			$backup['{timestamp}'] = time();
+			$backup = [
+				'version' 	=> $this->getSemanticVersion()->primary,
+				'timestamp'	=> time(),
+				'network' 	=> [
+					$this->networkOptions,
+					$this->getSavedNetworkOptions(),
+				],
+				'site' 		=> []
+			];
+			$this->forEachNetworkSite(function() use(&$backup) {
+				$backup['site'][get_current_blog_id()] = [
+					$this->pluginOptions,
+					$this->getSavedPluginOptions(),
+				];
+			});
 			\update_network_option( null, $optionName, $backup, 'no' );
 		}
 	}
@@ -1528,24 +1572,45 @@ abstract class abstract_backend extends abstract_core
 		{
 			if ($backup = $this->get_network_backup())
 			{
-				foreach($backup as $siteId => $siteBackup)
+				if (isset($backup['{timestamp}']))		// older (pre-3.2) backup
 				{
-					if ($siteId == '{timestamp}') continue;
-					if ($siteId == '{network}')
-					{
-						foreach($siteBackup as $optionName => $optionValue)
-						{
-							\update_network_option( null, $optionName, $optionValue );
+					foreach($backup as $siteId => $siteBackup) {
+						if ($siteId == '{timestamp}') continue;
+						if ($siteId == '{network}') {
+							foreach($siteBackup as $optionName => $optionValue) {
+								$this->update_network_option( null, $this->removeClassNamePrefix($optionName), $optionValue );
+							}
+						} else {
+							$this->switch_to_blog( $siteId );
+							foreach($siteBackup as $optionName => $optionValue) {
+								$this->update_option( $this->removeClassNamePrefix($optionName), $optionValue );
+							}
+							$this->restore_current_blog();
 						}
 					}
-					else
+				}
+				else
+				{
+					if (isset($backup['network']) && $this->is_network_admin())
 					{
-						switch_to_blog( $siteId );
-						foreach($siteBackup as $optionName => $optionValue)
-						{
-							\update_option( $optionName, $optionValue );
+						$options = $backup['network'];
+						$this->networkOptions  = $options[0];
+						foreach ($options[1] as $optionName => $optionValue) {
+							$this->update_network_option( $this->removeClassNamePrefix($optionName), $optionValue );
 						}
-						restore_current_blog();
+						$this->networkOptionsUpdated = true;
+					}
+					if (isset($backup['site']))
+					{
+						foreach ($backup['site'] as $siteId => $options) {
+							$this->switch_to_blog( $siteId );
+							$this->pluginOptions = $options[0];
+							foreach ($options[1] as $optionName => $optionValue) {
+								$this->update_option( $this->removeClassNamePrefix($optionName), $optionValue );
+							}
+							$this->pluginOptionsUpdated = true;
+							$this->restore_current_blog();
+						}
 					}
 				}
 			}

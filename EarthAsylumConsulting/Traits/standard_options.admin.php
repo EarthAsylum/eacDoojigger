@@ -10,8 +10,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0424.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		25.0620.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -213,7 +213,7 @@ trait standard_options
 	private function stdOptions_restoreOptions(): array
 	{
 		$backupTime = ( $backup = $this->plugin->get_option_backup() )
-						? wp_date($this->plugin->date_time_format,$backup['{timestamp}']) : "";
+						? wp_date($this->plugin->date_time_format,$backup['timestamp'] ?? $backup['{timestamp}']) : "";
 		return [
 			'_btnRestoreOptions'.( ($backupTime) ? '' : '_hidden' ) => array(
 				'type'		=> 	($backupTime) ? 'button' : 'hidden',
@@ -266,7 +266,7 @@ trait standard_options
 		if ( ! $this->plugin->is_network_admin() ) return [];
 
 		$backupTime = ( $backup = $this->plugin->get_network_backup() )
-						? wp_date($this->plugin->date_time_format,$backup['{timestamp}']) : "";
+						? wp_date($this->plugin->date_time_format,$backup['timestamp'] ?? $backup['{timestamp}']) : "";
 		return [
 			'_btnRestoreNetwork'.( ($backupTime) ? '' : '_hidden' )	=> array(
 				'type'		=> 	($backupTime) ? 'button' : 'hidden',
