@@ -455,7 +455,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
     +   see: https://github.com/EarthAsylum/eacKeyValue
 +   Internal transient methods use key/value helper instead of WP transient API.
 +   Internal options methods use key/value helper instead of WP options API.
-+   Reserved options now default to autoload=false.
++   Reserved options (using options API) now default to autoload=false.
 +   Reworked internal option backup/restore.
 +   Added 'Key/Value storage' as session manager option.
 +   Session 'transient' option uses WP transient functions (not internal).

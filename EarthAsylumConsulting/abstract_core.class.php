@@ -4364,9 +4364,11 @@ abstract class abstract_core
 		// when wp cache is disabled, transients may be exported back to wp
 		if (is_null($value))
 		{
-			$value = ($this->is_network_admin())
-				? \get_site_transient( $transientName )
-				: \get_transient( $transientName );
+			if (! wp_using_ext_object_cache() ) {
+				$value = ($this->is_network_admin())
+					? \get_site_transient( $transientName )
+					: \get_transient( $transientName );
+			} else $value = false;
 
 			if ( $value === false )
 			{
@@ -4377,6 +4379,7 @@ abstract class abstract_core
 					$value = $default;
 				}
 			}
+
 			// passing expiration shows intent
 			if ($value && $expiration) {
 				$this->set_transient($transientName,$value,$expiration);
@@ -4462,9 +4465,11 @@ abstract class abstract_core
 		// when wp cache is disabled, transients may be exported back to wp
 		if (is_null($value))
 		{
-			$value = ($this->is_network_admin() || $this->is_network_enabled())
-				? \get_site_transient( $transientName )
-				: \get_transient( $transientName );
+			if (! wp_using_ext_object_cache() ) {
+				$value = ($this->is_network_admin() || $this->is_network_enabled())
+					? \get_site_transient( $transientName )
+					: \get_transient( $transientName );
+			} else $value = false;
 
 			if ( $value === false )
 			{
@@ -4475,6 +4480,7 @@ abstract class abstract_core
 					$value = $default;
 				}
 			}
+
 			// passing expiration shows intent
 			if ($value && $expiration) {
 				$this->set_site_transient($transientName,$value,$expiration);
