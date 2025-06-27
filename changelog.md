@@ -1,12 +1,12 @@
 == Changelog ==
 
-= Version 3.2 – June 20, 2025 =
+= Version 3.2 – June 27, 2025 =
 
 +   New `eacKeyValue` helper class for key/value pair storage.
     +   see: https://github.com/EarthAsylum/eacKeyValue
 +   Internal transient methods use key/value helper instead of WP transient API.
 +   Internal options methods use key/value helper instead of WP options API.
-+   Reserved options now default to autoload=false.
++   Reserved options (using options API) now default to autoload=false.
 +   Reworked internal option backup/restore.
 +   Added 'Key/Value storage' as session manager option.
 +   Session 'transient' option uses WP transient functions (not internal).
