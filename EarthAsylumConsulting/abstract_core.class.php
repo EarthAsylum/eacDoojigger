@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0619.1
+ * @version		25.0626.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -4477,7 +4477,7 @@ abstract class abstract_core
 			}
 			// passing expiration shows intent
 			if ($value && $expiration) {
-				$this->set_transient($transientName,$value,$expiration);
+				$this->set_site_transient($transientName,$value,$expiration);
 			}
 		}
 

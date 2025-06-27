@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '25.0612.1';
+		const 	VERSION	= '25.0626.1';
 
 		/**
 		 * @var string supported session managers
@@ -236,7 +236,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 
 				case self::SESSION_KEYVALUE:
 					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
-						$this->session 			= \get_key_value($this->session_id);
+						$this->session 			= \get_key_value($this->session_id,null,'transient');
 					}
 					if (empty($this->session)) {
 						$this->session_id 		= 'session_'.bin2hex(random_bytes(16));

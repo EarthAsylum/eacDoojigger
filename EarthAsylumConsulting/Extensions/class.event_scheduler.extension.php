@@ -34,7 +34,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 	 * Extension: event_schedule - Schedule timed, repeating event(s).
 	 *
 	 * @category	WordPress Plugin
-	 * @package		{eac}Doojigger Utilities\{eac}Doojigger Object Cache
+	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
