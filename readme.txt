@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.2.0-RC3
-Last Updated:           27-Jun-2025
+Stable tag:             3.2.0-RC4
+Last Updated:           28-Jun-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -449,8 +449,10 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.2 – June 27, 2025 =
+= Version 3.2 – June 28, 2025 =
 
++   Added `eacDoojigger_risk_assessment_data` filter allowing actors to filter risk assessment result.
++   Fixed potential 1-second error in rate limit check of Risk Assessment.
 +   New `eacKeyValue` helper class for key/value pair storage.
     +   see: https://github.com/EarthAsylum/eacKeyValue
 +   Internal transient methods use key/value helper instead of WP transient API.

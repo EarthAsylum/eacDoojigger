@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0311.1';
+		const VERSION 			= '25.0628.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -43,11 +43,17 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 		const ACCOUNT_LIMITS = [
 		//	id						name
 			"developer"		=> [ 	"Developer (free)",		'day'=>1000,	'month'=>   30000	],
-			"bronze"		=> [ 	"Bronze",				'day'=>0,		'month'=>  150000	],
-			"silver"		=> [ 	"Silver",				'day'=>0,		'month'=> 1000000	],
-			"silver+"		=> [ 	"Silver+",				'day'=>0,		'month'=> 3000000	],
-			"gold"			=> [ 	"Gold",					'day'=>0,		'month'=> 6000000	],
-			"platinum"		=> [ 	"Platinum",				'day'=>0,		'month'=>20000000	],
+
+		//	"bronze"		=> [ 	"Bronze",				'day'=>0,		'month'=>  150000	],
+		//	"silver"		=> [ 	"Silver",				'day'=>0,		'month'=> 1000000	],
+		//	"silver+"		=> [ 	"Silver+",				'day'=>0,		'month'=> 3000000	],
+		//	"gold"			=> [ 	"Gold",					'day'=>0,		'month'=> 6000000	],
+		//	"platinum"		=> [ 	"Platinum",				'day'=>0,		'month'=>20000000	],
+
+			"standard"		=> [ 	"Standard",				'day'=>0,		'month'=> 1000000	],
+			"security"		=> [ 	"Security",				'day'=>0,		'month'=> 1000000	],
+			"advance"		=> [ 	"Advance",				'day'=>0,		'month'=> 1000000	],
+			"custom"		=> [ 	"Custom",				'day'=>0,		'month'=>       0	],
 		];
 
 
@@ -95,6 +101,10 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 			// set the account plan and rate limit
 			if ($account = $this->security->isPolicyEnabled('ipgeolocation_plan'))
 			{
+				// old plans to standard
+				if (!isset(self::ACCOUNT_LIMITS[$account])) {
+					$account = 'standard';
+				}
 				$this->account_plan 		= self::ACCOUNT_LIMITS[$account];
 				$this->rate_limit['limit'] 	= $this->account_plan['month'];
 				$this->rate_limit['retry'] 	= strtotime('tomorrow');

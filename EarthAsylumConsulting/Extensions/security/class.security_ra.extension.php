@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0514.1';
+		const VERSION 			= '25.0628.1';
 
 		/**
 		 * @var string alias
@@ -190,7 +190,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			}
 
 			/**
-			 * action {* action }_clear_risk - forget any previously registered risk
+			 * action {pluginName}_clear_risk - forget any previously registered risk
 			 */
 			$this->add_action( 'clear_risk', 			array($this,'clear_risk_action') );
 		}
@@ -290,6 +290,12 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 			// get the final score
 			$data = $this->risk_assessment_scores($data);
+
+			/**
+			 * filter {pluginName}_risk_assessment_data
+			 * @param array risk assessment data
+			 */
+			$data = $this->apply_filters('risk_assessment_data', $data);
 
 			// save data in transient
 			$transient_provider_key = $this->transient_provider($ipAddress,false);
@@ -639,8 +645,6 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 			$this->plugin->setVariable('RiskAssessment',null);
 			$this->plugin->setVariable('RiskAssessmentScore',null);
-
-			$ipAddress 				= sanitize_key(str_replace(['.',':'],'-',$ipAddress));
 
 			$transient_provider_key = $this->transient_provider($ipAddress,false);
 			$this->plugin->delete_site_transient($transient_provider_key);

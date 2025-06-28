@@ -1,7 +1,9 @@
 == Changelog ==
 
-= Version 3.2 – June 27, 2025 =
+= Version 3.2 – June 28, 2025 =
 
++   Added `eacDoojigger_risk_assessment_data` filter allowing actors to filter risk assessment result.
++   Fixed potential 1-second error in rate limit check of Risk Assessment.
 +   New `eacKeyValue` helper class for key/value pair storage.
     +   see: https://github.com/EarthAsylum/eacKeyValue
 +   Internal transient methods use key/value helper instead of WP transient API.

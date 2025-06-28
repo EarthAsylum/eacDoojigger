@@ -15,7 +15,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	/**
 	 * @var string extension version
 	 */
-	const VERSION 			= '25.0419.1';
+	const VERSION 			= '25.0627.1';
 
 	/**
 	 * @var string extension tab name
@@ -236,7 +236,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 						$this->logDebug(wp_date('c',$reset[1]), $provider." per-{$type} rate limit ({$plan[$type]}) set");
 					}
 				}
-				$this->plugin->set_site_transient($key,$reset,$setTime - time());
+				$this->plugin->set_site_transient($key,$reset,max(1,$setTime - time()));
 			}
 		}
 		return false;
