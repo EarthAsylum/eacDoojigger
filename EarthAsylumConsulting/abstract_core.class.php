@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0626.1
+ * @version		25.0701.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -601,10 +601,9 @@ abstract class abstract_core
 												: $pluginData['PluginDir'];
 				$pluginData['Name']				= dirname($pluginData['PluginSlug']);
 
-				$this->set_site_transient($key,$pluginData,HOUR_IN_SECONDS * 12);
 				return $pluginData;
 			},
-		//	HOUR_IN_SECONDS * 12
+			HOUR_IN_SECONDS * 12
 		);
 		$this->pluginData['RequestTime'] 		= WP_START_TIMESTAMP;
 		$this->PLUGIN_TEXTDOMAIN = $this->pluginData['TextDomain'] ?? $this->className;
@@ -3881,7 +3880,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	option value
 	 */
-	public function add_option($optionName, $value, $autoload = false)
+	public function add_option($optionName, $value, $autoload = true)
 	{
 		if ($this->is_network_admin()) {
 			return $this->add_network_option($optionName, $value, $autoload);
@@ -3904,7 +3903,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	option value
 	 */
-	public function update_option($optionName, $value, $autoload = false)
+	public function update_option($optionName, $value, $autoload = true)
 	{
 		if ($this->is_network_admin()) {
 			return $this->update_network_option($optionName, $value, $autoload);
@@ -3927,7 +3926,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function update_option_encrypt($optionName, $value, $autoload = false)
+	public function update_option_encrypt($optionName, $value, $autoload = true)
 	{
 		return $this->update_option($optionName,
 				\apply_filters( 'eacDoojigger_encrypt_string', maybe_serialize($value) ),
@@ -3944,7 +3943,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function rename_option($oldOptionName, $newOptionName, $autoload = false)
+	public function rename_option($oldOptionName, $newOptionName, $autoload = true)
 	{
 		if ($this->is_network_admin()) {
 			return $this->rename_network_option($oldOptionName, $newOptionName, $autoload);
@@ -4254,7 +4253,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from add_option
 	 */
-	public function add_site_option($optionName, $value, $autoload = false)
+	public function add_site_option($optionName, $value, $autoload = true)
 	{
 		return ($this->is_network_enabled())
 			? $this->add_network_option($optionName, $value)
@@ -4270,7 +4269,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function update_site_option($optionName, $value, $autoload = false)
+	public function update_site_option($optionName, $value, $autoload = true)
 	{
 		return ($this->is_network_enabled())
 			? $this->update_network_option($optionName, $value)
@@ -4286,7 +4285,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function update_site_option_encrypt($optionName, $value, $autoload = false)
+	public function update_site_option_encrypt($optionName, $value, $autoload = true)
 	{
 		return ($this->is_network_enabled())
 			? $this->update_network_option_encrypt($optionName, $value)
@@ -4302,7 +4301,7 @@ abstract class abstract_core
 	 * @param	bool	$autoload WordPress autoload/cache
 	 * @return	mixed	returned from update_option
 	 */
-	public function rename_site_option($oldOptionName, $newOptionName, $autoload = false)
+	public function rename_site_option($oldOptionName, $newOptionName, $autoload = true)
 	{
 		return ($this->is_network_enabled())
 			? $this->rename_network_option($oldOptionName, $newOptionName)
@@ -4356,12 +4355,13 @@ abstract class abstract_core
 		$transientName = $this->prefixTransientName($transientName);
 
 		// try from key/value helper (or object cache)
-		$value = ($this->is_network_admin())
-			? \get_site_key_value( $transientName, null, 'transient' )
-			: \get_key_value( $transientName, null, 'transient' );
+		return ($this->is_network_admin())
+			? \get_site_key_value( $transientName, $default, $expiration, 'transient' )
+			: \get_key_value( $transientName, $default, $expiration, 'transient' );
 
 		// fallback to the old fashioned way
 		// when wp cache is disabled, transients may be exported back to wp
+/*
 		if (is_null($value))
 		{
 			if (! wp_using_ext_object_cache() ) {
@@ -4386,6 +4386,7 @@ abstract class abstract_core
 			}
 		}
 		return $value;
+*/
 	}
 
 
@@ -4457,12 +4458,13 @@ abstract class abstract_core
 		$transientName = $this->prefixTransientName($transientName);
 
 		// try from key/value helper (or object cache)
-		$value = ($this->is_network_admin() || $this->is_network_enabled())
-			? \get_site_key_value( $transientName, null, 'transient' )
-			: \get_key_value( $transientName, null, 'transient' );
+		return ($this->is_network_admin() || $this->is_network_enabled())
+			? \get_site_key_value( $transientName, $default, $expiration, 'transient' )
+			: \get_key_value( $transientName, $default, $expiration, 'transient' );
 
 		// fallback to the old fashioned way
 		// when wp cache is disabled, transients may be exported back to wp
+/*
 		if (is_null($value))
 		{
 			if (! wp_using_ext_object_cache() ) {
@@ -4486,8 +4488,8 @@ abstract class abstract_core
 				$this->set_site_transient($transientName,$value,$expiration);
 			}
 		}
-
 		return $value;
+*/
 	}
 
 

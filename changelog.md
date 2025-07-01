@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.2 – June 28, 2025 =
+= Version 3.2 – July 1, 2025 =
 
 +   Added `eacDoojigger_risk_assessment_data` filter allowing actors to filter risk assessment result.
 +   Fixed potential 1-second error in rate limit check of Risk Assessment.
@@ -8,7 +8,6 @@
     +   see: https://github.com/EarthAsylum/eacKeyValue
 +   Internal transient methods use key/value helper instead of WP transient API.
 +   Internal options methods use key/value helper instead of WP options API.
-+   Reserved options (using options API) now default to autoload=false.
 +   Reworked internal option backup/restore.
 +   Added 'Key/Value storage' as session manager option.
 +   Session 'transient' option uses WP transient functions (not internal).
