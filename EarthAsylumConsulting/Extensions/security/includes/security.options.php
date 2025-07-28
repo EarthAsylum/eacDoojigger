@@ -7,8 +7,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1113.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	25.0718.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -62,7 +62,7 @@ $this->registerExtensionOptions( $this->className,
 		'secPassLock'		=> array(
 				'type'		=>	'range',
 				'label'		=>	'Account Login Attempts ',
-				'default'	=>	$this->is_network_option('secPassLock','0'),
+				'default'	=>	$this->get_network_option('secPassLock','5'),
 				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secPassLock')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),
@@ -88,7 +88,7 @@ $this->registerExtensionOptions( $this->className,
 		'secPassTime'		=> array(
 				'type'		=>	'range',
 				'label'		=>	'Account Lock Time ',
-				'default'	=>	$this->is_network_option('secPassTime','5'),
+				'default'	=>	$this->get_network_option('secPassTime','5'),
 				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secPassTime')
 									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
 									: ''),

@@ -23,12 +23,12 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 	/**
 	 * @var string extension version
 	 */
-	const VERSION	= '25.0419.1';
+	const VERSION		= '25.0726.1';
 
 	/**
 	 * @var ALIAS constant ($this->Registration->...)
 	 */
-	const ALIAS		= 'Registration';
+	const ALIAS			= 'Registration';
 
 	/**
 	 * @var string|array|bool to set (or disable) default group display/switch
@@ -60,14 +60,22 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 		// allow internal extensions if license is L3 (standard) or better
 		$this->add_filter( 'allow_internal_extensions', function()
 			{
-				return $this->isRegistryvalue('license', 'L3', 'ge');
+				return $this->isRegistryvalue('license', 'L3', 'ge');	// standard
 			}, PHP_INT_MAX
 		);
 
-		// allow external extensions if license is L4 (professional) or better
+		// limit external extensions by license level
 		$this->add_filter( 'allow_external_extensions', function()
 			{
-				return $this->isRegistryvalue('license', 'L4', 'ge');
+			//	return $this->isRegistryvalue('license', 'L4', 'ge');
+				return match ($this->isRegistryvalue('license')) {
+					'L1'			=> false, 	// lite
+					'L2'			=> 1, 		// basic
+					'L3'			=> 4, 		// standard
+					'L4'			=> 8, 		// profesional
+					'L5'			=> true,	// enterprise
+					'LD','LU'		=> true, 	// developer,unlimited
+				};
 			}, PHP_INT_MAX
 		);
 	}
@@ -98,9 +106,10 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 		if ($this->is_admin())
 		{
 			// add to unregistered notice
-			$this->add_filter('unregistered_notice', 	function($notice)
+			$this->add_filter('unregistered_notice', function($notice)
 				{
-					$notice .= "<br/>Note: derivative plugins and other features may be non-functional until registered.";
+					$notice .= "<br/>".
+					__("Note: derivative plugins and other features may be non-functional until registered.", $this->plugin->PLUGIN_TEXTDOMAIN);
 					return $notice;
 				}
 			);

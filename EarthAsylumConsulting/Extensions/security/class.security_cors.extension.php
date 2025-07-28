@@ -9,6 +9,8 @@ namespace EarthAsylumConsulting\Extensions;
  *			$allowed[] = $origin;
  *			return $allowed;
  *		});
+ * Or
+ * 		$this->plugin->allow_request_origin($origin);
  */
 
 if (! class_exists(__NAMESPACE__.'\security_cors', false) )
@@ -27,7 +29,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0425.1';
+		const VERSION 			= '25.0718.1';
 
 		/**
 		 * @var string extension tab name
@@ -55,7 +57,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		 */
 		public function __construct($plugin)
 		{
-			parent::__construct($plugin, self::ALLOW_ALL | self::ALLOW_NON_PHP );
+			parent::__construct($plugin, self::ALLOW_ALL | self::ALLOW_NON_PHP | self::DEFAULT_DISABLED );
 
 			// must have security extension enabled
 			if (! $this->isEnabled('security')) return $this->isEnabled(false);
@@ -215,8 +217,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			if ($origin == $host && !empty($this->host_ips))
 			{
 				$ipAddress 	= $this->plugin->getVisitorIP();
-				$ipAsHost	= (is_ssl()) ? 'https://' : 'http://';
-				$ipAsHost	.= $ipAddress;
+				$ipAsHost	= $this->plugin->getRequestScheme() . '://' . $ipAddress;
 				if (!in_array($ipAddress,$this->host_ips) && !is_allowed_http_origin($ipAsHost)) {
 					$this->do_action('report_threat','cross-origin access denied from '.$origin." ({$ipAddress})",100,400);
 				}
@@ -243,7 +244,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			if (!empty($this->host_ips))
 			{
 				foreach ($this->host_ips as $host) {
-					$allowed_origins[] = (is_ssl() ? 'https://' : 'http://').$host;
+					$allowed_origins[] = $this->plugin->getRequestScheme().'://'.$host;
 				}
 			}
 			$allowed_origins = array_unique($allowed_origins);
@@ -263,7 +264,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 					if (empty($origin)) {
 						if ($this->plugin->isIpInList($this->getVisitorIP(),$ip_allowed))
 						{
-							$origin = (is_ssl() ? 'https://' : 'http://').$this->getVisitorIP();
+							$origin = $this->plugin->getRequestScheme().'://'.$this->getVisitorIP();
 							$allowed_origins[] = $origin;
 						}
 					}
@@ -291,8 +292,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			if ($this->security->isPolicyEnabled('secCorsOpt','ip_address')) {
 				add_filter( 'http_origin', function ($origin) {
 					if (empty($origin)) {
-						$origin = (is_ssl()) ? 'https://' : 'http://';
-						$origin .= gethostbyaddr($this->plugin->getVisitorIP());
+						$origin = $this->plugin->getRequestScheme().'://'.gethostbyaddr($this->plugin->getVisitorIP());
 					}
 					return $origin;
 				},101);

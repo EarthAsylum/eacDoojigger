@@ -472,6 +472,30 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 
 
 	/**
+	 * is license LD (developer)
+	 *
+	 * @return	bool
+	 */
+	public function isDeveloperLicense(): bool
+	{
+		return $this->Registration->isRegistryValue('license', 'LD', 'eq');
+	//	return $this->apply_filters('registry_value',false,'license', 'LD', 'eq');
+	}
+
+
+	/**
+	 * is license LU (unlimited)
+	 *
+	 * @return	bool
+	 */
+	public function isUnlimitedLicense(): bool
+	{
+		return $this->Registration->isRegistryValue('license', 'LU', 'eq');
+	//	return $this->apply_filters('registry_value',false,'license', 'LU', 'eq');
+	}
+
+
+	/**
 	 * alllow advanced mode - aids in complexity and/or licensing limits.
 	 * standard license or better to enable advanced mose
 	 *
@@ -503,6 +527,8 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 					$this->advanced_mode['settings']['standard'] 		= $this->isStandardLicense();
 					$this->advanced_mode['settings']['professional']	= $this->isProfessionalLicense();
 					$this->advanced_mode['settings']['enterprise'] 		= $this->isEnterpriseLicense();
+					$this->advanced_mode['settings']['developer'] 		= $this->isDeveloperLicense();
+					$this->advanced_mode['settings']['unlimited'] 		= $this->isUnlimitedLicense();
 				}
 			);
 		}

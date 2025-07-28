@@ -1,4 +1,4 @@
-## {eac}Doojigger, Plugin Derivatives  
+## {eac}Doojigger, Extras  
 [![EarthAsylum Consulting](https://img.shields.io/badge/EarthAsylum-Consulting-0?&labelColor=6e9882&color=707070)](https://earthasylum.com/)
 [![WordPress](https://img.shields.io/badge/WordPress-Plugins-grey?logo=wordpress&labelColor=blue)](https://wordpress.org/plugins/search/EarthAsylum/)
 [![eacDoojigger](https://img.shields.io/badge/Requires-%7Beac%7DDoojigger-da821d)](https://eacDoojigger.earthasylum.com/)
@@ -7,9 +7,10 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Last Updated:           19-Apr-2025  
+Last Updated:           26-Jul-2025  
 Contributors:       [earthasylum](https://github.com/earthasylum),[kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
-Requires EAC:           3.1  
+Donate link:            https://github.com/sponsors/EarthAsylum  
+Requires EAC:           3.2  
 License:                EarthAsylum Consulting Proprietary License - {eac}PLv1  
 License URI:            https://eacDoojigger.earthasylum.com/end-user-license-agreement/  
 WordPress URI:          https://wordpress.org/plugins/search/earthasylum/  

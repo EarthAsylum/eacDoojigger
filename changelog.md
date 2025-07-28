@@ -1,5 +1,23 @@
 == Changelog ==
 
+= Version 3.2.1 – July 28, 2025 =
+
++   Admin notice/settings errors recognize and eliminate duplicate notices.
++   Risk assessment looks for "ip_allow_list.conf" file to reset assessment by IP address.
++   `datetime` trait now uses DateTimeImmutable instead of DateTime, still returns \DateTime.
++   Moved extension loading code to `load_extensions` trait.
++   Fixed `getRequestParts()` using PHP_URL_* component.
++   Add (and use) `getRequestScheme()` method.
++   Add `allow_request_origin()` method, sets `http_origin` and `allowed_http_origins` filters.
++   Add error_log on access_denied().
++   Use Anonymous function to send headers in access_denied().
++   Load theme extensions/doolollys after plugin extensions/doohickies.
++   New `isDeveloperLicense()` and `isUnlimitedLicense()` methods.
++   Add 'developer' and 'unlimited' to advanced mode settings array.
++   Updated `swRegistrationUI` trait.
++   Updated registration SDK.
++   Updated license (for github distribution).
+
 = Version 3.2 – July 1, 2025 =
 
 +   Added `eacDoojigger_risk_assessment_data` filter allowing actors to filter risk assessment result.

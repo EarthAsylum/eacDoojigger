@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Utilities
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * Version: 	1.0.0
+ * @copyright	Copyright 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * Version: 	1.0.1
  */
 
 /*
@@ -95,7 +95,7 @@ class eacDoojiggerPluginUpdater
 			]
 		);
 
-		if ($plugin_detail !== $registered_plugins[ $plugin_slug ])
+		if (!isset($registered_plugins[ $plugin_slug ]) || $plugin_detail !== $registered_plugins[ $plugin_slug ])
 		{
 			$registered_plugins[ $plugin_slug ] = $plugin_detail;
 			\update_site_option(self::REGISTER_OPTION_NAME,$registered_plugins);

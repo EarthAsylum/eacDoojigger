@@ -1159,7 +1159,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				} else if (wp_is_xml_request()) {
 					$reqType = 'xml';
 				} else {
-					$reqType = is_ssl() ? 'https' : 'http';
+					$reqType = $this->plugin->getRequestScheme();
 				}
 			}
 			return $reqType;
@@ -1202,7 +1202,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		public function requestURL()
 		{
 			global $argv;
-			$http = (is_ssl()) ? "https://" : "http://";
+			$http = $this->plugin->getRequestScheme();
 
 			if ( (PHP_SAPI === 'cli') || (defined('WP_CLI') && WP_CLI) ) {
 				$_SERVER['REQUEST_METHOD']	= 'CLI';

@@ -1,12 +1,13 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.2.0
-Last Updated:           01-Jul-2025
+Stable tag:             3.2.1-RC1
+Last Updated:           28-Jul-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
 Contributors:           earthasylum@github,kevinburkholder@wordpress
+Donate link:            https://github.com/sponsors/EarthAsylum
 License:                EarthAsylum Consulting Proprietary License - {eac}PLv1
 License URI:            https://eacDoojigger.earthasylum.com/end-user-license-agreement/
 Tags:                   plugin development, rapid development, multi-function, security, encryption, debugging, administration, contextual-help, session management, maintenance mode, plugin framework, plugin derivative, plugin extensions, toolkit
@@ -15,6 +16,18 @@ GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki
 {eac}Doojigger - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress. {eac}Doojigger streamlines the plugin development process and allows you to create professional-grade plugins in a fraction of the time.
 
 == Description ==
+
+= Important Update =
+
+_Although this software may still be purchased on the
+[{eac}Doojigger web site](https://eacdoojigger.earthasylum.com/eacdoojigger/)
+under the existing subscription plans, as of August 2025, you may
+[download the standard edition](https://swregistry.earthasylum.com/software-updates/eacdoojigger.zip 'Download eacdoojigger.zip, latest release')
+for free (or with [sponsorship](https://github.com/sponsors/EarthAsylum)) at this
+[GitHub Repository](https://github.com/EarthAsylum/eacDoojigger)._
+
+*The [Copyright](#readme-copyright) and
+[End User License Agreement](https://eacdoojigger.earthasylum.com/end-user-license-agreement/) still apply.*
 
 = Summary =
 
@@ -51,18 +64,18 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 |   Included 'Doolollys' & 'Doodads'    | (Extensions, helpers & Traits) |
 |   ---------------------------------   |   ----------------    |
-|   *File System Access*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
-|   *WPMU Installer*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *Security*                          | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
+|   *[File System Access](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(file-system-extension))*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
+|   *[WPMU Installer](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(eacdoojigger-installer))*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
+|   *[Security](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/Security)*                          | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
 |   *Content Security Assistant*        | Adds security nonce to `script` and style `link` tags to facilitate creation of comprehensive *Content Security Policy* (CSP) | 
 |   *Server-Side CORS*                  | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
 |   *Threat Detection*                  | Ability to block access by IP address based on *security* and *CORS* violations as well as [AbuseIPDB](https://www.abuseipdb.com/user/165095), [FraudGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) threat scores. |
-|   *Event Scheduler*                   | Easily set and enable WordPress and custom CRON schedules (intervals), events, and tasks (actions). |
-|   *Key/Value Storage*                 | An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. |
-|   *Debugging*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
+|   *[Event Scheduler](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(recurring-events))*                   | Easily set and enable WordPress and custom CRON schedules (intervals), events, and tasks (actions). |
+|   *[Key/Value Storage](https://github.com/EarthAsylum/eacKeyValue/blob/main/readme.md)*                 | An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. |
+|   *[Debugging](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(debugging-logger-methods))*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *Encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
-|   *Cookie Compliance*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters for GDPR/CCPA Compliance. |
+|   *[Cookie Compliance](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(wp-consent-api-and-cookies))*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters for GDPR/CCPA Compliance. |
 |   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for reading/writing session variables. |
 |   *Maintenance Mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
 |   *Admin Tools*                       | Adds cache management and plugin settings backup/restore, export/import. |
@@ -142,7 +155,7 @@ Since uploading extensions to the plugin or theme folder risks overwriting those
 {eac}Doojigger provides many useful methods and hooks which can be accessed from your custom plugins or extensions, as well as from your theme functions or any code in WordPress.
 
 >   See [Using {eac}Doojigger](https://eacdoojigger.earthasylum.com/using-doojigger) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/UsingDoojigger/* folder) for details and examples,
-    +   [{eac}Doojigger PHP Reference](https://earthasylum.github.io/docs.eacDoojigger/) documentation.
+>   [{eac}Doojigger PHP Reference](https://earthasylum.github.io/docs.eacDoojigger/) documentation.
 
 
 = Automatic Updates =
@@ -440,7 +453,7 @@ __This is proprietary, copyrighted software.__
 +   Title to the Software will remain the exclusive intellectual property of *EarthAsylum Consulting*.
 
 +   You, the customer, are granted a non-exclusive, non-transferable, license to access, install, and use
-this software in accordance with the license level purchased.
+this software in accordance with the license level affirmed.
 
 +   You are not permitted to share, distribute, or make available this software to any third-party.
 
@@ -448,6 +461,24 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.2.1 – July 28, 2025 =
+
++   Admin notice/settings errors recognize and eliminate duplicate notices.
++   Risk assessment looks for "ip_allow_list.conf" file to reset assessment by IP address.
++   `datetime` trait now uses DateTimeImmutable instead of DateTime, still returns \DateTime.
++   Moved extension loading code to `load_extensions` trait.
++   Fixed `getRequestParts()` using PHP_URL_* component.
++   Add (and use) `getRequestScheme()` method.
++   Add `allow_request_origin()` method, sets `http_origin` and `allowed_http_origins` filters.
++   Add error_log on access_denied().
++   Use Anonymous function to send headers in access_denied().
++   Load theme extensions/doolollys after plugin extensions/doohickies.
++   New `isDeveloperLicense()` and `isUnlimitedLicense()` methods.
++   Add 'developer' and 'unlimited' to advanced mode settings array.
++   Updated `swRegistrationUI` trait.
++   Updated registration SDK.
++   Updated license (for github distribution).
 
 = Version 3.2 – July 1, 2025 =
 

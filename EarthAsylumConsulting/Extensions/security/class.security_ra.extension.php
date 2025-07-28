@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0628.1';
+		const VERSION 			= '25.0718.1';
 
 		/**
 		 * @var string alias
@@ -47,6 +47,11 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * @var string IP block list file name
 		 */
 		const IP_BLOCK_LIST 	= ABSPATH."ip_block_list.conf";
+
+		/**
+		 * @var string IP allow list file name
+		 */
+		const IP_ALLOW_LIST 	= ABSPATH."ip_allow_list.conf";
 
 		/**
 		 * @var array ignore these addresses
@@ -159,6 +164,12 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			 * @return array IP addresses
 			 */
 			$this->ip_ignored = $this->apply_filters('risk_assessment_ignore',$this->ip_ignored);
+
+			// allow list can be used to reset allowed IP addresses
+			if (is_file(self::IP_ALLOW_LIST))
+			{
+				$this->allow_ip_file();
+			}
 		}
 
 
@@ -426,17 +437,19 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		private function risk_assessment_abort(string $ipAddress, int $score, int $limit): void
 		{
-			$message = sprintf(
-				__("Request from %s denied; Risk assessment score: %d/%d",$this->plugin->PLUGIN_TEXTDOMAIN),
-				$ipAddress, $score, $limit
-			);
-
 			if ($this->isIpIgnored($ipAddress))
 			{
 				$this->clear_risk_action($ipAddress);
 			}
+			else
+			{
+				$message = sprintf(
+					__("Request from %s denied; Risk assessment score: %d/%d",$this->plugin->PLUGIN_TEXTDOMAIN),
+					$ipAddress, $score, $limit
+				);
 
-			wp_die( $this->plugin->access_denied($message, $this->http_status) );
+				wp_die( $this->plugin->access_denied($message, $this->http_status) );
+			}
 		}
 
 
@@ -490,14 +503,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			}
 
 			// allow origin in CORS
-			$origin = $this->plugin->getRequestOrigin();
-			add_filter( 'http_origin', function() use ($origin) {
-				return $origin;
-			});
-			add_filter( 'allowed_http_origins', function ($allowed) use ($origin) {
-				$allowed[] = $origin;
-				return $allowed;
-			});
+			$this->plugin->allow_request_origin();
 
 			return true;
 		}
@@ -694,6 +700,24 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				$checked = $this->plugin->isIpInList($ipAddress, $this->ip_ignored);
 			}
 			return $checked;
+		}
+
+
+		/**
+		 * Input ip allow file
+		 *
+		 */
+		public function allow_ip_file()
+		{
+			if (is_file(self::IP_ALLOW_LIST))
+			{
+				if ($ip_allow = file(self::IP_ALLOW_LIST,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)) {
+					$this->ip_ignored = array_merge(
+						$this->ip_ignored,
+						array_filter($ip_allow, function($line){return $line[0] != '#';})
+					);
+				}
+			}
 		}
 
 

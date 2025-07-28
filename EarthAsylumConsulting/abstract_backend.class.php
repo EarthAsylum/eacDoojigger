@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0418.1
+ * @version		25.0725.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -689,7 +689,7 @@ abstract class abstract_backend extends abstract_core
 	 * @param bool $useWPfs use wp filesystem (default)
 	 * @return string|bool
 	 */
-	public function get_config_path($filePath=null,$fileId='',$useWPfs=true)
+	public function get_config_path(string $filePath, string $fileId='', bool $useWPfs=true)
 	{
 		global $wp_filesystem;
 		// see if we can get to the config file (only single site or network admin)
@@ -874,7 +874,7 @@ abstract class abstract_backend extends abstract_core
 	 * like WP add_settings_error() - add a settings error.
 	 * prefer using add_option_error() which in turn uses this
 	 *
-	 * @param string $setting setting id
+	 * @param string $setting setting id ('settings-error','admin-notice')
 	 * @param string $code field id
 	 * @param string $message error / notice message
 	 * @param string|array $errorType 'error', 'warning', 'info', 'success'
@@ -882,10 +882,11 @@ abstract class abstract_backend extends abstract_core
 	 */
 	public function add_settings_error( string $setting, string $code, string $message, string $type = 'error' ): void
 	{
+		static $count = 0;
 		$settings_errors = $this->get_settings_errors();
-		$settings_errors[] = array(
+		$settings_errors[ md5($setting.$code.$message.$type) ] = array(
 			'setting' => $setting,
-			'code'    => $code,
+			'code'    => $code.'-'.++$count,
 			'message' => $message,
 			'type'    => $type,
 		);
@@ -979,7 +980,7 @@ abstract class abstract_backend extends abstract_core
 	{
 		$this->add_settings_error(
 			'settings-error',
-			$optionName.'-'.$errorType,
+			$optionName,
 			$this->admin_notice_msg($message, $moreInfo),
 			$errorType
 		);
@@ -1061,7 +1062,7 @@ abstract class abstract_backend extends abstract_core
 		do_action( "qm/{$errorType}", $message );
 		$this->add_settings_error(
 			'admin-notice',
-			$optionName.'-'.$errorType,
+			'admin-notice',
 			$this->admin_notice_msg($message, $moreInfo),
 			$errorType
 		);

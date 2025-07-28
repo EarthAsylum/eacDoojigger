@@ -106,8 +106,11 @@ trait eacDoojigger_admin_traits
 						"<span class='tooltip dashicons dashicons-editor-help button eac-logo-orange' title='{eac}Doojigger Documentation'></span>").
 						"&nbsp;&nbsp;&nbsp;".
 
-						$this->getDocumentationLink(true,'/phpdoc',
-						"<span class='tooltip dashicons dashicons-editor-code button eac-logo-orange' title='{eac}Doojigger PHP Reference'></span>",'PHP Reference').
+						sprintf('<a href="%s" title="%s">%s</a>',
+							"https://earthasylum.github.io/docs.eacDoojigger/",
+							'PHP Reference',
+							"<span class='tooltip dashicons dashicons-editor-code button eac-logo-orange' title='{eac}Doojigger PHP Reference'></span>"
+						).
 						"&nbsp;&nbsp;&nbsp;".
 
 						"<a href='".network_admin_url('/plugin-install.php?s=earthasylum&tab=search&type=term')."'>".

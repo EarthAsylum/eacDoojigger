@@ -8,36 +8,96 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	25.0416.1
+ * @version 	25.0726.1
  */
 
 trait swRegistrationUI
 {
 	/**
-	 * swRegistrationUI method
+	 * @var string the current registration key
+	 */
+	private $registrationKey = null;
+
+	/**
+	 * @var object the current registration object
+	 */
+	private $currentRegistry = null;
+
+
+	/**
+	 * add additional actions and filters
+	 *
+	 * should be called from addActionsAndFilters()
+	 *	$this->swRegistrationActionsAndFilters();
+	 *
+	 */
+	private function swRegistrationActionsAndFilters(): void
+	{
+		if (! is_admin()) return;
+
+		if ($this->registrationKey = $this->getRegistrationKey())
+		{
+			$this->currentRegistry = $this->getCurrentRegistration($this->registrationKey);
+		}
+
+		// when the plugin is updated, refresh the registration
+		$this->add_action( 'version_updated', 			array( $this, 'update_request_refresh'),10,3 );
+
+		// Add contextual help
+		$this->add_action( 'options_settings_help', 	array( $this, 'getRegistryHelp') );
+
+		// pass registration key in plugin updater request (from plugin_update.trait)
+		$this->add_filter( 'plugin_update_parameters', 	function($params)
+			{
+				if ($this->registrationKey) {
+					$params['requestHeaders']['Authorization'] 	= "token ".base64_encode($this->registrationKey);
+				}
+				return $params;
+			}
+		);
+
+		// on admin_init to allow for translations
+		add_action('admin_init', 						function()
+			{
+				// get registration link
+				$registrationLink = $this->plugin->getSettingsLink(true,'registration','Registration','Registration');
+
+				// add registration link on plugins page
+				\add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->plugin->PLUGIN_SLUG,
+					function($pluginLinks, $pluginFile, $pluginData) use ($registrationLink) {
+						return array_merge(['registration' => $registrationLink], $pluginLinks);
+					},25,3
+				);
+
+				// check status and dates for registration validity
+				if (! $this->isValidRegistration())
+				{
+					$this->invalidRegistrationNotice($registrationLink);
+				}
+			}
+		);
+	}
+
+
+	/**
+	 * swRegistrationUI - User Interface
 	 *
 	 * should be called from __construct() in 'options_settings_page' action
 	 * 	add_action( 'options_settings_page', [$this,'swRegistrationUI'], PHP_INT_MAX );
 	 *
-	 * @return 	void
 	 */
-	public function swRegistrationUI()
+	public function swRegistrationUI(): void
 	{
+		// a reserved option is separate WP option, not stored with plugin options array
 		$this->plugin->isReservedOption(self::SOFTWARE_REGISTRY_OPTION,true);
 
 		$title = $this->plugin->pluginHeader('Title');
 		$this->registerExtension( [$title,'registration'] );
 
-		$registrationKey = $this->getRegistrationKey();
-		$pluginOptions = [ // hides the submit button
-							'_btnSubmitOptions'		=> array(
-									'type'		=> 	'hidden',
-									'label'		=> 	'submit',
-									'default'	=> 	'',
-								),
-		];
+		// hides the submit button
+		$pluginOptions = [ '_btnSubmitOptions' => ['type'=>'hidden'] ];
 
-		if (empty($registrationKey))
+		if (empty($this->registrationKey))
 		{
 			$current_user = wp_get_current_user();
 
@@ -51,7 +111,6 @@ trait swRegistrationUI
 			$pluginOptions['registry_key']			= array(
 									'type'		=> 	'text',
 									'label'		=> 	'Registration Key',
-									'default'	=>	$registrationKey,
 								);
 			$pluginOptions['_activate_registration'] = array(
 									'type'		=> 	'button',
@@ -99,29 +158,34 @@ trait swRegistrationUI
 		else
 		{
 			// display the current registration with options to refresh & delete
+			if ($this->isSettingsPage('Registration')) {
+				$this->getRegistryNotices();
+			}
 			if ($refresh = $this->nextRegistryRefreshEvent()) {
 				$refresh = wp_date($this->plugin->date_time_format,$refresh->timestamp);
 			} else {
-				$refresh = __('none, please refresh now.');
+				$this->update_request_refresh();
+				$this->plugin->page_reload(true);
 			}
 			$refresh = sprintf(__('Next scheduled refresh: %s'),$refresh);
+
 			$pluginOptions['registry_key']			= array(
 									'type'		=> 	'disabled',
 									'label'		=> 	'Registration Key',
-									'default'	=>	$registrationKey,
+									'default'	=>	$this->registrationKey,
 								);
 			$pluginOptions['_registry_info']		= array(
 									'type'		=> 	'display',
 									'label'		=> 	'Registration Information',
-									'default'	=> 	$this->getRegistryHtml($registrationKey),
+									'default'	=> 	$this->getRegistryHtml(),
 									'advanced'	=> 	true,
 								);
 			$pluginOptions['_refresh_registration']	= array(
 									'type'		=> 	'button',
 									'label'		=> 	'Refresh Registration',
 									'default'	=> 	'Refresh',
-									'info'		=> 	'Refresh registration by re-validating registration key with the registry server.'.
-													'<br/><small>'.$refresh.'</small>',
+									'info'		=> 	'Refresh registration by re-validating the registration key with the registry server.'.
+													'<small> -- '.$refresh.'</small>',
 								);
 			$pluginOptions['_delete_registration'] 	= array(
 									'type'		=> 	'button',
@@ -135,20 +199,18 @@ trait swRegistrationUI
 		{
 			// only register from network administration
 			$this->plugin->registerNetworkOptions([$title,'registration'],$pluginOptions);
+/*
 			$this->plugin->registerPluginOptions([$title,'registration'],
 			[
-				'registry_key'					=> 	array(
+				'_btnSubmitOptions'				=> 	$pluginOptions['_btnSubmitOptions'],
+				'registry_key'					=> array(
 									'type'		=> 	'disabled',
 									'label'		=> 	'Registration Key',
-									'default'	=>	$registrationKey,
+									'default'	=>	$this->registrationKey,
 								),
-				'_registry_info'				=> 	array(
-									'type'		=> 	'display',
-									'label'		=> 	'Registration Information',
-									'default'	=> 	$this->getRegistryHtml($registrationKey),
-									'advanced'	=> 	true,
-								)
+				'_registry_info'				=> 	$pluginOptions['_registry_info'],
 			]);
+*/
 		}
 		else
 		{
@@ -162,6 +224,7 @@ trait swRegistrationUI
 		$this->add_filter( 'options_form_post__refresh_registration', 	array($this, 'form_request_refresh'), 10, 4 );
 		$this->add_filter( 'options_form_post__delete_registration', 	array($this, 'form_request_delete'), 10, 4 );
 
+		// add supplemental to the settings footer
 		$this->add_action('options_settings_page_footer', function()
 			{
 				if ($supp = $this->getRegistrySupplemental()) {
@@ -170,94 +233,6 @@ trait swRegistrationUI
 			},
 			100
 		);
-	}
-
-
-	/**
-	 * add additional actions and filters
-	 *
-	 * should be called from addActionsAndFilters()
-	 *	$this->swRegistrationActionsAndFilters();
-	 *
-	 * @return	void
-	 */
-	private function swRegistrationActionsAndFilters(): void
-	{
-		if (is_admin())
-		{
-			// when updated, refresh the registration
-			$this->add_action( 'version_updated', 				array($this, 'update_request_refresh'),10,3 );
-
-			// pass registration key in plugin updater request (from plugin_update.trait)
-			$this->add_filter( 'plugin_update_parameters', function($parameters)
-				{
-					if ($RegistrationKey = $this->getRegistrationKey()) {
-						$parameters['requestHeaders']['Authorization'] 	= "token ".base64_encode($RegistrationKey);
-					}
-					return $parameters;
-				}
-			);
-
-			// Add contextual help
-			$this->add_action( 'options_settings_help', 		array( $this, 'getRegistryHelp') );
-
-			add_action('admin_init', 							array($this, 'swRegistrationAdminInit'));
-		}
-	}
-
-
-	/**
-	 * add additional actions and filters - on admin_init to allow for translations
-	 *
-	 * @return	void
-	 */
-	public function swRegistrationAdminInit(): void
-	{
-		// add registration link on plugins page
-		$registrationLink = $this->plugin->getSettingsLink(true,'registration','Registration','Registration');
-
-		\add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->plugin->PLUGIN_SLUG,
-			function($pluginLinks, $pluginFile, $pluginData) use ($registrationLink) {
-				return array_merge(['registration' => $registrationLink], $pluginLinks);
-			},25,3
-		);
-
-		if (! $this->isValidRegistration())
-		{
-			/**
-			 * filter {classname}_unregistered_notice
-			 * @param string
-			 * @return	string
-			 */
-			$notice = $this->apply_filters('unregistered_notice',
-				"%1\$s is currently unregistered or inactive.\n".
-				"You may check your %2\$s on the settings page."
-			);
-			$notice = sprintf(__($notice, $this->plugin->PLUGIN_TEXTDOMAIN),
-				'<em>'.$this->plugin->pluginHeader('Title').'</em>', $registrationLink );
-
-			if (! $this->isSettingsPage('registration'))
-			{
-				$this->add_admin_notice($notice,'error');
-			}
-
-			// display notice on plugins page
-			\add_action( 'after_plugin_row_'.$this->plugin->PLUGIN_SLUG, function($plugin_file,$plugin_data) use ($notice)
-				{
-					$wp_list_table = _get_list_table( 'WP_Plugins_List_Table', ['screen' => get_current_screen()] );
-					printf(
-						'<tr class="plugin-update-tr active" data-slug="%s" data-plugin="%s">'.
-						'<td colspan="%s" class="plugin-update colspanchange">'.
-						'<div class="update-message notice inline notice-error"><p>%s</p></div>'.
-						'</td></tr>',
-						sanitize_title($plugin_data['Name']),
-						plugin_basename($plugin_file),
-						$wp_list_table->get_column_count(),
-						$notice
-					);
-				},10,2
-			);
-		}
 	}
 
 
@@ -280,24 +255,23 @@ trait swRegistrationUI
 	public function form_request_create($function, $fieldName=null, $metaData=null, $priorValue=null)
 	{
 		$apiParams = [
-			'registry_name'			=> $this->plugin->_POST('_registry_name'),
-			'registry_email'		=> $this->plugin->_POST('_registry_email'),
-			'registry_company'		=> $this->plugin->_POST('_registry_company'),
+			'registry_name'			=> $this->plugin->varPost('_registry_name'),
+			'registry_email'		=> $this->plugin->varPost('_registry_email'),
+			'registry_company'		=> $this->plugin->varPost('_registry_company'),
 			'registry_address'		=> sanitize_textarea_field($_POST['_registry_address']),
 			'registry_product'		=> self::SOFTWARE_REGISTRY_PRODUCTID,
 			'registry_version'		=> $this->plugin->getVersion(),
 			'registry_title'		=> $this->plugin->pluginHeader('Title'),
 			'registry_description'	=> $this->plugin->pluginHeader('Description'),
 			'registry_timezone'		=> wp_timezone_string(),
+			'registry_locale'		=> get_locale(),
 		];
 		$apiParams = array_merge($apiParams,$this->getRegistryCustomValues());
 
 		$response = $this->registryApiRequest('create',$apiParams);
-
 		if (!$this->is_api_error($response))
 		{
-			$registry = $response->registration;
-			$this->add_option_success($function,"{$function}d Registration {$registry->registry_key}; Status: {$registry->registry_status}");
+			$this->request_success("{$function}d",$response);
 			$this->plugin->page_reload(true);
 		}
 
@@ -318,10 +292,11 @@ trait swRegistrationUI
 	public function form_request_activate($function, $fieldName=null, $metaData=null, $priorValue=null)
 	{
 		$apiParams = [
-			'registry_key' 			=> $this->plugin->_POST('registry_key'),
+			'registry_key' 			=> $this->plugin->varPost('registry_key'),
 			'registry_product'		=> self::SOFTWARE_REGISTRY_PRODUCTID,
 			'registry_version'		=> $this->plugin->getVersion(),
 			'registry_timezone'		=> wp_timezone_string(),
+			'registry_locale'		=> get_locale(),
 		];
 		$apiParams = array_merge($apiParams,$this->getRegistryCustomValues());
 
@@ -329,8 +304,7 @@ trait swRegistrationUI
 
 		if (!$this->is_api_error($response))
 		{
-			$registry = $response->registration;
-			$this->add_option_success($function,"{$function}d Registration {$registry->registry_key}; Status: {$registry->registry_status}");
+			$this->request_success("{$function}d",$response);
 			$this->plugin->page_reload(true);
 		}
 
@@ -386,15 +360,15 @@ trait swRegistrationUI
 			'registry_product'		=> self::SOFTWARE_REGISTRY_PRODUCTID,
 			'registry_version'		=> $this->plugin->getVersion(),
 			'registry_timezone'		=> wp_timezone_string(),
+			'registry_locale'		=> get_locale(),
 		];
 		$apiParams = array_merge($apiParams,$this->getRegistryCustomValues());
 
-		$response = $this->refreshRegistration($this->plugin->_POST('registry_key'),$apiParams);
+		$response = $this->refreshRegistration($this->plugin->varPost('registry_key'),$apiParams);
 
 		if (!$this->is_api_error($response))
 		{
-			$registry = $response->registration;
-			$this->add_option_success($function,"{$function}ed Registration {$registry->registry_key}; Status: {$registry->registry_status}");
+			$this->request_success("{$function}ed",$response);
 			$this->plugin->page_reload(true);
 		}
 
@@ -404,14 +378,48 @@ trait swRegistrationUI
 
 
 	/**
+	 * output success notice
+	 *
+	 */
+	protected function request_success($action,$response)
+	{
+		$registry = $response->registration;
+		if ($refresh = $this->nextRegistryRefreshEvent()) {
+			$refresh = wp_date($this->plugin->date_time_format.' (T)',$refresh->timestamp);
+			$refresh = sprintf(__('Next scheduled refresh: %s'),$refresh);
+		} else {
+			$refresh = '';
+		}
+
+		$expires = $registry->registry_expires.' 23:59:59';
+		$expires = date_create($expires,timezone_open($response->registrar->timezone ?? 'UTC'));
+		$expires = $expires->setTimeZone(wp_timezone())->format($this->plugin->date_time_format.' (T)');
+
+		$action = strtolower($action);
+		$this->add_option_success($action,
+			sprintf(__("Registration {$action}: %s"),$registry->registry_key),
+			'success',
+			sprintf(__("Status: %s, Expires: %s<br>%s"),$registry->registry_status,$expires,$refresh)
+		);
+	//	do_action('eacDoojigger_log_debug',$response,current_action());
+	}
+
+
+	/*
+	 *
+	 * When the plugin is updated
+	 *
+	 */
+
+
+	/**
 	 * filter for version_updated
 	 *
 	 * @param	string|null	$curVersion currently installed version number
 	 * @param	string		$newVersion version being installed/updated
 	 * @param	bool		$asNetworkAdmin running as network admin
-	 * @return	void
 	 */
-	public function update_request_refresh($curVersion=null, $newVersion=null, $asNetworkAdmin=false)
+	public function update_request_refresh($curVersion=null, $newVersion=null, $asNetworkAdmin=false): void
 	{
 		if ($registrationKey = $this->getRegistrationKey())
 		{
@@ -419,6 +427,7 @@ trait swRegistrationUI
 				'registry_product'		=> self::SOFTWARE_REGISTRY_PRODUCTID,
 				'registry_version'		=> $newVersion,
 				'registry_timezone'		=> wp_timezone_string(),
+				'registry_locale'		=> get_locale(),
 			];
 			$apiParams = array_merge($apiParams,$this->getRegistryCustomValues());
 			$this->refreshRegistration($registrationKey,$apiParams);
@@ -434,17 +443,79 @@ trait swRegistrationUI
 
 
 	/**
+	 * Invalid registration notices
+	 *
+	 * @param string $registrationLink passed from swRegistrationAdminInit
+	 */
+	private function invalidRegistrationNotice($registrationLink): void
+	{
+		$registry = $this->currentRegistry;
+		$status  = $registry->registration->registry_status ?? 'inactive';
+
+		if (in_array($status,['trial','active'])) {
+			$expires = $registry->registration->registry_expires.' 23:59:59';
+			$expires = date_create($expires,timezone_open($registry->registrar->timezone ?? 'UTC'));
+			$expires = $expires->setTimeZone(wp_timezone())->format($this->plugin->date_time_format.' (T)');
+			$expires = ' '.sprintf(__('with an expiration of %s.', $this->plugin->PLUGIN_TEXTDOMAIN),$expires);
+		} else {
+			$expires = '.';
+		}
+
+		/**
+		 * filter {pluginName}_unregistered_notice
+		 * @param string
+		 * @return	string
+		 */
+		$notice = $this->apply_filters('unregistered_notice',
+			"%s is currently %s%s\n".
+			"You may check your %s on the settings page."
+		);
+
+		// "<plugin title> is currently <status> with an expiration of <expiration date/time>"
+		$notice = sprintf(__($notice, $this->plugin->PLUGIN_TEXTDOMAIN),
+			'<em>'.$this->plugin->pluginHeader('Title').'</em>', $status, $expires, $registrationLink );
+
+		// display notice on admin pages
+		if (! $this->isSettingsPage('registration')) {
+			$this->add_admin_notice($notice,'error');
+		}
+
+		// display notice on plugins page
+		\add_action( 'after_plugin_row_'.$this->plugin->PLUGIN_SLUG, function($plugin_file,$plugin_data) use ($notice)
+			{
+				$wp_list_table = _get_list_table( 'WP_Plugins_List_Table', ['screen' => get_current_screen()] );
+				printf(
+					'<tr class="plugin-update-tr active" data-slug="%s" data-plugin="%s">'.
+					'<td colspan="%s" class="plugin-update colspanchange">'.
+					'<div class="update-message notice inline notice-error"><p>%s</p></div>'.
+					'</td></tr>',
+					sanitize_title($plugin_data['Name']),
+					plugin_basename($plugin_file),
+					$wp_list_table->get_column_count(),
+					$notice
+				);
+			},10,2
+		);
+	}
+
+
+	/**
 	 * get registration custom values
 	 *
 	 * @return array ['variations','options','domains','sites']
 	 */
 	protected function getRegistryCustomValues(): array
 	{
-		$variations = ['environment' => ($this->plugin->is_network_enabled()) ? 'network' : 'domain'];
+		// variations : environment network or single site
+		$variations = ['environment' => ($this->plugin->is_network_enabled()) ? 'network' : 'site'];
+		// options : list of all extensions loaded
 		$options 	= array_keys($this->plugin->extension_objects);
+		// domains : current host
 		$domains	= [$_SERVER['HTTP_HOST']];
+		// sites : current site url
 		$sites 		= [get_option( 'siteurl' )];
 
+		// add network domains and sites
 		if ($this->plugin->is_network_enabled() && function_exists('\get_sites'))
 		{
 			foreach(get_sites() as $site)
@@ -454,13 +525,12 @@ trait swRegistrationUI
 					$sites[] 	= $site->siteurl;
 				}
 			}
+			$domains 	= array_values(array_unique($domains));
+			$sites 		= array_values(array_unique($sites));
 		}
 
-		$domains 	= array_values(array_unique($domains));
-		$sites 		= array_values(array_unique($sites));
-
 		/**
-		 * filter {classname}_registry_custom_values
+		 * filter {pluginName}_registry_custom_values
 		 *
 		 * @param	array custom values
 		 * @return	array custom values
@@ -477,35 +547,33 @@ trait swRegistrationUI
 	/**
 	 * get registry contextual help
 	 *
-	 * @param string $registrationKey registry key
-	 * @return array help content
+	 * @return string help content
 	 */
-	public function getRegistryHelp(string $registrationKey=null)
+	public function getRegistryHelp()
 	{
-		$currentRegistry = $this->getCurrentRegistration($registrationKey);
 		$help = [];
 
-		if (empty($currentRegistry))
+		if (empty($this->currentRegistry))
 		{
 			return $this->plugin->pluginHeader('Title').' is currently unregistered';
 		}
 		// if we have 'help', use it
-		if (!empty($currentRegistry->registrar->help))
+		if (!empty($this->currentRegistry->registrar->help))
 		{
-			$help[] = $currentRegistry->registrar->help;
+			$help[] = $this->currentRegistry->registrar->help;
 		}
 		else
 		// otherwise use notices & message
 		{
-			foreach ((array)$currentRegistry->registrar->notices as $type=>$notice)
+			foreach ((array)$this->currentRegistry->registrar->notices as $type=>$notice)
 			{
 				if (!empty($notice)) {
 					$help[] = $notice;
 				}
 			}
-			if (!empty($currentRegistry->registrar->message))
+			if (!empty($this->currentRegistry->registrar->message))
 			{
-				$help[] = $currentRegistry->registrar->message;
+				$help[] = $this->currentRegistry->registrar->message;
 			}
 		}
 		$this->addPluginHelpTab('Registration',$help,null,99);
@@ -517,50 +585,63 @@ trait swRegistrationUI
 	/**
 	 * get registry information - in html table
 	 *
-	 * @param string $registrationKey registry key
 	 * @return string
 	 */
-	protected function getRegistryHtml(string $registrationKey=null,$getHelp=false)
+	protected function getRegistryHtml()
 	{
-		$currentRegistry = $this->getCurrentRegistration($registrationKey);
 		$html = "";
 
-		if (empty($currentRegistry))
+		if (empty($this->currentRegistry))
 		{
 			return $this->plugin->pluginHeader('Title').' is currently unregistered';
 		}
-		$html .= "<div class='hidden' style='display:none'>";
-		foreach ((array)$currentRegistry->registrar->notices as $type=>$notice)
+
+		if (!empty($this->currentRegistry->registrar->message))
+		{
+			$html .= "<div class='registration-message'>".$this->currentRegistry->registrar->message."</div>";
+		}
+		$html .= $this->currentRegistry->registryHtml ?? '';
+		return wp_kses_post($html);
+	}
+
+
+	/**
+	 * get registry notices
+	 *
+	 * @return string
+	 */
+	protected function getRegistryNotices()
+	{
+		if (empty($this->currentRegistry))
+		{
+			return;
+		}
+
+		$html = "<div class='hidden' style='display:none'>";
+		foreach ((array)$this->currentRegistry->registrar->notices as $type=>$notice)
 		{
 			if (!empty($notice)) {
 				$html .= "<div class='notice notice-{$type}'><p><strong>{$notice}</strong></p></div>";
 			}
 		}
 		$html .= "</div>";
-		if (!empty($currentRegistry->registrar->message))
-		{
-			$html .= "<div class='registration-message'>".$currentRegistry->registrar->message."</div>";
-		}
-		$html .= $currentRegistry->registryHtml ?: '';
-		return wp_kses_post($html);
+		echo wp_kses_post($html);
 	}
 
 
 	/**
 	 * get registry information - in html table
 	 *
-	 * @param string $registrationKey registry key
 	 * @return string
 	 */
-	protected function getRegistrySupplemental(string $registrationKey=null)
+	protected function getRegistrySupplemental()
 	{
-		$currentRegistry = $this->getCurrentRegistration($registrationKey);
-
-		if (empty($currentRegistry))
+		if (empty($this->currentRegistry))
 		{
 			return '';
 		}
-		$html = $currentRegistry->supplemental ?? '';
+
+		$html = $this->currentRegistry->supplemental ?? '';
 		return wp_kses_post($html);
 	}
 
@@ -571,4 +652,3 @@ trait swRegistrationUI
 	 *
 	 */
 }
-?>
