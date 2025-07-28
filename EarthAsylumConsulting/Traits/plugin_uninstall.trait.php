@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		25.0728.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -82,8 +82,14 @@ trait plugin_uninstall
 		$prefix = self::prefixName('%');
 
 		$wpdb->query( "DELETE FROM {$wpdb->options} ".
-					  "WHERE option_name LIKE '{$prefix}'"
+					  "WHERE `option_name` LIKE '{$prefix}'"
 		);
+	    try {
+			$table = $wpdb->get_blog_prefix() . 'eac_key_value';
+			$wpdb->query( "DELETE FROM {$table} ".
+					  "WHERE `key` LIKE '{$prefix}' AND `expires` = '0000-00-00 00:00:00'"
+			);
+		} catch (\Throwable $e) {}
 		//error_log( self::$className.' '.__METHOD__ );
 	}
 
@@ -96,11 +102,17 @@ trait plugin_uninstall
 		$prefix = strtolower(self::prefixName('%'));
 
 		$wpdb->query( "DELETE FROM {$wpdb->options} ".
-					"WHERE option_name LIKE '%_transient_{$prefix}'"
+					"WHERE `option_name` LIKE '%_transient_{$prefix}'"
 		);
 		$wpdb->query( "DELETE FROM {$wpdb->options} ".
-					"WHERE option_name LIKE '%_transient_timeout_{$prefix}'"
+					"WHERE `option_name` LIKE '%_transient_timeout_{$prefix}'"
 		);
+	    try {
+			$table = $wpdb->get_blog_prefix() . 'eac_key_value';
+			$wpdb->query( "DELETE FROM {$table} ".
+						  "WHERE `key` LIKE '{$prefix}' AND `expires` <> '0000-00-00 00:00:00'"
+			);
+		} catch (\Throwable $e) {}
 		//error_log( self::$className.' '.__METHOD__ );
 	}
 
@@ -113,8 +125,14 @@ trait plugin_uninstall
 		$prefix = self::prefixName('%');
 
 		$wpdb->query( "DELETE FROM {$wpdb->sitemeta} ".
-					"WHERE meta_key LIKE '{$prefix}'"
+					"WHERE `meta_key` LIKE '{$prefix}'"
 		);
+	    try {
+			$table = $wpdb->get_blog_prefix() . 'eac_key_value_site';
+			$wpdb->query( "DELETE FROM {$table} ".
+					  "WHERE `key` LIKE '{$prefix}' AND `expires` = '0000-00-00 00:00:00'"
+			);
+		} catch (\Throwable $e) {}
 		//error_log( self::$className.' '.__METHOD__ );
 	}
 
@@ -127,11 +145,17 @@ trait plugin_uninstall
 		$prefix = strtolower(self::prefixName('%'));
 
 		$wpdb->query( "DELETE FROM {$wpdb->sitemeta} ".
-					"WHERE meta_key LIKE '%_transient_{$prefix}'"
+					"WHERE `meta_key` LIKE '%_transient_{$prefix}'"
 		);
 		$wpdb->query( "DELETE FROM {$wpdb->sitemeta} ".
-					"WHERE meta_key LIKE '%_transient_timeout_{$prefix}'"
+					"WHERE `meta_key` LIKE '%_transient_timeout_{$prefix}'"
 		);
+	    try {
+			$table = $wpdb->get_blog_prefix() . 'eac_key_value_site';
+			$wpdb->query( "DELETE FROM {$table} ".
+						  "WHERE `key` LIKE '{$prefix}' AND `expires` <> '0000-00-00 00:00:00'"
+			);
+		} catch (\Throwable $e) {}
 		//error_log( self::$className.' '.__METHOD__ );
 	}
 

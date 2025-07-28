@@ -17,7 +17,7 @@ defined( 'WP_UNINSTALL_PLUGIN' ) or exit;
 
 if (!trait_exists('\\EarthAsylumConsulting\\Traits\\plugin_uninstall'))
 {
-	require __NAMESPACE__.'/Traits/plugin_uninstall.trait.php';
+	require 'EarthAsylumConsulting/Traits/plugin_uninstall.trait.php';
 }
 
 /**

@@ -2,6 +2,7 @@
 
 = Version 3.2.1 – July 28, 2025 =
 
++   Fixed issues with uninstall and added support for keyvalue table(s).
 +   Admin notice/settings errors recognize and eliminate duplicate notices.
 +   Risk assessment looks for "ip_allow_list.conf" file to reset assessment by IP address.
 +   `datetime` trait now uses DateTimeImmutable instead of DateTime, still returns \DateTime.

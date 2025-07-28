@@ -75,6 +75,7 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 					'L4'			=> 8, 		// profesional
 					'L5'			=> true,	// enterprise
 					'LD','LU'		=> true, 	// developer,unlimited
+					default 		=> false,
 				};
 			}, PHP_INT_MAX
 		);

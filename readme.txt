@@ -26,7 +26,7 @@ under the existing subscription plans, as of August 2025, you may
 for free (or with [sponsorship](https://github.com/sponsors/EarthAsylum)) at this
 [GitHub Repository](https://github.com/EarthAsylum/eacDoojigger)._
 
-*The [Copyright](#readme-copyright) and
+*The [Copyright](#copyright) and
 [End User License Agreement](https://eacdoojigger.earthasylum.com/end-user-license-agreement/) still apply.*
 
 = Summary =
@@ -400,7 +400,7 @@ Currently, and for the last decade or more, my focus has been on internet-based 
 
 In developing {eac}Doojigger, and other plugins based on it, I hope to maintain a small revenue stream to help keep me going.
 
-To that end, your support is greatly appreciated.
+To that end, your support and [sponsorship](https://github.com/sponsors/EarthAsylum) are greatly appreciated.
 It will enable me to continue developing quality software and provide support to current and future clients (and to enjoy a cup of coffee occasionally).
 
 *It's not just a job, it's a hobby, a craft, a passion, and an art.*
@@ -464,6 +464,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 = Version 3.2.1 – July 28, 2025 =
 
++   Fixed issues with uninstall and added support for keyvalue table(s).
 +   Admin notice/settings errors recognize and eliminate duplicate notices.
 +   Risk assessment looks for "ip_allow_list.conf" file to reset assessment by IP address.
 +   `datetime` trait now uses DateTimeImmutable instead of DateTime, still returns \DateTime.
