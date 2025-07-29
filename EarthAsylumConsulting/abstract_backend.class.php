@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0725.1
+ * @version		25.0728.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -281,6 +281,8 @@ abstract class abstract_backend extends abstract_core
 	 * We may pass through here more than once, if network-enabled.
 	 * In multisite environment, network admin calls upgrade for each active site.
 	 *
+	 * This doesn't work if instaling on multisite but not network activated.
+	 *
 	 * @param	object	$upgrader_object
 	 * @param	array	$hook_extra
 	 * @return	void
@@ -289,9 +291,17 @@ abstract class abstract_backend extends abstract_core
 	{
 		if ( $hook_extra['type'] === 'plugin' && in_array($hook_extra['action'], ['install','update']) )
 		{
-			if ( array_key_exists('plugins',$hook_extra) && in_array($this->PLUGIN_SLUG, $hook_extra['plugins']) )
+			// are we updating this plugin?
+			if ((array_key_exists('plugin',$hook_extra) &&  $hook_extra['plugin'] == $this->PLUGIN_SLUG)
+			||  (array_key_exists('plugins',$hook_extra) && in_array($this->PLUGIN_SLUG, $hook_extra['plugins'])) )
 			{
 				$this->delete_site_transient( self::PLUGIN_HEADER_TRANSIENT );
+				// delete transient on all sites
+				$this->forEachNetworkSite(function()
+					{
+						$this->delete_site_transient( self::PLUGIN_HEADER_TRANSIENT );
+					}
+				);
 			}
 		}
 	}
@@ -464,7 +474,10 @@ abstract class abstract_backend extends abstract_core
 	 */
 	protected function admin_upgrade_plugin(string $oldVersion): void
 	{
-		//$this->setPluginHeaderValues([]); // force reload of header values
+		if ( is_multisite() && !$this->is_network_enabled() ) {
+			// because we can't detect plugin update
+			$this->setPluginHeaderValues([]); // force reload of header values
+		}
 		$newVersion = $this->getSemanticVersion()->version;
 		if ( ($compare = $this->isVersionCompare($oldVersion, $newVersion, true, 'upgrade', 'downgrade')) === true ) return;
 

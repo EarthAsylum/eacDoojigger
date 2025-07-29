@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0614.1';
+		const VERSION	= '25.0728.1';
 
 		/**
 		 * @var string extension tab name
@@ -1202,7 +1202,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		public function requestURL()
 		{
 			global $argv;
-			$http = $this->plugin->getRequestScheme();
+			$http = $this->plugin->getRequestScheme().'://';
 
 			if ( (PHP_SAPI === 'cli') || (defined('WP_CLI') && WP_CLI) ) {
 				$_SERVER['REQUEST_METHOD']	= 'CLI';
