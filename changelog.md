@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.2.1 – July 28, 2025 =
+= Version 3.2.1 – August 1, 2025 =
 
 +   Fixed issues with uninstall and added support for keyvalue table(s).
 +   Fix for plugin update, not network activated, on multisite.
