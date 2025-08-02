@@ -22,7 +22,7 @@ GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki
 _Although this software may still be purchased on the
 [{eac}Doojigger web site](https://eacdoojigger.earthasylum.com/eacdoojigger/)
 under the existing subscription plans, as of August 2025, you may
-[download the standard edition](https://swregistry.earthasylum.com/software-updates/eacdoojigger.zip 'Download eacdoojigger.zip, latest release')
+[download the basic edition](https://swregistry.earthasylum.com/software-updates/eacdoojigger.zip 'Download eacdoojigger.zip, latest release')
 for free (or with [sponsorship](https://github.com/sponsors/EarthAsylum)) at this
 [GitHub Repository](https://github.com/EarthAsylum/eacDoojigger)._
 

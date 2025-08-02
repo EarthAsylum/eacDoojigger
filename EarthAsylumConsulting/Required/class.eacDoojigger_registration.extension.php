@@ -23,7 +23,7 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 	/**
 	 * @var string extension version
 	 */
-	const VERSION		= '25.0726.1';
+	const VERSION		= '25.0802.1';
 
 	/**
 	 * @var ALIAS constant ($this->Registration->...)
@@ -60,7 +60,7 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 		// allow internal extensions if license is L3 (standard) or better
 		$this->add_filter( 'allow_internal_extensions', function()
 			{
-				return $this->isRegistryvalue('license', 'L3', 'ge');	// standard
+				return $this->isRegistryvalue('license', 'L2', 'ge');	// basic
 			}, PHP_INT_MAX
 		);
 
@@ -70,7 +70,7 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 			//	return $this->isRegistryvalue('license', 'L4', 'ge');
 				return match ($this->isRegistryvalue('license')) {
 					'L1'			=> false, 	// lite
-					'L2'			=> 1, 		// basic
+					'L2'			=> 2, 		// basic
 					'L3'			=> 4, 		// standard
 					'L4'			=> 8, 		// profesional
 					'L5'			=> true,	// enterprise
