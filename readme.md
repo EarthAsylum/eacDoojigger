@@ -78,8 +78,8 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 #### Provided With {eac}Doojigger
 
-|   Included 'Doolollys' & 'Doodads'             | (Extensions, helpers & Traits) |
-|   ---------------------------------   |   ----------------    |
+|   'Doolollys' & 'Doodads'             | (Extensions, helpers & Traits) |
+|   :--------------------------------   |   :---------------    |
 |   *[File System Access]*              | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *[WPMU Installer]*                  | Uses the file system extension to easily install or update programs or files within the WordPress directory structure.|
 |   *[Security]*                        | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
@@ -114,7 +114,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 [IpGeoLocation]:		https://www.ipgeolocation.io
 
 |   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
-|   ---------------------------------   |   ----------------    |
+|   :--------------------------------   |   :---------------    |
 |   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first 'Doojigger' plugin.* |
 |   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first 'Doololly' extension.* |
 |   *myFunctions*                       | A functional skeleton 'Doohickey' (extension plugin) intended to replace (or augment) custom theme `functions.php`, including custom stylesheet and javascript. |
@@ -127,21 +127,21 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 
 |   {eac}Doojigger Utilities            |                       |
-|   ---------------------------------   |   ----------------    |
+|   :--------------------------------   |   :---------------    |
 |   *{eac}DoojiggerAutoloader*          | The required auto-loader to automatically load {eac}Doojigger (and derivative) classes and traits. |
 |   *{eac}DoojiggerEnvironment*         | The Environment Switcher to set WP environment from the network (multi-site) settings page. |
 |   *{eac}DoojiggerActionTimer*         | A timer/tracking utility to track the load/execution timing of WordPress actions and filters (as well as custom events) when WordPress loads. |
 
 
 |   Available 'Doojiggers'              | (Derivative Plugins)  |
-|   ---------------------------------   |   ----------------    |
+|   :--------------------------------   |   :---------------    |
 |   [{eac}SoftwareRegistry]             | A full-featured Software Registration/Licensing Server (used by {eac}Doojigger). |
 
 [{eac}SoftwareRegistry]:	https://swregistry.earthasylum.com/
 
 
 |   Available 'Doohickies'              | (Extension Plugins) [WordPress Repository] |
-|   ---------------------------------   |   ----------------    |
+|   :--------------------------------   |   :---------------    |
 |   [{eac}SimpleSMTP]                   | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
 |   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
 |   [{eac}SimpleCDN]                    | Enables the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience. |
