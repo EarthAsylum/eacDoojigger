@@ -104,7 +104,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 [FraudGuard]:			https://www.fraudguard.io
 [IpGeoLocation]:		https://www.ipgeolocation.io
 
-|   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
+|   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
 |   ---------------------------------   |   ----------------    |
 |   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first 'Doojigger' plugin.* |
 |   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first 'Doololly' extension.* |
@@ -117,21 +117,21 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 [download zip]:			https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip
 
 
-|   {eac}Doojigger Utilities            |                       |
+|   {eac}Doojigger Utilities            |                       |
 |   ---------------------------------   |   ----------------    |
 |   *{eac}DoojiggerAutoloader*          | The required auto-loader to automatically load {eac}Doojigger (and derivative) classes and traits. |
 |   *{eac}DoojiggerEnvironment*         | The Environment Switcher to set WP environment from the network (multi-site) settings page. |
 |   *{eac}DoojiggerActionTimer*         | A timer/tracking utility to track the load/execution timing of WordPress actions and filters (as well as custom events) when WordPress loads. |
 
 
-|   Available 'Doojiggers'              | (Derivative Plugins)  |
+|   Available 'Doojiggers'              | (Derivative Plugins)  |
 |   ---------------------------------   |   ----------------    |
 |   [{eac}SoftwareRegistry]             | A full-featured Software Registration/Licensing Server (used by {eac}Doojigger). |
 
 [{eac}SoftwareRegistry]:	https://swregistry.earthasylum.com/
 
 
-|   Available 'Doohickies'              | (Extension Plugins) [WordPress Repository] |
+|   Available 'Doohickies'              | (Extension Plugins) [WordPress Repository] |
 |   ---------------------------------   |   ----------------    |
 |   [{eac}SimpleSMTP]                   | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
 |   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
