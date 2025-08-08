@@ -69,7 +69,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 = Provided With {eac}Doojigger =
 
-|   'Doolollys' & 'Doodads'             | (Extensions, helpers & Traits) |
+|   'Doolollys' & 'Doodads'             | Included extensions, helpers & Traits |
 |   :--------------------------------   |   :---------------    |
 |   *[File System Access]*              | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *[WPMU Installer]*                  | Uses the file system extension to easily install or update programs or files within the WordPress directory structure.|
@@ -124,7 +124,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *{eac}DoojiggerActionTimer*         | A timer/tracking utility to track the load/execution timing of WordPress actions and filters (as well as custom events) when WordPress loads. |
 
 
-|   Available 'Doojiggers'              | (Derivative Plugins)  |
+|   Available 'Doojiggers'              | (Derivative Plugins)  |
 |   :--------------------------------   |   :---------------    |
 |   [{eac}SoftwareRegistry]             | A full-featured Software Registration/Licensing Server (used by {eac}Doojigger). |
 
