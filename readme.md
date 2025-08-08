@@ -78,7 +78,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 #### Provided With {eac}Doojigger
 
-|   Included 'Doolollys' & 'Doodads'    | (Extensions, helpers & Traits) |
+|   Included 'Doolollys' & 'Doodads'    | (Extensions, helpers & Traits) |
 |   ---------------------------------   |   ----------------    |
 |   *[File System Access]*              | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *[WPMU Installer]*                  | Uses the file system extension to easily install or update programs or files within the WordPress directory structure.|
@@ -113,7 +113,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 [FraudGuard]:			https://www.fraudguard.io
 [IpGeoLocation]:		https://www.ipgeolocation.io
 
-|   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
+|   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
 |   ---------------------------------   |   ----------------    |
 |   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first 'Doojigger' plugin.* |
 |   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first 'Doololly' extension.* |

@@ -104,7 +104,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 [FraudGuard]:			https://www.fraudguard.io
 [IpGeoLocation]:		https://www.ipgeolocation.io
 
-|   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
+|   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
 |   ---------------------------------   |   ----------------    |
 |   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first 'Doojigger' plugin.* |
 |   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first 'Doololly' extension.* |
