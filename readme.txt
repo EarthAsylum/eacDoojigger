@@ -20,14 +20,21 @@ GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki
 = Important Update =
 
 _Although this software may still be purchased on the
-[{eac}Doojigger web site](https://eacdoojigger.earthasylum.com/eacdoojigger/)
+[{eac}Doojigger web site][website]
 under the existing subscription plans, as of August 2025, you may
-[download the basic edition](https://swregistry.earthasylum.com/software-updates/eacdoojigger.zip 'Download eacdoojigger.zip, latest release')
-for free (or with [sponsorship](https://github.com/sponsors/EarthAsylum)) at this
-[GitHub Repository](https://github.com/EarthAsylum/eacDoojigger)._
+[download the basic edition][download] for free (or with [sponsorship])
+available at this [GitHub Repository]._
 
 *The [Copyright](#copyright) and
-[End User License Agreement](https://eacdoojigger.earthasylum.com/end-user-license-agreement/) still apply.*
+[End User License Agreement](https://swregistry.earthasylum.com/end-user-license-agreement/) still apply.*
+
+:package: [Download eacDoojigger.zip][Download]
+
+[website]:			https://eacdoojigger.earthasylum.com/eacdoojigger/
+[sponsorship]:		https://github.com/sponsors/EarthAsylum
+[download]:			https://swregistry.earthasylum.com/software-updates/eacdoojigger.zip "Download eacDoojigger.zip, latest release, ready to install"
+[GitHub Repository]:https://github.com/EarthAsylum/eacDoojigger
+
 
 = Summary =
 
@@ -64,18 +71,18 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 |   Included 'Doolollys' & 'Doodads'    | (Extensions, helpers & Traits) |
 |   ---------------------------------   |   ----------------    |
-|   *[File System Access](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(file-system-extension))*                | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
-|   *[WPMU Installer](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(eacdoojigger-installer))*                    | Uses the file system extension to easily install or update programs or files within the WordPress directory structure. |
-|   *[Security](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/Security)*                          | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
-|   *Content Security Assistant*        | Adds security nonce to `script` and style `link` tags to facilitate creation of comprehensive *Content Security Policy* (CSP) | 
+|   *[File System Access]*              | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
+|   *[WPMU Installer]*                  | Uses the file system extension to easily install or update programs or files within the WordPress directory structure.|
+|   *[Security]*                        | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
+|   *Content Security Assistant*        | Adds security nonce to `script` and style `link` tags to facilitate creation of comprehensive *Content Security Policy* (CSP) |
 |   *Server-Side CORS*                  | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
-|   *Threat Detection*                  | Ability to block access by IP address based on *security* and *CORS* violations as well as [AbuseIPDB](https://www.abuseipdb.com/user/165095), [FraudGuard](https://www.fraudguard.io), and/or [IpGeoLocation](https://www.ipgeolocation.io) threat scores. |
-|   *[Event Scheduler](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(recurring-events))*                   | Easily set and enable WordPress and custom CRON schedules (intervals), events, and tasks (actions). |
-|   *[Key/Value Storage](https://github.com/EarthAsylum/eacKeyValue/blob/main/readme.md)*                 | An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. |
-|   *[Debugging](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(debugging-logger-methods))*                         | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
+|   *Threat Detection*                  | Ability to block access by IP address based on *security* and *CORS* violations as well as [AbuseIPDB], [FraudGuard], and/or [IpGeoLocation] threat scores. |
+|   *[Event Scheduler]*                 | Easily set and enable WordPress and custom CRON schedules (intervals), events, and tasks (actions). |
+|   *[Key/Value Storage]*               | An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. |
+|   *[Debugging]*                       | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
 |   *Encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
-|   *[Cookie Compliance](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(wp-consent-api-and-cookies))*                 | Set cookies with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) compatible consent parameters for GDPR/CCPA Compliance. |
+|   *[Cookie Compliance]*               | Set cookies with [WP Consent API] compatible consent parameters for GDPR/CCPA Compliance. |
 |   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for reading/writing session variables. |
 |   *Maintenance Mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
 |   *Admin Tools*                       | Adds cache management and plugin settings backup/restore, export/import. |
@@ -83,14 +90,31 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *Material Icons*                    | Adds Google's Material Icons to WordPress. |
 |   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, html input fields, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
 
+[File System Access]:	https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(file-system-extension)
+[WPMU Installer]:		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(eacdoojigger-installer)
+[Security]:				https://github.com/EarthAsylum/docs.eacDoojigger/wiki/Security
+[Event Scheduler]:		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(recurring-events)
+[Key/Value Storage]:	https://github.com/EarthAsylum/eacKeyValue/blob/main/readme.md
+[Debugging]:			https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(debugging-logger-methods)
+[Cookie Compliance]:	https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(wp-consent-api-and-cookies
 
-|   Extras & Examples                   |   { [explore on github](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras) } { [documentation wiki](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/) } { [download zip](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip) } |
+[WP Consent API]:		https://wordpress.org/plugins/wp-consent-api/
+
+[AbuseIPDB]:			https://www.abuseipdb.com/user/165095
+[FraudGuard]:			https://www.fraudguard.io
+[IpGeoLocation]:		https://www.ipgeolocation.io
+
+|   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
 |   ---------------------------------   |   ----------------    |
 |   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first 'Doojigger' plugin.* |
 |   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first 'Doololly' extension.* |
 |   *myFunctions*                       | A functional skeleton 'Doohickey' (extension plugin) intended to replace (or augment) custom theme `functions.php`, including custom stylesheet and javascript. |
 |   *myOptionsTest*                     | A functional example 'Doohickey' that produces a settings screen with all input field types. Includes example input field filters and sanitization. |
 |   A debugging test api                | Extension that provides testing via url through the debugging extension (not intended for production sites). |
+
+[explore on github]:	https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras
+[documentation wiki]:	https://github.com/EarthAsylum/docs.eacDoojigger/wiki/
+[download zip]:			https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip
 
 
 |   {eac}Doojigger Utilities            |                       |
@@ -100,20 +124,33 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *{eac}DoojiggerActionTimer*         | A timer/tracking utility to track the load/execution timing of WordPress actions and filters (as well as custom events) when WordPress loads. |
 
 
-|   Available 'Doojiggers' | (Derivative Plugins) |
+|   Available 'Doojiggers'              | (Derivative Plugins)  |
 |   ---------------------------------   |   ----------------    |
-|   [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/) | A full-featured Software Registration/Licensing Server (used by {eac}Doojigger). |
+|   [{eac}SoftwareRegistry]             | A full-featured Software Registration/Licensing Server (used by {eac}Doojigger). |
+
+[{eac}SoftwareRegistry]:	https://swregistry.earthasylum.com/
 
 
-|   Available 'Doohickies' | (Extension Plugins) [WordPress Repository](https://wordpress.org/plugins/search/earthasylum/) |
+|   Available 'Doohickies'              | (Extension Plugins) [WordPress Repository] |
 |   ---------------------------------   |   ----------------    |
-|   [{eac}SimpleSMTP](https://eacdoojigger.earthasylum.com/eacsimplesmtp/)  | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
-|   [{eac}SimpleAWS](https://eacdoojigger.earthasylum.com/eacsimpleaws/)    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
-|   [{eac}SimpleCDN](https://eacdoojigger.earthasylum.com/eacsimplecdn/)    | Enables the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience. |
-|   [{eac}ObjectCache](https://eacdoojigger.earthasylum.com/objectcache/)   | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects. |
-|   [{eac}Readme](https://eacdoojigger.earthasylum.com/eacreadme/)          | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
-|   [{eac}SimpleGTM](https://eacdoojigger.earthasylum.com/eacsimplegtm/)    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
-|   [{eac}MetaPixel](https://eacdoojigger.earthasylum.com/eacmetapixel/)    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
+|   [{eac}SimpleSMTP]                   | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
+|   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
+|   [{eac}SimpleCDN]                    | Enables the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience. |
+|   [{eac}ObjectCache]                  | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects. |
+|   [{eac}Readme]                       | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
+|   [{eac}SimpleGTM]                    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
+|   [{eac}MetaPixel]                    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
+|   [{eac}KeyValue]                     | An easy to use, efficient, key-value pair storage mechanism for WordPress. |
+
+[WordPress Repository]:		https://wordpress.org/plugins/search/earthasylum/
+
+[{eac}SimpleAWS]:			https://eacdoojigger.earthasylum.com/eacsimpleaws/
+[{eac}SimpleCDN]:			https://eacdoojigger.earthasylum.com/eacsimplecdn/
+[{eac}ObjectCache]:			https://eacdoojigger.earthasylum.com/objectcache/
+[{eac}Readme]:				https://eacdoojigger.earthasylum.com/eacreadme/
+[{eac}SimpleGTM]:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
+[{eac}MetaPixel]:			https://eacdoojigger.earthasylum.com/eacmetapixel/
+[{eac}KeyValue]:			https://eacdoojigger.earthasylum.com/eackeyvalue/
 
 
 = 'Doojiggers' - Custom Derivative Plugins =
@@ -130,7 +167,7 @@ Once {eac}Doojigger is installed and registered, you, the developer, can create 
 
 Your plugin code need only focus on your particular requirements. The WordPress code and many utility functions have been taken care of for you.
 
->   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/derivatives/) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/Plugins/* folder).
+>   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/derivatives/) (found in the *[Extras]/Plugins/* folder).
 
 
 = 'Doolollys' - Custom Doojigger Extensions =
@@ -142,7 +179,7 @@ An extension is a PHP program class that adds functionality to the base plugin. 
 
 *Custom extensions may also be uploaded to your theme folder (preferable a [child theme](https://developer.wordpress.org/themes/advanced-topics/child-themes/)), in the ../eacDoojigger/Extensions folder.*
 
->   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/extensions/) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/Extensions/* folder).
+>   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/extensions/) (found in the *[Extras]/Extensions/* folder).
 
 
 = 'Doohickeys' - Custom Extension Plugins =
@@ -154,8 +191,9 @@ Since uploading extensions to the plugin or theme folder risks overwriting those
 
 {eac}Doojigger provides many useful methods and hooks which can be accessed from your custom plugins or extensions, as well as from your theme functions or any code in WordPress.
 
->   See [Using {eac}Doojigger](https://eacdoojigger.earthasylum.com/using-doojigger) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/UsingDoojigger/* folder) for details and examples,
->   [{eac}Doojigger PHP Reference](https://earthasylum.github.io/docs.eacDoojigger/) documentation.
+>   See:
+>	+ [Using {eac}Doojigger](https://eacdoojigger.earthasylum.com/using-doojigger) (found in the *[Extras]/UsingDoojigger/* folder) for details and examples,
+>   + [{eac}Doojigger PHP Reference](https://earthasylum.github.io/docs.eacDoojigger/) documentation.
 
 
 = Automatic Updates =
@@ -164,8 +202,7 @@ WordPress hosted plugins provide updating functionality automatically. Whenever 
 
 You can provide the same functionality with your externally or self hosted plugin with a few easy changes.
 
->   See [Automatic Updates](https://eacdoojigger.earthasylum.com/automatic-updates/) (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/AutoUpdate/* folder) for more information.
-
+>   See [Automatic Updates](https://eacdoojigger.earthasylum.com/automatic-updates/) (found in the *[Extras]/AutoUpdate/* folder) for more information.
 
 = Contextual Help =
 
@@ -173,7 +210,9 @@ To complete your plugin and improve support, provide contextual help using the {
 
 Adding contextual help to your plugin and extension is easy using the methods built into {eac}Doojigger... and when using the proper filter, you can ensure that your help content only shows on your plugin page or extension tab.
 
->   See the [Contextual Help](https://eacdoojigger.earthasylum.com/contextual-help/) page (found in the *[Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)/ContextualHelp/* folder) for complete details and examples.
+>   See the [Contextual Help](https://eacdoojigger.earthasylum.com/contextual-help/) page (found in the *[Extras]/ContextualHelp/* folder) for complete details and examples.
+
+[Extras]:	https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras
 
 
 = Advanced Mode =
@@ -306,29 +345,40 @@ _doodad_ (n)
 
 *'Doohickeys' (plugins) and 'Doolollys' (extensions) built with {eac}Doojigger*
 
-+   [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/)
-A full-featured Software Registration/Licensing Server built on {eac}Doojigger.
++   [{eac}SoftwareRegistry] A full-featured Software Registration/Licensing Server built on {eac}Doojigger.
 
-+   [{eac}SimpleGTM](https://eacDoojigger.earthasylum.com/eacsimplegtm/)
++   [{eac}SimpleGTM]
 Installs and configures the Google Tag Manager (GTM) or Google Analytics (GA4) script with optional tracking events.
 
-+   [{eac}SimpleSMTP](https://eacDoojigger.earthasylum.com/eacsimplesmtp/)
++   [{eac}SimpleSMTP]
 An {eac}Doojigger extension to configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email.
 
-+   [{eac}SimpleAWS](https://eacDoojigger.earthasylum.com/eacsimpleaws/)
++   [{eac}SimpleAWS]
 An {eac}Doojigger extension to include and enable use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK).
 
-+   [{eac}SimpleCDN](https://eacDoojigger.earthasylum.com/eacsimplecdn/)
++   [{eac}SimpleCDN]
 An {eac}Doojigger extension to enable the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience.
 
-+   [{eac}ObjectCache](https://eacDoojigger.earthasylum.com/objectcache/)
++   [{eac}ObjectCache]
 A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects.
 
-+   [{eac}Readme](https://eacDoojigger.earthasylum.com/eacreadme/)
++   [{eac}Readme]
 An {eac}Doojigger extension to translate a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document.
 
-+   [{eac}MetaPixel](https://eacDoojigger.earthasylum.com/eacmetapixel/)
++   [{eac}MetaPixel]
 An {eac}Doojigger extension to install the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events.
+
++	[{eac}KeyValue]
+An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. Similar to WP options/transients with less overhead and greater efficiency (and fewer hooks).
+
+[{eac}SoftwareRegistry]:	https://swregistry.earthasylum.com/
+[{eac}SimpleAWS]:			https://eacdoojigger.earthasylum.com/eacsimpleaws/
+[{eac}SimpleCDN]:			https://eacdoojigger.earthasylum.com/eacsimplecdn/
+[{eac}ObjectCache]:			https://eacdoojigger.earthasylum.com/objectcache/
+[{eac}Readme]:				https://eacdoojigger.earthasylum.com/eacreadme/
+[{eac}SimpleGTM]:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
+[{eac}MetaPixel]:			https://eacdoojigger.earthasylum.com/eacmetapixel/
+[{eac}KeyValue]:			https://eacdoojigger.earthasylum.com/eackeyvalue/
 
 
 == Installation ==
@@ -387,7 +437,7 @@ Since version 2, {eac}Doojigger has been meticulously updated to provide not onl
 
 The *{eac}Doojigger Extras* (now at this [Github Repository](https://github.com/EarthAsylum/docs.eacDoojigger)) includes examples and documentation:
 
-+   [{eac}Doojigger Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)  
++   [{eac}Doojigger Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)
 +   [{eac}Doojigger Extras Documentation](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/)
 +   [{eac}Doojigger Extras Download](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)
 
@@ -595,9 +645,9 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
     +   New `register_[fraud|threat|abuse|risk]` hooks used to tag risky actions and, possibly, block access.
         +   Added `register_threat` action to several security checks.
     +   New AbuseIPDB api extension to block by IP address based on abuse score.
-        +   See : https://www.abuseipdb.com/user/165095 
+        +   See : https://www.abuseipdb.com/user/165095
     +   New FraudGuard api extension to block by IP address based on risk level.
-        +   See : https://www.fraudguard.io 
+        +   See : https://www.fraudguard.io
     +   New IpGeoLocation api extension to block by IP address based on threat score.
         +   See : https://www.ipgeolocation.io
 +   New 'Content Security Assistant' (Add Script nonce, Add Style nonce, Do CSP Action).
