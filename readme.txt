@@ -140,7 +140,6 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   [{eac}Readme]                       | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
 |   [{eac}SimpleGTM]                    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
 |   [{eac}MetaPixel]                    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
-|   [{eac}KeyValue]                     | An easy to use, efficient, key-value pair storage mechanism for WordPress. |
 
 [WordPress Repository]:		https://wordpress.org/plugins/search/earthasylum/
 
@@ -151,7 +150,6 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 [{eac}Readme]:				https://eacdoojigger.earthasylum.com/eacreadme/
 [{eac}SimpleGTM]:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
 [{eac}MetaPixel]:			https://eacdoojigger.earthasylum.com/eacmetapixel/
-[{eac}KeyValue]:			https://eacdoojigger.earthasylum.com/eackeyvalue/
 
 
 = 'Doojiggers' - Custom Derivative Plugins =
