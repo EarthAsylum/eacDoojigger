@@ -1,6 +1,6 @@
 # {eac}PLv1 - End-User License Agreement  
 Author:             [EarthAsylum Consulting](https://www.earthasylum.com)  
-Last Updated: 		28-Jul-2025  
+Last Updated: 		13-Aug-2025  
 Contributors:       [Kevin Burkholder](https://kevinburkholder.com)  
 License:            EarthAsylum Consulting Proprietary License - {eac}PLv1  
 License URI:        https://earthasylum.com/end-user-license-agreement/  
@@ -42,3 +42,40 @@ IF YOU DO NOT AGREE TO THESE TERMS:
 +   See the `{eac)PLv1` folder distributed with this software.
 +   Visit [EarthAsylum Consulting EULA](https://earthasylum.com/end-user-license-agreement/) on the web.
 
+## License Levels
+
+### Basic
+
++   Register on 1 domain or 2 sites
++   Access to all examples and extras
++   Supports custom Doojiggers (derivative) plugins
++   Includes all {eac}Doojigger extensions
++   Supports up to 2 custom Doolollys / extensions
++   ~~Enable Advanced Mode features~~
+
+### Standard
+
++   Register on up to 2 domains or 4 sites
++   Access to all examples and extras
++   Supports custom Doojiggers (derivative) plugins
++   Includes all {eac}Doojigger extensions
++   Supports up to 4 custom Doolollys / extensions
++   Enable Advanced Mode features
+
+### Professional
+
++   Register on up to 4 domains or 8 sites
++   Access to all examples and extras
++   Supports custom Doojiggers (derivative) plugins
++   Includes all {eac}Doojigger extensions
++   Supports up to 8 custom Doolollys / extensions
++   Enable Advanced Mode features
+
+### Enterprise
+
++   Register on up to 8 domains with unlimited sites
++   Access to all examples and extras
++   Supports custom Doojiggers (derivative) plugins
++   Includes all {eac}Doojigger extensions
++   Supports unlimited custom Doolollys / extensions
++   Enable Advanced Mode features
