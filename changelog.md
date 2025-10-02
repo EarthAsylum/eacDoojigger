@@ -1,5 +1,17 @@
 == Changelog ==
 
+= Version 3.2.2 – October 1, 2025 =
+
++   Fixed SQL select for sitewide transient (meta_key) in eacKeyValue.
++	Ignore (return default) options with ['-','\_','.'] prefix in `get_option()`.
++	Pass `$context` array in logging methods.
++ 	Force string return in getRequestParts(...) when null.
++	Don't repeatedly set visitor cookie, only set if not found.
++	Fix  error in `upgrader_process_complete` when `$hook_extra['plugins']` is null.
++	Check `headers_sent()` in `set_cookie()` to prevent error.
++	Option to bypass kses in `minifyString()` since typically is not html.
++	Automatically strip invalid characters in `minifyString()`.
+
 = Version 3.2.1 – August 1, 2025 =
 
 +   Fixed issues with uninstall and added support for keyvalue table(s).

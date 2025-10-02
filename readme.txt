@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.2.1
-Last Updated:           01-Aug-2025
+Stable tag:             3.2.2
+Last Updated:           01-Oct-2025
 Requires at least:      5.8
 Tested up to:           6.8
 Requires PHP:           8.1
@@ -28,7 +28,7 @@ available at this [GitHub Repository]._
 *The [Copyright](#copyright) and
 [End User License Agreement](https://swregistry.earthasylum.com/end-user-license-agreement/) still apply.*
 
-:package: [Download eacDoojigger.zip][Download]
+📦 [Download eacDoojigger.zip][Download]
 
 [website]:			https://eacdoojigger.earthasylum.com/eacdoojigger/
 [sponsorship]:		https://github.com/sponsors/EarthAsylum
@@ -136,7 +136,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   [{eac}SimpleSMTP]                   | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
 |   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
 |   [{eac}SimpleCDN]                    | Enables the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience. |
-|   [{eac}ObjectCache]                  | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects. |
+|   [{eac}ObjectCache]                  | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database and even faster APCu shared memory to cache WordPress objects. |
 |   [{eac}Readme]                       | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
 |   [{eac}SimpleGTM]                    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
 |   [{eac}MetaPixel]                    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
@@ -359,7 +359,7 @@ An {eac}Doojigger extension to include and enable use of the Amazon Web Services
 An {eac}Doojigger extension to enable the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience.
 
 +   [{eac}ObjectCache]
-A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects.
+A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database and even faster APCu shared memory to cache WordPress objects.
 
 +   [{eac}Readme]
 An {eac}Doojigger extension to translate a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document.
@@ -512,6 +512,18 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
+= Version 3.2.2 – October 1, 2025 =
+
++   Fixed SQL select for sitewide transient (meta_key) in eacKeyValue.
++	Ignore (return default) options with ['-','\_','.'] prefix in `get_option()`.
++	Pass `$context` array in logging methods.
++ 	Force string return in getRequestParts(...) when null.
++	Don't repeatedly set visitor cookie, only set if not found.
++	Fix  error in `upgrader_process_complete` when `$hook_extra['plugins']` is null.
++	Check `headers_sent()` in `set_cookie()` to prevent error.
++	Option to bypass kses in `minifyString()` since typically is not html.
++	Automatically strip invalid characters in `minifyString()`.
+
 = Version 3.2.1 – August 1, 2025 =
 
 +   Fixed issues with uninstall and added support for keyvalue table(s).
@@ -524,7 +536,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 +   Add (and use) `getRequestScheme()` method.
 +   Add `allow_request_origin()` method, sets `http_origin` and `allowed_http_origins` filters.
 +   Add error_log on access_denied().
-+   Use Anonymous function to send headers in access_denied().
++   Use anonymous function to send headers in access_denied().
 +   Load theme extensions/doolollys after plugin extensions/doohickies.
 +   New `isDeveloperLicense()` and `isUnlimitedLicense()` methods.
 +   Add 'developer' and 'unlimited' to advanced mode settings array.

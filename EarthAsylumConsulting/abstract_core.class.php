@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0717.1
+ * @version		25.0927.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -1483,7 +1483,8 @@ abstract class abstract_core
 		{
 			$url_parts = parse_url( $this->getRequestURL() );
 		}
-		if (!is_null($part)) {
+		if (!is_null($part))
+		{
 			$part = match($part) {
 				PHP_URL_SCHEME 		=> 'scheme',
 				PHP_URL_HOST		=> 'host',
@@ -1494,7 +1495,7 @@ abstract class abstract_core
 				PHP_URL_QUERY		=> 'query',
 				PHP_URL_FRAGMENT 	=> 'fragment',
 			};
-			return $url_parts[$part];
+			return (string)$url_parts[$part];
 		}
 		return $url_parts;
 	}
@@ -2070,7 +2071,7 @@ abstract class abstract_core
 		$cookieName[0] = $this->apply_filters( 'visitor_cookie_name', $cookieName[0] );
 
 		$value = (!$forRequest)
-			? $this->getVariable($cookieName[0] ?: $this->get_cookie($cookieName))
+			? $this->getVariable($cookieName[0]) ?: $this->get_cookie($cookieName)
 			: null;
 
 		$cookieName = $cookieName[0];
@@ -2134,7 +2135,7 @@ abstract class abstract_core
 	 */
 	private function setVisitorCookie(string $cookieName, string $value, int $days): void
 	{
-		if (!headers_sent())
+		if (! $this->get_cookie($cookieName))
 		{
 			$this->set_cookie($cookieName, $value, "{$days} Days", [/* default options */],
 				[
@@ -2356,26 +2357,30 @@ abstract class abstract_core
 	/**
 	 * Simple minify for JS or CSS content.
 	 * Strips comments, leading/ttrailing white-space, new-lines.
-	 * Warning: not all js/css strings may succesfully pass through this regex!
+	 * Warning: not all js/css strings may succesfully pass through this regex or kses!
 	 *
 	 * @param	string	js/css content
-	 * @param	bool|string	strip new-line (set false to preserve line-endings)
+	 * @param	bool	strip new-line (true, set false to preserve line-endings)
+	 * @param	bool	use wp_kses (true, set false to skip wp_kses)
 	 * @return	string	minified content
 	 */
-	public function minifyString(string $content,$stripNL=true): string
+	public function minifyString(string $content,$stripNL=true,$kses=true): string
 	{
 		$search =
 			[
-				'|/\*\s[\s\S\t\n\r]*?\*/|',		// remove comment blocks	(/* ... */)
-				'|//\s[\s\S]*?$|m',				// remove line-ending comments (//{space}...)
-				'|^\s*|m',						// remove leading whitespace
-				'|\s*$|m',						// remove trailing whitespace
-				'|\t|',							// remove tabs
+				'|/\*\s[\s\S\t\n\r]*?\*/|',			// remove comment blocks	(/* ... */)
+				'|//\s[\s\S]*?$|m',					// remove line-ending comments (//{space}...)
+				'|^\s*|m',							// remove leading whitespace
+				'|\s*$|m',							// remove trailing whitespace
+				'|\t|',								// remove tabs
+				'/[\x00-\x08\x0B\x0C\x0E-\x1F]/',	// invalid characters
 			];
 		$search[] = ($stripNL)
-			?	'|\R|m'							// remove line-endings
-			:	'|^\R|m';						// remove blank lines
-		return preg_replace( $search, '', str_replace('&amp;&amp;','&&',$this->wp_kses($content,[])) );
+			?	'|\R|m'								// remove line-endings
+			:	'|^\R|m';							// remove blank lines
+		return preg_replace( $search, '', str_replace('&amp;&amp;','&&',
+			( $kses ? $this->wp_kses($content,[]) : $content )
+		));
 	}
 
 
@@ -3440,10 +3445,13 @@ abstract class abstract_core
 
 		if (isset($this->pluginOptions[$optionName]) && !$isReserved)
 		{
-			$value = $this->pluginOptions[$optionName];
+			$value = $this->pluginOptions[$optionName] ?? false;
 		}
 		else
 		{
+			// non-saved options
+			if (empty($optionName) || in_array($optionName[0],['_','-','.'])) return $default;
+
 			// get pre-2.0 record (or orphaned record) and maybe delete it
 			// this causes a db read on all get_option() calls to options not reserved
 			//		$value = \get_option( $this->prefixOptionName($optionName) );
@@ -3671,6 +3679,9 @@ abstract class abstract_core
 		}
 		else
 		{
+			// non-saved options
+			if (empty($optionName) || in_array($optionName[0],['_','-','.'])) return $default;
+
 			// get pre-2.0 record (or reserved/orphaned record) and maybe delete it
 			$value = \get_network_option( null, $preOption );
 			if ( isset( $value ) && $value !== false )

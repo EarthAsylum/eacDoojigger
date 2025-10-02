@@ -10,8 +10,8 @@ use Psr\Log\LogLevel;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0904.1
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		25.09266.1
  */
 trait logging
 {
@@ -125,7 +125,7 @@ trait logging
 	 */
 	public function logInfo($variable, $message = '', array $context = []): void
 	{
-		$this->logWrite(LogLevel::INFO, $variable, $message);
+		$this->logWrite(LogLevel::INFO, $variable, $message, $context);
 	}
 
 
@@ -139,7 +139,7 @@ trait logging
 	 */
 	public function logNotice($variable, $message = '', array $context = []): void
 	{
-		$this->logWrite(LogLevel::NOTICE, $variable, $message);
+		$this->logWrite(LogLevel::NOTICE, $variable, $message, $context);
 	}
 
 
@@ -155,7 +155,7 @@ trait logging
 	 */
 	public function logData($variable, $message = '', array $context = []): void
 	{
-		$this->logWrite(LogLevel::DEBUG, $variable, $message);
+		$this->logWrite(LogLevel::DEBUG, $variable, $message, $context);
 	}
 
 
@@ -169,7 +169,7 @@ trait logging
 	 */
 	public function logWarning($variable, $message = '', array $context = []): void
 	{
-		$this->logWrite(LogLevel::WARNING, $variable, $message);
+		$this->logWrite(LogLevel::WARNING, $variable, $message, $context);
 	}
 
 
@@ -183,7 +183,7 @@ trait logging
 	 */
 	public function logError($variable, $message = '', array $context = []): void
 	{
-		$this->logWrite(LogLevel::ERROR, $variable, $message);
+		$this->logWrite(LogLevel::ERROR, $variable, $message, $context);
 	}
 
 
@@ -197,7 +197,7 @@ trait logging
 	 */
 	public function logDebug($variable, $message = '', array $context = []): void
 	{
-		$this->logWrite(LogLevel::DEBUG, $variable, $message);
+		$this->logWrite(LogLevel::DEBUG, $variable, $message, $context);
 	}
 
 
@@ -211,6 +211,6 @@ trait logging
 	 */
 	public function logAlways($variable, $message = '', array $context = []): void
 	{
-		$this->logWrite(E_ALL, $variable, $message);
+		$this->logWrite(E_ALL, $variable, $message, $context);
 	}
 }

@@ -8,8 +8,8 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.2.1  
-Last Updated:           01-Aug-2025  
+Stable tag:             3.2.2  
+Last Updated:           01-Oct-2025  
 Requires at least:      5.8  
 Tested up to:           6.8  
 Requires PHP:           8.1  
@@ -37,7 +37,7 @@ available at this [GitHub Repository]._
 *The [Copyright](#copyright) and
 [End User License Agreement](https://swregistry.earthasylum.com/end-user-license-agreement/) still apply.*
 
-:package: [Download eacDoojigger.zip][Download]
+📦 [Download eacDoojigger.zip][Download]
 
 [website]:			https://eacdoojigger.earthasylum.com/eacdoojigger/
 [sponsorship]:		https://github.com/sponsors/EarthAsylum
@@ -145,7 +145,7 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   [{eac}SimpleSMTP]                   | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
 |   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
 |   [{eac}SimpleCDN]                    | Enables the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience. |
-|   [{eac}ObjectCache]                  | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects. |
+|   [{eac}ObjectCache]                  | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database and even faster APCu shared memory to cache WordPress objects. |
 |   [{eac}Readme]                       | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
 |   [{eac}SimpleGTM]                    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
 |   [{eac}MetaPixel]                    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
@@ -368,7 +368,7 @@ An {eac}Doojigger extension to include and enable use of the Amazon Web Services
 An {eac}Doojigger extension to enable the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience.
 
 +   [{eac}ObjectCache]
-A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database to cache WordPress objects.
+A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database and even faster APCu shared memory to cache WordPress objects.
 
 +   [{eac}Readme]
 An {eac}Doojigger extension to translate a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document.

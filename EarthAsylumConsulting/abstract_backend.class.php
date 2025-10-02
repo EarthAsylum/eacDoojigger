@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0728.1
+ * @version		25.0928.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -2114,9 +2114,13 @@ abstract class abstract_backend extends abstract_core
 					if (substr($optionKey,1) == 'btnSubmitOptions') $foundSubmit = true;
 
 					// get option value
-					$optionValue = (isset($optionData['encrypt']) && $optionData['encrypt'])
-						? $this->get_option_decrypt($optionKey,$optionData['default'] ?: false)
-						: $this->get_option($optionKey,$optionData['default'] ?: false);
+					if (in_array($optionKey[0],['_','-','.'])) {
+						$optionValue = $optionData['default'] ?: false;
+					} else {
+						$optionValue = (isset($optionData['encrypt']) && $optionData['encrypt'])
+							? $this->get_option_decrypt($optionKey,$optionData['default'] ?: false)
+							: $this->get_option($optionKey,$optionData['default'] ?: false);
+					}
 
 					// add label and field with grid <div>s
 					$this->options_settings_page_block($optionKey, $optionData, $optionValue);

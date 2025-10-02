@@ -10,17 +10,14 @@ namespace EarthAsylumConsulting;
  * @category 	WordPress Plugin
  * @package 	{eac}Doojigger\Utilities\{eac}DoojiggerAutoloader
  * @author 		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright 	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	2.2.1
+ * @copyright 	Copyright 2025 EarthAsylum Consulting <www.EarthAsylum.com>
  * @link		https://eacDoojigger.earthasylum.com/
  *
  * @wordpress-plugin
  * Plugin Name: 		{eac}Doojigger Auto-Loader
  * Description: 		Autoloader for {eac}Doojigger and derivative plugin classes and traits.
- * Version: 			2.2.1
+ * Version: 			25.0827.1
  * Requires at least: 	5.8
- * Tested up to: 		6.6
- * Requires PHP: 		7.4
  * Author:				EarthAsylum Consulting
  * Author URI: 			http://www.earthasylum.com
  */

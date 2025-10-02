@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category    WordPress Plugin
  * @package     {eac}Doojigger\Traits
  * @author      Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright   Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version     24.1108.1
+ * @copyright   Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version     25.0820.1
  * @see         https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To#wp-consent-api-and-cookies
  */
 trait cookie_consent
@@ -169,7 +169,7 @@ trait cookie_consent
             $options[$n] = apply_filters( "wp_setcookie_{$n}", $v, $name, $value );
         }
 
-        if (setcookie($name,$value,$options))
+        if (!headers_sent() && setcookie($name,$value,$options))
         {
             //  echo "<div class='notice'><pre>".__METHOD__." ".var_export([$name,$value,$options,$consent],true)."</pre></div>";
             if ($options['expires'] == 0 || $options['expires'] > time()) {

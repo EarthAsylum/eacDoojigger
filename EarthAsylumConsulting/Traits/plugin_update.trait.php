@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		2.x
+ * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		25.0820.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		abstract_backend.class.php
@@ -539,9 +539,12 @@ trait plugin_update
 	{
 		if ( $hook_extra['action'] == 'update' && $hook_extra['type'] === 'plugin' )
 		{
-			if ( in_array($this->update_plugin_info['plugin_slug'], $hook_extra['plugins']) )
+			if (isset($hook_extra['plugins']) && is_array($hook_extra['plugins']))
 			{
-				$this->deleteUpdaterTransient();
+				if ( in_array($this->update_plugin_info['plugin_slug'], $hook_extra['plugins']) )
+				{
+					$this->deleteUpdaterTransient();
+				}
 			}
 		}
 	}
