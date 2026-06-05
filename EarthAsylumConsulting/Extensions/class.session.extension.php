@@ -9,7 +9,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '25.0626.1';
+		const 	VERSION	= '26.0604.1';
 
 		/**
 		 * @var string supported session managers
@@ -228,7 +228,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
 						$this->session 			= wp_cache_get($this->session_id,$this->className);
 					}
-					if (empty($this->session)) {
+					if (empty($this->session) && ! $this->doing_ajax()) {
 						$this->session_id 		= 'session_'.bin2hex(random_bytes(16));
 						$this->session 			= new \stdclass();
 					}
@@ -238,7 +238,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
 						$this->session 			= \get_key_value($this->session_id,null,'transient');
 					}
-					if (empty($this->session)) {
+					if (empty($this->session) && ! $this->doing_ajax()) {
 						$this->session_id 		= 'session_'.bin2hex(random_bytes(16));
 						$this->session 			= new \stdclass();
 					}
@@ -248,7 +248,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					if ( $this->session_id = $this->get_cookie( $this->session_cookie ) ) {
 						$this->session 			= \get_transient($this->session_id);
 					}
-					if (empty($this->session)) {
+					if (empty($this->session) && ! $this->doing_ajax()) {
 						$this->session_id 		= 'session_'.bin2hex(random_bytes(16));
 						$this->session 			= new \stdclass();
 					}
@@ -274,6 +274,8 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 					$this->session 				= new \stdclass();
 					break;
 			}
+
+			if (empty($this->session)) return false;
 
 			$this->session->session_manager	= $this->get_option('session_manager');
 
@@ -496,6 +498,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			 * @return	void
 			 */
 			$this->do_action( 'session_stop' );
+			//$this->logDebug(current_action(),__METHOD__);
 
 			switch ($this->session->session_manager)
 			{

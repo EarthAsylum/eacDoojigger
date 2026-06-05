@@ -8,10 +8,10 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.2.2  
-Last Updated:           01-Oct-2025  
+Stable tag:             3.2.3  
+Last Updated:           05-Jun-2026  
 Requires at least:      5.8  
-Tested up to:           6.8  
+Tested up to:           7.0  
 Requires PHP:           8.1  
 Contributors:           [earthasylum](https://github.com/earthasylum),[kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
 Donate link:            https://github.com/sponsors/EarthAsylum  
@@ -505,7 +505,7 @@ As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1
 
 ### Copyright
 
-#### Copyright © 2019-2025, *EarthAsylum Consulting*, All rights reserved.
+#### Copyright © 2019-2026, *EarthAsylum Consulting*, All rights reserved.
 
 __This is proprietary, copyrighted software.__
 

@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category    WordPress Plugin
  * @package     {eac}Doojigger\Traits
  * @author      Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright   Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version     25.0820.1
+ * @copyright   Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version     26.0211.1
  * @see         https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To#wp-consent-api-and-cookies
  */
 trait cookie_consent
@@ -162,6 +162,9 @@ trait cookie_consent
             ]);
 
             if (! wp_has_consent($consent['category'])) return false;
+            if (function_exists('wp_has_service_consent')) {
+	            if (! wp_has_service_consent($consent['plugin_or_service'])) return false;
+	        }
         }
 
         foreach ($options as $n => $v)

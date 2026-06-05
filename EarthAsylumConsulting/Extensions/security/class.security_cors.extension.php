@@ -29,7 +29,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0718.1';
+		const VERSION 			= '26.0403.1';
 
 		/**
 		 * @var string extension tab name
@@ -301,6 +301,8 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			// is this origin allowed? Match origin ends with allowed
 			add_filter( 'allowed_http_origin', function($origin, $origin_arg) {
 				if (empty($origin) && !empty($origin_arg)) {	// $origin not allowed (so far)
+					// something (rarely) sets $origin_arg as an array
+					if (is_array($origin_arg)) $origin_arg = $origin_arg[0];
 					foreach(get_allowed_http_origins() as $allowed) {
 						if (str_ends_with($origin_arg,$allowed)) {
 							return $origin_arg;

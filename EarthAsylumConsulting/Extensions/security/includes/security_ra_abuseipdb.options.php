@@ -7,8 +7,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1025.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	26.0218.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -39,7 +39,7 @@ $this->registerExtensionOptions( $this->className,
 								"API : automatically transmit abuses through the AbuseIPDB API.",
 				'after'		=>	"<br><small><em>* Approval from <a href='https://www.abuseipdb.com' target='_blank'>AbuseIPDB</a> is required.</em></small>",
 				'validate'	=>	function($value,$key,$meta,$saved) {
-									if ($value && $value != $saved && in_array('csv',$value)) $this->get_abuse_file();
+								//	if ($value && $value != $saved && in_array('csv',$value)) $this->get_abuse_file();
 									return $value;
 								},
 				'advanced'	=> 	true,

@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0927.1
+ * @version		26.0604.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -2208,11 +2208,10 @@ abstract class abstract_core
 		 * @param	string	$key stored key
 		 * @return	mixed	stored variable (unserialized)
 		 */
-		if ($this->has_filter( 'get_variable' )) {
-			$value = $this->apply_filters( 'get_variable', $default, $key );
-		} else {
-			$value = \apply_filters( 'eacDoojigger_get_variable', $default, $key );
+		if ($this->className != 'eacDoojigger') {
+			$default = \apply_filters( 'eacDoojigger_get_variable', $default, $key );
 		}
+		$value = $this->apply_filters( 'get_variable', $default, $key );
 		return maybe_unserialize($value);
 	}
 

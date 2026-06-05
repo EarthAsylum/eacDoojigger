@@ -1,10 +1,10 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.2.2
-Last Updated:           01-Oct-2025
+Stable tag:             3.2.3
+Last Updated:           05-Jun-2026
 Requires at least:      5.8
-Tested up to:           6.8
+Tested up to:           7.0
 Requires PHP:           8.1
 Contributors:           earthasylum@github,kevinburkholder@wordpress
 Donate link:            https://github.com/sponsors/EarthAsylum
@@ -496,7 +496,7 @@ As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1
 
 == Copyright ==
 
-= Copyright © 2019-2025, *EarthAsylum Consulting*, All rights reserved. =
+= Copyright © 2019-2026, *EarthAsylum Consulting*, All rights reserved. =
 
 __This is proprietary, copyrighted software.__
 
@@ -511,6 +511,16 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.2.3 – June 5, 2026 =
+
++   Compatible with WordPress 7.0.
++	Fixed `getVariable()` when using derivative plugin(s).
+	+	Get default from eacDoojigger filter before derivative filter.
++	Do not start a new session from an ajax call.
++	Fixed error with `allowed_http_origin` filter when $origin_arg is an array.
++	Fixed error when enabling output file for AbuseIPDB.
++	Support `wp_has_service_consent()` from WP Consent API 2.0.
 
 = Version 3.2.2 – October 1, 2025 =
 

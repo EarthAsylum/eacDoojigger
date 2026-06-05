@@ -1,5 +1,15 @@
 == Changelog ==
 
+= Version 3.2.3 – June 5, 2026 =
+
++   Compatible with WordPress 7.0.
++	Fixed `getVariable()` when using derivative plugin(s).
+	+	Get default from eacDoojigger filter before derivative filter.
++	Do not start a new session from an ajax call.
++	Fixed error with `allowed_http_origin` filter when $origin_arg is an array.
++	Fixed error when enabling output file for AbuseIPDB.
++	Support `wp_has_service_consent()` from WP Consent API 2.0.
+
 = Version 3.2.2 – October 1, 2025 =
 
 +   Fixed SQL select for sitewide transient (meta_key) in eacKeyValue.
