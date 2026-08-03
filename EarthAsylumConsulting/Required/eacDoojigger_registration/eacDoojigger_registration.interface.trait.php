@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}SoftwareRegistry
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		25.0725.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0729.1
  */
 
 trait eacDoojigger_registration_interface
@@ -54,7 +54,7 @@ trait eacDoojigger_registration_interface
 	 * @param string $endpoint one of 'create', 'activate', 'deactivate', 'verify'
 	 * @return string
 	 */
-	public function getApiEndPoint(string $endpoint = null)
+	public function getApiEndPoint(?string $endpoint = null)
 	{
 		return rtrim(self::SOFTWARE_REGISTRY_HOST_URL.'/'.$endpoint, '/');
 	}

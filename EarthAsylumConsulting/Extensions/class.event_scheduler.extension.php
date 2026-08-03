@@ -36,7 +36,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 */
 
@@ -45,7 +45,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION		= '25.0530.1';
+		const VERSION		= '26.0729.1';
 
 		/**
 		 * @var string alias class name
@@ -505,7 +505,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 * @param string $include core = wp core, cron = added by plugins, self = ours
 		 * @return	array
 		 */
-		public function getIntervals(string $include = null, $default = []): array
+		public function getIntervals(?string $include = null, $default = []): array
 		{
 			switch ($include)
 			{
@@ -609,7 +609,7 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 		 * @param array $args arguments to pass to the hook’s callback function
 		 * @return	int|bool timestamp
 		 */
-		public function setEvent(string $name, \DateTime|int|string $scheduledTime = null, string $interval = null, array $args = []): int|bool
+		public function setEvent(string $name, \DateTime|int|string $scheduledTime = '', string $interval = '', array $args = []): int|bool
 		{
 			if (empty($interval)) {
 				$interval = $name;

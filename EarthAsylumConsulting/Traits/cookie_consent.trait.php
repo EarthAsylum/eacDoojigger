@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package     {eac}Doojigger\Traits
  * @author      Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright   Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version     26.0211.1
+ * @version     26.0729.1
  * @see         https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To#wp-consent-api-and-cookies
  */
 trait cookie_consent
@@ -339,7 +339,7 @@ trait cookie_consent
      * @param string        $category consent category to check.
      * @return  bool
      */
-    public function has_cookie_consent(string $category = null): bool
+    public function has_cookie_consent(?string $category = null): bool
     {
         if (is_null($category)) {
             return self::$cookie_consent_loaded;

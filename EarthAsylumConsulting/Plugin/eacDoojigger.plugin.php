@@ -8,7 +8,7 @@ require "eacDoojigger.trait.php";
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
  * @version		3.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
@@ -517,7 +517,7 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
 	 * @return	void
 	 */
-	public function setAdvancedMode( $is = true, string $what = null,string $level = null): void
+	public function setAdvancedMode( $is = true, ?string $what = null, ?string $level = null): void
 	{
 		if ($is === true && $what == 'settings')
 		{

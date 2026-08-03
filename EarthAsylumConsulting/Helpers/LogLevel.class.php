@@ -9,8 +9,8 @@ use Psr\Log\LogLevel as psr;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Helpers
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0830.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0729.1
  */
 class LogLevel
 {
@@ -55,7 +55,7 @@ class LogLevel
 		E_USER_ERROR 			=> self::LOG_ERROR,
 		E_USER_WARNING 			=> self::LOG_WARNING,
 		E_USER_NOTICE 			=> self::LOG_NOTICE,
-		E_STRICT 				=> self::LOG_NOTICE,
+	//	E_STRICT 				=> self::LOG_NOTICE,
 		E_RECOVERABLE_ERROR 	=> self::LOG_ERROR,
 		E_DEPRECATED 			=> self::LOG_WARNING,
 		E_USER_DEPRECATED 		=> self::LOG_NOTICE,
@@ -78,7 +78,7 @@ class LogLevel
 		E_USER_ERROR 			=> psr::ERROR,
 		E_USER_WARNING 			=> psr::WARNING,
 		E_USER_NOTICE 			=> psr::NOTICE,
-		E_STRICT 				=> psr::NOTICE,
+	//	E_STRICT 				=> psr::NOTICE,
 		E_RECOVERABLE_ERROR 	=> psr::ERROR,
 		E_DEPRECATED 			=> psr::WARNING,
 		E_USER_DEPRECATED 		=> psr::NOTICE,
@@ -102,7 +102,7 @@ class LogLevel
 		E_USER_ERROR 			=> 'E_USER_ERROR',
 		E_USER_WARNING 			=> 'E_USER_WARNING',
 		E_USER_NOTICE 			=> 'E_USER_NOTICE',
-		E_STRICT 				=> 'E_STRICT',
+	//	E_STRICT 				=> 'E_STRICT',
 		E_RECOVERABLE_ERROR 	=> 'E_RECOVERABLE_ERROR',
 		E_DEPRECATED 			=> 'E_DEPRECATED',
 		E_USER_DEPRECATED 		=> 'E_USER_DEPRECATED',

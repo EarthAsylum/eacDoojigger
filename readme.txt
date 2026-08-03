@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.2.3
-Last Updated:           05-Jun-2026
+Stable tag:             3.2.4
+Last Updated:           31-Jul-2026
 Requires at least:      5.8
 Tested up to:           7.0
 Requires PHP:           8.1
@@ -511,6 +511,17 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.2.4 – July 31, 2026 =
+
++	Don't wait for `rest_pre_serve_request` in CORS origin check.
+	+	Prevents rest execution when forbidden.
++	Use `send_headers` action  for CORS headers.
++	Fix: check return of parse_url for array.
++	Fix: `currentURL()` for WP-CLI.
++	Updated (finally) for PHP 8.4+
++	Removed reference to `E_STRICT` constant.
++	Implement explicit nullable types (?string).
 
 = Version 3.2.3 – June 5, 2026 =
 

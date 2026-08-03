@@ -29,7 +29,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.0403.1';
+		const VERSION 			= '26.0731.1';
 
 		/**
 		 * @var string extension tab name
@@ -317,12 +317,12 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 				$this->validate_local_origin($this->plugin->varServer('Origin'));
 			}
 
-			if (current_action() == 'rest_api_init') {
-				remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
-				add_filter( 'rest_pre_serve_request', [$this,'cors_origin_headers'] );
-			} else {
+			//if (current_action() == 'rest_api_init') {
+			//	remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+			//	add_filter( 'rest_pre_serve_request', [$this,'cors_origin_headers'] );
+			//} else {
 				$this->cors_origin_headers(null);
-			}
+			//}
 			return;
 		}
 
@@ -333,13 +333,17 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		 */
 		public function cors_origin_headers($value=null)
 		{
-			$origin = get_http_origin();
+			$origin = sanitize_url( get_http_origin() );
 			if ($this->security->match_disabled_uris('secExcludeCors') || is_allowed_http_origin($origin)) {
-				header( 'Access-Control-Allow-Origin: ' . $origin );
-				header( 'Access-Control-Allow-Methods: ' .
-					$this->plugin->varServer('REQUEST_METHOD') ?: 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
-				header( 'Access-Control-Allow-Credentials: true' );
-				header( 'Vary: Origin', false );
+				if (current_action() != 'rest_api_init' && !headers_sent()) {
+					add_action('send_headers', function() use ($origin) {
+						header( 'Access-Control-Allow-Origin: ' . $origin );
+						header( 'Access-Control-Allow-Methods: ' .
+							$this->plugin->varServer('REQUEST_METHOD') ?: 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
+						header( 'Access-Control-Allow-Credentials: true' );
+						header( 'Vary: Origin', false );
+					});
+				}
 				$this->logDebug($origin,'cross-origin access allowed');
 			} else {
 				header( 'Access-Control-Allow-Origin: ' . site_url() );

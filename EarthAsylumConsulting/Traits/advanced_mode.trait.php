@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.1215.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0730.1
  * @see 		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To#implementing-and-using-advanced-mode
  */
 trait advanced_mode
@@ -131,7 +131,7 @@ trait advanced_mode
 	 * @param bool $allow - allow or not
 	 * @return bool - allowed or not
 	 */
-	public function allowAdvancedMode(bool $allow = null): bool
+	public function allowAdvancedMode(?bool $allow = null): bool
 	{
 		if (is_bool($allow))
 		{
@@ -156,7 +156,7 @@ trait advanced_mode
 	 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
 	 * @return	void
 	 */
-	public function setAdvancedMode( $is = true, string $what = null, string $level = null): void
+	public function setAdvancedMode( $is = true, ?string $what = null, ?string $level = null): void
 	{
 		$what	= strtolower($what ?? 'global');
 		$level	= ltrim(strtolower($level ?? 'default'),'-');
@@ -180,9 +180,9 @@ trait advanced_mode
 	 * @param string|array $level - what level(s) is in advanced mode (default, basic, standard, pro)
 	 * @return	bool - is or is not
 	 */
-	public function isAdvancedMode(string $what = null, string|array $level = null): bool
+	public function isAdvancedMode(string $what = '', string|array $level = ''): bool
 	{
-		$what	= strtolower($what ?? 'global');
+		$what	= strtolower($what ?: 'global');
 
 		if (is_array($level))
 		{
@@ -193,7 +193,7 @@ trait advanced_mode
 			return $is;
 		}
 
-		$level	= ltrim(strtolower($level ?? 'default'),'-');
+		$level	= ltrim(strtolower($level ?: 'default'),'-');
 
 		foreach ([$what,'global'] as $w)
 		{
@@ -218,7 +218,7 @@ trait advanced_mode
 	 * @param string $level - what level is in advanced mode (default, basic, standard, pro)
 	 * @return	bool - is or is not
 	 */
-	public function is_advanced_mode(bool $bool = false, string $what = null, string $level = null): bool
+	public function is_advanced_mode(bool $bool = false, ?string $what = null, ?string $level = null): bool
 	{
 		return $this->isAdvancedMode($what, $level);
 	}

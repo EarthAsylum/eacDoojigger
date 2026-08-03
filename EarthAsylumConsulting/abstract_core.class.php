@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0604.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		26.0729.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -563,7 +563,7 @@ abstract class abstract_core
      *      'VendorDir'                                  The namespace directory within plugin directory.
 	 * @return	string	data value from plugin header
 	 */
-	public function pluginHeader(string $name = null): string
+	public function pluginHeader(?string $name = null): string
 	{
 		if (empty($name)) return $this->pluginData;
 		return $this->pluginData[$name] ?? '';
@@ -578,7 +578,7 @@ abstract class abstract_core
 	 * @param	string	$name name of plugin data value
 	 * @return	string	data value from plugin header
 	 */
-	public function getPluginValue(string $name = null): string
+	public function getPluginValue(?string $name = null): string
 	{
 	//	\_deprecated_function( __FUNCTION__, '2.6.0', 'pluginHeader()');
 		return $this->pluginHeader($name);
@@ -732,7 +732,7 @@ abstract class abstract_core
 	 * @param string $plugin plugin slug
 	 * @return	bool
 	 */
-	public function is_plugin_active(string $plugin = null): bool
+	public function is_plugin_active(?string $plugin = null): bool
 	{
 		$slug = $plugin ?? $this->PLUGIN_SLUG;
 		return $this->is_network_enabled($plugin) || in_array( $slug, (array) \get_option( 'active_plugins', [] ), true );
@@ -744,7 +744,7 @@ abstract class abstract_core
 	 *
 	 * @return	bool
 	 */
-	public function is_network_enabled(string $plugin = null): bool
+	public function is_network_enabled(?string $plugin = null): bool
 	{
 		if (is_null($this->is_network_enabled) || !is_null($plugin))
 		{
@@ -1048,7 +1048,7 @@ abstract class abstract_core
 	 *	   'primary'	=> '1.2.3',
 	 *		__toString() = '1.2.3-release+build'
 	 */
-	public function getSemanticVersion(string $version = null): ?object
+	public function getSemanticVersion(?string $version = null): ?object
 	{
 		static $default		=	['original'=>'','major'=>'0','minor'=>'0','patch'=>'0','release'=>null,'build'=>null];
 		// Semantic Version
@@ -1481,7 +1481,7 @@ abstract class abstract_core
 		static $url_parts = null;
 		if ( ! $url_parts )
 		{
-			$url_parts = parse_url( $this->getRequestURL() );
+			$url_parts = parse_url( $this->getRequestURL() ) ?: [];
 		}
 		if (!is_null($part))
 		{
@@ -1495,7 +1495,7 @@ abstract class abstract_core
 				PHP_URL_QUERY		=> 'query',
 				PHP_URL_FRAGMENT 	=> 'fragment',
 			};
-			return (string)$url_parts[$part];
+			return (string)$url_parts[$part] ?? '';
 		}
 		return $url_parts;
 	}
@@ -1598,8 +1598,8 @@ abstract class abstract_core
 	public function currentURL(): string
 	{
 		return sprintf('%s://%s%s',
-				(is_ssl()) ? 'https' : 'http',
-				$this->varServer('HTTP_HOST'),
+				( (defined('WP_CLI') && WP_CLI) ) ? 'cli' : ( (is_ssl()) ? 'https' : 'http' ),
+				$this->varServer('HTTP_HOST') ?: parse_url(home_url(),PHP_URL_HOST),
 				$this->varServer('REQUEST_URI')
 		);
 	}
@@ -1911,7 +1911,7 @@ abstract class abstract_core
 	 * @param string $name special header name
 	 * @return string the header content
 	 */
-	public function get_page_header(string $name = null)
+	public function get_page_header(?string $name = null)
 	{
 		ob_start();
 		\get_header( $name ); // header-<name>.php
@@ -1925,7 +1925,7 @@ abstract class abstract_core
 	 * @param string $name special footer name
 	 * @return string the footer content
 	 */
-	public function get_page_footer(string $name = null)
+	public function get_page_footer(?string $name = null)
 	{
 		ob_start();
 		\get_footer( $name ); // footer-<name>.php
@@ -1940,7 +1940,7 @@ abstract class abstract_core
 	 * @param string $name special name/part {$slug}-{$name}.php
 	 * @return string the template content
 	 */
-	public function get_page_template(string $slug, string $name = null, $args = [])
+	public function get_page_template(string $slug, ?string $name = null, $args = [])
 	{
 		ob_start();
 		\get_template_part( $slug, $name, $args );

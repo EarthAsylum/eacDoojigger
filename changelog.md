@@ -1,5 +1,16 @@
 == Changelog ==
 
+= Version 3.2.4 – July 31, 2026 =
+
++	Don't wait for `rest_pre_serve_request` in CORS origin check.
+	+	Prevents rest execution when forbidden.
++	Use `send_headers` action  for CORS headers.
++	Fix: check return of parse_url for array.
++	Fix: `currentURL()` for WP-CLI.
++	Updated (finally) for PHP 8.4+
++	Removed reference to `E_STRICT` constant.
++	Implement explicit nullable types (?string).
+
 = Version 3.2.3 – June 5, 2026 =
 
 +   Compatible with WordPress 7.0.

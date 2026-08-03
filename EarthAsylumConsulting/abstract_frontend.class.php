@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.earthasylum.com>
- * @version		24.1030.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		26.0729.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -188,7 +188,7 @@ abstract class abstract_frontend extends abstract_core
 	 * @param string 	$tag     	The shortcode which invoked the callback
 	 * @return string 	Shortcode output
 	 */
-	public function shortcode_plugin_access(array $atts = null, string $content = '', string $tag = ''): string
+	public function shortcode_plugin_access(?array $atts = null, string $content = '', string $tag = ''): string
 	{
 		$a = shortcode_atts(
 			[

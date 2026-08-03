@@ -8,8 +8,8 @@
  * @category	WordPress Plugin
  * @package		{eac}SoftwareRegistry
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		25.0725.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0729.1
  */
 
 include "eacDoojigger_registration.includes.php";
@@ -24,7 +24,7 @@ class eacDoojiggerRegistrationRefresh implements \EarthAsylumConsulting\Interfac
 	 * @param string current registration key
 	 * @return 	void
 	 */
-	public function __construct(string $registrationKey = null)
+	public function __construct(?string $registrationKey = null)
 	{
 		return $this->refreshRegistration($registrationKey);
 	}

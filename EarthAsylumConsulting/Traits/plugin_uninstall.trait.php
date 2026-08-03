@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		25.0728.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0729.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -194,7 +194,7 @@ trait plugin_uninstall
 	 * @param string $className the short (sans namespace) class name of the plugin being uninstalled
 	 * @return void
 	 */
-	public static function uninstall(string $className = null)
+	public static function uninstall(?string $className = null)
 	{
 		self::$className = $className ?: basename(str_replace('\\', '/', self::class));
 
