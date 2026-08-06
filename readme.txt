@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.2.4
-Last Updated:           31-Jul-2026
+Stable tag:             3.2.5
+Last Updated:           06-Aug-2026
 Requires at least:      5.8
 Tested up to:           7.0
 Requires PHP:           8.1
@@ -511,6 +511,15 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.2.5 – August 6, 2026 =
+
++	Fix: dashicons info icon `left: unset`.
++	In `cookie_consent.trait.php`...
+	+	Validate `plugin_or_service` using `wp_validate_consent_service()`.
+	+	Enhanced `has_cookie_consent()` to check category and/or service name for allowed/denied.
+	+	Add filter `wp_get_consent_type` earlier to prevent defaulting to 'allow' consent.
+	+	New `wp_setcookie_service` filter.
 
 = Version 3.2.4 – July 31, 2026 =
 

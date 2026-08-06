@@ -1,6 +1,6 @@
 /**
  * {eac}Doojigger for WordPress - Administrator options screen stylesheet
- * @version 25.0715.1
+ * @version 26.0803.1
  */
 
 /*
@@ -115,7 +115,7 @@ details.settings-grid-head summary > * {display: inline;}
 /* [tooltip] (either help or info) icon */
 .settings-tooltip.dashicons-editor-help,
 .settings-tooltip.dashicons-info-outline {
-	position: absolute; top: 2px;
+	position: absolute; top: 2px; left: unset;
 	visibility: hidden; overflow: hidden;
 	font-size: 19px;
 	color: var(--eac-admin-icon);
