@@ -20,9 +20,9 @@ jobs:
     steps:
 
     - name: Plugin-Slug
-      # convert REPO_NAME to lower case as SLUG used by deploy, get plugin version from TAG_NAME
+      # convert REPO_NAME as SLUG used by deploy, get plugin version from TAG_NAME
       run: |
-        echo "SLUG=${REPO_NAME,,}" >>${GITHUB_ENV}
+        echo "SLUG=${REPO_NAME}" >>${GITHUB_ENV}
         echo "VERSION=${TAG_NAME#v}" >>${GITHUB_ENV}
 
     - name: Checkout-Code
@@ -48,4 +48,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: ${{ github.workspace }}/WordPress-Plugin/${{ env.SLUG }}.${{ env.VERSION }}.zip
+        files: ${{ github.workspace }}/${{ env.SLUG }}.${{ env.VERSION }}.zip
