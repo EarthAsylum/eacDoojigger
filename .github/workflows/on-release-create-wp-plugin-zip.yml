@@ -15,6 +15,7 @@ env:
   TAG_NAME:  ${{ github.ref_name }}
 
 jobs:
+  deploy:
     runs-on: ubuntu-latest
     steps:
 
