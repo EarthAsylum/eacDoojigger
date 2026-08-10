@@ -40,7 +40,7 @@ jobs:
       # create {plugin}.{version}.zip
       run: |
         cd build
-        zip -r ../${SLUG}.${VERSION}.zip ./${SLUG}
+        zip -r ../${REPO_NAME}.${VERSION}.zip ./${SLUG}
 
     - name: Upload-Release-Asset
       # upload {plugin-name}.{version}.zip to github release
@@ -48,4 +48,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: ${{ github.workspace }}/${{ env.SLUG }}.${{ env.VERSION }}.zip
+        files: ${{ github.workspace }}/${{ env.REPO_NAME }}.${{ env.VERSION }}.zip
