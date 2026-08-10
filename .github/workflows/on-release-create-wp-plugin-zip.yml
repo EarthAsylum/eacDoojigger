@@ -20,7 +20,7 @@ jobs:
     steps:
 
     - name: Plugin-Slug
-      # convert REPO_NAME as SLUG used by deploy, get plugin version from TAG_NAME
+      # SLUG is the plugin slug/folder name, used by deploy. Get VERSION from TAG_NAME
       run: |
         echo "SLUG=${REPO_NAME}" >>${GITHUB_ENV}
         echo "VERSION=${TAG_NAME#v}" >>${GITHUB_ENV}
