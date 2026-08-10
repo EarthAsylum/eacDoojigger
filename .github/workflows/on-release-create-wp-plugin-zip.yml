@@ -8,14 +8,14 @@ name: Generate WordPress Zip on Release
 
 on:
   release:
-    types: [released]
+    types: [created]
 
 env:
   REPO_NAME: ${{ github.event.repository.name }}
   TAG_NAME:  ${{ github.ref_name }}
 
 jobs:
-  deploy:
+  release:
     runs-on: ubuntu-latest
     steps:
 
