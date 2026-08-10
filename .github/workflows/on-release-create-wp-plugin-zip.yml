@@ -32,14 +32,14 @@ jobs:
     - name: Prepare-Zip-Archive
       # Temp directory containing only files to include in zip archive
       run: |
-        mkdir -p build/${SLUG}
-        rsync -rc --exclude-from=.distignore ./ ./build/${SLUG}/ || \
-        rsync -rc --exclude='.*' ./ ./build/${SLUG}/
+        mkdir -p .build/${SLUG}
+        rsync -rc --exclude-from=.distignore ./ ./.build/${SLUG}/ || \
+        rsync -rc --exclude='.*' ./ ./.build/${SLUG}/
 
     - name: Create-Zip-Archive
       # create {plugin}.{version}.zip
       run: |
-        cd build
+        cd .build
         zip -r ../${REPO_NAME}.${VERSION}.zip ./${SLUG}
 
     - name: Upload-Release-Asset
