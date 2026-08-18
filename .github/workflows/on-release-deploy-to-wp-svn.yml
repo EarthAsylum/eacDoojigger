@@ -47,15 +47,15 @@ jobs:
 
     # Use CURL to check WordPress SVN for plugin
     - name: Detect WordPress SVN
-        run: |
-          id: detect_wp
-          STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://plugins.svn.wordpress.org/${SLUG}/)
-          echo "${SLUG} WP SVN STATUS=$STATUS"
-          if [[ "$STATUS" =~ ^2 ]]; then
-            echo "is_wp_plugin=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_wp_plugin=false" >> $GITHUB_OUTPUT
-          fi
+      id: detect_wp
+      run: |
+        STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://plugins.svn.wordpress.org/${SLUG}/)
+        echo "${SLUG} WP SVN STATUS=$STATUS"
+        if [[ "$STATUS" =~ ^2 ]]; then
+          echo "is_wp_plugin=true" >> $GITHUB_OUTPUT
+        else
+          echo "is_wp_plugin=false" >> $GITHUB_OUTPUT
+        fi
 
     # Deploy to WordPress trunk and tag
     - name: WordPress Deploy
