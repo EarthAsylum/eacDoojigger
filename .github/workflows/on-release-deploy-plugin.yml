@@ -78,7 +78,7 @@ jobs:
       if: steps.detect_wp.outputs.is_wp_plugin == 'false'
       run: |
         mkdir -p .${WORKFLOW}/${SLUG}
-        rsync -rc --exclude-from=.distignore --exclude='.${WORKFLOW}' ./ ./.${WORKFLOW}/${SLUG}/ || \
+        rsync -rc --exclude-from=.distignore --exclude='.${WORKFLOW}' ./ ./.${WORKFLOW}/${REPO_NAME}/ || \
         rsync -rc \
             --exclude='.*' \
             --exclude='/tests' \
@@ -98,4 +98,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: ${{ github.workspace }}/${{ env.REPO_NAME }}.${{ env.VERSION }}.zip
+        files: *.zip
