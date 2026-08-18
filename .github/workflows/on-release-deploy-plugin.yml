@@ -15,7 +15,7 @@
 #
 # Version: 26.0818.1
 
-name: On Release, deploy to WordPress SVN
+name: On Release, deploy plugin
 on:
   # When a release is published
   release:
@@ -31,7 +31,6 @@ env:
 
 jobs:
   deploy:
-    name: Deploy to WordPress SVN
     runs-on: ubuntu-latest
     steps:
 
@@ -58,7 +57,7 @@ jobs:
         fi
 
     # Deploy to WordPress trunk and tag
-    - name: WordPress Deploy
+    - name: Deploy To WordPress
       if: steps.detect_wp.outputs.is_wp_plugin == 'true'
       uses: 10up/action-wordpress-plugin-deploy@stable
       with:
@@ -69,7 +68,7 @@ jobs:
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
 
     # Rename zip file with REPO_NAME name and version (tag)
-    - name: Rename Zip
+    - name: Rename WP Zip
       if: steps.detect_wp.outputs.is_wp_plugin == 'true'
       run: |
         mv ${SLUG}.zip ${REPO_NAME}.${VERSION}.zip
