@@ -98,4 +98,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: *.zip
+        files: |
+          ${{ github.workspace }}/${{ env.REPO_NAME }}.${{ env.VERSION }}.zip
+          ${{ github.workspace }}/${{ env.SLUG }}.${{ env.VERSION }}.zip
