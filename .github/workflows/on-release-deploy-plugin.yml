@@ -58,7 +58,7 @@ jobs:
           echo "is_wp_plugin=false" >> $GITHUB_OUTPUT
         fi
 
-    # -- Has WordPress Repository (is_wp_plugin == 'true')
+    # -- Has WordPress Repository (is_wp_plugin == 'true') -- #
 
     # Deploy to WordPress trunk and tag
     - name: Deploy To WordPress
@@ -77,7 +77,7 @@ jobs:
       run: |
         mv ${SLUG}.zip ${REPO_NAME}.${VERSION}.zip
 
-    # -- Doesn't Have WordPress Repository (is_wp_plugin == 'false')
+    # -- Doesn't Have WordPress Repository (is_wp_plugin == 'false') -- #
 
     # Create zip archive from temp directory containing only files to include
     - name: Create Zip Archive
@@ -98,7 +98,7 @@ jobs:
         cd .${WORKFLOW}
         zip -r ../${REPO_NAME}.${VERSION}.zip ./${REPO_NAME}
 
-    # -- #
+    # -- | -- #
 
     # Upload {plugin-name}.{version}.zip to github release
     - name: Upload Release Asset
