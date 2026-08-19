@@ -8,7 +8,8 @@
 # wordpress.org plugin slug is the repository name (lower case).
 # Expects tag name to be version (M.m.p) with or without preceding "v" (v1.2.3 or 1.2.3)
 # Expects wordpress.org assets (screenshots, icons, banners) to be in /.wp-assets.
-# Uses .distignore or .gitattributes for exclusions from deployment.
+# Uses .distignore or .gitattributes for exclusions from WP deployment or
+# only .distignore or default list for exclusions from zip archive.
 #
 # See: https://github.com/10up/action-wordpress-plugin-deploy/
 # See: https://github.com/softprops/action-gh-release
@@ -30,8 +31,9 @@ env:
   WORKFLOW:  ${{ github.run_id }}
 
 jobs:
-  deploy:
+  Deploy-Plugin:
     runs-on: ubuntu-latest
+
     steps:
 
     # Get plugin SLUG (lower-case) from REPO_NAME and VERSION (sans 'v') from TAG_NAME
@@ -44,17 +46,19 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v7
 
-    # Use CURL to check WordPress SVN for plugin
+    # Use CURL HEAD to check WordPress repository for plugin
     - name: Detect WordPress SVN
       id: detect_wp
       run: |
-        STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://plugins.svn.wordpress.org/${SLUG}/)
+        STATUS=$(curl -o /dev/null -s -w "%{http_code}" -I https://plugins.svn.wordpress.org/${SLUG}/)
         echo "${SLUG} WP SVN STATUS=$STATUS"
         if [[ "$STATUS" =~ ^2 ]]; then
           echo "is_wp_plugin=true" >> $GITHUB_OUTPUT
         else
           echo "is_wp_plugin=false" >> $GITHUB_OUTPUT
         fi
+
+    # -- Has WordPress Repository (is_wp_plugin == 'true')
 
     # Deploy to WordPress trunk and tag
     - name: Deploy To WordPress
@@ -67,17 +71,19 @@ jobs:
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
 
-    # Rename zip file with REPO_NAME name and version (tag)
+    # Rename zip file with REPO_NAME and VERSION (tag)
     - name: Rename WP Zip
       if: steps.detect_wp.outputs.is_wp_plugin == 'true'
       run: |
         mv ${SLUG}.zip ${REPO_NAME}.${VERSION}.zip
 
+    # -- Doesn't Have WordPress Repository (is_wp_plugin == 'false')
+
     # Create zip archive from temp directory containing only files to include
     - name: Create Zip Archive
       if: steps.detect_wp.outputs.is_wp_plugin == 'false'
       run: |
-        mkdir -p .${WORKFLOW}/${SLUG}
+        mkdir -p .${WORKFLOW}/${REPO_NAME}
         rsync -rc --exclude-from=.distignore --exclude='.${WORKFLOW}' ./ ./.${WORKFLOW}/${REPO_NAME}/ || \
         rsync -rc \
             --exclude='.*' \
@@ -88,9 +94,11 @@ jobs:
             --exclude='composer.lock' \
             --exclude='package.json' \
             --exclude='package-lock.json' \
-        ./ ./.${WORKFLOW}/${SLUG}/
+        ./ ./.${WORKFLOW}/${REPO_NAME}/
         cd .${WORKFLOW}
-        zip -r ../${REPO_NAME}.${VERSION}.zip ./${SLUG}
+        zip -r ../${REPO_NAME}.${VERSION}.zip ./${REPO_NAME}
+
+    # -- #
 
     # Upload {plugin-name}.{version}.zip to github release
     - name: Upload Release Asset
@@ -98,6 +106,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: |
-          ${{ github.workspace }}/${{ env.REPO_NAME }}.${{ env.VERSION }}.zip
-          ${{ github.workspace }}/${{ env.SLUG }}.${{ env.VERSION }}.zip
+        files: ${{ github.workspace }}/${{ env.REPO_NAME }}.${{ env.VERSION }}.zip
