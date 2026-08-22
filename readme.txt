@@ -4,7 +4,7 @@ Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             3.2.5
 Last Updated:           06-Aug-2026
 Requires at least:      5.8
-Tested up to:           7.0
+Tested up to:           7.1
 Requires PHP:           8.1
 Contributors:           earthasylum@github,kevinburkholder@wordpress
 Donate link:            https://github.com/sponsors/EarthAsylum
@@ -514,45 +514,45 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 = Version 3.2.5 – August 6, 2026 =
 
-+	Fix: dashicons info icon `left: unset`.
-+	In `cookie_consent.trait.php`...
-	+	Validate `plugin_or_service` using `wp_validate_consent_service()`.
-	+	Enhanced `has_cookie_consent()` to check category and/or service name for allowed/denied.
-	+	Add filter `wp_get_consent_type` earlier to prevent defaulting to 'allow' consent.
-	+	New `wp_setcookie_service` filter.
++   Fix: dashicons info icon `left: unset`.
++   In `cookie_consent.trait.php`...
+    +   Validate `plugin_or_service` using `wp_validate_consent_service()`.
+    +   Enhanced `has_cookie_consent()` to check category and/or service name for allowed/denied.
+    +   Add filter `wp_get_consent_type` earlier to prevent defaulting to 'allow' consent.
+    +   New `wp_setcookie_service` filter.
 
 = Version 3.2.4 – July 31, 2026 =
 
-+	Don't wait for `rest_pre_serve_request` in CORS origin check.
-	+	Prevents rest execution when forbidden.
-+	Use `send_headers` action  for CORS headers.
-+	Fix: check return of parse_url for array.
-+	Fix: `currentURL()` for WP-CLI.
-+	Updated (finally) for PHP 8.4+
-+	Removed reference to `E_STRICT` constant.
-+	Implement explicit nullable types (?string).
++   Don't wait for `rest_pre_serve_request` in CORS origin check.
+    +   Prevents rest execution when forbidden.
++   Use `send_headers` action  for CORS headers.
++   Fix: check return of parse_url for array.
++   Fix: `currentURL()` for WP-CLI.
++   Updated (finally) for PHP 8.4+
++   Removed reference to `E_STRICT` constant.
++   Implement explicit nullable types (?string).
 
 = Version 3.2.3 – June 5, 2026 =
 
 +   Compatible with WordPress 7.0.
-+	Fixed `getVariable()` when using derivative plugin(s).
-	+	Get default from eacDoojigger filter before derivative filter.
-+	Do not start a new session from an ajax call.
-+	Fixed error with `allowed_http_origin` filter when $origin_arg is an array.
-+	Fixed error when enabling output file for AbuseIPDB.
-+	Support `wp_has_service_consent()` from WP Consent API 2.0.
++   Fixed `getVariable()` when using derivative plugin(s).
+    +   Get default from eacDoojigger filter before derivative filter.
++   Do not start a new session from an ajax call.
++   Fixed error with `allowed_http_origin` filter when $origin_arg is an array.
++   Fixed error when enabling output file for AbuseIPDB.
++   Support `wp_has_service_consent()` from WP Consent API 2.0.
 
 = Version 3.2.2 – October 1, 2025 =
 
 +   Fixed SQL select for sitewide transient (meta_key) in eacKeyValue.
-+	Ignore (return default) options with ['-','\_','.'] prefix in `get_option()`.
-+	Pass `$context` array in logging methods.
-+ 	Force string return in getRequestParts(...) when null.
-+	Don't repeatedly set visitor cookie, only set if not found.
-+	Fix  error in `upgrader_process_complete` when `$hook_extra['plugins']` is null.
-+	Check `headers_sent()` in `set_cookie()` to prevent error.
-+	Option to bypass kses in `minifyString()` since typically is not html.
-+	Automatically strip invalid characters in `minifyString()`.
++   Ignore (return default) options with ['-','\_','.'] prefix in `get_option()`.
++   Pass `$context` array in logging methods.
++   Force string return in getRequestParts(...) when null.
++   Don't repeatedly set visitor cookie, only set if not found.
++   Fix  error in `upgrader_process_complete` when `$hook_extra['plugins']` is null.
++   Check `headers_sent()` in `set_cookie()` to prevent error.
++   Option to bypass kses in `minifyString()` since typically is not html.
++   Automatically strip invalid characters in `minifyString()`.
 
 = Version 3.2.1 – August 1, 2025 =
 
@@ -566,7 +566,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 +   Add (and use) `getRequestScheme()` method.
 +   Add `allow_request_origin()` method, sets `http_origin` and `allowed_http_origins` filters.
 +   Add error_log on access_denied().
-+   Use anonymous function to send headers in access_denied().
++   Use Anonymous function to send headers in access_denied().
 +   Load theme extensions/doolollys after plugin extensions/doohickies.
 +   New `isDeveloperLicense()` and `isUnlimitedLicense()` methods.
 +   Add 'developer' and 'unlimited' to advanced mode settings array.
@@ -593,150 +593,4 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 +   Strip tags when logging admin_notice warnings/error.
 +   Debug log entry for Action Scheduler tasks.
 
-= Version 3.1.1 – May 6, 2025 =
-
-+   Session extension:
-    +   Add wp_cache as supported session manager.
-    +   check for doing or did `init` on session_init.
-    +   `session_init()` returns bool (required).
-+   Include `debugging` filtered array in QueueMonitor (qm) output.
-+   Limit `flush_caches()` to once per minute.
-+   `after_flush_caches` filter allows return of cache name(s) flushed.
-+   Disable security extension for WP-cli.
-+   Added `X-Kinsta-Edge-Incomingip` to HTTP_IP_HEADERS.
-+   Check for string when overriding enable_option in extensions.
-+   Added `isExtension` flag (true) on registerExtension.
-
-= Version 3.1 – April 29, 2025 =
-
-+   Tweak admin loading actions to load before extensions.
-+   Added CORS override/allow by IP address or CIDR subnet.
-+   Improved/fixed extension loading and registration.
-    +   Prevent `_load_textdomain_just_in_time was called incorrectly` notice from WordPress.
-        +   All extensions - delay option registration until admin_init.
-        +   swRegistrationUI - delay admin links until admin_init.
-        +   abstract_extension - force delay of `registerExtension()` until admin_init.
-    +   Fix potential 'enabled' extension that should be 'disabled'.
-    +   abstract_extension - save enable_option name when registered.
-+   Rework plugin environment check - limit when checked (on activate, updates, or daily).
-+   Due to new extension (event_scheduler) and external dependencies, version set to 3.1.0.
-    +   Version 3.0.4 was not released.
-+   Added `EAC_ALLOWED_WP_SCHEDULES` to limit intervals shown on admin screen.
-+   Added `allowed_schedules` filter to filter out any unwanted schedules/intervals.
-+   security_cors: Use daily cron (if scheduled) to get host IP addresses.
-+   security_cors: Suppress scheme/host warning.
-
-= ~~Version 3.0.4 – March 31, 2025~~ =
-
-+   Tested with WordPress 6.8.
-+   New event_scheduler (cron) extension.
-    +   Intervals - Manage custom intervals (aka schedules).
-    +   Events - Schedule WP Core or custom interval events.
-    +   Tasks - Add tasks (actions) to scheduled events.
-+   `createScheduledEvents()` and `removeScheduledEvents()` called on plugin install/update now do nothing.
-+   Added `plugin_activated` and `plugin_deactivated` actions.
-+   Session extension - wait for WP 'init' before setting cookie.
-+   Visitor Id - wait for WP 'init' before setting cookie.
-+   Removed obsolete `delete_option(...)` statements.
-+   Optimized `forEachNetworkSite()` method.
-+   Removed schedule to purge transients, WP will do it (delete_expired_transients).
-+   Don't flush object cache (`wp_cache_flush()`) when using external cache.
-+   Added eacDoojigger_log_info|notice|warning|error|debug|always actions.
-+   Debugging extension enhancements.
-    +   Added wp-cron debugging options.
-    +   Added support for Queue Monitor.
-    +   Combined settings to single switch option.
-+   `explode_with_keys()` now accepts array of strings to explode.
-
-= Version 3.0.3 – March 11, 2025 =
-
-+   Remove check for 'X-Requested-With' in ajax request (cors).
-+   Fix inclusion of `security_ra.abstract.php`.
-
-= Version 3.0.2 – February 26, 2025 =
-
-+   Validate `risk_assessment_limit` in `risk_assessment()`.
-+   Check `headers_sent()` in `access_denied()`.
-+   Use `is_file()` rather than `file_exists()` in `insert_with_markers()`.
-+   Validate `$_REQUEST['action']` in debugging extension.
-+   Make `$userIni` public in security extension.
-
-= Version 3.0.1 – December 14, 2024 =
-
-+   Settings are not registered until `set_current_user` action and only when `isSettingsPage()`.
-+   Non-standard "advanced mode" (i.e. "professional")
-    +   Display "__ Level Feature" instead of hiding the feature/option.
-        +   If level has multiple words (i.e. "Professional Mode Only"), display level only, else display "{level} Level Feature".
-    +   If level starts with "-" (i.e. "-professional"), don't display.
-    +   Filter `{classname}_advanced_mode_field` to filter above display field.
-+   Fix wp_filter_count(), wp_action_count().
-
-
-= Version 3.0 – December 3, 2024 =
-
-+   Introducing 'Doojiggers', 'Doolollys', 'Doohickeys', and 'Doodads'.
-+   Tested with WordPress 6.7.
-+   Dropped support for PHP < 8.1.
-+   New browser optimization options (CSS Early Hints, Asynchronous CSS, JS Early Hints, Asynchronous JS).
-+   New Risk Assessment security module using 3rd-party API extensions as well as internal actions and filters to assess and track security risks by IP address.
-    +   Implemented server-side CORS security.
-        +   Apply CORS rules to rest, xml, and admin-ajax.php requests.
-        +   Options to use referer or reverse DNS to get origin.
-        +   Validate local server host IP when passed as origin.
-        +   Origin white-list and excluded URIs.
-    +   New `register_[fraud|threat|abuse|risk]` hooks used to tag risky actions and, possibly, block access.
-        +   Added `register_threat` action to several security checks.
-    +   New AbuseIPDB api extension to block by IP address based on abuse score.
-        +   See : https://www.abuseipdb.com/user/165095
-    +   New FraudGuard api extension to block by IP address based on risk level.
-        +   See : https://www.fraudguard.io
-    +   New IpGeoLocation api extension to block by IP address based on threat score.
-        +   See : https://www.ipgeolocation.io
-+   New 'Content Security Assistant' (Add Script nonce, Add Style nonce, Do CSP Action).
-    +   Add `nonce=xxx`  to `script` and style `link` tags.
-    +   New `eacDoojigger_security_nonce` filter gets security nonce.
-    +   New `eacDoojigger_content_security_policy` action passes security nonce to facilitate `Content-Security-Policy` creation.
-+   New ipUtil helper to check IP address against list of addresses and/or subnets (cidr).
-    +   New `isIpInList()` method using ipUtil.
-+   New `get_output_file()` to create/write a file in appropriate WP path.
-	 +  a. where the WP debug log is stored.
-	 +  b. in the upload folder.
-	 +  Uses wp_filesystem for proper access.
-+   New `access_denied()` method used to block fraudulent requests.
-+   Move `is_admin_request()` and `is_network_admin_request()` from abstract_context to Helpers/functions.php.
-+   Added `is_request_type()` and `is_php_request()` to functions.php (\EarthAsylumConsulting namespace).
-+   Reworked admin options menu(s).
-+   Improved extension loader methods.
-+   Allow null instance in plugin_loader::getInstance().
-+   Added user roles to advanced mode arrays and allow array of OR'd options.
-    +   `$this->isAdvancedMode('global','administrator')`
-    +   `$this->isAdvancedMode('global',['administrator','editor'])`
-+   Standard methods for option, hook, table names with prefix.
-    +   `addClassNamePrefix()`, `removeClassNamePrefix()`, `getClassNamePrefix()`, `hasClassNamePrefix()`
-+   Debugging extension uses `get_output_file()` and changes log file name.
-+   New hooks trait includes all prefixed action and filter functions.
-    +   New `has_filter_count()`, `has_action_count()`
-    +   New `wp_filter_count()`, `wp_action_count()` (not prefixed).
-+   Added `ENABLE_OPTION` constant to extensions to allow override of the enable option used in an admin tab section.
-+   Added `TAB_NAME` constant to extensions to allow setting the default tab name.
-+   Added filters to change a settings group label or tab name.
-    +   `$this->apply_filters('settings_group_label',$groupLabel,$optionGroup)`
-    +   `$this->apply_filters('settings_tab_name',$optionTab,$optionGroup,$isNetworkSettings)`
-+   New `getRequestURL()`, `getRequestParts()`, `getRequestHost()`, `getRequestPath()` methods using WP request.
-+   New `getRequestOrigin()` gets origin from header or referrer or reverse DNS lookup.
-+   New `options_settings_page_footer` action after settings form before closing div.
-+   Use `options_settings_page_footer` action in swRegistrationUI.
-+   Suppress shutdown error for not-called parent methods.
-+   Check additional http headers in `getVisitorIP()`.
-+   Debugging allows non-php requests with file type exclude list (using `wp_get_ext_types()`).
-+   Changed default session cookie name (play nice with caching utilities).
-+   Changed default visitor cookie name (play nice with caching utilities).
-+   Allow cookie name as array containing alternate names in `get_cookie()`.
-+   Maybe serialize/unserialize cookie value in `set_cookie()` and `get_cookie()`.
-+   `varCookie()` defaults to `get_cookie()` if only one argument (name).
-+   Use `sanitize_key()` on cookie name but check for un-sanitized name in `get_cookie()`.
-+   Removed `scheduleEvent()` method. Not used, didn't work. Use `wp_schedule_single_event()`.
-+   New `color-palette.css` loaded on admin pages.
-+   Load TextDomain on `init` (as per WP v6.7).
-
-= See changelog.md for more =
+= [See changelog.md for more](https://raw.githubusercontent.com/EarthAsylum/eacDoojigger/main/changelog.md) =
