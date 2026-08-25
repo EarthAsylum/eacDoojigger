@@ -13,7 +13,7 @@
  * Version:             1.1.2
  * Last Updated:        26-May-2026
  * Requires at least:   5.8
- * Tested up to:        7.0
+ * Tested up to:        7.1
  * Requires PHP:        8.1
  * Author:              EarthAsylum Consulting
  * Author URI:          http://www.earthasylum.com
