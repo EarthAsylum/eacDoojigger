@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	25.0726.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	26.0828.1
  */
 
 trait swRegistrationUI
@@ -63,11 +63,13 @@ trait swRegistrationUI
 				$registrationLink = $this->plugin->getSettingsLink(true,'registration','Registration','Registration');
 
 				// add registration link on plugins page
+/*
 				\add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->plugin->PLUGIN_SLUG,
 					function($pluginLinks, $pluginFile, $pluginData) use ($registrationLink) {
 						return array_merge(['registration' => $registrationLink], $pluginLinks);
 					},25,3
 				);
+*/
 
 				// check status and dates for registration validity
 				if (! $this->isValidRegistration())

@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting\Plugin;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0429.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		26.0901.1
  */
 
 trait eacDoojigger_admin_traits
@@ -50,24 +50,43 @@ trait eacDoojigger_admin_traits
 		// When the plugin is deactivated
 		register_deactivation_hook($header['PluginFile'],	array( $this, 'uninstall_autoloader') );
 
+		// to put settings first on general tab
+		if ($this->is_network_admin()) {
+			$this->registerNetworkOptions('network_settings');
+			$this->registerNetworkOptions(['administration_tools','tools']);
+		} else {
+			$this->registerPluginOptions('plugin_settings');
+			$this->registerPluginOptions(['administration_tools','tools']);
+		}
+
 		add_action('admin_init', function()
 		{
-			// to put settings first on general tab
-			if ($this->is_network_admin()) {
-				$this->registerNetworkOptions('network_settings');
-			} else {
-				$this->registerPluginOptions('plugin_settings');
-			}
-
 			// on plugins page, add documentation link
 			add_filter( (is_network_admin() ? 'network_admin_' : '').'plugin_action_links_' . $this->PLUGIN_SLUG,
 				function($pluginLinks, $pluginFile, $pluginData) {
 					return array_merge(
-						['documentation'=>$this->getDocumentationLink($pluginData)],
+						[
+							'documentation'	=> $this->getDocumentationLink(true,'/eacdoojigger'),
+							'support'		=> $this->getSupportLink(),
+						],
 						$pluginLinks
 					);
 				},20,3
 			);
+
+			// on plugin_row_meta filter, add 'Sponsor' link
+			add_filter( 'plugin_row_meta', function($pluginMeta, $pluginSlug, $pluginData, $status)
+				{
+					if ($pluginSlug == $this->PLUGIN_SLUG)
+					{
+						$pluginMeta['Sponsor'] =
+						'<a href="https://github.com/sponsors/EarthAsylum" target="_blank">'.
+						'<span class="dashicons dashicons-heart" style="color:#c00;font-size:13px;line-height:1.5"></span>Sponsor</a>';
+					}
+					return $pluginMeta;
+				},20,4
+			);
+
 		},1);
 
 		// Register plugin options
@@ -128,6 +147,7 @@ trait eacDoojigger_admin_traits
 		$options = $this->standard_options(['adminSettingsMenu','uninstallOptions'/*,'emailFatalNotice'*/]);
 		$options['adminSettingsMenu']['options'][] = 'Menu Bar';
 		$options['adminSettingsMenu']['default'][] = 'Menu Bar';
+
 		$options['optimize_options'] = array(
 				'type'		=>	'checkbox',
 				'label'		=>	'Optimizations',

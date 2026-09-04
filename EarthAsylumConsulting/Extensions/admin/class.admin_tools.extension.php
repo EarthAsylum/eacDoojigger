@@ -9,8 +9,7 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2022 EarthAsylum Consulting <www.EarthAsylum.com>
-	 * @version		1.x
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -22,7 +21,12 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0419.1';
+		const VERSION	= '26.0901.1';
+
+		/**
+		 * @var string extension tab name
+		 */
+		const TAB_NAME	= 'Tools';
 
 
 		/**
@@ -36,7 +40,7 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 			$this->enable_option = false;
 			parent::__construct($plugin, self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ONLY_ADMIN);
 
-			$this->registerExtension( ['administration_tools', 'Tools'] );
+			$this->registerExtension( 'administration_tools' );
 
 			add_action('admin_init', function()
 			{
@@ -75,11 +79,14 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 				);
 			}
 
-			if ( $this->isAdvancedMode('settings') && (!is_multisite() || $this->plugin->is_network_admin()) )
+			if ( current_user_can( 'install_plugins' ) || current_user_can( 'update_plugins' ) )
 			{
-				$this->registerExtensionOptions( 'software_updates',
-					$this->standard_options(['updateChannel','checkForUpdates'])
-				);
+				if ( $this->isAdvancedMode('settings') && (!is_multisite() || $this->plugin->is_network_admin()) )
+				{
+					$this->registerExtensionOptions( 'software_updates',
+						$this->standard_options(['updateChannel','checkForUpdates'])
+					);
+				}
 			}
 		}
 	}

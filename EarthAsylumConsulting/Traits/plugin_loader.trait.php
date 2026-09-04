@@ -20,8 +20,8 @@ namespace EarthAsylumConsulting\Traits
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Traits
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
-	 * @version		25.0411.1
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
+	 * @version		26.0829.1
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -46,7 +46,7 @@ namespace EarthAsylumConsulting\Traits
 		{
 			if (! $onlyPHP || self::isPHP() )
 			{
-				self::$instance = self::load_plugin();
+				static::$instance = self::load_plugin();
 			}
 		}
 
@@ -59,7 +59,7 @@ namespace EarthAsylumConsulting\Traits
 		 */
 		public static function getInstance(): ?object
 		{
-			return self::$instance;
+			return static::$instance;
 		}
 
 

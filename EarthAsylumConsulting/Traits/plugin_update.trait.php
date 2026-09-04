@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		25.0820.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0829.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		abstract_backend.class.php
@@ -437,12 +437,12 @@ trait plugin_update
 		$blogVersion = $blogVersion[0];
 		if ($result['info']->tested) {
 			if (version_compare( $result['info']->tested, substr($blogVersion,0,strlen($result['info']->tested)) ) == 0) {
-				$result['info']->tested = substr($blogVersion,0,5);
+		//		$result['info']->tested = $blogVersion; // substr($blogVersion,0,5);
 			}
 		}
 		if ($result['update']->tested) {
 			if (version_compare( $result['update']->tested, substr($blogVersion,0,strlen($result['update']->tested)) ) == 0) {
-				$result['update']->tested = substr($blogVersion,0,5);
+		//		$result['update']->tested = $blogVersion; // substr($blogVersion,0,5);
 			}
 		}
 

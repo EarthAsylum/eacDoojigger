@@ -7,14 +7,15 @@
 <details><summary>Plugin Header</summary>
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
-Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.2.5  
-Last Updated:           06-Aug-2026  
+Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)  
+Stable tag:             3.3.0-RC1  
+Last Updated:           04-Sep-2026  
 Requires at least:      5.8  
 Tested up to:           7.1  
 Requires PHP:           8.1  
-Contributors:           [earthasylum](https://github.com/earthasylum),[kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
+Contributors:       	[EarthAsylum](https://github.com/EarthAsylum),[KevinBurkholder](https://profiles.wordpress.org/KevinBurkholder)  
 Donate link:            https://github.com/sponsors/EarthAsylum  
+Support link:           https://github.com/EarthAsylum/eacDoojigger/issues  
 License:                EarthAsylum Consulting Proprietary License - {eac}PLv1  
 License URI:            https://eacDoojigger.earthasylum.com/end-user-license-agreement/  
 Tags:                   plugin development, rapid development, multi-function, security, encryption, debugging, administration, contextual-help, session management, maintenance mode, plugin framework, plugin derivative, plugin extensions, toolkit  
@@ -90,11 +91,12 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   *[Key/Value Storage]*               | An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. |
 |   *[Debugging]*                       | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
 |   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
-|   *Encryption*                        | Adds easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
+|   *Encryption*                        | Provides easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
 |   *[Cookie Compliance]*               | Set cookies with [WP Consent API] compatible consent parameters for GDPR/CCPA Compliance. |
 |   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for reading/writing session variables. |
 |   *Maintenance Mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
 |   *Admin Tools*                       | Adds cache management and plugin settings backup/restore, export/import. |
+|   *[Plugin Reinstall]*                | Provides the ability to re-install eacDoojigger from the `Tools` tab or any/all plugins from the `Plugins` page. |
 |   *Ajax Action*                       | Adds an easy to use ajax responder (accessable from any extension). |
 |   *Material Icons*                    | Adds Google's Material Icons to WordPress. |
 |   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, html input fields, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
@@ -105,7 +107,8 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 [Event Scheduler]:		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(recurring-events)
 [Key/Value Storage]:	https://github.com/EarthAsylum/eacKeyValue/blob/main/readme.md
 [Debugging]:			https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(debugging-logger-methods)
-[Cookie Compliance]:	https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(wp-consent-api-and-cookies
+[Cookie Compliance]:	https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(wp-consent-api-and-cookies)
+[Plugin Reinstall]:		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(plugin-reinstall)
 
 [WP Consent API]:		https://wordpress.org/plugins/wp-consent-api/
 
@@ -453,7 +456,7 @@ The *{eac}Doojigger Extras* (now at this [Github Repository](https://github.com/
 #### Who is EarthAsylum Consulting?
 
 {EarthAsylum Consulting} is a one-person consulting agency in business since 2005.
-I have some 30 years experience in technology and software development for a disperse range of businesses.
+I have some 30+ years experience in technology and software development for a disperse range of businesses.
 
 Currently, and for the last decade or more, my focus has been on internet-based business software & technology management.
 

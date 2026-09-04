@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0729.1
+ * @version		26.0901.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -458,45 +458,53 @@ abstract class abstract_core
 	 */
 	protected function setPluginHeaderValues(array $header): void
 	{
-		if (empty($header)) $this->delete_site_transient( self::PLUGIN_HEADER_TRANSIENT );
-
+		if (empty($header)) {
+			$this->delete_site_transient( self::PLUGIN_HEADER_TRANSIENT );
+			$header['PluginFile'] = WP_PLUGIN_DIR . '/' . $this->PLUGIN_SLUG;
+		}
 		$this->pluginData = $this->get_site_transient(self::PLUGIN_HEADER_TRANSIENT, function($key) use ($header)
 			{
 				$default_headers = array(
-					'Title'			=> 'Plugin Name',			// The name of your plugin, which will be displayed in the Plugins list in the WordPress Admin.
-					'Description'	=> 'Description',			// A short description of the plugin, as displayed in the Plugins section in the WordPress Admin
-					'Version'		=> 'Version',				// The current version number of the plugin.
-					'RequiresWP'	=> 'Requires at least',		// The lowest WordPress version that the plugin will work on.
-					'RequiresPHP'	=> 'Requires PHP',			// The minimum required PHP version.
-					'RequiresEAC'	=> 'Requires EAC',			// The minimum required eacDoojigger version.
-					'RequiresWC'	=> 'WC requires at least',	// The lowest WooCommerce version that the plugin will work on.
-					'Author'		=> 'Author',				// The name of the plugin author.
-					'AuthorURI'		=> 'Author URI',			// The author's website or profile on another website, such as WordPress.org.
-					'License'		=> 'License',				// The short name (slug) of the plugin's license (e.g. GPLv2).
-					'LicenseURI'	=> 'License URI',			// A link to the full text of the license (e.g. https://www.gnu.org/licenses/gpl-2.0.html).
-					'TextDomain'	=> 'Text Domain',			// The gettext text domain of the plugin.
-					'DomainPath'	=> 'Domain Path',			// The domain path lets WordPress know where to find the translations.
-					'Network'		=> 'Network',				// Whether the plugin can be activated network-wide.
-					'PluginURI'		=> 'Plugin URI',			// The home page or update link of the plugin.
-					'UpdateURI'		=> 'Update URI',			// Allows third-party plugins to avoid accidentally being overwritten with an update of a plugin of a similar name from the WordPress.org Plugin Directory.
-					'StableTag'		=> 'Stable Tag',			// From readme.txt
-					'LastUpdated'	=> 'Last Updated',			// From readme.txt
+					'Title'				=> 'Plugin Name',			// The name of your plugin, which will be displayed in the Plugins list in the WordPress Admin.
+					'Description'		=> 'Description',			// A short description of the plugin, as displayed in the Plugins section in the WordPress Admin
+					'Version'			=> 'Version',				// The current version number of the plugin.
+					'RequiresWP'		=> 'Requires at least',		// The lowest WordPress version that the plugin will work on.
+					'RequiresPHP'		=> 'Requires PHP',			// The minimum required PHP version.
+					'RequiresEAC'		=> 'Requires EAC',			// The minimum required eacDoojigger version.
+					'RequiresWC'		=> 'WC requires at least',	// The lowest WooCommerce version that the plugin will work on.
+					'Author'			=> 'Author',				// The name of the plugin author.
+					'AuthorURI'			=> 'Author URI',			// The author's website or profile on another website, such as WordPress.org.
+					'License'			=> 'License',				// The short name (slug) of the plugin's license (e.g. GPLv2).
+					'LicenseURI'		=> 'License URI',			// A link to the full text of the license (e.g. https://www.gnu.org/licenses/gpl-2.0.html).
+					'TextDomain'		=> 'Text Domain',			// The gettext text domain of the plugin.
+					'DomainPath'		=> 'Domain Path',			// The domain path lets WordPress know where to find the translations.
+					'Network'			=> 'Network',				// Whether the plugin can be activated network-wide.
+					'PluginURI'			=> 'Plugin URI',			// The home page or update link of the plugin.
+					'UpdateURI'			=> 'Update URI',			// Allows third-party plugins to avoid accidentally being overwritten with an update of a plugin of a similar name from the WordPress.org Plugin Directory.
+					'RequiresPlugins' 	=> 'Requires Plugins',		// Comma separated list of dot org plugin slugs.
+					'StableTag'			=> 'Stable Tag',			// From readme.txt
+					'LastUpdated'		=> 'Last Updated',			// From readme.txt
+					'DonateLink'		=> 'Donate link',			// From readme.txt
+					'SupportLink'		=> 'Support link',			// From readme.txt
 				);
-				if (empty($header)) {
-					$header['PluginFile'] = WP_PLUGIN_DIR . '/' . $this->PLUGIN_SLUG;
-				}
-				$readme = dirname($header['PluginFile']).'/readme.txt';
+
+				$readme = plugin_dir_path($header['PluginFile']);
+				list($readme) = glob($readme.'[rR][eE][aA][dD][mM][eE].{txt,TXT,md,MD}', GLOB_BRACE|GLOB_NOSORT);
+				$header['Readme']		= $readme;
+				$readme = ($readme)
+					? array_filter(get_file_data($readme, $default_headers, 'readme')) : [];
+
 				$pluginData = array_replace(
 					$header,
-					array_filter(get_file_data($readme, $default_headers, 'readme')),
+					$readme,
 					array_filter(get_file_data($header['PluginFile'], $default_headers, 'plugin') )
 				);
 
-				$pluginData['PluginSlug']		= plugin_basename( $pluginData['PluginFile'] );						// Plugin slug
-				$pluginData['PluginDir']		= untrailingslashit(plugin_dir_path( $pluginData['PluginFile'] ));	// Plugin directory
-				$pluginData['PluginDirUrl']		= plugin_dir_url( $pluginData['PluginFile'] );						// URL to plugin directory
+				$pluginData['PluginDir'] 		= untrailingslashit(plugin_dir_path( $header['PluginFile'] ));	// Plugin directory
+				$pluginData['PluginSlug']		= plugin_basename( $pluginData['PluginFile'] );					// Plugin slug
+				$pluginData['PluginDirUrl']		= plugin_dir_url( $pluginData['PluginFile'] );					// URL to plugin directory
 				$pluginData['VendorDir']		= (is_dir($pluginData['PluginDir'].'/'.__NAMESPACE__))
-												? $pluginData['PluginDir'].'/'.__NAMESPACE__						// vendor directory default
+												? $pluginData['PluginDir'].'/'.__NAMESPACE__					// vendor directory default
 												: $pluginData['PluginDir'];
 				$pluginData['Name']				= dirname($pluginData['PluginSlug']);
 
@@ -650,44 +658,53 @@ abstract class abstract_core
 	 * add an action link (for menu and/or clickable actions)
 	 *
 	 * @param string $action action name
-	 * 				advanced_mode_enable, advanced_mode_disable, or custom action name
+	 * @param string $option option string
+	 * @param string $returnURL override defaul/current url
 	 * @return string href
 	 */
-	public function add_admin_action_link(string $action): string
+	public function add_admin_action_link(string $action, ?string $option=null, ?string $returnURL=null): string
 	{
-		$action = esc_attr($action);
-		$actionKey = '_'.sanitize_key($this->className).'_action'; // _eacdoojiggerFN
-		return wp_nonce_url( add_query_arg( [$actionKey=>$action] ),$this->className );
+		$actionKey 		= sanitize_key($this->className).'_action';
+		$actionArgs 	= [$actionKey => esc_attr($action)];
+		if ($option) {
+			$optionKey 	= sanitize_key($this->className).'_option';
+			$actionArgs[$optionKey] = esc_attr($option);
+		}
+		if (empty($returnURL)) $returnURL = false;
+		$actionUrl 		= add_query_arg( $actionArgs, $returnURL );
+		return wp_nonce_url( $actionUrl, $this->className );
 	}
 
 
 	/**
 	 * process action links from admin page.
-	 * additional/custom actions may be added by adding an action for the function name:
-	 * 		$this->add_action('my_action_name',function(){...});
+	 * custom actions are accomplished by adding an action hook for the action name:
+	 * @example
+	 *		$this->add_admin_action_link('my_action_name','my_option_value);
+	 * 		$this->add_action('my_action_name',function(){...},10,2);
 	 *
 	 * @param object $admin_bar wp_admin_bar
 	 * @return void
 	 */
 	public function do_admin_action_links($admin_bar)
 	{
-		$actionKey = '_'.sanitize_key($this->className).'_action'; // _eacdoojiggerFN
-		if (!isset($_GET[$actionKey]) || !isset($_GET['_wpnonce'])) return;
-
-		$menuFN 	= $this->varGet($actionKey);
+		$actionKey 	= sanitize_key($this->className).'_action';
+		$action 	= $this->varGet($actionKey);
+		$optionKey 	= sanitize_key($this->className).'_option';
+		$option 	= $this->varGet($optionKey);
 		$wpnonce 	= $this->varGet('_wpnonce');
-		if (wp_verify_nonce($wpnonce,$this->className))
+		if ($action && wp_verify_nonce($wpnonce,$this->className))
 		{
-			switch ($menuFN)
+			switch ($action)
 			{
 				default:
-					$this->do_action($menuFN);
+					$this->do_action($action,$option);
 					break;
 			}
+			// so a reload doesn't initiate again
+			wp_safe_redirect( remove_query_arg([$actionKey,$optionKey,'_wpnonce']) );
+			exit;
 		}
-		// so a reload doesn't initiate again
-		wp_safe_redirect( remove_query_arg([$actionKey,'_wpnonce']) );
-		exit;
 	}
 
 
@@ -1309,14 +1326,14 @@ abstract class abstract_core
 		if (!wp_using_ext_object_cache() && function_exists('\wp_cache_flush')) {
 			\wp_cache_flush();
 			$caches[] = 'WP Object Cache';
-			$this->logDebug('wp_cache_flush',__METHOD__);
+		//	$this->logDebug('wp_cache_flush',__METHOD__);
 		}
 
 		// WP update cache
 		if (function_exists('\wp_clean_update_cache')) {
 			\wp_clean_update_cache();
 			$caches[] = 'WP Update Cache';
-			$this->logDebug('wp_clean_update_cache',__METHOD__);
+		//	$this->logDebug('wp_clean_update_cache',__METHOD__);
 		}
 
 		// Cache_Enabler
@@ -1324,37 +1341,37 @@ abstract class abstract_core
 			\do_action( 'cache_enabler_clear_site_cache' );
 			\do_action( 'ce_clear_cache' );
 			$caches[] = 'Cache Enabler';
-			$this->logDebug('Cache_Enabler',__METHOD__);
+		//	$this->logDebug('Cache_Enabler',__METHOD__);
 		}
 		// Autoptimize
 		if (method_exists('\autoptimizeCache','clearall')) {
 			\autoptimizeCache::clearall();
 			$caches[] = 'Autoptimize';
-			$this->logDebug('autoptimizeCache',__METHOD__);
+		//	$this->logDebug('autoptimizeCache',__METHOD__);
 		}
 		// W3 Total Cache
 		if (function_exists('\w3tc_cache_flush')) {
 			\w3tc_cache_flush();
 			$caches[] = 'W3 Total Cache';
-			$this->logDebug('w3tc_cache_flush',__METHOD__);
+		//	$this->logDebug('w3tc_cache_flush',__METHOD__);
 		}
 		// WP-Optimize
 		if (function_exists('\wpo_cache_flush')) {
 			\wpo_cache_flush();
 			$caches[] = 'WP-Optimize';
-			$this->logDebug('wpo_cache_flush',__METHOD__);
+		//	$this->logDebug('wpo_cache_flush',__METHOD__);
 		}
 		// WP Rocket
 		if (function_exists('\rocket_clean_domain')) {
 			\rocket_clean_domain();
 			$caches[] = 'WP Rocket';
-			$this->logDebug('rocket_clean_domain',__METHOD__);
+		//	$this->logDebug('rocket_clean_domain',__METHOD__);
 		}
 		// WP Super Cache
 		if (function_exists('\wp_cache_clear_cache')) {
 			\wp_cache_clear_cache(get_current_blog_id());
 			$caches[] = 'WP Super Cache';
-			$this->logDebug('wp_cache_clear_cache',__METHOD__);
+		//	$this->logDebug('wp_cache_clear_cache',__METHOD__);
 		}
 		// $this used to be an action (with no return value)
 		//$this->do_action('after_flush_caches');
@@ -1678,7 +1695,7 @@ abstract class abstract_core
 	 * @param string $title title ('Settings')
 	 * @return	string	the settings link
 	 */
-	public function getSettingsLink($plugin=true,$tab=null,$name='Settings',$title='Settings'): string
+	public function getSettingsLink($plugin=true,$tab=null,$name='',$title=''): string
 	{
 		if ($plugin === true)
 		{
@@ -1694,13 +1711,18 @@ abstract class abstract_core
 		}
 		if (!is_string($pluginId)) $pluginId = '';
 
-		$link = sprintf(
-				'<a href="%s" title="%s">%s</a>',
-				$this->getSettingsURL($plugin,$tab),
-				esc_attr( sprintf( __( "%s {$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId ) ),
-				__( $name, $this->PLUGIN_TEXTDOMAIN )
-		);
-		return $link;
+		if ($linkURL = $this->getSettingsURL($plugin,$tab))
+		{
+			if (empty($name))  $name = 'Settings';
+			if (empty($title)) $title = '%1$s Settings';
+			return sprintf(
+					'<a href="%1$s" data-tooltip title="%2$s">%3$s</a>',
+					$linkURL,
+					esc_attr( sprintf( __( "{$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId,$tab ) ),
+					esc_attr( sprintf( __( "{$name}",  $this->PLUGIN_TEXTDOMAIN ), $pluginId,$tab ) ),
+			);
+		}
+		return '';
 	}
 
 
@@ -1728,32 +1750,37 @@ abstract class abstract_core
 	 * @param mixed $plugin true=use this plugin title, array=get_plugin_data array, string = title
 	 * @param string $permalink uri (/sample-post, ?p=nnn, /2022/08/26/sample-post/, etc.)
 	 * @param string $name link name ('Docs')
-	 * @param string $title title ('Documentation')
+	 * @param string $title title ('%1$s Documentation')
 	 * @return	string	the Documentation link
 	 */
-	public function getDocumentationLink($plugin=true,$permalink=null,$name='Docs',$title='Documentation'): string
+	public function getDocumentationLink($plugin=true,$permalink=null,$name='',$title=''): string
 	{
-		if ($plugin === true)
+		if ($plugin === true)							// this plugin
 		{
 			$pluginId = $this->pluginHeader('Title');
 		}
-		else if (is_array($plugin))
+		else if (is_array($plugin))						// get_plugin_data() array
 		{
 			if (isset($plugin['Name'])) $pluginId = $plugin['Name'];
 		}
-		else  if (is_scalar($plugin))
+		else  if (is_scalar($plugin))					// named plugin
 		{
 			$pluginId = $plugin;
 		}
 		else $pluginId = '';
 
-		$link = sprintf(
-				'<a href="%s" title="%s">%s</a>',
-				$this->getDocumentationURL($plugin,$permalink),
-				esc_attr( sprintf( __( "%s {$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId ) ),
-				__( $name, $this->PLUGIN_TEXTDOMAIN )
-		);
-		return $link;
+		if ($linkURL = $this->getDocumentationURL($plugin,$permalink))
+		{
+			if (empty($name))  $name = 'Docs';
+			if (empty($title)) $title = '%1$s Documentation';
+			return sprintf(
+					'<a href="%1$s" data-tooltip title="%2$s" target="_blank">%3$s</a>',
+					$linkURL,
+					esc_attr( sprintf( __( "{$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId,$permalink ) ),
+					sprintf( __( "{$name}", $this->PLUGIN_TEXTDOMAIN ), $pluginId,$permalink ),
+			);
+		}
+		return '';
 	}
 
 
@@ -1766,23 +1793,26 @@ abstract class abstract_core
 	 */
 	public function getDocumentationURL($plugin=true,$permalink=null): string
 	{
-		if ($plugin === true)
+		if ($plugin === true)							// this plugin
 		{
 			$url = $this->pluginHeader('PluginURI');
 		}
-		else if (is_array($plugin))
+		else if (is_array($plugin))						// get_plugin_data() array
 		{
-			if (isset($plugin['PluginURI'])) $url = $plugin['PluginURI'];
+			$url = $plugin['PluginURI'] ?? '';
 		}
-		else  if (is_scalar($plugin))
+		else if (is_scalar($plugin))					// named plugin
 		{
-			$url = $plugin;
+			$url = ($permalink) ? '/' : '';				// $permalink must be full uri
 		}
 		else $url = '';
 
-		if ($permalink) $url = rtrim($url,'/').$permalink;
-
-		return esc_url( $url );
+		if ($url)
+		{
+			if ($permalink) $url = rtrim($url,'/').$permalink;
+			return esc_url( $url );
+		}
+		return '';
 	}
 
 
@@ -1790,38 +1820,41 @@ abstract class abstract_core
 	 * get WordPress support link for this plugin
 	 *
 	 * @param mixed $plugin true=use this plugin title, array=get_plugin_data array, string = title
-	 * @param string $slug uri plugin slug
+	 * @param string $slug WP plugin slug
 	 * @param string $name link name ('Support')
-	 * @param string $title title ('Support')
+	 * @param string $title title ('%1$s Support')
 	 * @return	string	the Support link
 	 */
-	public function getSupportLink($plugin=true,$slug=null,$name='Support',$title='Support'): string
+	public function getSupportLink($plugin=true,$slug=null,$name='',$title=''): string
 	{
-		if ($plugin === true)
+		if ($plugin === true)							// this plugin
 		{
 			$pluginId = $this->pluginHeader('Title');
+			if (empty($slug)) $slug = $this->PLUGIN_SLUG;
 		}
-		else if (is_array($plugin))
+		else if (is_array($plugin))						// get_plugin_data() array
 		{
-			if (empty($slug) && isset($plugin['slug'])) $slug = basename($plugin['slug']);
 			if (isset($plugin['Name'])) $pluginId = $plugin['Name'];
+			if (empty($slug) && isset($plugin['slug'])) $slug = $plugin['slug'];
 		}
-		else if (is_scalar($plugin))
+		else if (is_scalar($plugin))					// named plugin
 		{
 			$pluginId = $plugin;
 		}
 		else $pluginId = '';
 
-		if (empty($slug)) $slug = $this->PLUGIN_SLUG;
-		$url = "https://wordpress.org/support/plugin/{$slug}";
-
-		$link = sprintf(
-				'<a href="%s" title="%s">%s</a>',
-				$this->getSupportURL($plugin,$slug),
-				esc_attr( sprintf( __( "%s {$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId ) ),
-				__( $name, $this->PLUGIN_TEXTDOMAIN )
-		);
-		return $link;
+		if ($linkURL = $this->getSupportURL($plugin,$slug))
+		{
+			if (empty($name))  $name = 'Support';
+			if (empty($title)) $title = '%1$s Support';
+			return sprintf(
+					'<a href="%1$s" data-tooltip title="%2$s" target="_blank">%3$s</a>',
+					$linkURL,
+					esc_attr( sprintf( __( "{$title}", $this->PLUGIN_TEXTDOMAIN ), $pluginId,$slug ) ),
+					sprintf( __( "{$name}", $this->PLUGIN_TEXTDOMAIN ), $pluginId,$slug ),
+			);
+		}
+		return '';
 	}
 
 
@@ -1834,13 +1867,32 @@ abstract class abstract_core
 	 */
 	public function getSupportURL($plugin=true,$slug=null): string
 	{
-		if (is_array($plugin))
+		$url = '';
+
+		if (is_array($plugin))							// get_plugin_data() array
 		{
-			if (empty($slug) && isset($plugin['slug'])) $slug = basename($plugin['slug']);
+			if (empty($slug) && isset($plugin['slug'])) $slug = $plugin['slug'];
 		}
 
-		if (empty($slug)) $slug = $this->PLUGIN_SLUG;
-		return esc_url( "https://wordpress.org/support/plugin/{$slug}" );
+		if ($plugin === true || $slug == $this->PLUGIN_SLUG)	// this plugin
+		{
+			$url = $this->pluginHeader('SupportLink');
+		}
+		else if (is_array($plugin))						// get_plugin_data() array
+		{
+			$readme = WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . dirname($plugin['plugin']) . DIRECTORY_SEPARATOR;
+			list($readme) = glob($readme.'[rR][eE][aA][dD][mM][eE].{txt,TXT,md,MD}', GLOB_BRACE|GLOB_NOSORT);
+			if (empty($readme)) return '';
+			$url = get_file_data( $readme, ['SupportLink' => 'Support link'], 'readme');
+			$url = $url['SupportLink'] ?? '';
+		}
+
+		if (empty($url))								// default to wp plugin support
+		{
+			if (empty($slug)) $slug = $this->PLUGIN_SLUG;
+			$url = "https://wordpress.org/support/plugin/{$slug}";
+		}
+		return esc_url( $url );
 	}
 
 

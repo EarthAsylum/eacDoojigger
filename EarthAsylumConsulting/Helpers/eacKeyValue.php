@@ -5,13 +5,13 @@
  * @category    WordPress Plugin
  * @package     {eac}KeyValue
  * @author      Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright   Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
+ * @copyright   Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
  *
  * @wordpress-plugin
  * Plugin Name:         {eac}KeyValue
  * Description:         {eac}KeyValue - key-value pair storage mechanism for WordPress
- * Version:             1.1.2
- * Last Updated:        26-May-2026
+ * Version:             1.1.3
+ * Last Updated:        30-Aug-2026
  * Requires at least:   5.8
  * Tested up to:        7.1
  * Requires PHP:        8.1
@@ -250,7 +250,7 @@ namespace EarthAsylumConsulting
                         $result = wp_cache_get( $key, $cache_id, false, $found );
                         if ($found) {
                             if ($encrypt) {
-                                $value = \apply_filters( 'eacDoojigger_decrypt_string', $value );
+                                $result = \apply_filters( 'eacDoojigger_decrypt_string', $result );
                             }
                             break;
                         }

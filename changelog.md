@@ -1,5 +1,25 @@
 == Changelog ==
 
+= Version 3.3.0 – September 4, 2026 =
+
++	Compatible with WordPress 7.1.
++	Aesthetic/Nonstructural changes...
+	+	Enhanced `getDocumentationLink()`.
+	+	Enhanced `getSupportLink()` with use of `Support Link` in readme.txt.
+	+	Removed 'Registration' link added 'Support' and 'Sponsor' to plugins page listing.
++	New 'plugin_reinstall extension enables the re-installation of current plugins.
+	+	`getReinstallLink()` method provides html link to trigger a plugin reinstall.
+	+	`reinstall_plugin_action()` method used by `eacDoojigger_reinstall_plugin` action.
+	+	Adds 'Trigger Reinstall' link to tools page.
+	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
++	Allow single option passed to `add_admin_action_link` then passed through url to triggered action.
++	Allow passing alternate url to `add_admin_action_link` (override current uri);
++	Moved admin-only extensions to admin folder.
++	Use case-insensitive search for readme.txt/md file.
++	Admin page tool-tips now converts new-line to break.
++	Fix: Pass full/un-truncated blog version in plugin_update.trait.
++	Fix: decryption in `eacKeyValue::get()`
+
 = Version 3.2.5 – August 6, 2026 =
 
 +   Fix: dashicons info icon `left: unset`.

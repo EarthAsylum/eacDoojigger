@@ -609,16 +609,20 @@ trait standard_options
 			'selected_update_channel'	=> array(
 				'type'		=> 	'select',
 				'label'		=> 	'Update Channel',
-				'options'	=> 	[
-									'Current/Latest-Release'	=> 	'release',			// github 'latest_release'
-									'Preview/Release-Candidate'	=>	'branch',			// github 'default_branch' (main)
+				'options'	=> 	$this->apply_filters('selected_update_channel',[
+									'Current/Latest-Release'	=> 	'release',			// github latest release
+									'Preview/Release-Candidate'	=>	'prerelease',		// github preview release
+									'Developer Branch'			=>	'branch',			// github default branch (main)
+									'Select by Environment'		=>	'either', //select	// github preview or default branch (main)
 				//	e.g.			'Beta/test version'			=> 	'branch/beta',		// github 'beta' branch (tag_name=beta)
 				//	e.g.			'Previous Version'			=> 	'release/1.0.0',	// github '1.0.0' release (tag_name=1.0.0)
-								],
-				'info'		=> 	"Select the channel for updates to this plugin.<br>".
-								"The <em>Current/Latest-Release</em> is the stable and supported release channel, ".
-								"whereas the <em>Preview/Release-Candidate</em> provides an early, pre-release channel ".
-								"(not recommended for production sites).",
+								]),
+				'info'		=> 	"Select the channel for updates to this plugin.",
+				'help'		=>	"The <em>Current/Latest-Release</em> is the stable and supported release channel, ".
+								"whereas the <em>Preview/Release-Candidate</em> provides an early, pre-release channel, ".
+								"and <em>Developer Branch</em> may be an unstable, experimental branch. ".
+								"<em>Select by Environment</em> selects the latest release for production environments, ".
+								"pre-release or the developer branch for test environments.",
 				'attributes'=>	['onchange'=>'this.form.requestSubmit()'],
 			),
 		];
@@ -632,17 +636,36 @@ trait standard_options
 	 */
 	private function stdOptions_checkForUpdates(): array
 	{
+		$plugin_slug = $this->plugin->PLUGIN_SLUG;
+		$message = 'No update history available';
+		if ($updates = \get_site_transient('update_plugins'))
+		{
+			if (isset($updates->no_update[$plugin_slug]))
+			{
+				$item = $updates->no_update[$plugin_slug];
+				$message = sprintf('No update available (last version: %s)',$item->new_version ?? $item->version);
+			}
+			else if (isset($updates->response[$plugin_slug]))
+			{
+				$item = $updates->response[$plugin_slug];
+				$message = sprintf('Update available (version: %s)',$item->new_version ?? $item->version);
+			}
+			$message = "{$message}\nLast checked: ".wp_date($this->plugin->date_time_format,$updates->last_checked);
+		}
+
 		return [
 			'_btnCheckForUpdates'	=> array(
 				'type'		=> 	'button',
 				'label'		=> 	'Check for Updates',
 				'default'	=> 	'Check Now',
+			//	'after'		=> 	"&nbsp;{$message}",
 				'info'		=> 	"Clear WordPress update caches and check for software updates.",
 				'validate'	=> 	function($value) {
 									\wp_clean_update_cache();
 									$this->page_redirect(network_admin_url('update-core.php'));
 									die();
 								},
+				'attributes'=> ['data-tooltip'=>false,'title'=>$message],
 			),
 		];
 	}

@@ -9,8 +9,8 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.earthasylum.com>
- * @version		25.0928.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
+ * @version		26.0901.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -3158,7 +3158,7 @@ abstract class abstract_backend extends abstract_core
 			$( 'abbr,.tooltip.dashicons,[data-tooltip]:not(.settings-tooltip)' ).tooltip({
 				content: function() {
 					var e = $( this );
-					return e.data( 'tooltip' ) || e.attr( 'title' );
+					return ( e.data( 'tooltip' ) || e.attr( 'title' ) ).replace(/\r\n|\r|\n/g, '<br>');
 				}
 			});
 		});
