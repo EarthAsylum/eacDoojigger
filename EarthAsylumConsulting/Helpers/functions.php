@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting;
  * @category 	WordPress Plugin
  * @package 	{eac}Doojigger\Helpers\Functions
  * @author 		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright 	Copyright 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.1121.1
+ * @copyright 	Copyright 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	26.0904.1
  */
 
 /*
@@ -23,13 +23,14 @@ namespace EarthAsylumConsulting;
  */
 function is_request_type(string $type='php'): bool
 {
-	if (array_key_exists('REQUEST_URI', $_SERVER))
+	static $extension = null;
+
+	if (!is_string($extension) && array_key_exists('REQUEST_URI', $_SERVER))
 	{
-		$ext = explode('?',$_SERVER['REQUEST_URI']);
-		$ext = pathinfo(trim($ext[0],'/'),PATHINFO_EXTENSION);
-		if (!empty($ext) && $ext != $type) return false;
+		$extension = explode('?',$_SERVER['REQUEST_URI']);
+		$extension = pathinfo(trim($extension[0],'/'),PATHINFO_EXTENSION);
 	}
-	return true;
+	return (empty($extension) || $extension == $type);
 }
 
 
@@ -40,6 +41,37 @@ function is_request_type(string $type='php'): bool
 function is_php_request(): bool
 {
 	return is_request_type('php');
+}
+
+
+/**
+ * function: \EarthAsylumConsulting\is_request_non_code().
+ * check request uri for file type
+ */
+function is_non_code_request(): bool
+{
+	static $is_non_code = null;
+
+	if (!is_bool($is_non_code))
+	{
+		$fileTypes = \wp_get_ext_types();
+		$fileTypes = array_merge(
+			$fileTypes['image'],
+			$fileTypes['audio'],
+			$fileTypes['video'],
+			$fileTypes['document'],
+			$fileTypes['spreadsheet'],
+			$fileTypes['interactive'],
+			['ttf', 'otf', 'woff', 'woff2', 'eot']
+		);
+		if (array_key_exists('REQUEST_URI', $_SERVER))
+		{
+			$extension 		= explode('?',$_SERVER['REQUEST_URI']);
+			$extension 		= pathinfo(trim($extension[0],'/'),PATHINFO_EXTENSION);
+			$is_non_code 	= (!empty($extension) && in_array($extension,$fileTypes));
+		}
+	}
+	return (bool)$is_non_code;
 }
 
 

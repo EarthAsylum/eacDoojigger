@@ -15,7 +15,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	/**
 	 * @var string extension version
 	 */
-	const VERSION 			= '25.0627.1';
+	const VERSION 			= '26.0904.1';
 
 	/**
 	 * @var string extension tab name
@@ -232,9 +232,6 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 						default			: $setTime = strtotime("+1 {$type}");
 					}
 					$reset 		= [0,$setTime];
-					if ($idx > 1) { // don't log second or minute
-						$this->logDebug(wp_date('c',$reset[1]), $provider." per-{$type} rate limit ({$plan[$type]}) set");
-					}
 				}
 				$this->plugin->set_site_transient($key,$reset,max(1,$setTime - time()));
 			}
@@ -246,11 +243,11 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	/**
 	 * Helper to check or set rate limit - set on a 429 status from the provider
 	 *
-	 * @param int $time - epoch time to expire
+	 * @param int|string $time - epoch time to expire
 	 * @param string $name - optional id (non-default rate limit)
 	 * @return bool|array - false or transient array
 	 */
-	protected function isRateLimit(int $time=0,string $name='')
+	protected function isRateLimit(int|string $time=0,string $name='')
 	{
 		$provider 				= static::PROVIDER . (($name) ? "-{$name}" : '');
 		$hash 					= md5($this->account_id);
@@ -258,6 +255,14 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 
 		if ($time)
 		{
+			if (is_string($time)) {
+				$time = strtotime($time);
+			} else if ($time < YEAR_IN_SECONDS) {
+				$time = time() + $time;
+			}
+			if (! (is_int($time) && $time >= time()) ) {
+				$time = time() + HOUR_IN_SECONDS;
+			}
 			$this->plugin->set_site_transient($transient_rate_key,[0,$time],$time - time());
 			$this->logError(wp_date('c',$time),$provider.' provider rate limit exceeded');
 			return [0,$time];

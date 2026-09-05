@@ -11,7 +11,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
 	class security_ra_abuseipdb extends security_ra_abstract
@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0311.1';
+		const VERSION 			= '26.0904.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -146,8 +146,14 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 
 			if ($status != 200)
 			{
+				if ($status == 429) {	// rate limit exceeded (day or month)
+					if ($rateLimit = wp_remote_retrieve_header($result,'Retry-After')) {
+						$this->rate_limit['retry'] = $rateLimit;
+					}
+				}
+			//	$this->logDebug(wp_remote_retrieve_headers($result),self::PROVIDER.' API Error Response');
 				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
-					$this->logError($result['errors'][0]['detail'],'AbuseIPDB API Error');
+					$this->logError($result['errors'][0]['detail'],self::PROVIDER.' API Error');
 				}
 			}
 			else
@@ -291,7 +297,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 			{
 				$this->logError('Status '.$status.': '.get_status_header_desc($status),__FUNCTION__);
 				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
-					$this->logError($result['errors'][0]['detail'],'AbuseIPDB Reporting Error');
+					$this->logError($result['errors'][0]['detail'],self::PROVIDER.' Reporting Error');
 				}
 				if ($status == 429) {			// rate limit reached
 					$retry = wp_remote_retrieve_header($result, 'X-RateLimit-Reset') ?: strtotime('tomorrow');

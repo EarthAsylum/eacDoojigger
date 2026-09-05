@@ -1,6 +1,6 @@
 /**
  * {eac}Doojigger for WordPress - Administrator options screen stylesheet
- * @version 26.0803.1
+ * @version 26.0905.1
  */
 
 /*
@@ -207,7 +207,7 @@ details.settings-grid-head summary > * {display: inline;}
 	text-align: right;
 }
 /* output for range field (use with <code><output ...</output></code>) */
-.settings-grid-item-input-range code output {
+.settings-grid-item code output {
 	color: var(--eac-admin-highlight);
 	font-weight: 500;
 }

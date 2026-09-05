@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const 	VERSION	= '26.0604.1';
+		const 	VERSION	= '26.0904.1';
 
 		/**
 		 * @var string supported session managers
@@ -500,7 +500,7 @@ if (! class_exists(__NAMESPACE__.'\session_extension', false) )
 			$this->do_action( 'session_stop' );
 			//$this->logDebug(current_action(),__METHOD__);
 
-			switch ($this->session->session_manager)
+			switch (isset($this->session,$this->session->session_manager))
 			{
 				case self::SESSION_OBJECTCACHE:
 					$expires = max($this->get_session_expiration(),30*MINUTE_IN_SECONDS);

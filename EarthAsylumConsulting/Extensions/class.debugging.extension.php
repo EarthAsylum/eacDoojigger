@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '25.0728.1';
+		const VERSION	= '26.0904.1';
 
 		/**
 		 * @var string extension tab name
@@ -58,8 +58,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * previous error/exception handlers
 		 */
-		 private $previous_error_handler;
-		 private $previous_exception_handler;
+		private $previous_error_handler;
+		private $previous_exception_handler;
 
 		/**
 		 * constructor method
@@ -71,6 +71,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		{
 			parent::__construct($plugin, (self::ALLOW_ALL | self::ALLOW_NON_PHP | self::DEFAULT_DISABLED)/* & ~self::ALLOW_CRON*/);
 
+		/*
 			$ext = explode('?',$_SERVER['REQUEST_URI']);
 			$ext = pathinfo(trim($ext[0],'/'),PATHINFO_EXTENSION);
 			if (!empty($ext))
@@ -87,6 +88,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				);
 				if (in_array($ext,$fileTypes)) return $this->isEnabled(false);
 			}
+		*/
 
 			$this->registerExtension( $this->className );
 			add_action('admin_init', function()

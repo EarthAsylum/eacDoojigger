@@ -11,7 +11,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
 	class security_ra_ipgeolocation extends security_ra_abstract
@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0628.1';
+		const VERSION 			= '26.0904.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -42,18 +42,19 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 		 */
 		const ACCOUNT_LIMITS = [
 		//	id						name
-			"developer"		=> [ 	"Developer (free)",		'day'=>1000,	'month'=>   30000	],
+			"developer"		=> [ 	"Developer (free)",		'day'=>1000,	'month'=>       0	],
 
-		//	"bronze"		=> [ 	"Bronze",				'day'=>0,		'month'=>  150000	],
-		//	"silver"		=> [ 	"Silver",				'day'=>0,		'month'=> 1000000	],
-		//	"silver+"		=> [ 	"Silver+",				'day'=>0,		'month'=> 3000000	],
-		//	"gold"			=> [ 	"Gold",					'day'=>0,		'month'=> 6000000	],
-		//	"platinum"		=> [ 	"Platinum",				'day'=>0,		'month'=>20000000	],
+			"starter"		=> [ 	"Starter",				'day'=>0,		'month'=>  150000	],
+			"plus"			=> [ 	"Plus",					'day'=>0,		'month'=>  500000	],
+			"pro"			=> [ 	"Pro",					'day'=>0,		'month'=> 1000000	],
+			"business"		=> [ 	"Business",				'day'=>0,		'month'=> 2000000	],
+			"premium"		=> [ 	"Premium",				'day'=>0,		'month'=> 5000000	],
+			"enterprise"	=> [ 	"Enterprise",			'day'=>0,		'month'=>       0	],
 
-			"standard"		=> [ 	"Standard",				'day'=>0,		'month'=> 1000000	],
-			"security"		=> [ 	"Security",				'day'=>0,		'month'=> 1000000	],
-			"advance"		=> [ 	"Advance",				'day'=>0,		'month'=> 1000000	],
-			"custom"		=> [ 	"Custom",				'day'=>0,		'month'=>       0	],
+		//	"standard"		=> [ 	"Standard",				'day'=>0,		'month'=> 1000000	],
+		//	"security"		=> [ 	"Security",				'day'=>0,		'month'=> 1000000	],
+		//	"advance"		=> [ 	"Advance",				'day'=>0,		'month'=> 1000000	],
+		//	"custom"		=> [ 	"Custom",				'day'=>0,		'month'=>       0	],
 		];
 
 
@@ -103,10 +104,15 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 			{
 				// old plans to standard
 				if (!isset(self::ACCOUNT_LIMITS[$account])) {
-					$account = 'standard';
+					$link = $this->plugin->getSettingsLink(true,'security','IpGeoLocation plan');
+					self::add_admin_notice("Please reset your {$link}",'warning');
+					$account = 'starter';
 				}
 				$this->account_plan 		= self::ACCOUNT_LIMITS[$account];
 				$this->rate_limit['limit'] 	= $this->account_plan['month'];
+				if ($this->rate_limit['limit']) {
+					$this->rate_limit['limit'] = $this->rate_limit['limit'] / 3; // 3 credits per request
+				}
 				$this->rate_limit['retry'] 	= strtotime('tomorrow');
 			}
 		}
@@ -127,7 +133,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 					'ip'		=> $ipAddress,
 					'include'	=> ($this->security->isPolicyEnabled('ipgeolocation_plan') != 'developer')
 						? 'security' : '',
-				],'https://api.ipgeolocation.io/ipgeo');
+				],'https://api.ipgeolocation.io/v3/ipgeo');
 
 			$result = wp_remote_get($api_url,
 				[
@@ -142,8 +148,14 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 
 			if ($status != 200)
 			{
+				if ($status == 429) {	// rate limit exceeded (day or month)
+					if ($rateLimit = wp_remote_retrieve_header($result,'Retry-After')) {
+						$this->rate_limit['retry'] = $rateLimit;
+					}
+				}
+			//	$this->logDebug(wp_remote_retrieve_headers($result),self::PROVIDER.' API Error Response');
 				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
-					$this->logError($result['message'],'IpGeoLocation API Error');
+					$this->logError($result['message'],self::PROVIDER.' API Error');
 				}
 			}
 			else
@@ -153,11 +165,13 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 						? intval($result['security']['threat_score'])
 						: 0;
 					$data = array_replace($data,[
-						'CountryCode'		=> $result['country_code2'],
-						'CountryName'		=> $result['country_name'],
-						'PostalCode'		=> $result['zipcode'],
-						'Region'			=> (isset($result['state_code'])) ? substr($result['state_code'],-2) : $result['state_prov'],
-						'City'				=> $result['city'],
+						'CountryCode'		=> $result['location']['country_code2'],
+						'CountryName'		=> $result['location']['country_name'],
+						'PostalCode'		=> $result['location']['zipcode'],
+						'Region'			=> (isset($result['location']['state_code']))
+												? substr($result['location']['state_code'],-2)
+												: $result['location']['state_prov'],
+						'City'				=> $result['location']['city'],
 						'TimeZone'			=> $result['time_zone']['name'] ?? $data['TimeZone'],
 						'Currency'			=> $result['currency']['code'] ?? $data['Currency'],
 					]);

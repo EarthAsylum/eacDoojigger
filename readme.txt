@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.3.0-RC1
-Last Updated:           04-Sep-2026
+Stable tag:             3.3.0-RC2
+Last Updated:           05-Sep-2026
 Requires at least:      5.8
 Tested up to:           7.1
 Requires PHP:           8.1
@@ -515,25 +515,34 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.3.0 – September 4, 2026 =
+= Version 3.3.0 – September 5, 2026 =
 
 +	Compatible with WordPress 7.1.
-+	Aesthetic/Nonstructural changes...
-	+	Enhanced `getDocumentationLink()`.
-	+	Enhanced `getSupportLink()` with use of `Support Link` in readme.txt.
-	+	Removed 'Registration' link added 'Support' and 'Sponsor' to plugins page listing.
++	New `Request Rate Limit` setting in Risk Assessment extension.
+	+	Limits the number of request (by IP address) within 10 minutes.
+	+	Added `Retry-After` header on status = 429.
++	New `is_non_code_request()` function to determine non-code request from url using `wp_get_ext_types()`.
+	+	Extensions, by default, do not load for non-code requests.
+	+	If needed, extension must specify `self::ALLOW_NON_CODE` on `parent::__construct()`.
 +	New 'plugin_reinstall extension enables the re-installation of current plugins.
 	+	`getReinstallLink()` method provides html link to trigger a plugin reinstall.
 	+	`reinstall_plugin_action()` method used by `eacDoojigger_reinstall_plugin` action.
 	+	Adds 'Trigger Reinstall' link to tools page.
 	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
-+	Allow single option passed to `add_admin_action_link` then passed through url to triggered action.
-+	Allow passing alternate url to `add_admin_action_link` (override current uri);
 +	Moved admin-only extensions to admin folder.
 +	Use case-insensitive search for readme.txt/md file.
 +	Admin page tool-tips now converts new-line to break.
 +	Fix: Pass full/un-truncated blog version in plugin_update.trait.
 +	Fix: decryption in `eacKeyValue::get()`
++	Updated `IpGeoLocation` API to v3.
++	Updated `IpGeoLocation` plans for rate limits and credits.
++	Always respect `Retry-After` header in risk assessment APIs.
++	Aesthetic/Nonstructural changes...
+	+	Enhanced `getDocumentationLink()`.
+	+	Enhanced `getSupportLink()` with use of `Support Link` in readme.txt.
+	+	Removed 'Registration' link added 'Support' and 'Sponsor' to plugins page listing.
++	Allow single option passed to `add_admin_action_link` then passed through url to triggered action.
++	Allow passing alternate url to `add_admin_action_link` (override current uri);
 
 = Version 3.2.5 – August 6, 2026 =
 

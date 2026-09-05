@@ -7,7 +7,7 @@ namespace EarthAsylumConsulting\Extensions;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @uses 		\EarthAsylumConsulting\Traits\swRegistrationUI;
  */
@@ -23,7 +23,7 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 	/**
 	 * @var string extension version
 	 */
-	const VERSION		= '25.0802.1';
+	const VERSION		= '26.0904.1';
 
 	/**
 	 * @var ALIAS constant ($this->Registration->...)
@@ -47,7 +47,7 @@ class eacDoojigger_registration extends \EarthAsylumConsulting\abstract_extensio
 	 */
 	public function __construct($plugin)
 	{
-		parent::__construct($plugin, self::ALLOW_ALL|self::ALLOW_NON_PHP);
+		parent::__construct($plugin, self::ALLOW_ALL|self::ALLOW_NON_PHP|self::ALLOW_NON_CODE);
 
 		if ($this->is_admin())
 		{

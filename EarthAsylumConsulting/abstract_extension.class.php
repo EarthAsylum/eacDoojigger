@@ -11,8 +11,8 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		25.0417.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0904.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_core
@@ -53,7 +53,8 @@ abstract class abstract_extension
 	const ALLOW_CLI			= 0b00010000;		// enabled for wp-cli requests
 	const ALLOW_ALL			= self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ALLOW_CRON|self::ALLOW_CLI;
 	const ALLOW_NON_PHP		= 0b00100000;		// enabled when loaded for a url not ending in .php
-	const DEFAULT_DISABLED	= 0b01000000;		// force {classname}_enabled' option to default to not enabled
+	const ALLOW_NON_CODE	= 0b01000000;		// enabled on non-code requests
+	const DEFAULT_DISABLED	= 0b10000000;		// force {classname}_enabled' option to default to not enabled
 
 	/**
 	 * @var bool is this extension network enabled
@@ -148,6 +149,14 @@ abstract class abstract_extension
 				} else if (method_exists($this,'addPluginUpdateNotice')) {
 					$this->addPluginUpdateNotice(plugin_basename($this->update_plugin_file));
 				}
+			}
+		}
+
+		// check request uri for non-code file types (not .php, .json, .xml, etc.)
+		if ( ! ($flags & self::ALLOW_NON_CODE) )
+		{
+			if ( \EarthAsylumConsulting\is_non_code_request() ) {
+				return $this->isEnabled(false);
 			}
 		}
 

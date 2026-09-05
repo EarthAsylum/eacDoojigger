@@ -9,7 +9,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
 	 */
 
 	class security_ra_extension extends \EarthAsylumConsulting\abstract_extension
@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '25.0718.1';
+		const VERSION 			= '26.0905.1';
 
 		/**
 		 * @var string alias
@@ -28,6 +28,18 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * @var string extension tab name
 		 */
 		const TAB_NAME 			= 'Security';
+
+		/**
+		 * @var int risk assessment time-to-live
+		 * hold for n hours after last request
+		 */
+		const RA_TTL 			= HOUR_IN_SECONDS * 12;
+
+		/**
+		 * @var int rate limit time span
+		 * limit request to n in n minutes
+		 */
+		const RL_SPAN 			= MINUTE_IN_SECONDS * 10;
 
 		/**
 		 * @var string|array|bool to set (or disable) default group display/switch
@@ -144,7 +156,8 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function admin_options_help()
 		{
-		//	if (!$this->plugin->isSettingsPage(self::TAB_NAME)) return;
+			if (!$this->plugin->isSettingsPage(self::TAB_NAME)) return;
+			require 'includes/security_ra.help.php';
 		}
 
 
@@ -183,16 +196,16 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			{
 				add_action('init',						array($this, 'check_for_blocks'));
 				// do this late, but before output, so other rules may process
-				add_action('wp_headers',				array($this, 'risk_assessment_result'),99);
-				add_action('login_init',				array($this, 'risk_assessment_result'),99);
+				add_action('wp_headers',				array($this, 'get_risk_assessment_result'),99);
+				add_action('login_init',				array($this, 'get_risk_assessment_result'),99);
 			}
-			add_action('xmlrpc_enabled',				array($this, 'risk_assessment_result'),99);
-			add_action('rest_pre_serve_request',		array($this, 'risk_assessment_result'),99);
+			add_action('xmlrpc_enabled',				array($this, 'get_risk_assessment_result'),99);
+			add_action('rest_pre_serve_request',		array($this, 'get_risk_assessment_result'),99);
 
 			/**
 			 * action {pluginName}_risk_assessment - used to force the assessment
 			 */
-			$this->add_action('risk_assessment',		array($this, 'risk_assessment_result'));
+			$this->add_action('risk_assessment',		array($this, 'get_risk_assessment_result'));
 
 			// capture IP addresses to block file
 			if ($this->security->isPolicyEnabled('risk_assessment_file'))
@@ -245,17 +258,16 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * get the risk assessment result
 		 *
 		 */
-		public function risk_assessment_result($arg=null)
+		public function get_risk_assessment_result($arg=null)
 		{
-			static $once = false;
-			if (!$once)
+			static $once = 0;
+			if (! $once++)
 			{
-				$once = true;
 				/**
 				 * action {pluginName}_risk_assessment_result
 				 * @param array risk assessment data
 				 */
-				$this->do_action('risk_assessment_result', $this->risk_assessment());
+				$this->do_action('risk_assessment_result', $this->do_risk_assessment());
 			}
 			return $arg;
 		}
@@ -266,7 +278,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @return array risk assessment data
 		 */
-		private function risk_assessment($arg=null): array
+		private function do_risk_assessment($arg=null): array
 		{
 			$ipAddress 	= $this->getVisitorIP();
 			$method 	= $this->security->isPolicyEnabled('risk_assessment_method');
@@ -276,6 +288,10 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			{
 				$data = [
 					'ipAddress'				=> $ipAddress,		// remote address
+					'RequestCount'			=> 0,				// track number of requests
+					'RequestTime'			=> 0,				// track time of last requests
+					'RateLimitCount'		=> 0,				// for rate limiting - request count
+					'RateLimitTime'			=> time(),			// for rate limiting - 1st request time
 					'RiskAssessmentMethod'	=> $method,			// divergent, convergent, average
 					'RiskAssessmentLimit'	=> $limit,			// 1 - 100
 					'RiskAssessmentType'	=> 'none',			// fraud, threat, abuse, risk
@@ -291,6 +307,13 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					'TimeZone'				=> '',
 					'Currency'				=> '',
 				];
+			}
+			else 	// temporarily account for pre-existing transients
+			{
+				if (!isset($date['RequestCount'])) $date['RequestCount'] = 1;
+				if (!isset($date['RequestTime'])) $date['RequestTime'] = time();
+				if (!isset($date['RateLimitCount'])) $date['RateLimitCount'] = 1;
+				if (!isset($date['RateLimitTime'])) $date['RateLimitTime'] = time();
 			}
 
 			// get registered score (from register_risk)
@@ -310,8 +333,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 			// save data in transient
 			$transient_provider_key = $this->transient_provider($ipAddress,false);
-			$transient_time 		= HOUR_IN_SECONDS * 12;
-			$this->plugin->set_site_transient($transient_provider_key,$data,$transient_time);
+			$this->plugin->set_site_transient($transient_provider_key,$data,self::RA_TTL);
 
 			$this->logNotice(
 				sprintf("%d/%d", $data['RiskAssessmentScore'], $limit),
@@ -341,6 +363,29 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		private function risk_assessment_registered(array $data): array
 		{
+			static $once = 0;
+			if (! $once++ )
+			{
+				// count the number of requests
+				$data['RequestCount']++;
+				$data['RequestTime'] 	= time();
+
+				// check rate limiting
+				if ($data['RateLimitTime'] < (time() - self::RL_SPAN)) {
+					$data['RateLimitCount'] = 0;
+					$data['RateLimitTime'] = time();
+				}
+
+				$data['RateLimitCount']++;
+				if ($rateLimit = $this->security->isPolicyEnabled('risk_assessment_rate_limit'))
+				{
+					if ($data['RateLimitCount'] > $rateLimit) {
+						$this->http_status = 429;
+						$this->register_risk_internal('rate limit maximum exceeded','abuse',100);
+					}
+				}
+			}
+
 			if ($result = $this->transient_register($data['ipAddress'],true))
 			{
 				// save registered type/score
@@ -447,7 +492,10 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					__("Request from %s denied; Risk assessment score: %d/%d",$this->plugin->PLUGIN_TEXTDOMAIN),
 					$ipAddress, $score, $limit
 				);
-
+				if ($this->http_status == 429) {
+					$httpDate = gmdate('D, d M Y H:i:s', time()+self::RA_TTL) . ' GMT';
+					header('Retry-After: '.$httpDate);
+				}
 				wp_die( $this->plugin->access_denied($message, $this->http_status) );
 			}
 		}
@@ -561,7 +609,25 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * @param string $type fraud|threat|abuse|risk
 		 * @param int $score risk score (0-100)
 		 */
-		private function register_risk(string $message, string $type, int $score=0)
+		private function register_risk(string $message, string $type, int $score=0): void
+		{
+			if ($this->register_risk_internal($message, $type, $score))
+			{
+				$this->do_risk_assessment();
+			}
+		}
+
+
+		/**
+		 * register the risk request
+		 *
+		 * @param string $message additional comment text
+		 * @param string $type fraud|threat|abuse|risk
+		 * @param int $score risk score (0-100)
+		 *
+		 * @return bool risk > limit
+		 */
+		private function register_risk_internal(string $message, string $type, int $score=0): bool
 		{
 			static $limit 			= 0;
 			static $threshold 		= 0;
@@ -575,7 +641,6 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 			$ipAddress 				= $this->getVisitorIP();
 			$score 					= $score ?: round(($limit / $threshold) * self::RISK_TYPES[$type],0);
-			$transient_time 		= time() + DAY_IN_SECONDS;
 
 			// get previously registered
 			if ($registered = $this->transient_register($ipAddress,true))
@@ -593,16 +658,13 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				$registered['type']		= $type;
 				$registered['score']	= min(100, $score);
 				$registered['message']	= [$message];
-				$registered['expires'] 	= $transient_time;
+				$registered['expires'] 	= self::RA_TTL;
 				$registered['status']	= 200;
 			}
 			$registered['message']		= array_slice($registered['message'],- $threshold);
 
 			$stats = sprintf("(%d/%d),(%d/%d)",$registered['count'],$threshold,$registered['score'],$limit);
-			$this->logWarning(
-				$message,
-				"Registered {$type} report {$stats}"
-			);
+			$this->logWarning($message,"Registered {$type} report {$stats}");
 
 			// force score to max when limit is reached
 			if ($registered['count'] >= $threshold) $registered['score'] = max($limit,$registered['score']);
@@ -625,8 +687,8 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					 */
 					$this->do_action('risk_assessment_report',$ipAddress,$registered,$threshold,$limit);
 				}
-				// update expiration time (report once in 24hrs)
-				$registered['expires'] = $transient_time;
+				// update expiration time (report once in 12hrs)
+				$registered['expires'] = self::RA_TTL;
 			}
 
 			$transient_register_key = $this->transient_register($ipAddress,false);
@@ -634,8 +696,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			// save current status (for at least a minute, we're obviously still active)
 			$seconds = ($registered['expires'] > time()) ? $registered['expires'] - time() : MINUTE_IN_SECONDS;
 			$this->plugin->set_site_transient($transient_register_key,$registered,$seconds);
-
-			if ($registered['score'] >= $limit) $this->risk_assessment();
+			return ($registered['score'] >= $limit);
 		}
 
 

@@ -11,7 +11,7 @@ namespace EarthAsylumConsulting\Extensions;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -21,7 +21,7 @@ class file_system_extension extends \EarthAsylumConsulting\abstract_extension
 	/**
 	 * @var string extension version
 	 */
-	const VERSION	= '25.0416.1';
+	const VERSION	= '26.0905.1';
 
 	/**
 	 * @var string extension alias
@@ -58,7 +58,7 @@ class file_system_extension extends \EarthAsylumConsulting\abstract_extension
 	public function __construct($plugin)
 	{
 		$this->enable_option = false;
-		parent::__construct($plugin, self::ALLOW_ALL|self::ALLOW_NON_PHP);
+		parent::__construct($plugin, self::ALLOW_ALL|self::ALLOW_NON_PHP|self::ALLOW_NON_CODE);
 
 		// store as separate option keys
 		$this->isReservedOption('filesystem_multisite',true);
