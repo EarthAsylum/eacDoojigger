@@ -147,6 +147,14 @@ $this->registerExtensionOptions( $this->className,
 				'info'		=>	"Treat additional IP addresses as high-risk (banned). Enter 1 IPv4 or IPv6 address or subnet per line.",
 				'advanced'	=> 	true,
 		),
+		'risk_assessment_allowed' 	=> array(
+				'type'		=>	'textarea',
+				'label'		=>	"Whitelist IP Addresses",
+				'info'		=>	"Allow these IP addresses regardless of risk assessment. Enter 1 IPv4 or IPv6 address or subnet (CIDR) per line.",
+				'help'		=>	"[info] When an allow list file (ip_allow_list.conf) is found in your WordPress root folder, ".
+								"the content is read and parsed for allowed IP addresses, overriding the risk assessment.",
+				'advanced'	=> 	true,
+		),
 		'_risk_assessment_reset' 	=> array(
 				'type'		=>	'text',
 				'label'		=>	"Clear IP Address",

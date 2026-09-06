@@ -6,10 +6,12 @@
 +	New `Request Rate Limit` setting in Risk Assessment extension.
 	+	Limits the number of request (by IP address) within 10 minutes.
 	+	Added `Retry-After` header on status = 429.
++	New `Whitelist IP Addresses` setting in Risk Assessment extension.
+	+	To bypass risk assessment for given IP addresses.
 +	New `is_non_code_request()` function to determine non-code request from url using `wp_get_ext_types()`.
 	+	Extensions, by default, do not load for non-code requests.
 	+	If needed, extension must specify `self::ALLOW_NON_CODE` on `parent::__construct()`.
-+	New 'plugin_reinstall extension enables the re-installation of current plugins.
++	New 'plugin_reinstall' extension enables the re-installation of current plugins.
 	+	`getReinstallLink()` method provides html link to trigger a plugin reinstall.
 	+	`reinstall_plugin_action()` method used by `eacDoojigger_reinstall_plugin` action.
 	+	Adds 'Trigger Reinstall' link to tools page.

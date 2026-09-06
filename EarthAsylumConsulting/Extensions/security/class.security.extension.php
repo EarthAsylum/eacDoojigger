@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '25.0502.1';
+		const VERSION			= '26.0905.1';
 
 		/**
 		 * @var string extension alias
@@ -326,7 +326,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				add_filter( 'wp_authenticate_user',			array($this, 'validate_authentication_attempts'), 5, 2 );
 				add_action( 'wp_login',						function( $uername, $user ) {
 					$this->delete_transient('login_attempt_'.$user->ID);
-					$this->do_action('clear_risk');
+					$this->do_action('clear_risk_assessment');
 				}, 10, 2 );
 			}
 

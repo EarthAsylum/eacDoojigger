@@ -56,19 +56,19 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		const RISK_TYPES 		= [ 'fraud' => 1.5, 'threat' => 1.25, 'abuse' => 1.0, 'risk' => 0.75, 'none' => 0 ];
 
 		/**
-		 * @var string IP block list file name
+		 * @var string IP block list file name (write)
 		 */
-		const IP_BLOCK_LIST 	= ABSPATH."ip_block_list.conf";
+		const IP_BLACKLIST_FILE	= ABSPATH."ip_block_list.conf";
 
 		/**
-		 * @var string IP allow list file name
+		 * @var string IP allow list file name (read)
 		 */
-		const IP_ALLOW_LIST 	= ABSPATH."ip_allow_list.conf";
+		const IP_WHITELIST_FILE = ABSPATH."ip_allow_list.conf";
 
 		/**
 		 * @var array ignore these addresses
 		 */
-		private $ip_ignored 	= [];
+		private $ip_whitelist 	= [];
 
 		/**
 		 * @var int http status on die
@@ -109,29 +109,6 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					wp_add_inline_style( $styleId, $style );
 				});
 			}
-
-			// open api to allow external risk reporting
-			if ($this->isEnabled())
-			{
-				if ($this->security->isPolicyEnabled('risk_assessment_api'))
-				{
-					/*
-					 * setup rest api
-					 */
-					add_action( 'rest_api_init', 	array($this,'register_risk_api') );
-				}
-
-				/**
-				 * action {plugin}_register_[threat|fraud|abuse|risk]
-				 * @param string $message additional comment text
-				 * @param int $score risk score (0-100)
-				 * @param int $http_status optional, set http status on die
-				 */
-				foreach (array_keys(self::RISK_TYPES) as $type)
-				{
-					$this->add_action( "register_{$type}", array($this, 'register_risk_action'),10,3 );
-				}
-			}
 		}
 
 
@@ -170,18 +147,38 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		{
 			if ( ! parent::initialize() ) return; // disabled
 
+			/*
+			 * setup rest api - allow external risk reporting
+			 */
+			if ($this->security->isPolicyEnabled('risk_assessment_api'))
+			{
+				add_action( 'rest_api_init', 	array($this,'risk_api_register') );
+			}
+
 			/**
+			 * action {plugin}_register_[threat|fraud|abuse|risk]
+			 * @param string $message additional comment text
+			 * @param int $score risk score (0-100)
+			 * @param int $http_status optional, set http status on die
+			 */
+			foreach (array_keys(self::RISK_TYPES) as $type)
+			{
+				$this->add_action( "register_{$type}", array($this, 'register_risk_action'),10,3 );
+			}
+
+ 			/**
 			 * filter {pluginName}_risk_assessment_ignore - IP addresses to ignore
 			 * 'ignore' is a misnomer, these IPs are processed but reset (i.e. for testing)
 			 * @param array IP addresses
 			 * @return array IP addresses
 			 */
-			$this->ip_ignored = $this->apply_filters('risk_assessment_ignore',$this->ip_ignored);
+			$this->ip_whitelist = $this->security->mergePolicies('risk_assessment_allowed') ?: [];
+			$this->ip_whitelist = $this->apply_filters('risk_assessment_whitelist',$this->ip_whitelist);
 
 			// allow list can be used to reset allowed IP addresses
-			if (is_file(self::IP_ALLOW_LIST))
+			if (is_file(self::IP_WHITELIST_FILE))
 			{
-				$this->allow_ip_file();
+				$this->input_ip_whitelist_file();
 			}
 		}
 
@@ -192,10 +189,11 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
+			if ($this->isWhitelisted()) return;
+
 			if ($this->isEnabled() && ! current_user_can('edit_pages') ) // not editor or better
 			{
-				add_action('init',						array($this, 'check_for_blocks'));
-				// do this late, but before output, so other rules may process
+				add_action('init',						array($this, 'isBlacklisted'));
 				add_action('wp_headers',				array($this, 'get_risk_assessment_result'),99);
 				add_action('login_init',				array($this, 'get_risk_assessment_result'),99);
 			}
@@ -210,13 +208,30 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			// capture IP addresses to block file
 			if ($this->security->isPolicyEnabled('risk_assessment_file'))
 			{
-				$this->add_action('risk_assessment_report', array($this, 'output_ip_file'),10,4 );
+				$this->add_action('risk_assessment_report', array($this, 'output_ip_blacklist_file'),10,4 );
 			}
 
 			/**
-			 * action {pluginName}_clear_risk - forget any previously registered risk
+			 * action {pluginName}_clear_risk_assessment - forget any previously registered risk
 			 */
-			$this->add_action( 'clear_risk', 			array($this,'clear_risk_action') );
+			$this->add_action( 'clear_risk_assessment', array($this,'clear_risk_action') );
+		}
+
+
+		/**
+		 * Check an IP address is in ignored list
+		 *
+		 * @param string $ipAddress IPv4 or IPv6 address
+		 * @return bool
+		 */
+		public function isWhitelisted(?string $ipAddress=null): bool
+		{
+			static $checked = null;
+			if (is_null($checked))
+			{
+				$checked = $this->plugin->isIpInList($ipAddress ?? $this->getVisitorIP(), $this->ip_whitelist);
+			}
+			return $checked;
 		}
 
 
@@ -224,7 +239,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * Check http header and blocked IP addresses
 		 *
 		 */
-		public function check_for_blocks(): void
+		public function isBlacklisted(): void
 		{
 			// get score passed in custom header
 			foreach (array_keys(self::RISK_TYPES) as $type)
@@ -239,16 +254,15 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			}
 
 			/**
-			 * filter {pluginName}_risk_assessment_banned - IP addresses to ban
+			 * filter {pluginName}_risk_assessment_blacklist - IP addresses to ban
 			 * @param array IP addresses
 			 * @return array IP addresses
 			 */
-			$ip_blocked = $this->security->mergePolicies('risk_assessment_banned') ?: [];
-			if ( $ip_blocked = $this->apply_filters('risk_assessment_banned',$ip_blocked) )
+			$ip_blacklist = $this->security->mergePolicies('risk_assessment_banned') ?: [];
+			if ( $ip_blacklist = $this->apply_filters('risk_assessment_blacklist',$ip_blacklist) )
 			{
-				if ($this->plugin->isIpInList($this->getVisitorIP(),$ip_blocked)) {
-				//if (in_array($this->getVisitorIP(),$ip_blocked)) {
-					$this->register_risk('blocked by IP rule', 'threat', 100);
+				if ($this->plugin->isIpInList($this->getVisitorIP(),$ip_blacklist)) {
+					$this->register_risk('blocked by IP blacklist rule', 'threat', 100);
 				}
 			}
 		}
@@ -482,7 +496,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		private function risk_assessment_abort(string $ipAddress, int $score, int $limit): void
 		{
-			if ($this->isIpIgnored($ipAddress))
+			if ($this->isWhitelisted($ipAddress))
 			{
 				$this->clear_risk_action($ipAddress);
 			}
@@ -503,8 +517,8 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 		/*
 		 * Register risk activity
-		 * used by actions: do_action( 'register_[fraud|threat|abuse|risk]' )
-		 * - or-  REST api: /wp-json/.../register_[fraud|threat|abuse|risk]
+		 * used by REST api: /wp-json/eacDoojigger/v1/register_[fraud|threat|abuse|risk]
+		 * - or - actions: do_action( 'eacDoojigger_register_[fraud|threat|abuse|risk]' )
 		 */
 
 
@@ -513,14 +527,14 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @return void
 		 */
-		public function register_risk_api()
+		public function risk_api_register()
 		{
 			$types = implode('|',array_keys(self::RISK_TYPES));
 			register_rest_route( $this->pluginName, "/v1/register_(?P<type>{$types})", array(
 				array(
 					'methods'             	=> \WP_REST_Server::ALLMETHODS,
-					'callback'            	=> [$this, 'register_risk_request'],
-					'permission_callback' 	=> [$this, 'register_risk_permission'],
+					'callback'            	=> [$this, 'risk_api_register_request'],
+					'permission_callback' 	=> [$this, 'risk_api_permission'],
 					'args'					=> array(
 						'url'				=> ['default' => ''],
 						'reason'			=> ['default' => ''],
@@ -537,15 +551,15 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @return void
 		 */
-		public function register_risk_permission($request)
+		public function risk_api_permission($request)
 		{
 			/**
-			 * filter - {pluginName}_register_risk_request - allow actors to authenticate and/or process request
+			 * filter - {pluginName}_risk_api_register_request - allow actors to authenticate and/or process request
 			 * @param bool is authenticated
 			 * @param object API request object
 			 * @return bool
 			 */
-			if (! $this->apply_filters('register_risk_request',true,$request))
+			if (! $this->apply_filters('risk_api_register_request',true,$request))
 			{
 				return $this->plugin->access_denied("Register Risk authentication failed",401);
 			}
@@ -562,17 +576,18 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @param object $request REST request
 		 */
-		public function register_risk_request($request)
+		public function risk_api_register_request($request)
 		{
 			$type 		= sanitize_text_field($request->get_param('type'));		// fraud|threat|abuse|risk
-			$reason 	= sanitize_text_field($request->get_param('reason'))
-							?: 'disallowed remote request blocked';
 			$score 		= intval($request->get_param('score')) ?: 100;
+			$reason 	= sanitize_text_field($request->get_param('reason'))
+							?: "remote request registered {$type} ($score)";
 			$url 		= $request->get_param('url');
 
 			$this->http_status = intval($request->get_param('status'));
 
-			if ($url) {
+			if ($url)
+			{
 				$url = sanitize_text_field(urldecode($url));
 				$url = parse_url($url,PHP_URL_PATH);
 				if ($url) $reason .= " [uri: {$url}]";
@@ -619,7 +634,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 
 		/**
-		 * register the risk request
+		 * register the risk request (without recursive call to do_risk_assessment())
 		 *
 		 * @param string $message additional comment text
 		 * @param string $type fraud|threat|abuse|risk
@@ -670,7 +685,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			if ($registered['count'] >= $threshold) $registered['score'] = max($limit,$registered['score']);
 
 			// report risk to providers...
-			if ($registered['count'] == $threshold && $type != 'risk' && !$this->isIpIgnored($ipAddress))
+			if ($registered['count'] == $threshold && $type != 'risk' && !$this->isWhitelisted($ipAddress))
 			{
 				if ($this->has_action('risk_assessment_report'))
 				{
@@ -748,33 +763,16 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 
 		/**
-		 * Check an IP address is in ignored list
-		 *
-		 * @param string $ipAddress IPv4 or IPv6 address
-		 * @return bool
-		 */
-		public function isIpIgnored(string $ipAddress): bool
-		{
-			static $checked = null;
-			if (is_null($checked))
-			{
-				$checked = $this->plugin->isIpInList($ipAddress, $this->ip_ignored);
-			}
-			return $checked;
-		}
-
-
-		/**
 		 * Input ip allow file
 		 *
 		 */
-		public function allow_ip_file()
+		public function input_ip_whitelist_file()
 		{
-			if (is_file(self::IP_ALLOW_LIST))
+			if (is_file(self::IP_WHITELIST_FILE))
 			{
-				if ($ip_allow = file(self::IP_ALLOW_LIST,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)) {
-					$this->ip_ignored = array_merge(
-						$this->ip_ignored,
+				if ($ip_allow = file(self::IP_WHITELIST_FILE,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)) {
+					$this->ip_whitelist = array_merge(
+						$this->ip_whitelist,
 						array_filter($ip_allow, function($line){return $line[0] != '#';})
 					);
 				}
@@ -796,9 +794,9 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * @param int 		$threshold risk reporting threshold (1-50)
 		 * @param int 		$limit risk reporting limit (1-100)
 		 */
-		public function output_ip_file(string $ipAddress,array $report, int $threshold, int $limit)
+		public function output_ip_blacklist_file(string $ipAddress,array $report, int $threshold, int $limit)
 		{
-			if ($file = $this->get_ip_file()) {
+			if ($file = $this->get_ip_blacklist_file()) {
 				file_put_contents($file, $ipAddress."\n", FILE_APPEND | LOCK_EX);
 			}
 		}
@@ -809,22 +807,22 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @return string file path
 		 */
-		private function get_ip_file()
+		private function get_ip_blacklist_file()
 		{
 			if	(! ($fs = $this->fs->load_wp_filesystem()) ) return '';
 
-			if (!$fs->exists(self::IP_BLOCK_LIST)) {
-				if (($fsLogPath = $fs->find_folder(dirname(self::IP_BLOCK_LIST))) && $fs->is_writable($fsLogPath)) {
-					$fsLogPath .= basename(self::IP_BLOCK_LIST);
+			if (!$fs->exists(self::IP_BLACKLIST_FILE)) {
+				if (($fsLogPath = $fs->find_folder(dirname(self::IP_BLACKLIST_FILE))) && $fs->is_writable($fsLogPath)) {
+					$fsLogPath .= basename(self::IP_BLACKLIST_FILE);
 					// since we write to this not using $fs, we need onwner & group write access
 					$fs->put_contents($fsLogPath,"# Risk Assessment IP Block File\n",FS_CHMOD_FILE|0660);
 				}
 			}
-			if (!$fs->exists(self::IP_BLOCK_LIST)) {
-				$this->add_admin_notice('Unable to create '.basename(self::IP_BLOCK_LIST),'error','Write acces denied.');
+			if (!$fs->exists(self::IP_BLACKLIST_FILE)) {
+				$this->add_admin_notice('Unable to create '.basename(self::IP_BLACKLIST_FILE),'error','Write acces denied.');
 				return '';
 			}
-			return self::IP_BLOCK_LIST;
+			return self::IP_BLACKLIST_FILE;
 		}
 	}
 }

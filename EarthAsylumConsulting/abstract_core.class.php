@@ -1594,7 +1594,7 @@ abstract class abstract_core
 	 * @param string origin url (optional)
 	 * @return	bool
 	 */
-	public function allow_request_origin($origin=null): string
+	public function allow_request_origin($origin=null)
 	{
 		if (empty($origin)) $origin = $this->getRequestOrigin();
 		add_filter( 'http_origin', function() use ($origin) {
