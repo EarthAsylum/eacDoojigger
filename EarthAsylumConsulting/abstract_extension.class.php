@@ -12,7 +12,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0904.1
+ * @version		26.0906.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_core
@@ -52,8 +52,8 @@ abstract class abstract_extension
 	const ALLOW_CRON		= 0b00001000;		// enabled for cron requests
 	const ALLOW_CLI			= 0b00010000;		// enabled for wp-cli requests
 	const ALLOW_ALL			= self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ALLOW_CRON|self::ALLOW_CLI;
-	const ALLOW_NON_PHP		= 0b00100000;		// enabled when loaded for a url not ending in .php
-	const ALLOW_NON_CODE	= 0b01000000;		// enabled on non-code requests
+	const ALLOW_NON_PHP		= 0b00100000;		// enabled when loaded for a non-php url (.php)
+	const ALLOW_NON_CODE	= 0b01000000;		// enabled on non-code url - is_non_code_request() / wp_get_ext_types()
 	const DEFAULT_DISABLED	= 0b10000000;		// force {classname}_enabled' option to default to not enabled
 
 	/**

@@ -9,7 +9,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)  
 Stable tag:             3.3.0-RC2  
-Last Updated:           05-Sep-2026  
+Last Updated:           08-Sep-2026  
 Requires at least:      5.8  
 Tested up to:           7.1  
 Requires PHP:           8.1  
@@ -23,47 +23,45 @@ GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki
 
 </details>
 
-> {eac}Doojigger - A new path to rapid plugin development. A powerful, extensible, multi-function architectural framework and utility plugin for WordPress. {eac}Doojigger streamlines the plugin development process and allows you to create professional-grade plugins in a fraction of the time.
+> {eac}Doojigger is a powerful, extensible WordPress framework: a ready-to-use utility plugin combined with an architecture for building your own plugins, so you can ship professional-grade results in a fraction of the usual development time.
 
 ### Description
 
 #### Important Update
 
-_Although this software may still be purchased on the
-[{eac}Doojigger web site][website]
-under the existing subscription plans, as of August 2025, you may
-[download the basic edition][download] for free (or with [sponsorship])
-available at this [GitHub Repository]._
+**As of August 2025, a free "basic edition" is available** on [GitHub][GitHub Repository], optionally supported via [GitHub Sponsorship][sponsorship].
 
-*The [Copyright](#copyright) and
-[End User License Agreement](https://swregistry.earthasylum.com/end-user-license-agreement/) still apply.*
+**Paid subscription plans are still sold** on the [product site][website] for those who want the full commercial offering.
 
-📦 [Download eacDoojigger.zip][Download]
+*The [Copyright](#copyright) and [End User License Agreement][EULA] still apply.*
 
-[website]:			https://eacdoojigger.earthasylum.com/eacdoojigger/
+📦 [Download eacDoojigger.zip][Download] - latest release, ready to install
+
+[website]:			https://eacdoojigger.earthasylum.com/shop/
 [sponsorship]:		https://github.com/sponsors/EarthAsylum
-[download]:			https://swregistry.earthasylum.com/software-updates/eacdoojigger.zip "Download eacDoojigger.zip, latest release, ready to install"
+[download]:			https://swregistry.earthasylum.com/software-updates/eacdoojigger.zip
 [GitHub Repository]:https://github.com/EarthAsylum/eacDoojigger
+[EULA]:				https://eacdoojigger.earthasylum.com/end-user-license-agreement/
 
 
 #### Summary
 
-{EarthAsylum Consulting} **{eac}Doojigger** is a multi functional and highly extensible WordPress plugin that eases and advances WordPress development and includes several 'Doolollys' (extensions) providing file access, security, debugging, encryption, session management, maintenance mode, administration tools, and more.
+{eac}Doojigger is a WordPress plugin framework: a base plugin that ships with a working set of security, debugging, encryption, session, and administration features, plus an architecture for building your own plugins and extensions on top of it without rewriting WordPress boilerplate each time.
 
-*{eac}Doojigger* is not only a fully functional plugin, but more so, an architectural development platform (using shared/abstract code) enabling the effortless creation of full featured...
+If you build or maintain multiple WordPress plugins — internal tools, client work, or products — {eac}Doojigger's abstract classes and traits handle the repetitive plumbing (activation/deactivation, multi-site awareness, options storage, updates, settings UI, logging) so your code only has to handle what's actually specific to your plugin.
 
-1.  [Custom 'Doojiggers' (Plugins derived from {eac}Doojigger)](#custom-derivative-plugins).
-    +   Create your own plugin with {eac}Doojigger as a robust, efficient, and clean foundation.
+__Three ways to build with {eac}Doojigger__
 
-2.  [Custom 'Doolollys' (Doojigger Extensions)](#custom-eacdoojigger-extensions).
-    +   Add easy-to-code, task-oriented extensions installed or included in the "Extensions" folder of your 'Doojigger' plugin or WordPress theme.
+1. 	**Derivative plugins ("Doojiggers")**
+— build your own plugin by extending {eac}Doojigger's abstract classes (`abstract_context`, `abstract_frontend`, `abstract_backend`). You write a small loader file plus a class file; the framework handles the rest.
 
-3.  [Custom 'Doohickeys' (Doololly Plugins)](#custom-extension-plugins).
-    +   Load your plugin extensions ('Doolollys') as their own WordPress plugins with their own installation folder.
+2. 	**Extensions ("Doolollys")**
+— a PHP class dropped into the `Extensions` folder (of the plugin or a child theme) that adds functionality to an existing Doojigger. Lowest-effort option for small, task-specific additions.
 
-Rather than updating or customizing themes and functions, it is often best to isolate your custom code in a plugin ('Doojigger') or extension ('Doololly') so that code is not lost when the theme is changed or updated. Themes should only be used and customized with code pertinent to the look and feel of your site. Any code that should be retained after changing a theme belongs in a 'Doojigger' or 'Doololly'. This keeps your code reusable and theme independent.
+3. 	**Extension plugins ("Doohickeys")**
+— an extension packaged as its own plugin, so it isn't at risk of being overwritten on the parent plugin's next update or reinstall. Can ship its own automatic updates via the included `plugin_update` trait.
 
-_{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable, and efficient code easy to create and maintain._
+If you're customizing a WordPress site, code that needs to survive a theme change belongs in a plugin, not a theme. Themes should hold presentation code only — anything functional should live in a plugin or plugin extension so it isn't lost the next time the theme is updated or swapped.
 
 
 #### Table of Contents
@@ -83,23 +81,23 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 |   :--------------------------------   |   :---------------    |
 |   *[File System Access]*              | Uses and provides easy access to the WP_Filesystem API for creating or updating files while maintaining permissions, compatibility, and security. |
 |   *[WPMU Installer]*                  | Uses the file system extension to easily install or update programs or files within the WordPress directory structure.|
-|   *[Security]*                        | Adds a number of security/firewall options to your WordPress installation including altering the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
-|   *Content Security Assistant*        | Adds security nonce to `script` and style `link` tags to facilitate creation of comprehensive *Content Security Policy* (CSP) |
-|   *Server-Side CORS*                  | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
-|   *Threat Detection*                  | Ability to block access by IP address based on *security* and *CORS* violations as well as [AbuseIPDB], [FraudGuard], and/or [IpGeoLocation] threat scores. |
+|   *[Security]*                        | Adds a number of security/firewall options to your WordPress installation including obfuscating the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
+|   *[Content Security Assistant][Security]* | Adds security nonce to `script` and style `link` tags to facilitate creation of comprehensive *Content Security Policy* (CSP) |
+|   *[Server-Side CORS][Security]*      | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
+|   *[Threat Detection][Security]*      | Block access by IP address based on *security* and *CORS* violations and third-party threat-score APIs (AbuseIPDB, FraudGuard, IPGeoLocation). Version 3.3 adds request rate limiting. |
 |   *[Event Scheduler]*                 | Easily set and enable WordPress and custom CRON schedules (intervals), events, and tasks (actions). |
-|   *[Key/Value Storage]*               | An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. |
-|   *[Debugging]*                       | Adds powerful debugging and detailed logging tools with controls for WordPress debugging options. |
-|   *PSR-3 Logging*                     | Standard logging methods with ability to `subscribe` to log events. |
-|   *Encryption*                        | Provides easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
+|   *[Key/Value Storage]*               | Lightweight key-value storage that takes full advatage of the WP Object Cache. |
+|   *[Debugging]*                       | Provides powerful debugging and detailed logging tools with controls for WordPress debugging options. |
+|   *[PSR-3 Logging][Debugging]*        | Standard logging methods with ability to `subscribe` to log events. |
+|   *Encryption*                        | Easy to use data encryption and decryption filters using AES (a NIST FIPS-approved cryptographic algorithm) with authentication tag. |
 |   *[Cookie Compliance]*               | Set cookies with [WP Consent API] compatible consent parameters for GDPR/CCPA Compliance. |
 |   *Session Support*                   | Manages PHP sessions using well-known session managers or through WordPress transients, with built-in support for reading/writing session variables. |
-|   *Maintenance Mode*                  | Enables a custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
-|   *Admin Tools*                       | Adds cache management and plugin settings backup/restore, export/import. |
+|   *Maintenance Mode*                  | Custom "Maintenance Mode" when you need to disable front-end access to your site(s). |
+|   *Administrator Tools*               | Adds cache management and plugin settings backup/restore, export/import. |
 |   *[Plugin Reinstall]*                | Provides the ability to re-install eacDoojigger from the `Tools` tab or any/all plugins from the `Plugins` page. |
 |   *Ajax Action*                       | Adds an easy to use ajax responder (accessable from any extension). |
-|   *Material Icons*                    | Adds Google's Material Icons to WordPress. |
-|   shared PHP traits                   | Several useful, usable PHP traits such as plugin loader, plugin updater, plugin help, html input fields, standard (common) dashboard options, date/time methods, version compare methods, and zip archive. |
+
+Plus shared PHP traits for plugin loading, updates, contextual help, HTML input fields, common dashboard options, date/time handling, version comparisons, and zip archives.
 
 [File System Access]:	https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(file-system-extension)
 [WPMU Installer]:		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(eacdoojigger-installer)
@@ -109,25 +107,10 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 [Debugging]:			https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(debugging-logger-methods)
 [Cookie Compliance]:	https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(wp-consent-api-and-cookies)
 [Plugin Reinstall]:		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/How-To-(plugin-reinstall)
-
 [WP Consent API]:		https://wordpress.org/plugins/wp-consent-api/
-
 [AbuseIPDB]:			https://www.abuseipdb.com/user/165095
 [FraudGuard]:			https://www.fraudguard.io
 [IpGeoLocation]:		https://www.ipgeolocation.io
-
-|   Extras & Examples                   |   { [explore on github] } { [documentation wiki] } { [download zip] } |
-|   :--------------------------------   |   :---------------    |
-|   *myAwesomePlugin*                   | Example, skeleton plugin derivative. *Start here with your first 'Doojigger' plugin.* |
-|   *myAwesomeExtension*                | Example, skeleton plugin extension. *Start here with your first 'Doololly' extension.* |
-|   *myFunctions*                       | A functional skeleton 'Doohickey' (extension plugin) intended to replace (or augment) custom theme `functions.php`, including custom stylesheet and javascript. |
-|   *myOptionsTest*                     | A functional example 'Doohickey' that produces a settings screen with all input field types. Includes example input field filters and sanitization. |
-|   A debugging test api                | Extension that provides testing via url through the debugging extension (not intended for production sites). |
-
-[explore on github]:	https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras
-[documentation wiki]:	https://github.com/EarthAsylum/docs.eacDoojigger/wiki/
-[download zip]:			https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip
-
 
 |   {eac}Doojigger Utilities            |                       |
 |   :--------------------------------   |   :---------------    |
@@ -145,62 +128,73 @@ _{eac}Doojigger makes purpose-driven, task-oriented, theme-independent, reliable
 
 |   Available 'Doohickies'              |   Extension Plugins { [WordPress Repository] } |
 |   :--------------------------------   |   :---------------    |
+|   [{eac}ObjectCache]                  | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database and even faster APCu shared memory to cache WordPress objects. |
+|   [{eac}SimpleCDN]                    | Enables the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience. |
 |   [{eac}SimpleSMTP]                   | Configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email. |
 |   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
-|   [{eac}SimpleCDN]                    | Enables the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience. |
-|   [{eac}ObjectCache]                  | A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database and even faster APCu shared memory to cache WordPress objects. |
 |   [{eac}Readme]                       | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
 |   [{eac}SimpleGTM]                    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
 |   [{eac}MetaPixel]                    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
 
 [WordPress Repository]:		https://wordpress.org/plugins/search/earthasylum/
 
+[{eac}ObjectCache]:			https://eacdoojigger.earthasylum.com/objectcache/
+[{eac}SimpleCDN]:			https://eacdoojigger.earthasylum.com/eacsimplecdn/
 [{eac}SimpleSMTP]:			https://eacdoojigger.earthasylum.com/eacsimplesmtp/
 [{eac}SimpleAWS]:			https://eacdoojigger.earthasylum.com/eacsimpleaws/
-[{eac}SimpleCDN]:			https://eacdoojigger.earthasylum.com/eacsimplecdn/
-[{eac}ObjectCache]:			https://eacdoojigger.earthasylum.com/objectcache/
 [{eac}Readme]:				https://eacdoojigger.earthasylum.com/eacreadme/
 [{eac}SimpleGTM]:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
 [{eac}MetaPixel]:			https://eacdoojigger.earthasylum.com/eacmetapixel/
 
+__Extras & Examples__
+
+*Skeleton/example code* (`myAwesomePlugin`, `myAwesomeExtension`, `myFunctions`, `myOptionsTest`) ships separately as working starting points, available on [GitHub][explore on github].
+
+[explore on github] | [documentation wiki] | [download extras zip]
+
+[explore on github]:		https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras
+[documentation wiki]:		https://github.com/EarthAsylum/docs.eacDoojigger/wiki/
+[download extras zip]:		https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip
+
 
 #### 'Doojiggers' - Custom Derivative Plugins
 
-Once {eac}Doojigger is installed and registered, you, the developer, can create your own plugin using the abstract classes and traits provided.
+Once {eac}Doojigger is installed and registered, you can build your own plugin on its abstract classes and traits:
 
-+   First, create a simple plugin loader using your plugin class name (myAwesomePlugin.php).
-    This is the primary plugin file and must contain the required WordPress headers; it will use the plugin_loader trait provided by {eac}Doojigger.
-+   Second, create your actual plugin class (myAwesomePlugin.class.php) that gets loaded by your plugin loader.
-    This class extends the {eac}Doojigger abstract classes (abstract_context, abstract_frontend, abstract_backend)
-    which include all of the management and utility code needed for a full-featured, full-functioning plugin.
-+   Third, upload and install your plugin.
+1. **Create a plugin loader** (`myAwesomePlugin.php`) — this is your main plugin file. It needs the standard WordPress plugin headers and uses the `plugin_loader` trait provided by {eac}Doojigger.
 
+2. **Create your plugin class** (`myAwesomePlugin.class.php`) — loaded by the file above. Extend {eac}Doojigger's abstract classes (`abstract_context`, `abstract_frontend`, `abstract_backend`) to inherit the management and utility code a full-featured plugin needs.
 
-Your plugin code need only focus on your particular requirements. The WordPress code and many utility functions have been taken care of for you.
+3. **Install it** — upload the plugin as usual.
 
->   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/derivatives/) (found in the *[Extras]/Plugins/* folder).
+From there, your code only needs to handle your actual requirements — the WordPress plumbing is already done.
+
+>   See [instructions and examples](https://eacdoojigger.earthasylum.com/derivatives/) (found in the *[Extras]/Plugins/* folder).
 
 
 #### 'Doolollys' - Custom Doojigger Extensions
 
-An extension is a PHP program class that adds functionality to the base plugin. Extensions can be coded for specific needs and can be as simple or complex as needed.
+An extension is a PHP class that adds functionality to the base plugin — as simple or complex as you need.
 
-+   First, create an extension class (myAwesomeExtension.extension.php) that extends the extension abstract class (abstract_extension).
-+   Second, upload your extension to the plugin's 'Extensions' folder.
+1. Create an extension class (`myAwesomeExtension.extension.php`) extending `abstract_extension`.
 
-*Custom extensions may also be uploaded to your theme folder (preferable a [child theme](https://developer.wordpress.org/themes/advanced-topics/child-themes/)), in the ../eacDoojigger/Extensions folder.*
+2. Drop it into the plugin's `Extensions` folder.
 
->   See detailed [instructions and examples](https://eacdoojigger.earthasylum.com/extensions/) (found in the *[Extras]/Extensions/* folder).
+*Custom extensions may also be uploaded to your theme folder (preferable a [child theme](https://developer.wordpress.org/themes/advanced-topics/child-themes/)), in the ../eacDoojigger/Extensions or ../eacDoojigger/doolollys folder.*
+
+>   See [instructions and examples](https://eacdoojigger.earthasylum.com/extensions/) (found in the *[Extras]/Extensions/* folder).
 
 
 #### 'Doohickeys' - Custom Extension Plugins
 
-Since uploading extensions to the plugin or theme folder risks overwriting those extensions when upgrading or re-installing the plugin or theme, it is very easy to add extensions as their own WordPress plugin. The plugin simply answers a filter from the base plugin telling it where to load additional extensions. These extensions then exist in their own plugin folder with no risk of being overwritten.
+Adding extensions directly into {eac}Doojigger's `Extensions` folder works, but an upgrade or re-install can overwrite them. To avoid that, package extensions as their own plugin instead — it responds to a filter from the base plugin telling it where to load additional extensions, and lives in its own plugin folder, safe from being overwritten.
+
+Extension plugins built this way can also provide automatic updates, by using the `plugin_update` trait.
 
 
 #### Using {eac}Doojigger
 
-{eac}Doojigger provides many useful methods and hooks which can be accessed from your custom plugins or extensions, as well as from your theme functions or any code in WordPress.
+{eac}Doojigger exposes methods and hooks you can call from your own plugins, extensions, template functions, or anywhere else in WordPress.
 
 >   See:
 >	+ [Using {eac}Doojigger](https://eacdoojigger.earthasylum.com/using-doojigger) (found in the *[Extras]/UsingDoojigger/* folder) for details and examples,
@@ -229,6 +223,7 @@ Adding contextual help to your plugin and extension is easy using the methods bu
 #### Advanced Mode
 
 Advanced Mode gives developers a method to implement options or features based on an advanced mode setting (or combination of settings). {eac}Doojigger uses a menu selection and license level to enable advanced mode, but custom derivatives may use other methods to implement advanced mode.
+
 >   See [Implementing and Using Advanced Mode](https://eacdoojigger.earthasylum.com/how-to/#implementing-and-using-advanced-mode) for details.
 
 
@@ -238,23 +233,19 @@ Advanced Mode gives developers a method to implement options or features based o
 
 {eac}Doojigger is well aware of multi-site/network environments where only a network administrator may install plugins and plugins may be *network-activated* (enabled for all sites) or *site-activated* (enabled for/by individual sites within the network).
 
-{eac}Doojigger manages installation, activation, deactivation and un-installing properly based on the type of installation and activation. For example, when an {eac}Doojigger derivative plugin is *network-activated*, it is activated on all sites in the network. When un-installed, it is un-installed from all sites. When installed by the network administrator but not *network activated*, each site administrator may properly activate or de-activate the plugin.
+{eac}Doojigger manages installation, activation, deactivation and un-installing properly based on the type of installation and activation. For example, when an Doojigger plugin is *network-activated*, it is activated on all sites in the network. When un-installed, it is un-installed from all sites. When installed by the network administrator but not *network activated*, each site administrator may properly activate or de-activate the plugin.
 
-{eac}Doojigger also manages options and transients on network installations differently than the WordPress defaults...
+{eac}Doojigger distinguishes between a plugin being *network-installed* versus *network-activated*, and its option/transient methods behave accordingly — deliberately diverging from WordPress's own defaults, where `*_network_option()` and `*_site_option()` fall back to single-site behavior without checking activation type.
 
-{eac}Doojigger makes a distinction between *network installed* (i.e. a plugin *installed* on a multisite network) and *network activated* (i.e. *activated* on all sites in a multisite network).
+In short:
 
-The WordPress `+_network_option()` (e.g. `get_network_option()`) and `+_site_option()` (e.g. `get_site_option()`) methods are essentially the same and fallback to `+_option()` methods (e.g. single-site `get_option()`) if not installed  on a multisite network. As well, `+_site_transient()` methods fallback to `+_transient()` when not on a multisite network.
+- `$this->add_option()` — site-only, always.
+- `$this->add_network_option()` — only takes effect when network-activated; otherwise a no-op.
+- `$this->add_site_option()` — site-scoped normally, but automatically becomes network-wide when the plugin is network-activated.
 
 WordPress does not check (nor should it) for the type of plugin *activation* (network wide vs. individual site).
 
-{eac}Doojigger methods are different...
-
-+   `$this->+_network_option()` (`$this->get_network_option()`) methods only work on a multi-site installation when the plugin was *network activated* and do nothing (return default value) on a single-site activation.
-+   `$this->+_site_option()` methods only use network methods if the plugin was *network activated* on a multi-site installation, otherwise these methods fallback to `+_option()` (single-site) methods.
-+   `$this->+_site_transient()` methods only use network methods if the plugin was *network activated* or if invoked by the *network administrator*, otherwise these methods fallback to `+_transient()` (single-site) methods.
-
-These are important differences and help make managing options and transients more effective in a network environment.
+If you manage plugins across a multi-site network — some sites opting in, others not — this gives you option and transient behavior that matches actual activation state without extra code on your part.
 
 To illustrate these differences, if we run this code:
 
@@ -291,12 +282,6 @@ And we get this...
 | `$this->get_network_option()` | false                     | false                 | 'my site test' |
 | `$this->get_site_option()`    | 'my site test'            | 'my site test'        | 'my site test' |
 
-In short,
-
-+   use `$this->add_option()` to add an option *only* used for an individual site.
-+   use `$this->add_network_option()` to add an option *only* used when network activated on a multi-site installation.
-+   use `$this->add_site_option()` to add an option used either for a single site or network-wide (all sites) when network activated.
-
 #### Network Related Methods
 
 | Method Name                                               | Description |
@@ -319,19 +304,19 @@ In short,
 
 _doojigger_ (n)
 1. Something unspecified whose name is either forgotten or not known.
-2. *A Wordpress Plugin built with {eac}Doojigger.*
+2. *A plugin built on {eac}Doojigger (including {eac}Doojigger itself)*
 
 _doololly_ (n)
 1. Any nameless small object, typically some form of gadget.
-2. *An extension to a Doojigger plugin.*
+2. *An extension added to a Doojigger*
 
 _doohickey_ (n)
 1. A thing (used in a vague way to refer to something whose name one does not know or cannot recall).
-2. *A plugin used to load a Doololly extension.*
+2. *A Doololly packaged as its own standalone plugin*
 
 _doodad_ (n)
 1. Something, especially a small device or part, whose name is unknown or forgotten.
-2. *A helper or trait included with a Doojigger plugin.*
+2. *A shared helper or trait included with a Doojigger*
 
 ---
 
@@ -356,10 +341,14 @@ _doodad_ (n)
 
 *'Doohickeys' (plugins) and 'Doolollys' (extensions) built with {eac}Doojigger*
 
-+   [{eac}SoftwareRegistry] A full-featured Software Registration/Licensing Server built on {eac}Doojigger.
++   [{eac}SoftwareRegistry]
+A full-featured Software Registration/Licensing Server built on {eac}Doojigger.
 
-+   [{eac}SimpleGTM]
-Installs and configures the Google Tag Manager (GTM) or Google Analytics (GA4) script with optional tracking events.
++   [{eac}ObjectCache]
+A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database and even faster APCu shared memory to cache WordPress objects.
+
++   [{eac}SimpleCDN]
+An {eac}Doojigger extension to enable the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience.
 
 +   [{eac}SimpleSMTP]
 An {eac}Doojigger extension to configure WordPress wp_mail and phpmailer to use your SMTP (outgoing) mail server when sending email.
@@ -367,14 +356,11 @@ An {eac}Doojigger extension to configure WordPress wp_mail and phpmailer to use 
 +   [{eac}SimpleAWS]
 An {eac}Doojigger extension to include and enable use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK).
 
-+   [{eac}SimpleCDN]
-An {eac}Doojigger extension to enable the use of Content Delivery Network assets on your WordPress site, significantly decreasing your page load times and improving the user experience.
-
-+   [{eac}ObjectCache]
-A light-weight and very efficient drop-in persistent object cache that uses a fast SQLite database and even faster APCu shared memory to cache WordPress objects.
-
 +   [{eac}Readme]
 An {eac}Doojigger extension to translate a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document.
+
++   [{eac}SimpleGTM]
+Installs and configures the Google Tag Manager (GTM) or Google Analytics (GA4) script with optional tracking events.
 
 +   [{eac}MetaPixel]
 An {eac}Doojigger extension to install the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events.
@@ -383,10 +369,10 @@ An {eac}Doojigger extension to install the Facebook/Meta Pixel to enable trackin
 An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache. Similar to WP options/transients with less overhead and greater efficiency (and fewer hooks).
 
 [{eac}SoftwareRegistry]:	https://swregistry.earthasylum.com/
+[{eac}ObjectCache]:			https://eacdoojigger.earthasylum.com/objectcache/
+[{eac}SimpleCDN]:			https://eacdoojigger.earthasylum.com/eacsimplecdn/
 [{eac}SimpleSMTP]:			https://eacdoojigger.earthasylum.com/eacsimplesmtp/
 [{eac}SimpleAWS]:			https://eacdoojigger.earthasylum.com/eacsimpleaws/
-[{eac}SimpleCDN]:			https://eacdoojigger.earthasylum.com/eacsimplecdn/
-[{eac}ObjectCache]:			https://eacdoojigger.earthasylum.com/objectcache/
 [{eac}Readme]:				https://eacdoojigger.earthasylum.com/eacreadme/
 [{eac}SimpleGTM]:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
 [{eac}MetaPixel]:			https://eacdoojigger.earthasylum.com/eacmetapixel/
@@ -436,7 +422,7 @@ When uninstalled, the plugin will delete custom tables, settings, and transient 
 
 #### Is {eac}Doojigger stable and reliable?
 
-Since version 2, {eac}Doojigger has been meticulously updated to provide not only new features and efficiencies, but many other improvements, including stability and reliability. The code base of {eac}Doojigger has been in proprietary use (and in development) over several years and on several websites. However, there is a nearly infinte number of website configurations and uses that can't possibly be tested. If you run into any issues, problems, bugs or simply change requests, I'd be more than happy to address them and to work with you.
+{eac}Doojigger has been meticulously updated to provide not only new features and efficiencies, but many other improvements, including stability and reliability. The code base of {eac}Doojigger has been in proprietary use (and in development) over many years and on several websites. However, there is a nearly infinte variety of configurations and uses that can't possibly be tested. If you run into any issues, problems, bugs or simply change requests, please share any details on the [issues](https://github.com/EarthAsylum/eacDoojigger/issues) or [discussions](https://github.com/EarthAsylum/eacDoojigger/discussions) pages.
 
 #### Where can I find more information about ...
 
@@ -447,32 +433,24 @@ Since version 2, {eac}Doojigger has been meticulously updated to provide not onl
 +   providing [contextual help](https://eacDoojigger.earthasylum.com/contextual-help/) for my plugin or extension
 +   [using features](https://eacDoojigger.earthasylum.com/how-to/) of {eac}Doojigger
 
-The *{eac}Doojigger Extras* (now at this [Github Repository](https://github.com/EarthAsylum/docs.eacDoojigger)) includes examples and documentation:
+The *{eac}Doojigger Extras* (now at this [Github Repository](https://github.com/EarthAsylum/docs.eacDoojigger)) includes documentation and several functional examples:
 
-+   [{eac}Doojigger Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)
-+   [{eac}Doojigger Extras Documentation](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/)
-+   [{eac}Doojigger Extras Download](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)
++   [Extras](https://github.com/EarthAsylum/docs.eacDoojigger/tree/main/Extras)
++   [Extras Documentation](https://github.com/EarthAsylum/docs.eacDoojigger/wiki/)
++   [Extras Download](https://swregistry.earthasylum.com/software-updates/eacdoojigger-extras.zip)
 
 #### Who is EarthAsylum Consulting?
 
-{EarthAsylum Consulting} is a one-person consulting agency in business since 2005.
-I have some 30+ years experience in technology and software development for a disperse range of businesses.
+{EarthAsylum Consulting} is a one-person consulting agency, active since 2005, with decades of experience in technology and software development.
 
-Currently, and for the last decade or more, my focus has been on internet-based business software & technology management.
+The focus for the last decade, or more, has been internet-based business software and technology management.
 
-In developing {eac}Doojigger, and other plugins based on it, I hope to maintain a small revenue stream to help keep me going.
-
-To that end, your support and [sponsorship](https://github.com/sponsors/EarthAsylum) are greatly appreciated.
-It will enable me to continue developing quality software and provide support to current and future clients (and to enjoy a cup of coffee occasionally).
+{eac}Doojigger (and the plugins built on it) exist to fund continued development and support. Your support and [sponsorship](https://github.com/sponsors/EarthAsylum) are greatly appreciated.
 
 *It's not just a job, it's a hobby, a craft, a passion, and an art.*
 
-Learn more here...
-+   [EarthAsylum Consulting](https://www.earthasylum.com)
-+   [Kevin Burkholder](https://www.kevinBurkholder.com)
-
 Thank you!
-_Kevin Burkholder_
+[Kevin Burkholder](https://www.kevinBurkholder.com) @ [EarthAsylum Consulting](https://www.earthasylum.com)
 
 
 ### Screenshots

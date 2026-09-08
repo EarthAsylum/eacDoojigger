@@ -7,8 +7,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	24.0314.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	26.0907.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -27,6 +27,8 @@ ob_start();
 				Display blog/site name ('%s')
 			<li><code>[BlogDescription]</code><br>
 				Display the blog/site description (tag line) ('%s')
+			<li><code>[UntilTime]</code> or <code>[UntilTime]m/d/y H:i:s[/UntilTime]</code><br>
+				Display Maintenance Mode expiration date/time.
 			<li><code>[PageHeader]</code><br>
 				Include the 'scheduled-maintenance' header theme template,
 				if not found the default theme header is used.

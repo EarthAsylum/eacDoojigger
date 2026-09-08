@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 3.3.0 – September 5, 2026 =
+= Version 3.3.0 – September 8, 2026 =
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.
@@ -21,6 +21,7 @@
 +	Admin page tool-tips now converts new-line to break.
 +	Fix: Pass full/un-truncated blog version in plugin_update.trait.
 +	Fix: decryption in `eacKeyValue::get()`
++	Fix/improve maintenance mode with accurate retry-after and [UntilTime] shortcode.
 +	Updated `IpGeoLocation` API to v3.
 +	Updated `IpGeoLocation` plans for rate limits and credits.
 +	Always respect `Retry-After` header in risk assessment APIs.
@@ -28,6 +29,7 @@
 	+	Enhanced `getDocumentationLink()`.
 	+	Enhanced `getSupportLink()` with use of `Support Link` in readme.txt.
 	+	Removed 'Registration' link added 'Support' and 'Sponsor' to plugins page listing.
+	+	Updated readme and other documentation.
 +	Allow single option passed to `add_admin_action_link` then passed through url to triggered action.
 +	Allow passing alternate url to `add_admin_action_link` (override current uri);
 
