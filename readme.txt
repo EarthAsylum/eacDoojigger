@@ -1,7 +1,7 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.3.0-RC2
+Stable tag:             3.3.0-RC3
 Last Updated:           08-Sep-2026
 Requires at least:      5.8
 Tested up to:           7.1
@@ -509,6 +509,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 	+	`reinstall_plugin_action()` method used by `eacDoojigger_reinstall_plugin` action.
 	+	Adds 'Trigger Reinstall' link to tools page.
 	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
++	Plugin loader - uses `is_non_code_request()` rather than `isPHP()` on load option (load only for code files).
 +	Moved admin-only extensions to admin folder.
 +	Use case-insensitive search for readme.txt/md file.
 +	Admin page tool-tips now converts new-line to break.

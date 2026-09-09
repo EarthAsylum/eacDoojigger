@@ -1,6 +1,6 @@
-== Changelog ==
+### Changelog
 
-= Version 3.3.0 – September 8, 2026 =
+#### Version 3.3.0 – September 8, 2026
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.
@@ -16,6 +16,7 @@
 	+	`reinstall_plugin_action()` method used by `eacDoojigger_reinstall_plugin` action.
 	+	Adds 'Trigger Reinstall' link to tools page.
 	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
++	Plugin loader - uses `is_non_code_request()` rather than `isPHP()` on load option (load only for code files).
 +	Moved admin-only extensions to admin folder.
 +	Use case-insensitive search for readme.txt/md file.
 +	Admin page tool-tips now converts new-line to break.
@@ -33,7 +34,7 @@
 +	Allow single option passed to `add_admin_action_link` then passed through url to triggered action.
 +	Allow passing alternate url to `add_admin_action_link` (override current uri);
 
-= Version 3.2.5 – August 6, 2026 =
+#### Version 3.2.5 – August 6, 2026
 
 +   Fix: dashicons info icon `left: unset`.
 +   In `cookie_consent.trait.php`...
@@ -42,7 +43,7 @@
     +   Add filter `wp_get_consent_type` earlier to prevent defaulting to 'allow' consent.
     +   New `wp_setcookie_service` filter.
 
-= Version 3.2.4 – July 31, 2026 =
+#### Version 3.2.4 – July 31, 2026
 
 +   Don't wait for `rest_pre_serve_request` in CORS origin check.
     +   Prevents rest execution when forbidden.
@@ -53,7 +54,7 @@
 +   Removed reference to `E_STRICT` constant.
 +   Implement explicit nullable types (?string).
 
-= Version 3.2.3 – June 5, 2026 =
+#### Version 3.2.3 – June 5, 2026
 
 +   Compatible with WordPress 7.0.
 +   Fixed `getVariable()` when using derivative plugin(s).
@@ -63,7 +64,7 @@
 +   Fixed error when enabling output file for AbuseIPDB.
 +   Support `wp_has_service_consent()` from WP Consent API 2.0.
 
-= Version 3.2.2 – October 1, 2025 =
+#### Version 3.2.2 – October 1, 2025
 
 +   Fixed SQL select for sitewide transient (meta_key) in eacKeyValue.
 +   Ignore (return default) options with ['-','\_','.'] prefix in `get_option()`.
@@ -75,7 +76,7 @@
 +   Option to bypass kses in `minifyString()` since typically is not html.
 +   Automatically strip invalid characters in `minifyString()`.
 
-= Version 3.2.1 – August 1, 2025 =
+#### Version 3.2.1 – August 1, 2025
 
 +   Fixed issues with uninstall and added support for keyvalue table(s).
 +   Fix for plugin update, not network activated, on multisite.
@@ -95,7 +96,7 @@
 +   Updated registration SDK.
 +   Updated license (for github distribution).
 
-= Version 3.2 – July 1, 2025 =
+#### Version 3.2 – July 1, 2025
 
 +   Added `eacDoojigger_risk_assessment_data` filter allowing actors to filter risk assessment result.
 +   Fixed potential 1-second error in rate limit check of Risk Assessment.
@@ -114,7 +115,7 @@
 +   Strip tags when logging admin_notice warnings/error.
 +   Debug log entry for Action Scheduler tasks.
 
-= Version 3.1.1 – May 6, 2025 =
+#### Version 3.1.1 – May 6, 2025
 
 +   Session extension:
     +   Add wp_cache as supported session manager.
@@ -128,7 +129,7 @@
 +   Check for string when overriding enable_option in extensions.
 +   Added `isExtension` flag (true) on registerExtension.
 
-= Version 3.1 – April 29, 2025 =
+#### Version 3.1 – April 29, 2025
 
 +   Added CORS override/allow by IP address or CIDR subnet.
 +   Improved/fixed extension loading and registration.
@@ -146,7 +147,7 @@
 +   security_cors: Use daily cron (if scheduled) to get host IP addresses.
 +   security_cors: Suppress scheme/host warning.
 
-= ~~Version 3.0.4 – March 31, 2025~~ =
+#### ~~Version 3.0.4 – March 31, 2025~~
 
 +   Tested with WordPress 6.8.
 +   New event_scheduler (cron) extension.
@@ -168,12 +169,12 @@
     +   Combined settings to single switch option.
 +   `explode_with_keys()` now accepts array of strings to explode.
 
-= Version 3.0.3 – March 11, 2025 =
+#### Version 3.0.3 – March 11, 2025
 
 +   Remove check for 'X-Requested-With' in ajax request (cors).
 +   Fix inclusion of `security_ra.abstract.php`.
 
-= Version 3.0.2 – February 26, 2025 =
+#### Version 3.0.2 – February 26, 2025
 
 +   Validate `risk_assessment_limit` in `risk_assessment()`.
 +   Check `headers_sent()` in `access_denied()`.
@@ -181,7 +182,7 @@
 +   Validate `$_REQUEST['action']` in debugging extension.
 +   Make `$userIni` public in security extension.
 
-= Version 3.0.1 – December 14, 2024 =
+#### Version 3.0.1 – December 14, 2024
 
 +   Settings are not registered until `set_current_user` action and only when `isSettingsPage()`.
 +   Non-standard "advanced mode" (i.e. "professional")
@@ -191,7 +192,7 @@
     +   Filter `{classname}_advanced_mode_field` to filter above display field.
 +   Fix wp_filter_count(), wp_action_count().
 
-= Version 3.0 – December 3, 2024 =
+#### Version 3.0 – December 3, 2024
 
 +   Introducing 'Doojiggers', 'Doolollys', 'Doohickeys', and 'Doodads'.
 +   Tested with WordPress 6.7.
@@ -258,7 +259,7 @@
 +   New `color-palette.css` loaded on admin pages.
 +   Load TextDomain on `init` (as per WP v6.7).
 
-= Version 2.7.0 – October 7, 2024 =
+#### Version 2.7.0 – October 7, 2024
 
 +   Enhanced security extensions...
     +   Add custom secure nonce on login and lost password pages.
@@ -291,7 +292,7 @@
 +   Added action `{pluginname}_startup` after `plugins_loaded`, before loading extensions.
 +   Session debugging filter for `eacDoojigger_debugging`.
 
-= Version 2.6.1 – July 6, 2024 =
+#### Version 2.6.1 – July 6, 2024
 
 +   Session manager extension:
     +   Use session_set_cookie_params if session_start().
@@ -308,7 +309,7 @@
 +   Save visitorId using setVariable() (maybe session).
     +   isNewVisitor() checks variable.
 
-= Version 2.6.0 – June 4, 2024 =
+#### Version 2.6.0 – June 4, 2024
 
 +   EAC_DOOJIGGER_VERSION constant deprecated in favor of EACDOOJIGGER_VERSION.
 +   Fixed upgrade notice in plugin update notice trait.
@@ -360,7 +361,7 @@
     +   `$fs = apply_filters('eacDoojigger_link_filesystem',$wp_filesystem,true,'file system required',[]);`
 +   Fix call/use of WC() in session_manager to prevent erros if woocommerce has been disabled.
 
-= Version 2.5.0 – April 4, 2024 =
+#### Version 2.5.0 – April 4, 2024
 
 +   Update trait - check 'compatible up to' without '-RCx' in WordPress version.
 +   Compatible with WordPress 6.5.
@@ -403,7 +404,7 @@
     +   Using [{eac}SoftwareRegistry](https://swregistry.earthasylum.com/) plugin.
     +   With [Software Product Taxonomy](https://swregistry.earthasylum.com/software-taxonomy/) extension for github hosting.
 
-= Version 2.4.1 – December 27, 2023 =
+#### Version 2.4.1 – December 27, 2023
 
 +   Fixed filesystem multisite option.
 +   Fixed filesystem call (arguments) to encryption::encode().
@@ -424,7 +425,7 @@
 +   Confirm cache flush by (known) cache name(s).
 +   Updated page_reload() using wp_safe_redirect() or location.replace.
 
-= Version 2.4.0 – November 5, 2023 =
+#### Version 2.4.0 – November 5, 2023
 
 +   Support WordPress 6.4+
     +   Use wp_set_options_autoload on activate/deactivate.
@@ -476,25 +477,25 @@
     +   stdOptions 'emailFatalNotice' may be used to set email recipient address.
 +   Fixed potential loss of option update if/when swith_to_blog() is called externally.
 
-= Version 2.3.3 – September 18, 2023 =
+#### Version 2.3.3 – September 18, 2023
 
 +   Several minor fixes/updates for PHP 8.0+
     +   Fixed use of static function variables.
     +   Fixed optional argument before required argument(s).
 +   Fixed potential warning with invalid api response in plugin_update.trait.
 
-= Version 2.3.2 – August 30, 2023 =
+#### Version 2.3.2 – August 30, 2023
 
 +   Support for WordPress 6.3.
 +   Support for WP_DEVELOPMENT_MODE in Environment Switcher.
 +   Changed account lock input in security extension.
 +   Fixed security IP blocking when no referrer.
 
-= Version 2.3.1 – July 26, 2023 =
+#### Version 2.3.1 – July 26, 2023
 
 +   Add filters for registry license values in plugin file (unused).
 
-= Version 2.3.0 – June 14, 2023 =
+#### Version 2.3.0 – June 14, 2023
 
 +   Moved html_input_* method to html_input_fields trait.
 +   Further changed settings sections (header, fieldset, enabled) with toggle option.
@@ -525,7 +526,7 @@
 +   Fixed style declaration in security extension.
 +   Fixed settings_fields group (tab) name.
 
-= Version 2.2.0 – May 11, 2023 =
+#### Version 2.2.0 – May 11, 2023
 
 +   Fixed tab name matching on admin screen (isSettingsPage()).
 +   Added required_extensions filter when loading extensions.
@@ -551,7 +552,7 @@
 +   Fixed security extension error on login_redirect when reseting login attempts.
 +   Fixed potential critical error when refreshing updated registration triggered on front-end.
 
-= Version 2.1.0 – February 18, 2023 =
+#### Version 2.1.0 – February 18, 2023
 
 +   ajaxAction now returns the jqXHR object (var jqxhr = atpCustom.AjaxRequest(...)).
 +   Fixed bug when extension changed with $this->enable_option = false; defaulting to disabled.
@@ -566,7 +567,7 @@
 +   Fixed custom queries - reset post data after query
 +   Added backtrace level to PHP error debugging option (previously set to 3)
 
-= Version 2.0.0 – November 20, 2022 =
+#### Version 2.0.0 – November 20, 2022
 
 +   Fixed excessive DB reads on unreserved options.
 +   Fixed maintenance mode from network admin by clearing caches when enabled.
@@ -610,11 +611,11 @@
 +   Added 'noSubmit' to standardOptions trait using hidden '_btnSubmitOptions'.
 +   '_btnSubmitOptions' option overrides default submit button on settings pages.
 
-= Version 1.2.2 – October 20, 2022 =
+#### Version 1.2.2 – October 20, 2022
 
 +   Backported get_the_id(), get_the_post(), get_the_field(), (to v1.2.0)
 
-= Version 1.2.1 – October 1, 2022 =
+#### Version 1.2.1 – October 1, 2022
 
 +   abstract_extension remembers first registered tab.
 +   Built-in extension optimization.
@@ -623,7 +624,7 @@
 +   Hide parent elements of hidden fields in abstract_backend.
 +   Added getInstance() to plugin_loader trait.
 
-= Version 1.2.0 – September 28, 2022 =
+#### Version 1.2.0 – September 28, 2022
 
 +   General code restructuring and optimization to abstract_backend.
 +   Added 'options_form_post' action when admin form is posted.
@@ -646,40 +647,40 @@
 +   Added $this->getSettingsLink(), $this->getDocumentationLink(), $this->getSupportLink().
 +   Fixed admin css class name for extensions with unexpected registered name.
 
-= Version 1.1.4 – August 5, 2022 =
+#### Version 1.1.4 – August 5, 2022
 
 +   Allow extensions loaded from plugins or themes directories.
 +   Updated documentation and directory structure.
 
-= Version 1.1.3 – July 18, 2022 =
+#### Version 1.1.3 – July 18, 2022
 
 +   Removed code injection extension.
 
-= Version 1.1.2 – July 8, 2022 =
+#### Version 1.1.2 – July 8, 2022
 
 +   Improved sanitization of option input fields.
 +   Added $this->_COOKIE() for cookie filtering.
 +   Replaced default (depreciated) FILTER_SANITIZE_STRING with WP sanitize_textarea_field() callback.
 +   Removed FILTER_PATTERN and FILTER_REPLACE (no longer used).
 
-= Version 1.1.1 – June 17, 2022 =
+#### Version 1.1.1 – June 17, 2022
 
 +   Check headers sent before setting cookie.
 
-= Version 1.1.0 – May 27, 2022 =
+#### Version 1.1.0 – May 27, 2022
 
 +   Completed name change from eacBasePlugin to eacDoojigger.
 +   Fixed debug log purging (use modification time).
 +   Add ability to override prefix (classname) for options/tables/transients when calling directly.
 +   Add ability to override option prefix in getSavedPluginOptions() and getSavedNetworkOptions()
 
-= Version 1.0.9 – May 23, 2022 =
+#### Version 1.0.9 – May 23, 2022
 
 +   Fix bug in update trait.
 +   Fixed network enabled check in abstract.extension.
 +   Don't register extensions if not in admin settings page.
 
-= Version 1.0.8 – May 17, 2022 =
+#### Version 1.0.8 – May 17, 2022
 
 +   Updated documentation (phpdoc).
 +   Changed log file location to wp-content (for proper file permissions).
@@ -689,18 +690,18 @@
     Prevents interference with multiple/auto installs.
 +   Removed derivative tracking.
 
-= Version 1.0.7 – May 9, 2022 =
+#### Version 1.0.7 – May 9, 2022
 
 +   Fixed issue with isPHP() function with '.' in request uri.
 
-= Version 1.0.6 – April 28, 2022 =
+#### Version 1.0.6 – April 28, 2022
 
 +   Updated external requirements.
 +   Updated Software Registry SDK.
 +   Fixed plugin_loader_environment notice
 +   Prevent auto loader and environment switcher update for each site in multi-site.
 
-= Version 1.0.5 – April 21, 2022 =
+#### Version 1.0.5 – April 21, 2022
 
 +   New 'Material Icons' extension.
 +   Several minor "notice" fixes.
@@ -708,7 +709,7 @@
 +   Updated for WordPress 5.9.3.
 +   Fixed ajaxaction error when no parameters passed.
 
-= Version 1.0.4 – March 13, 2022 =
+#### Version 1.0.4 – March 13, 2022
 
 +   Fix debugging log across derivatives (not load-order dependent)
 +   Fix proper capitalization of the word 'WordPress' (as opposed to 'Wordpress').
@@ -718,7 +719,7 @@
 +   Cosmetic changes to plugin settings page.
 +   Updated for WordPress 5.9.2.
 
-= Version 1.0.3 – March 3, 2022 =
+#### Version 1.0.3 – March 3, 2022
 
 +   Added upgrade notice to admin plugins screen.
 +   Added option encryption/decryption.

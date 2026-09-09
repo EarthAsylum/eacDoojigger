@@ -221,7 +221,7 @@ if (! class_exists(__NAMESPACE__.'\plugin_reinstall', false) )
 			{
 				$item = $updates->no_update[$plugin];
 				unset($updates->no_update[$plugin]);
-				unset($item->version);
+				$item->version = '0.0.0';
 				$updates->response[$plugin] = $item;
 				$updates->last_checked = time();
 				\set_site_transient('update_plugins', $updates);

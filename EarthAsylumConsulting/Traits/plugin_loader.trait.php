@@ -21,7 +21,7 @@ namespace EarthAsylumConsulting\Traits
 	 * @package		{eac}Doojigger\Traits
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
 	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
-	 * @version		26.0829.1
+	 * @version		26.0908.1
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -39,12 +39,12 @@ namespace EarthAsylumConsulting\Traits
 		 * 	Initialize the plugin & extensions
 		 * 	Add filters/actions and shortcodes once all plugins are loaded
 		 *
-		 * @param bool $onlyPHP - only load for PHP requests
+		 * @param bool $onlyCode - only load for code-file requests (see functions - is_non_code_request())
 		 * @return void
 		 */
-		public static function loadPlugin(bool $onlyPHP = true): void
+		public static function loadPlugin(bool $onlyCode = true): void
 		{
-			if (! $onlyPHP || self::isPHP() )
+			if (! $onlyCode || self::isCodeFile() )
 			{
 				static::$instance = self::load_plugin();
 			}
@@ -264,6 +264,18 @@ namespace EarthAsylumConsulting\Traits
 		public static function isPHP(): bool
 		{
 			return \EarthAsylumConsulting\is_php_request();
+		}
+
+
+		/**
+		 * only load for code-file requests
+		 * We only want to load the plugin for code files
+		 *
+		 * @return bool
+		 */
+		public static function isCodeFile(): bool
+		{
+			return ! \EarthAsylumConsulting\is_non_code_request();
 		}
 	} // trait
 } // namespace
