@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             3.3.0-RC3
-Last Updated:           08-Sep-2026
+Last Updated:           09-Sep-2026
 Requires at least:      5.8
 Tested up to:           7.1
 Requires PHP:           8.1
@@ -493,7 +493,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.3.0 – September 8, 2026 =
+= Version 3.3.0 – September 9, 2026 =
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.

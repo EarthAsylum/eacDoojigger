@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0901.1
+ * @version		26.0909.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -1303,7 +1303,7 @@ abstract class abstract_core
 	 * @param	bool	full cache flush
 	 * @return	void
 	 */
-	public function flush_caches(bool $fullFlush=false): void
+	public function flush_caches(?bool $fullFlush=false): void
 	{
 		if ($this->get_transient('flush_cache_lock')) return;
 		$this->set_transient('flush_cache_lock',time(),MINUTE_IN_SECONDS);

@@ -10,8 +10,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		25.0620.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.0909.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -610,12 +610,12 @@ trait standard_options
 				'type'		=> 	'select',
 				'label'		=> 	'Update Channel',
 				'options'	=> 	$this->apply_filters('selected_update_channel',[
-									'Current/Latest-Release'	=> 	'release',			// github latest release
-									'Preview/Release-Candidate'	=>	'prerelease',		// github preview release
-									'Developer Branch'			=>	'branch',			// github default branch (main)
-									'Select by Environment'		=>	'either', //select	// github preview or default branch (main)
-				//	e.g.			'Beta/test version'			=> 	'branch/beta',		// github 'beta' branch (tag_name=beta)
-				//	e.g.			'Previous Version'			=> 	'release/1.0.0',	// github '1.0.0' release (tag_name=1.0.0)
+								'Current/Latest-Release'	=> 	'release',			// github latest release
+								'Preview/Release-Candidate'	=>	'prerelease',		// github preview release (prerelease or default branch)
+				//				'Developer Branch'			=>	'branch',			// github default branch (main)
+				//				'Select by Environment'		=>	'select',			// github release, pre-release or default branch (main)
+				//	e.g.		'Beta/test version'			=> 	'branch/beta',		// github 'beta' branch (tag_name=beta)
+				//	e.g.		'Previous Version'			=> 	'release/1.0.0',	// github '1.0.0' release (tag_name=1.0.0)
 								]),
 				'info'		=> 	"Select the channel for updates to this plugin.",
 				'help'		=>	"The <em>Current/Latest-Release</em> is the stable and supported release channel, ".

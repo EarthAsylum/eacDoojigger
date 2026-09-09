@@ -11,6 +11,8 @@ require "eacDoojigger.trait.php";
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
  * @version		3.x
  * @link		https://eacDoojigger.earthasylum.com/
+ * @link 		https://github.com/EarthAsylum/eacDoojigger/
+ * @link 		https://github.com/EarthAsylum/docs.eacDoojigger/wiki
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @uses		\EarthAsylumConsulting\abstract_context
  * @uses		\EarthAsylumConsulting\abstract_frontend
@@ -40,6 +42,7 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	 * @var array style handles excluded from preloading
 	 */
 	private $style_preload_exclude 	= [
+			'login',
 	//		'woocommerce',
 			'debug-bar',
 			'query-monitor',
@@ -49,6 +52,7 @@ class eacDoojigger extends \EarthAsylumConsulting\abstract_context
 	 * @var array style handles excluded from async-ing
 	 */
 	private $style_async_exclude 	= [
+			'login',
 			'woocommerce',
 	];
 

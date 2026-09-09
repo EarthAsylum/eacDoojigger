@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\plugin_reinstall', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '26.0903.1';
+		const VERSION	= '26.0909.1';
 
 		/**
 		 * @var string extension tab name
@@ -42,8 +42,11 @@ if (! class_exists(__NAMESPACE__.'\plugin_reinstall', false) )
 
 			add_action('admin_init', function()
 			{
-				// Register plugin options when needed
-				$this->add_action( "options_settings_page", 	array($this, 'admin_options_settings') );
+				if ($this->isAdvancedMode('settings'))
+				{
+					// Register plugin options when needed
+					$this->add_action( "options_settings_page", 	array($this, 'admin_options_settings') );
+				}
 			});
 		}
 
