@@ -29,7 +29,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.0731.1';
+		const VERSION 			= '26.0912.1';
 
 		/**
 		 * @var string extension tab name
@@ -107,6 +107,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		{
 			if ( ! parent::initialize() ) return; // disabled
 
+		/*
 			if ( $this->plugin->isSettingsPage(self::TAB_NAME))
 			{
 				if ( is_multisite() && !is_network_admin() &&
@@ -115,6 +116,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 					if ($this->security->isNetworkPolicy('secCorsOpt')) 	$this->delete_option('secCorsOpt');
 				}
 			}
+		*/
 
 			if ($this->security->isPolicyEnabled('secCorsOpt','host_origin'))
 			{

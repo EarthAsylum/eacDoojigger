@@ -7,8 +7,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	25.0421.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	26.0913.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -28,13 +28,10 @@ $this->registerExtensionOptions( $this->className,
 					["<abbr title='Verify IP address of incoming requests with origin=".$this->plugin->varServer('host')." to prevent spoofing'>Validate</abbr> this site's origin to its IP address" => 'host_origin'],
 				),
 				'default'	=>	$this->is_network_option('secCorsOpt'),
-				'after'		=>	(!is_network_admin() && $this->security->isNetworkPolicy('secCorsOpt')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"CORS is a security feature implemented by browsers. These options implement basic ".
 								"CORS security at the server level helping to prevent malicious activty from browser &amp; non-browser sources.",
 				'help'		=> 	'CORS (Cross-Origin Resource Sharing) - [info]',
-				'attributes'=>	(!is_network_admin() && $this->security->isNetworkPolicy('secCorsOpt')) ? 'disabled="disabled"' : '',
+				'network'	=> 'merge',
 		),
 		'secAllowCors' 	=> array(
 				'type'		=>	'textarea',
@@ -43,16 +40,15 @@ $this->registerExtensionOptions( $this->className,
 				'info'		=>	"Allow API access from specific origin domains only. ".
 								"Enter origin URLs, 1 per line beginning with 'http://' or 'https://, or simply the ending domain name ".
 								"(e.g. 'http://api.trusted_domain.com' or '.trusted_domain.com').",
-				'after'		=>	(!is_network_admin() && $this->security->isNetworkPolicy('secAllowCors')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'attributes'=>	['placeholder'=>'https://origin.trusted_domain.com'],
+				'network'	=> 'merge',
 		),
 		'secAllowCorsIP' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Allowed IP Addresses",
 				'info'		=>	"Allow these IP addresses regardless of origin domain. Enter 1 IPv4 or IPv6 address or subnet (CIDR) per line.",
 				'advanced'	=> 	true,
+				'network'	=> 'merge',
 		),
 		'secExcludeCors' 	=> array(
 				'type'		=>	'textarea',
@@ -60,10 +56,8 @@ $this->registerExtensionOptions( $this->className,
 				'default'	=>	$this->is_network_option('secExcludeCors'),
 				'info'		=>	"Exclude site URIs from CORS security checks, allowing access from any origin. ".
 								"Enter URIs, 1 per line, beginning with /.",
-				'after'		=>	(!is_network_admin() && $this->security->isNetworkPolicy('secExcludeCors')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'attributes'=>	['placeholder'=>'/wp-json/...'],
+				'network'	=> 'merge',
 		),
 	]
 );

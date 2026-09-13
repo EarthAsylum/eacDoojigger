@@ -7,8 +7,8 @@
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	25.0718.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version 	26.0913.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -21,28 +21,24 @@ $this->registerExtensionOptions( $this->className,
 	[
 		'secLoginUri'		=> array(
 				'type'		=>	($this->htaccess) ? 'text' : 'disabled',
+		//		'when'		=> 	(!is_multisite() || $this->plugin->is_network_admin()),
 				'label'		=> 	"Change Login URI ",
 				'before'	=>	site_url('/'),
 				'default'	=> 	$current_login_uri,
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secPassPolicy')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	'Security by obscurity: Change the name of the well-known \'wp-login\'. '.
 								'Users must login at this url before accessing the WordPress dashboard.',
 				//				(($this->htaccess) ? '<br/><small>* Updates the Apache .htaccess file using rewrite rules and adds filters/actions for login.</small>' : ''),
 				'attributes'=>	['pattern'=>'[a-zA-Z0-9_\.\-]*','placeholder'=>'wp-login.php'],
 				'width'		=>	'25',
+				'network'	=>	true,
 		),
 		'secLoginNonce' 	=> array(
 				'type'		=>	'switch',
 				'label'		=>	"Add Secure Nonce",
 				'options'	=>	['Enabled'],
 				'default'	=>	$this->is_network_option('secLoginNonce','Enabled'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secLoginNonce')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"Add and verify a hidden 'number-used-once' security token to the login/reset forms to block malicious attacks.",
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secLoginNonce')) ? 'disabled="disabled"' : '',
+				'network'	=>	'override',
 		),
 		'secPassPolicy' 	=> array(
 				'type'		=>	'checkbox',
@@ -54,18 +50,13 @@ $this->registerExtensionOptions( $this->className,
 									['Has Special Character(s)'	=> 'has-spec']
 								),
 				'default'	=>	$this->is_network_option('secPassPolicy',''),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secPassPolicy')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"Password policies for user profiles (enforce strong passwords).",
+				'network'	=>	'merge',
 		),
 		'secPassLock'		=> array(
 				'type'		=>	'range',
 				'label'		=>	'Account Login Attempts ',
 				'default'	=>	$this->get_network_option('secPassLock','5'),
-				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secPassLock')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'after'		=>	'<datalist id="secPassLock-ticks">'.
 									'<option value="0" label="0"></option>'.
 									'<option value="1"></option>'.
@@ -84,14 +75,12 @@ $this->registerExtensionOptions( $this->className,
 								'</code> login attempts (0 = unlimited).',
 				'attributes'=>	['min="0"', 'max="10"','step="1"','list="secPassLock-ticks"',
 								'oninput'=>"secPassLockShow.value = this.value"],
+				'network'	=>	'minimum',
 		),
 		'secPassTime'		=> array(
 				'type'		=>	'range',
 				'label'		=>	'Account Lock Time ',
 				'default'	=>	$this->get_network_option('secPassTime','5'),
-				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secPassTime')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'after'		=>	'<datalist id="secPassTime-ticks">'.
 									'<option value="5" label="5m"></option>'.
 									'<option value="30"></option>'.
@@ -125,22 +114,21 @@ $this->registerExtensionOptions( $this->className,
 								'</code> minutes after failed login.',
 				'attributes'=>	['min="5"', 'max="1440"','step="5"','list="secPassTime-ticks"',
 								'oninput'=>"secPassTimeShow.value = this.value"],
+				'network'	=>	'maximum',
 		),
 		'secFileChanges' 	=> array(
 				'type'		=>	'switch',
+		//		'when'		=> 	(!is_multisite() || $this->plugin->is_network_admin()),
 				'label'		=>	"Disable File Changes",
 				'options'	=>	[
 					"<abbr title='Disables the WordPress code editor only.'>Code Editor</abbr> Disabled" => 'no-code',
 					"<abbr title='Disables all file modifications and updates'>File Changes</abbr> Disabled" => 'no-mods'
 				],
 				'default'	=>	$this->is_network_option('secFileChanges'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secFileChanges')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"WordPress supports online editing of theme and plugin code as well as automated core, theme, and plugin updates. ".
 								"These options disable editiing and file modifications.<br>".
 								"<small>Disable file changes for everyday operation and enable when applying updates.</small>",
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secFileChanges')) ? 'disabled="disabled"' : '',
+				'network'	=>	true,
 		),
 		'secUnAuthRest' 	=> array(
 				'type'		=>	'switch',
@@ -153,14 +141,11 @@ $this->registerExtensionOptions( $this->className,
 					"<abbr title='Typically invalid unless custom code has been added.'>Non-REST JSON Requests</abbr>" =>'no-json',
 				],
 				'default'	=>	$this->is_network_option('secUnAuthRest'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"This option hides API index lists and may disable WP Core API URLS, un-authenticated requests, or all REST API URLs. ".
 								"Additionally, JSON requests to non-api URLs (often used in attacks) can be blocked.",
 				'help'		=> 	'REST (REpresentational State Transfer) API (Application Program Interface) - [info]',
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secUnAuthRest')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
+				'network'	=>	'merge',
 		),
 		'secDisableXML' 	=> array(
 				'type'		=>	'switch',
@@ -171,118 +156,95 @@ $this->registerExtensionOptions( $this->className,
 					"<abbr title='Typically invalid unless custom code has been added.'>Non-RPC XML Requests</abbr>" =>'no-rpc',
 				],
 				'default'	=>	$this->is_network_option('secDisableXML'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"XML-RPC may be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if XML-RPC is not needed.",
 				'help'		=> 	'XML (eXtensible Markup Language) RPC (Remote Procedure Call) - [info]',
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableXML')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
+				'network'	=>	'merge',
 		),
 		'secDisableRSS' 	=> array(
 				'type'		=>	'switch',
 				'label'		=>	"Disable <abbr title='Really Simple Syndication/Atom Syndication Format '>RSS/ATOM</abbr> Feeds ",
 				'options'	=>	array(['RSS Feeds Disabled'=>'no-rss']),
 				'default'	=>	$this->is_network_option('secDisableRSS'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableRSS')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"RSS/ATOM URLs may be used to attempt unauthorized access or to overload the site in a DDoS attack. Disable if RSS/ATOM feeds are not needed.",
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableRSS')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
+				'network'	=>	'override',
 		),
 		'secDisableEmbed' 	=> array(
 				'type'		=>	'switch',
 				'label'		=>	"Disable oEmbed exchange",
 				'options'	=>	array(['oEmbed Disabled'=>'no-embed']),
 				'default'	=>	$this->is_network_option('secDisableEmbed'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableEmbed')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"oEmbed is a format for allowing an embedded representation of a URL on third party sites.",
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableEmbed')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
+				'network'	=>	'override',
 		),
 		'secRequireHttp' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Require HTTP Headers",
 				'default'	=>	$this->is_network_option('secRequireHttp'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secRequireHttp')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"Require the presence of an HTTP header in all requests. ".
 								"If your web site is behind a CDN (e.g. CloudFlare), you may be able to use a CDN-specific (or custom) http header and verify its existance to block any attempt to bypass the CDN. ".
 								"You may enter the header name or header:value to validate a specific value.",
+				'network'	=>	'merge',
 		),
 		'secBlockHttp' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Block HTTP Headers",
 				'default'	=>	$this->is_network_option('secBlockHttp'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secBlockHttp')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"Many bots or suspicious browsers include detectable http headers. ".
 								"Use this list to look for and block requests with any of these headers. ".
 								"You may enter the header name or header:value to block a specific value.",
 				'advanced'	=> 	true,
+				'network'	=>	'merge',
 		),
 		'secDisableURIs' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Disable Site URIs ",
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secDisableURIs')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"Certain site URIs should be unavailable or may present a security concern. ".
 								"This option allows you to block access to those URIs. ".
 								"Enter URIs, 1 per line, starting with '/'. For example '/category/name/' or just '/category'",
 				'help'		=>	"[info]".
-								(($this->htaccess) ? '<br/>* These URIs will be blocked in the Apache .htaccess file using rewrite rules OR through internal code to ensure functionality.' : '')
+								(($this->htaccess) ? '<br/>* These URIs will be blocked in the Apache .htaccess file using rewrite rules OR through internal code to ensure functionality.' : ''),
+				'network'	=>	'merge',
 		),
 		'secBlockIP' 		=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Block IP Addresses",
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secBlockIP')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"Block specific IP addresses or host/referrer names. ".
 								"Enter addresses or subnets 1 per line. For example: <br>192.168.100.1 or 192.168.100.0/16 <br>2001:0db8:85a3:08d3:1319:8a2e:0370:7334 <br>maliciousdomain.com",
 				'help'		=>	"[info]".
 								(($this->htaccess) ? '<br/>* These addresses will be blocked in the Apache .htaccess file using RequireAll rules AND through internal code to ensure functionality.' : ''),
 				'advanced'	=> 	true,
+				'network'	=>	'merge',
 		),
 		'secCookies' 		=> array(
 				'type'		=>	'checkbox',
+		//		'when'		=> 	(!is_multisite() || $this->plugin->is_network_admin()),
 				'label'		=>	"Global Cookie Flags ",
 				'options'	=>	array(['HTTP Only'=>'httponly'],['Secure (SSL)'=>'secure'],['SameSite (strict)'=>'strict']),
 				'default'	=>	$this->is_network_option('secCookies'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secCookies')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"<table>".
 								"<tr><td>HTTP&nbsp;Only</td><td>Refuses access to cookies from JavaScript. This setting prevents cookies snatched by a JavaScript injection.</td></tr>".
 								"<tr><td>Secure&nbsp;(SSL)</td><td>Allows access to cookies only when using HTTPS. If the website is only accessible via HTTPS, this should be enabled.</td></tr>".
 								"<tr><td>SameSite&nbsp;(strict)</td><td>Cookies will only be sent in a first-party context and not be sent along with requests initiated by third party websites.</td></tr>".
 								"</table>",
 							//	(($this->htaccess) ? '<small>* These options may be set in .htaccess, .user.ini (for php session cookies), OR through internal code to ensure functionality.</small>' : '')
+				'network'	=>	true,
 		),
 		'secCookiesExc' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Cookies to Exclude ",
 				'default'	=> 	"woocommerce_items_in_cart\nwoocommerce_cart_hash",
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secCookiesExc')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
-				'info'		=>	"Exclude these cookies when applying flags. ".
-								"Cookies may need to be accessable from the browser as well as the server, or with both http and https, or by 3rd parties (often for tracking)."
+				'info'		=>	"Exclude these cookies when applying cookie flags. ".
+								"Cookies may need to be accessable from the browser as well as the server, or with both http and https, or by 3rd parties (often for tracking).",
+				'network'	=>	'merge',
 			),
 		'secHeartbeat'		=> array(
 				'type'		=>	'range',
 				'label'		=>	"WP Heartbeat Time ",
 				'default'	=>	$this->is_network_option('secHeartbeat') ?: 0,
 				'info'		=>	"Although not a security concern, WordPress pings the server every 15 to 60 seconds. This option can be used to slow it down and lessen resource usage.",
-				'before'	=>	(!is_network_admin() && $this->isNetworkPolicy('secHeartbeat')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'after'		=>	'<datalist id="secHeartbeat-ticks">'.
 									'<option value="0"   label="n/a"></option>'.
 									'<option value="15"  label=""></option>'.
@@ -312,19 +274,17 @@ $this->registerExtensionOptions( $this->className,
 				'attributes'=>	['min="0"', 'max="300"','step="15"','list="secHeartbeat-ticks"',
 								'oninput'=>"secHeartbeatShow.value = this.value"],
 				'advanced'	=> 	true,
+				'network'	=>	'maximum',
 		),
 		'secHeartbeatFE' 	=> array(
 				'type'		=>	'switch',
 				'label'		=>	"Disable Front-End Heartbeat ",
 				'options'	=> 	['Heartbeat Disabled'=>'Enabled'],
 				'default'	=>	$this->is_network_option('secHeartbeatFE'),
-				'after'		=>	(!is_network_admin() && $this->isNetworkPolicy('secHeartbeatFE')
-									? '<span class="settings-tooltip dashicons dashicons-networking" title="Network policy is set"></span>'
-									: ''),
 				'info'		=>	"Often the WordPress heartbeat ping is not needed on the site's public front-end. ".
 								"It can be disabled here but may be required by WordPress scheduled tasks or certain plugins and themes.",
-				'attributes'=>	(!is_network_admin() && $this->isNetworkPolicy('secHeartbeatFE')) ? 'disabled="disabled"' : '',
 				'advanced'	=> 	true,
+				'network'	=>	'override',
 		),
 	]
 );
@@ -448,7 +408,7 @@ $this->add_filter( 'options_form_post_secBlockIP',		function($value, $fieldName,
 
 		$value = implode("\n",$ipList);
 
-		if ($this->htaccess)
+		if ($this->htaccess && (!is_multisite() || $this->plugin->is_network_admin()))
 		{
 			$lines = [];
 			if (!empty($ipSet)) {
@@ -480,7 +440,7 @@ $this->add_filter( 'options_form_post_secCookies',		function($value, $fieldName,
 		$secure 	= in_array('secure',$value);
 		$strict 	= in_array('strict',$value);
 
-		if ($this->userIni)
+		if ($this->userIni && (!is_multisite() || $this->plugin->is_network_admin()))
 		{
 			$lines = [
 				'session.cookie_httponly = ' . ( ($httpOnly) ? 'on' : 'off' ),
@@ -498,21 +458,24 @@ $this->add_filter( 'options_form_post_secFileChanges',	function($value, $fieldNa
 	{
 		if ($value == $priorValue) return $value; 	// no change
 		if (!$this->wpConfig) return $value;		// no configurator
-		if (is_array($value) && in_array('no-code',$value))
+		if (!is_multisite() || $this->plugin->is_network_admin())
 		{
-			$this->wpConfig->update( 'constant', 'DISALLOW_FILE_EDIT', 'true', array( 'raw' => true ) );
-		}
-		else
-		{
-			$this->wpConfig->remove( 'constant', 'DISALLOW_FILE_EDIT' );
-		}
-		if (is_array($value) && in_array('no-mods',$value))
-		{
-			$this->wpConfig->update( 'constant', 'DISALLOW_FILE_MODS', 'true', array( 'raw' => true ) );
-		}
-		else
-		{
-			$this->wpConfig->remove( 'constant', 'DISALLOW_FILE_MODS' );
+			if (is_array($value) && in_array('no-code',$value))
+			{
+				$this->wpConfig->update( 'constant', 'DISALLOW_FILE_EDIT', 'true', array( 'raw' => true ) );
+			}
+			else
+			{
+				$this->wpConfig->remove( 'constant', 'DISALLOW_FILE_EDIT' );
+			}
+			if (is_array($value) && in_array('no-mods',$value))
+			{
+				$this->wpConfig->update( 'constant', 'DISALLOW_FILE_MODS', 'true', array( 'raw' => true ) );
+			}
+			else
+			{
+				$this->wpConfig->remove( 'constant', 'DISALLOW_FILE_MODS' );
+			}
 		}
 		return $value;
 	},

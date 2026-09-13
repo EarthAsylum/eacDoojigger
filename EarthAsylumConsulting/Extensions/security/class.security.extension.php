@@ -172,6 +172,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				$this->wpConfig = $this->plugin->wpconfig_handle();
 				$this->userIni	= $this->plugin->userini_handle();
 
+			/*
 				if ( is_multisite() && !is_network_admin() &&
 					(!defined( 'WP_CLI' ) && !defined( 'DOING_AJAX' ) && !defined( 'DOING_CRON' )) )
 				{
@@ -192,6 +193,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					// only use site_option
 					$this->delete_option('secLoginUri');
 				}
+			*/
 			}
 
 			// default actions if security_ra_extension is disabled
@@ -417,9 +419,6 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			static $threshold	= 25;	// max
 			static $maxScore	= 0;
 			static $count		= 0;
-
-			//if (! $limit)		$limit		= $this->isPolicyEnabled('risk_assessment_limit') ?: 80;
-			//if (! $threshold) $threshold	= $this->isPolicyEnabled('risk_assessment_threshold') ?: 5;
 
 			$maxScore += intval( $score ?: $limit / $threshold );
 			$count++;
@@ -1285,11 +1284,13 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function isPolicyEnabled($optionName,$value=null)
 		{
-			if (! is_null($value))
-			{
-				return ($this->is_option($optionName,$value) || $this->is_network_option($optionName,$value));
-			}
-			return ($this->is_option($optionName) ?: $this->is_network_option($optionName));
+		// with the advent of the 'network' attribute on options, we only need 'is_option()'.
+			return $this->is_option($optionName,$value);
+		//	if (! is_null($value))
+		//	{
+		//		return ($this->is_option($optionName,$value) || $this->is_network_option($optionName,$value));
+		//	}
+		//	return ($this->is_option($optionName) ?: $this->is_network_option($optionName));
 		}
 
 
@@ -1305,39 +1306,42 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		{
 			if (is_int($default))
 			{
-				$value1 = ($getPost && isset($_POST[$optionName]))
-					? intval($_POST[$optionName])
-					: intval($this->get_option($optionName,$default));
-				$value2 = intval( $this->is_network_option($optionName) );
-				return max($value1,$value2);
+				return intval($this->get_option($optionName,$default));
+			//	$value1 = ($getPost && isset($_POST[$optionName]))
+			//		? intval($_POST[$optionName])
+			//		: intval($this->get_option($optionName,$default));
+			//	$value2 = intval( $this->is_network_option($optionName) );
+			//	return max($value1,$value2);
 			}
 			else if (is_bool($default))
 			{
-				$value1 = ($getPost && isset($_POST[$optionName]))
-					? $this->plugin->isTrue($_POST[$optionName])
-					: $this->get_option($optionName,$default);
-				$value2 = $this->is_network_option($optionName);
-				return ($value1 || $value2) ? true : false;
+				return $this->isTrue($this->get_option($optionName,$default));
+			//	$value1 = ($getPost && isset($_POST[$optionName]))
+			//		? $this->plugin->isTrue($_POST[$optionName])
+			//		: $this->get_option($optionName,$default);
+			//	$value2 = $this->is_network_option($optionName);
+			//	return ($value1 || $value2) ? true : false;
 			}
 			else // expect string or array, return array of strings
 			{
-				$value1 = ($getPost && isset($_POST[$optionName]))
-					? $_POST[$optionName]
-					: $this->get_option($optionName,$default);
-				if (!is_array($value1)) {
-					$value1 = (empty($value1))
-						? []
-						: $this->plugin->text_to_array($value1,[',',';'],'sanitize_textarea_field');
-				}
-
-				$value2 = $this->is_network_option($optionName);
-				if (!is_array($value2)) {
-					$value2 = (empty($value2))
-						? []
-						: $this->plugin->text_to_array($value2,[',',';'],'sanitize_textarea_field');
-				}
-
-				return array_unique( array_merge($value1,$value2) );
+				$value = $this->get_option($optionName,$default);
+				return (is_array($value)) ? $value : $this->plugin->text_to_array($value,[',',';'],'sanitize_textarea_field');
+			//	$value1 = ($getPost && isset($_POST[$optionName]))
+			//		? $_POST[$optionName]
+			//		: $this->get_option($optionName,$default);
+			//	if (!is_array($value1)) {
+			//		$value1 = (empty($value1))
+			//			? []
+			//			: $this->plugin->text_to_array($value1,[',',';'],'sanitize_textarea_field');
+			//	}
+			//
+			//	$value2 = $this->is_network_option($optionName);
+			//	if (!is_array($value2)) {
+			//		$value2 = (empty($value2))
+			//			? []
+			//			: $this->plugin->text_to_array($value2,[',',';'],'sanitize_textarea_field');
+			//	}
+			//	return array_unique( array_merge($value1,$value2) );
 			}
 		}
 	}

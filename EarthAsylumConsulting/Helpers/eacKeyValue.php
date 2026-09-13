@@ -10,8 +10,8 @@
  * @wordpress-plugin
  * Plugin Name:         {eac}KeyValue
  * Description:         {eac}KeyValue - key-value pair storage mechanism for WordPress
- * Version:             1.1.3
- * Last Updated:        30-Aug-2026
+ * Version:             1.1.4
+ * Last Updated:        12-Sep-2026
  * Requires at least:   5.8
  * Tested up to:        7.1
  * Requires PHP:        8.1
@@ -694,12 +694,15 @@ namespace EarthAsylumConsulting
              */
             protected static function commit()
             {
+            	$current = get_current_blog_id();
                 foreach (self::$commit_keys as $site => $commit_keys)
                 {
+					wp_cache_switch_to_blog( $site );
                     self::set_site_id($site);
                     self::commit_site($commit_keys);
                 }
-                self::$commit_keys = [];
+				wp_cache_switch_to_blog( $current );
+                self::$commit_keys = [ [] ];
             }
 
 

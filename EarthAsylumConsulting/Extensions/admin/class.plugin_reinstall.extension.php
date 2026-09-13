@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\plugin_reinstall', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '26.0909.1';
+		const VERSION	= '26.0911.1';
 
 		/**
 		 * @var string extension tab name
@@ -37,6 +37,11 @@ if (! class_exists(__NAMESPACE__.'\plugin_reinstall', false) )
 		{
 			$this->enable_option = false;
 			parent::__construct($plugin, self::ALLOW_ADMIN|self::ALLOW_NETWORK|self::ONLY_ADMIN);
+
+			if (is_multisite() && !$this->plugin->is_network_admin())
+			{
+				return $this->isEnabled(false);
+			}
 
 			$this->registerExtension( 'software_updates' );
 

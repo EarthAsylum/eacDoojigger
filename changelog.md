@@ -1,6 +1,6 @@
 ### Changelog
 
-#### Version 3.3.0 – September 9, 2026
+#### Version 3.3.0 – September 13, 2026
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.
@@ -16,6 +16,8 @@
 	+	`reinstall_plugin_action()` method used by `eacDoojigger_reinstall_plugin` action.
 	+	Adds 'Trigger Reinstall' link to tools page.
 	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
++	New 'network' option attribute used to push/merge/select network setting to/on individual sites.
+	+	See [Administrator Options and Settings - Option Meta Data](https://eacDoojigger.earthasylum.com/options/#meta-data)
 +	Plugin loader - uses `is_non_code_request()` rather than `isPHP()` on load option (load only for code files).
 +	Moved admin-only extensions to admin folder.
 +	Use case-insensitive search for readme.txt/md file.
@@ -33,6 +35,7 @@
 	+	Updated readme and other documentation.
 +	Allow single option passed to `add_admin_action_link` then passed through url to triggered action.
 +	Allow passing alternate url to `add_admin_action_link` (override current uri);
++	`isTrue()` and `isFalse()` take optional array of values considered true/false.
 
 #### Version 3.2.5 – August 6, 2026
 

@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0901.1
+ * @version		26.0913.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -58,6 +58,7 @@ abstract class abstract_backend extends abstract_core
 			'info'			=> '',
 			'tooltip'		=> '',
 			'advanced'		=> false,
+			'network'		=> false,
 	];
 
 	/**
@@ -91,6 +92,8 @@ abstract class abstract_backend extends abstract_core
 	 *			'encrypt'		=> truthy = encrypt/decrypt option
 	 *			'sanitize'		=> callable function overrides internal sanitization
 	 *			'filter'		=> array passed to PHP filter_var [filter_type, options]
+	 *			'network'		=> true|override|merge|max(imum)|min(imum) = network option overrides/merges site option
+	 *			'when'			=> (expression) - include field only when expression evaluates to true
 	 *		)
 	 *	]
 	 */
@@ -1677,6 +1680,9 @@ abstract class abstract_backend extends abstract_core
 			{
 				$optionName = $this->standardizeOptionName($optionName,false); // retain case of option name
 				$optionMetaData[$optionName] = array_merge(self::OPTION_META_KEYS,$optionMeta);
+				if (!$this->is_network_enabled()) {
+					$optionMetaData[$optionName]['network'] = false;
+				}
 
 				// advanced mode setting
 				if ($optionMetaData[$optionName]['advanced'])
@@ -1786,6 +1792,10 @@ abstract class abstract_backend extends abstract_core
 			 */
 			$this->optionTabNames[$optionGroup] = $this->apply_filters('settings_tab_name',$optionTab,$optionGroup,false);
 		}
+
+		$optionMeta = array_filter($optionMeta,function($v,$k) {
+			return (!isset($v['when']) || $this->isTrue($v['when']));
+		},ARRAY_FILTER_USE_BOTH);
 
 		$optionMeta = array_merge($this->getOptionMetaData($optionGroup),$optionMeta);
 		$this->optionMetaData[$optionGroup] = $this->standardizeOptionMeta($optionMeta);
@@ -2011,21 +2021,8 @@ abstract class abstract_backend extends abstract_core
 				$h2Version.' - '.
 				__( $currentTab, $this->PLUGIN_TEXTDOMAIN ).
 				"</h2>\n";
+
 		// add clickable link to enable/disable advanced mode
-	/*
-		if ($this->allowAdvancedMode())
-		{
-			$switchTo 	= ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
-			$href 		= $this->add_admin_action_link( strtolower($switchTo).'_advanced_mode' );
-			$h2a = preg_replace("|<span.*></span>|",
-					"<a href='{$href}'>".
-					"<span class='tooltip dashicons dashicons-admin-settings'".
-					"title='{$switchTo} advanced mode'>".
-					"</span></a>",
-					$h2a
-			);
-		}
-	*/
 		if ($this->allowAdvancedMode())
 		{
 			$switchTo 	= ($this->isAdvancedMode()) ? 'Disable' : 'Enable';
@@ -2038,6 +2035,7 @@ abstract class abstract_backend extends abstract_core
 					$h2
 			);
 		}
+
 		/**
 		 * filter {classname}_options_form_h2_html
 		 * @param	string	$h2a current html for h2 header with advanced-mode link
@@ -2121,6 +2119,8 @@ abstract class abstract_backend extends abstract_core
 							? $this->get_option_decrypt($optionKey,$optionData['default'] ?: false)
 							: $this->get_option($optionKey,$optionData['default'] ?: false);
 					}
+
+					$optionValue = $this->options_settings_network_field($optionValue, $optionKey, $optionMeta);
 
 					// add label and field with grid <div>s
 					$this->options_settings_page_block($optionKey, $optionData, $optionValue);
@@ -2345,12 +2345,22 @@ abstract class abstract_backend extends abstract_core
 						: \filter_var($values,$filter[0],$filter[1]);
 			}
 
+			// check/process network option
+			if (!in_array($optionKey[0],['_','-','.']) && ($savedOptionValue !== $values))
+			{
+				if ($this->is_network_admin()) {
+					$values = $this->options_settings_network_admin($values, $optionKey, $optionMeta, $savedOptionValue);
+				} else {
+					$values = $this->options_settings_network_field($values, $optionKey, $optionMeta);
+				}
+			}
+
 			/**
 			 * filter {classname}_options_form_post_{optionKey} capture option value when posted from admin page
 			 * @param	mixed	$values posted option value(s)
 			 * @param	string	$optionKey option name
 			 * @param	array	$optionMeta option meta data
-			 * @param	mixed	$optionValue current option value
+			 * @param	mixed	$savedOptionValue current option value
 			 * @return	mixed	new option value(s)
 			 */
 			$values = $this->apply_filters( "options_form_post_{$optionKey}", $values, $optionKey, $optionMeta, $savedOptionValue );
@@ -2377,15 +2387,6 @@ abstract class abstract_backend extends abstract_core
 		 * @return	void
 		 */
 		$this->do_action( "options_form_post", $optionMetaPosted );
-
-		// debugging turned on
-		if (!empty($this->logging_filter))
-		{
-			foreach ($optionMetaPosted as $fieldName => $metaData)
-			{
-				$this->logDebug( [$metaData['priorValue'], $metaData['postValue'] ], $fieldName.' updated');
-			}
-		}
 
 		if (!empty($optionMetaPosted))
 		{
@@ -2688,7 +2689,7 @@ abstract class abstract_backend extends abstract_core
 
 		// add the input field
 		echo "\t<div class='settings-grid-item settings-grid-item-{$inputClass}'{$style}>";
-		$this->options_settings_page_field($optionKey, $optionMeta, $optionValue, $width, $height);
+		$this->options_settings_page_field($optionKey, $optionMeta, $optionMeta['value'], $width, $height);
 		echo "\n\t</div>\n";
 	}
 
@@ -2771,6 +2772,58 @@ abstract class abstract_backend extends abstract_core
 		if (isset($optionMeta['style']))
 		{
 			$attributes['style'] .= esc_attr($optionMeta['style']);
+		}
+
+		// network policy true|override|default|merge|max(imum)|min(imum)
+		if (isset($optionMeta['network']) && !empty($optionMeta['network']))
+		{
+			// title is shown to both net admin and site admin
+			if ($optionMeta['network'] === true)
+			{
+				if (!is_network_admin()) $attributes['disabled'] = 'disabled';
+				$networkTitle = 'Network policy excludes site setting.';
+			}
+			if (strtolower($optionMeta['network']) == 'override')
+			{
+				$networkTitle = 'Network policy overrides site setting.';
+			}
+			else if (strtolower($optionMeta['network']) == 'default')
+			{
+				$networkTitle = 'Network value is default site setting.';
+			}
+			else if (strtolower($optionMeta['network']) == 'merge')
+			{
+				$networkTitle = 'Network policy is merged with site setting.';
+			}
+			else if (in_array(strtolower($optionMeta['network']),['min','minimum']))
+			{
+				$networkTitle = 'Uses the mimimum of network policy or site setting.';
+			}
+			else if (in_array(strtolower($optionMeta['network']),['max','maximum']))
+			{
+				$networkTitle = 'Uses the maximum of network policy or site setting.';
+			}
+
+			// site admin...
+			if (!is_network_admin() && ($networkValue = $this->is_network_option($optionKey,null)))
+			{
+				if ($optionMeta['network'] === true || strtolower($optionMeta['network']) == 'override')
+				{
+					if (empty($optionMeta['default'])) $optionMeta['default'] = $networkValue;
+					$attributes['disabled'] = 'disabled';
+				}
+				else if (strtolower($optionMeta['network']) == 'default')
+				{
+					unset($networkTitle);
+					$optionMeta['default'] = $networkValue;
+				}
+			}
+
+			if (isset($networkTitle))
+			{
+				$optionMeta['after'] .= "<span class='settings-tooltip dashicons dashicons-networking' ".
+										"title='MultiSite Enabled'>{$networkTitle}</span>";
+			}
 		}
 
 		// implode attributes to a valid html string
@@ -3046,6 +3099,117 @@ abstract class abstract_backend extends abstract_core
 				$this->addPluginHelpField($help['tab'],$help['label'],$help['content']);
 			}
 		}
+	}
+
+
+	/**
+	 * process network enabled fields
+	 *
+	 * @param	mixed 	$values current field value
+	 * @param	string 	$optionKey option name
+	 * @param	array 	$optionMeta meta-data for $optionKey
+	 * @param	mixed 	$_removeValues previous network value (to remove)
+	 * @param	mixed 	$_networkValues current network value (to add)
+	 * @return	mixed
+	 */
+	public function options_settings_network_admin($values, string $optionKey, array $optionMeta,
+													$_removeValues=null, $_networkValues=null)
+	{
+		if (!isset($optionMeta['network']) || empty($optionMeta['network'])) return $values;
+
+		if ($this->is_network_admin())
+		{
+			$_networkValues = $values;
+			$this->forEachNetworkSite(function() use($optionKey, $optionMeta, $_removeValues, $_networkValues)
+				{
+					$siteValues = (isset($optionMeta['encrypt']) && $optionMeta['encrypt'])
+						? $this->get_option_decrypt($optionKey,null)
+						: $this->get_option($optionKey,null);
+
+					$siteValues = $this->options_settings_network_field($siteValues, $optionKey, $optionMeta, $_removeValues, $_networkValues);
+
+					if (isset($optionMeta['encrypt']) && $optionMeta['encrypt']) {
+						$this->update_option_encrypt($optionKey, $siteValues);
+					} else {
+						$this->update_option($optionKey, $siteValues);
+					}
+				}
+			);
+		}
+		return $values;
+	}
+
+
+	/**
+	 * process network enabled fields
+	 *
+	 * @param	mixed 	$values current field value
+	 * @param	string 	$optionKey option name
+	 * @param	array 	$optionMeta meta-data for $optionKey
+	 * @param	mixed 	$_removeValues previous network value (to remove)
+	 * @param	mixed 	$_networkValues current network value (to add)
+	 * @return	mixed
+	 */
+	public function options_settings_network_field($values, string $optionKey, array $optionMeta,
+													$_removeValues=null, $_networkValues=null)
+	{
+		if (!isset($optionMeta['network']) || empty($optionMeta['network'])) return $values;
+
+		if (!$this->is_network_admin())
+		{
+			$networkValues =  (is_null($_networkValues))
+				? ( (isset($optionMeta['encrypt']) && $optionMeta['encrypt'])
+					? $this->get_network_option_decrypt($optionKey,null)
+					: $this->get_network_option($optionKey,null) )
+				: $_networkValues;
+
+			if (is_null($_removeValues) && is_null($networkValues)) return $values;
+
+			if ($optionMeta['network'] === true || strtolower($optionMeta['network']) == 'override')
+			{
+				return $networkValues;
+			}
+			else if ($values == '' && $networkValues == '')
+			{
+				return $values;
+			}
+			else if (strtolower($optionMeta['network']) == 'merge')
+			{
+				// must return an array
+				if (is_array($values) || is_array($networkValues))
+				{
+					if (!empty($_removeValues)) {
+						$values = array_diff($values, (array)$_removeValues);
+					}
+					return array_merge((array)$values,(array)$networkValues);
+				}
+				else
+				{
+					$value1 = ($values) ? $this->plugin->text_to_array($values,[',',';']) : [];
+					$value2 = ($networkValues) ? $this->plugin->text_to_array($networkValues,[',',';']) : [];
+					if (!empty($_removeValues)) {
+						$valueX = (is_array($_removeValues))
+							? $_removeValues
+							: $this->plugin->text_to_array($_removeValues,[',',';']);
+						$value1 = array_diff($value1, $valueX);
+					}
+					return implode("\n",array_unique( array_merge($value1,$value2) ));
+				}
+			}
+			else if (in_array(strtolower($optionMeta['network']),['bool','boolean']))
+			{
+				return ($this->isTrue($value) || $this->isTrue($networkValues)) ? true : false;
+			}
+			else if (in_array(strtolower($optionMeta['network']),['min','minimum']))
+			{
+				return min($values,$networkValues);
+			}
+			else if (in_array(strtolower($optionMeta['network']),['max','maximum']))
+			{
+				return max($values,$networkValues);
+			}
+		}
+		return $values;
 	}
 
 

@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0909.1
+ * @version		26.0913.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -1420,11 +1420,17 @@ abstract class abstract_core
 	/**
 	 * is value true? true,on,yes,1
 	 *
-	 * @param	string	$value value to check
+	 * @param	string|bool	$value value to check
+	 * @param 	array $alsoTrue lower-case string values also considered to be true;
 	 * @return	bool
 	 */
-	public function isTrue($value): bool
+	public function isTrue($value, ?array $alsoTrue = null): bool
 	{
+		if (is_string($value) && !empty($alsoTrue)) {
+			if (in_array(strtolower($value),$alsoTrue)) {
+				return true;
+			}
+		}
 		return (\filter_var($value,FILTER_VALIDATE_BOOLEAN,FILTER_NULL_ON_FAILURE) === true);
 	}
 
@@ -1432,11 +1438,17 @@ abstract class abstract_core
 	/**
 	 * is value false? - false,off,no,0
 	 *
-	 * @param	string	$value value to check
+	 * @param	string|bool	$value value to check
+	 * @param 	array $alsoFalse lower-case string values also considered to be false;
 	 * @return	bool
 	 */
-	public function isFalse($value): bool
+	public function isFalse($value, ?array $alsoFalse = null): bool
 	{
+		if (is_string($value) && !empty($alsoFalse)) {
+			if (in_array(strtolower($value),$alsoFalse)) {
+				return true;
+			}
+		}
 		return (\filter_var($value,FILTER_VALIDATE_BOOLEAN,FILTER_NULL_ON_FAILURE) === false);
 	}
 
@@ -3413,12 +3425,12 @@ abstract class abstract_core
 	 *
 	 * @param	string	$optionName option name
 	 * @param	mixed	$value check for this value (optional)
-	 * @param	bool	$network using network options (internal)
+	 * @param	bool	$_network using network options (internal)
 	 * @return	bool|mixed	null or option value
 	 */
-	public function is_option($optionName, $value = null, $network = false)
+	public function is_option($optionName, $value = null, $_network  = false)
 	{
-		$option = ($network || ($this->is_network_admin()))
+		$option = ($_network  || ($this->is_network_admin()))
 					? $this->get_network_option($optionName, null)
 					: $this->get_option($optionName, null);
 
@@ -3444,28 +3456,13 @@ abstract class abstract_core
 		if (is_string($option))
 		{
 			switch (strtolower($option)) {
-				case 'disabled':
-				case 'disabled (admin)':
-				case 'network disabled':
-				case 'false':
-				case 'no':
-				case 'off':
-				case '0':
-				case '':
-					return false;
-					break;
-				case 'enabled':
-				case 'enabled (admin)':
-				case 'network enabled':
-				case 'true':
-				case 'yes':
-				case 'on':
-				case '1':
-					return true;
-					break;
 				case 'null':
 					return null;
 					break;
+				default:
+					// only truely true or false, not null
+					if ($this->isTrue($option,['enabled','enabled (admin)','network enabled'])) return true;
+					if ($this->isFalse($option,['disabled','disabled (admin)','network disabled'])) return false;
 			}
 		}
 

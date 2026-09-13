@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	26.0905.1
+ * @version 	26.0912.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -49,6 +49,7 @@ $this->registerExtensionOptions( $this->className,
 								'</code> or greater.',
 				'attributes'=>	['min="20"', 'max="100"','step="5"','list="risk_assessment_limit-ticks"',
 								'oninput'=>"risk_assessment_limit_show.value = this.value"],
+				'network'	=>	'minimum',
 		),
 		'risk_assessment_threshold' => array(
 				'type'		=>	'range',
@@ -87,6 +88,7 @@ $this->registerExtensionOptions( $this->className,
 								'</code> incidents.',
 				'attributes'=>	['min="1"', 'max="25"','step="1"','list="risk_assessment_threshold-ticks"',
 								'oninput'=>"risk_assessment_threshold_show.value = this.value"],
+				'network'	=>	'minimum',
 		),
 		'risk_assessment_method' 	=> array(
 				'type'		=>	($this->has_filter_count('risk_assessment_provider') > 1) ? 'radio' : 'hidden',
@@ -114,6 +116,7 @@ $this->registerExtensionOptions( $this->className,
 								'</code> pages per second.',
 				'attributes'=>	['min="0"', 'max="99999"','step="10"',
 								'oninput'=>"risk_assessment_rate_limit_show.value = (this.value/".self::RL_SPAN.").toFixed(2)"],
+				'network'	=>	'minimum',
 		),
 		'risk_assessment_api' 	=> array(
 				'type'		=>	'switch',
@@ -136,7 +139,7 @@ $this->registerExtensionOptions( $this->className,
 				'info'		=>	"When an IP address is blocked, save it to a block list file (ip_block_list.conf) in your WordPress root folder. ".
 								"This file may be used by your server or router to block requests before reaching WordPress.",
 				'validate'	=>	function($value,$key,$meta,$saved) {
-									if ($value && $value != $saved) $this->get_ip_file();
+									if ($value && $value != $saved) $this->get_ip_blacklist_file();
 									return $value;
 								},
 				'advanced'	=> 	true,
@@ -146,6 +149,7 @@ $this->registerExtensionOptions( $this->className,
 				'label'		=>	"Banned IP Addresses",
 				'info'		=>	"Treat additional IP addresses as high-risk (banned). Enter 1 IPv4 or IPv6 address or subnet per line.",
 				'advanced'	=> 	true,
+				'network'	=>	'merge',
 		),
 		'risk_assessment_allowed' 	=> array(
 				'type'		=>	'textarea',
@@ -154,6 +158,7 @@ $this->registerExtensionOptions( $this->className,
 				'help'		=>	"[info] When an allow list file (ip_allow_list.conf) is found in your WordPress root folder, ".
 								"the content is read and parsed for allowed IP addresses, overriding the risk assessment.",
 				'advanced'	=> 	true,
+				'network'	=>	'merge',
 		),
 		'_risk_assessment_reset' 	=> array(
 				'type'		=>	'text',
@@ -162,7 +167,6 @@ $this->registerExtensionOptions( $this->className,
 				'validate'	=> 	function($ip) {
 									if ($ip) $this->clear_risk_action($ip);
 								},
-				'advanced'	=> 	true,
 		),
 	]
 );

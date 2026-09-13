@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.3.0-RC3
-Last Updated:           09-Sep-2026
+Stable tag:             3.3.0-RC4
+Last Updated:           13-Sep-2026
 Requires at least:      5.8
 Tested up to:           7.1
 Requires PHP:           8.1
@@ -286,6 +286,13 @@ And we get this...
 
 *Using `$this->switch_to_blog()` and `$this->restore_current_blog()` over the corresponding WordPress functions ensures that options are correctly saved and loaded for the switched-from/to blogs.*
 
+= Administrator Settings =
+
+The __network__ attribute of *administrator option fields* can be used on multisite installations to share or limit options across the network of sites, giving the network administrator the ability to set required/minimum/maximum values that ensure proper settings by site administrators.
+
+This field attribute can be set to: 'override', 'merge', 'minimum', or 'maximum' to control how a network option value limits a site value.
+
+See [Administrator Options and Settings - Option Meta Data](https://eacDoojigger.earthasylum.com/options/#meta-data)
 
 == More Information ==
 
@@ -493,7 +500,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.3.0 – September 9, 2026 =
+= Version 3.3.0 – September 13, 2026 =
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.
@@ -509,6 +516,8 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 	+	`reinstall_plugin_action()` method used by `eacDoojigger_reinstall_plugin` action.
 	+	Adds 'Trigger Reinstall' link to tools page.
 	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
++	New 'network' option attribute used to push/merge/select network setting to/on individual sites.
+	+	See [Administrator Options and Settings - Option Meta Data](https://eacDoojigger.earthasylum.com/options/#meta-data)
 +	Plugin loader - uses `is_non_code_request()` rather than `isPHP()` on load option (load only for code files).
 +	Moved admin-only extensions to admin folder.
 +	Use case-insensitive search for readme.txt/md file.
@@ -526,6 +535,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 	+	Updated readme and other documentation.
 +	Allow single option passed to `add_admin_action_link` then passed through url to triggered action.
 +	Allow passing alternate url to `add_admin_action_link` (override current uri);
++	`isTrue()` and `isFalse()` take optional array of values considered true/false.
 
 = Version 3.2.5 – August 6, 2026 =
 

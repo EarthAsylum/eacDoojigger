@@ -8,8 +8,8 @@
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.3.0-RC3  
-Last Updated:           09-Sep-2026  
+Stable tag:             3.3.0-RC4  
+Last Updated:           13-Sep-2026  
 Requires at least:      5.8  
 Tested up to:           7.1  
 Requires PHP:           8.1  
@@ -295,6 +295,13 @@ And we get this...
 
 *Using `$this->switch_to_blog()` and `$this->restore_current_blog()` over the corresponding WordPress functions ensures that options are correctly saved and loaded for the switched-from/to blogs.*
 
+#### Administrator Settings
+
+The __network__ attribute of *administrator option fields* can be used on multisite installations to share or limit options across the network of sites, giving the network administrator the ability to set required/minimum/maximum values that ensure proper settings by site administrators.
+
+This field attribute can be set to: 'override', 'merge', 'minimum', or 'maximum' to control how a network option value limits a site value.  
+
+See [Administrator Options and Settings - Option Meta Data](https://eacDoojigger.earthasylum.com/options/#meta-data)
 
 ### More Information
 
