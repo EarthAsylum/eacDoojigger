@@ -2689,7 +2689,7 @@ abstract class abstract_backend extends abstract_core
 
 		// add the input field
 		echo "\t<div class='settings-grid-item settings-grid-item-{$inputClass}'{$style}>";
-		$this->options_settings_page_field($optionKey, $optionMeta, $optionMeta['value'], $width, $height);
+		$this->options_settings_page_field($optionKey, $optionMeta, $optionValue, $width, $height);
 		echo "\n\t</div>\n";
 	}
 
@@ -2780,7 +2780,7 @@ abstract class abstract_backend extends abstract_core
 			// title is shown to both net admin and site admin
 			if ($optionMeta['network'] === true)
 			{
-				if (!is_network_admin()) $attributes['disabled'] = 'disabled';
+				if (!$this->is_network_admin()) $attributes['disabled'] = 'disabled';
 				$networkTitle = 'Network policy excludes site setting.';
 			}
 			if (strtolower($optionMeta['network']) == 'override')
@@ -3179,7 +3179,7 @@ abstract class abstract_backend extends abstract_core
 				if (is_array($values) || is_array($networkValues))
 				{
 					if (!empty($_removeValues)) {
-						$values = array_diff($values, (array)$_removeValues);
+						$values = array_diff((array)$values, (array)$_removeValues);
 					}
 					return array_merge((array)$values,(array)$networkValues);
 				}
