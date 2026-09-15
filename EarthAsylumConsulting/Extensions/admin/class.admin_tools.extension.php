@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '26.0901.1';
+		const VERSION	= '26.0915.1';
 
 		/**
 		 * @var string extension tab name
@@ -44,9 +44,6 @@ if (! class_exists(__NAMESPACE__.'\admin_tools_extension', false) )
 
 			add_action('admin_init', function()
 			{
-				// used by optionExport in standard_options trait to process export url (admin_post)
-				$this->standard_options('optionExport_action');
-
 				// Register plugin options when needed
 				$this->add_action( "options_settings_page", 	array($this, 'admin_options_settings') );
 			});

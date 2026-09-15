@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Plugin;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0901.1
+ * @version		26.0915.1
  */
 
 trait eacDoojigger_admin_traits
@@ -53,10 +53,10 @@ trait eacDoojigger_admin_traits
 		// to put settings first on general tab
 		if ($this->is_network_admin()) {
 			$this->registerNetworkOptions('network_settings');
-			$this->registerNetworkOptions(['administration_tools','tools']);
+			$this->registerNetworkOptions(['Site Environment','tools']);
 		} else {
 			$this->registerPluginOptions('plugin_settings');
-			$this->registerPluginOptions(['administration_tools','tools']);
+			$this->registerPluginOptions(['Site Environment','tools']);
 		}
 
 		add_action('admin_init', function()

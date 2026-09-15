@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0913.1
+ * @version		26.0914.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -248,6 +248,22 @@ abstract class abstract_backend extends abstract_core
 					$this->options_settings_page_script();
 	    		}
 	    	);
+		}
+
+		// for code initiated backup/restoore
+		$this->add_action('backup_site_settings',			[$this,'do_option_backup']);
+		$this->add_action('restore_site_settings',			[$this,'do_option_restore']);
+
+		if (is_multisite())
+		{
+			$this->add_action('backup_network_settings',	[$this,'do_network_backup']);
+			$this->add_action('restore_network_settings',	[$this,'do_network_restore']);
+		}
+
+		// for button initiated export (see standard_options.admin.php)
+		if (method_exists($this,'standard_options'))
+		{
+			$this->standard_options('add_actions_and_filters');
 		}
 
 		parent::addActionsAndFilters();
@@ -1424,7 +1440,7 @@ abstract class abstract_backend extends abstract_core
 
 		return array_reduce($records, function ($result, $record)
 			{
-				$result[ $record->option_name ] = maybe_unserialize($record->option_value);
+				$result[ $record->meta_key ] = maybe_unserialize($record->meta_value);
 				return $result;
 			}, []
 		);

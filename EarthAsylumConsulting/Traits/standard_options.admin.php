@@ -11,7 +11,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0909.1
+ * @version		26.0915.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  */
@@ -58,6 +58,18 @@ trait standard_options
 		}
 
 		return $return;
+	}
+
+
+	/**
+	 * Add trait actions and filter.
+	 * called from abstract_admin::addActionsAndFilters().
+	 *
+	 * @return 	void
+	 */
+	private function stdOptions_add_actions_and_filters(): void
+	{
+		$this->stdOptions_optionExport_action();
 	}
 
 
@@ -196,9 +208,10 @@ trait standard_options
 				'label'		=> 	'Backup Settings',
 				'default'	=> 	'Backup',
 				'info'		=> 	"Backup all {$this->pluginName} settings.",
+				'help'		=>	"[info]<br>Stores a single backup of all settings in the options table.",
 				'validate'	=> 	function($value) {
 									$this->plugin->do_option_backup();
-									$this->add_option_success('button',"Your settings have been backed up.");
+									$this->add_option_success('_btnBackupOptions',"Your settings have been backed up.");
 								},
 			),
 		];
@@ -224,7 +237,7 @@ trait standard_options
 				'validate'	=> 	function($value) {
 									if ($value == 'Restore') {
 										$this->plugin->do_option_restore();
-										$this->add_option_success('button',"Your settings have been restored and are reflected below.");
+										$this->add_option_success('_btnRestoreOptions',"Your settings have been restored and are reflected below.");
 									}
 								},
 			),
@@ -247,9 +260,10 @@ trait standard_options
 				'label'		=> 	'Backup Network Settings',
 				'default'	=> 	'Backup All',
 				'info'		=> 	"Backup all {$this->pluginName} settings for all network sites.",
+				'help'		=>	"[info]<br>Stores a single backup of all settings in the options table.",
 				'validate'	=> 	function($value) {
 									$this->plugin->do_network_backup();
-									$this->add_option_success('button',"The settings for all sites have been backed up.");
+									$this->add_option_success('_btnBackupNetwork',"The settings for all sites have been backed up.");
 								},
 			),
 		];
@@ -271,13 +285,13 @@ trait standard_options
 			'_btnRestoreNetwork'.( ($backupTime) ? '' : '_hidden' )	=> array(
 				'type'		=> 	($backupTime) ? 'button' : 'hidden',
 				'label'		=> 	'Restore Network Settings',
-				'default'	=> 	($backupTime) ? 'Restore' : '',
+				'default'	=> 	($backupTime) ? 'Restore All' : '',
 				'after'		=> 	($backupTime) ? '&nbsp;<small>Last backup: '.$backupTime.'</small>' : '',
 				'info'		=> 	($backupTime) ? "Restore all {$this->pluginName} settings for all network sites from the backup created on {$backupTime}." : "No backup to restore from.",
 				'validate'	=> 	function($value) {
 									if ($value == 'Restore') {
 										$this->plugin->do_network_restore();
-										$this->add_option_success('button',"Your settings for all sites have been restored. Network settings are reflected below.");
+										$this->add_option_success('_btnRestoreNetwork',"Your settings for all sites have been restored. Network settings are reflected below.");
 									}
 								},
 			),
@@ -298,11 +312,11 @@ trait standard_options
 				'label'		=> 	'Clear Caches &amp; Transients',
 				'default'	=> 	'Clear Caches',
 				'info'		=> 	"Clear WordPress caches and {$this->pluginName} transients.",
-				'after' 	=>  wp_using_ext_object_cache()
-								? '' : '&nbsp;&nbsp;<input class="input-checkbox" type="checkbox" name="clear_transients" id="clear_transients" value="true" checked="checked">'.
-								'<label for="clear_transients">Include Transients</label>',
+			//	'after' 	=>  wp_using_ext_object_cache()
+			//					? '' : '&nbsp;&nbsp;<input class="input-checkbox" type="checkbox" name="clear_transients" id="clear_transients" value="true" checked="checked">'.
+			//					'<label for="clear_transients">Include Transients</label>',
 				'validate'	=> 	function($value) {
-									$withTrans = (isset($_POST['clear_transients']) && $_POST['clear_transients'] == 'true');
+									$withTrans = true; // (isset($_POST['clear_transients']) && $_POST['clear_transients'] == 'true');
 									$this->plugin->flush_caches( $withTrans );
 									$this->page_reload(true);
 								},
@@ -320,38 +334,25 @@ trait standard_options
 	{
 		if ( ! $this->plugin->is_network_admin() ) return [];
 
-		$this->add_filter( "options_form_post__btnNetworkCache", array($this, 'stdOptions_post_networkCache') );
-
 		return [
 			'_btnNetworkCache'		=> array(
 				'type'		=> 	'button',
-				'label'		=> 	'Clear Network Caches &amp; Transients',
+				'label'		=> 	'Clear Caches &amp; Transients',
 				'default'	=> 	'Network Caches',
 				'info'		=> 	"Clear WordPress caches and {$this->pluginName} transients for all network sites.",
-				'after' 	=>  wp_using_ext_object_cache()
-								? '' : '&nbsp;&nbsp;<input class="input-checkbox" type="checkbox" name="site_transients" id="site_transients" value="true">'.
-								'<label for="site_transients">Include Transients</label>',
+			//	'after' 	=>  wp_using_ext_object_cache()
+			//					? '' : '&nbsp;&nbsp;<input class="input-checkbox" type="checkbox" name="site_transients" id="site_transients" value="true">'.
+			//					'<label for="site_transients">Include Transients</label>',
+				'validate'	=> 	function($value) {
+									$this->plugin->flush_caches( true );
+									$this->plugin->forEachNetworkSite(function() {
+											$this->plugin->flush_caches( true );
+									});
+									$this->add_option_success('_btnNetworkCache',"The cache cleanup action has been triggered on all sites.");
+									$this->page_reload(true);
+								},
 			),
 		];
-	}
-
-	/**
-	 * When _btnNetworkCache button is posted, display notice
-	 *
-	 * @return	void
-	 */
-	public function stdOptions_post_networkCache(): void
-	{
-		$withTrans = (isset($_POST['site_transients']) && $_POST['site_transients'] == 'true');
-		$this->plugin->flush_caches( $withTrans );
-		$this->plugin->forEachNetworkSite(function() use($withTrans)
-			{
-				$this->plugin->flush_caches( $withTrans );
-			}
-		);
-		$message = ($withTrans) ? 'cache & transient' : 'cache';
-		$this->add_option_success('button',"The {$message} cleanup action has been triggered on all sites.");
-		$this->page_reload(true);
 	}
 
 
@@ -418,6 +419,20 @@ trait standard_options
 	{
 		$nonce 		= wp_create_nonce("{$this->pluginName}_export");
 		$basename 	= "{$this->pluginName}_".($this->is_network_admin() ? 'network' : 'site')."_settings.json";
+
+		if (! has_action("admin_post_{$this->pluginName}_settings_export"))
+		{
+			$required = 'Add this to your plugin code:<br><code>$this->standard_options(\'optionExport_action\')</code>';
+			return [
+				'_btnExportOptions'		=> array(
+					'type'		=> 	'display',
+					'label'		=> 	'Export Settings',
+					'default'	=> 	"<p>The required action needed to export has not been set.</p>",
+					'info'		=> 	"Export &amp; download all {$this->pluginName} settings to:<br><code>{$basename}</code>.",
+					'help'		=> 	"[info]<br>{$required}",
+				),
+			];
+		}
 		return [
 			'_btnExportOptions'		=> array(
 				'type'		=> 	'display',
@@ -425,21 +440,25 @@ trait standard_options
 				'default'	=> 	"<a href='".
 								admin_url("admin-post.php?action={$this->pluginName}_settings_export&_wpnonce={$nonce}").
 								"' class='button button-large' style='text-align:center'>Export</a>",
-				'info'		=> 	"Export &amp; download all {$this->pluginName} settings to {$basename}.",
+				'info'		=> 	"Export &amp; download all {$this->pluginName} settings to:<br><code>{$basename}</code>.",
 				'help'		=> "[info]",
 			),
 		];
 	}
 
 	/**
-	 * Action required for optionExport, must be added in plugin or extension constructor
+	 * Action required for optionExport, must be added in plugin or extension constructor.
+	 * This is now included in abstract_admin if/when this trait is USEd.
 	 *
 	 * @example $this->standard_options('optionExport_action');
 	 * @return	void
 	 */
 	public function stdOptions_optionExport_action(): void
 	{
-		add_action("admin_post_{$this->pluginName}_settings_export", array($this, 'stdOptions_post_optionExport'));
+		$export_action = "admin_post_{$this->pluginName}_settings_export";
+		if (! has_action($export_action)) {
+			add_action($export_action, 	[$this, 'stdOptions_post_optionExport']);
+		}
 	}
 
 	/**
@@ -448,7 +467,7 @@ trait standard_options
 	 * @internal
 	 * @return	void
 	 */
-	public function stdOptions_post_optionExport(): void
+	public function stdOptions_post_optionExport($post = null)
 	{
 		$nonce = $_REQUEST['_wpnonce'] ?? null;
 		if ( ! current_user_can('manage_options') || ! wp_verify_nonce( $nonce, "{$this->pluginName}_export" ) )
@@ -490,6 +509,8 @@ trait standard_options
 									=> $options,
 			'reserved_settings' 	=> $reserved,
 		),JSON_PRETTY_PRINT);
+
+		if (is_null($post)) return $data;
 
 		$basename = "{$this->pluginName}_".($this->is_network_admin() ? 'network' : 'site')."_settings.json";
 		$filesize = strlen($data);

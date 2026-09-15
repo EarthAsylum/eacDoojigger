@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\plugin_reinstall', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '26.0911.1';
+		const VERSION	= '26.0915.1';
 
 		/**
 		 * @var string extension tab name
