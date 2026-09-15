@@ -53,10 +53,11 @@ trait eacDoojigger_admin_traits
 		// to put settings first on general tab
 		if ($this->is_network_admin()) {
 			$this->registerNetworkOptions('network_settings');
-			$this->registerNetworkOptions(['Site Environment','tools']);
+			$this->registerNetworkOptions(['administration_tools','tools']);
+			$this->registerNetworkOptions(['network_administration','tools']);
 		} else {
 			$this->registerPluginOptions('plugin_settings');
-			$this->registerPluginOptions(['Site Environment','tools']);
+			$this->registerPluginOptions(['administration_tools','tools']);
 		}
 
 		add_action('admin_init', function()
@@ -172,22 +173,35 @@ trait eacDoojigger_admin_traits
 		{
 			// use mu-plugin on multisite so each site can set environment
 			if	( 	( is_multisite() )
-				&& 	( $this->is_network_admin() )
 				&&	( file_exists($this->pluginHeader('VendorDir').'/Utilities/eacDoojiggerEnvironment.class.php') )
 			) {
-				$default = $_POST['_btnEnvironment']
-							?? ( (file_exists(WPMU_PLUGIN_DIR.'/eacDoojiggerEnvironment.php')) ? 'Install' : 'Uninstall' );
-				$default = ($default=='Install') ? 'Uninstall' : 'Install';
-				$tools = ['_btnEnvironment' =>
-					[
-							'type'		=>	'button',
-							'label'		=>	'Environment Switcher',
-							'default'	=>	$default,
-							'info'		=>	$default." the Environment Switcher in the 'mu_plugins' folder.",
-							'validate'	=>	[$this, 'install_environment'],
-							'advanced'	=> 	true,
-					]
-				];
+				if ( $this->is_network_admin() ) {
+					$default = $_POST['_btnEnvironment']
+								?? ( (file_exists(WPMU_PLUGIN_DIR.'/eacDoojiggerEnvironment.php')) ? 'Install' : 'Uninstall' );
+					$default = ($default=='Install') ? 'Uninstall' : 'Install';
+					$tools = ['_btnEnvironment' =>
+						[
+								'type'		=>	'button',
+								'label'		=>	'Environment Switcher',
+								'default'	=>	$default,
+								'after'		=>	($default == 'Uninstall')
+												? "<br>See: <a href='".network_admin_url('settings.php')."#wp-environment'>Network settings</a>."
+												: '',
+								'info'		=>	$default." the Environment Switcher in the 'mu_plugins' folder.",
+								'validate'	=>	[$this, 'install_environment'],
+								'advanced'	=> 	true,
+						]
+					];
+				} else {
+					$tools = ['_btnEnvironment' =>
+						[
+								'type'		=>	'display',
+								'label'		=>	'Environment Switcher',
+								'default'	=>	"See: <a href='".admin_url('options-general.php')."#wp-environment'>General settings</a>.",
+								'advanced'	=> 	true,
+						]
+					];
+				}
 			}
 			// on single site, set via admin option
 			else if (!is_multisite() && ($this->wpConfig = $this->wpconfig_handle()) )
