@@ -185,19 +185,19 @@ trait eacDoojigger_admin_traits
 								'label'		=>	'Environment Switcher',
 								'default'	=>	$default,
 								'after'		=>	($default == 'Uninstall')
-												? "<br>See: <a href='".network_admin_url('settings.php')."#wp-environment'>Network settings</a>."
+												? "&nbsp;<small>See: <a href='".network_admin_url('settings.php')."#wp-environment'>Network settings</a></small>"
 												: '',
 								'info'		=>	$default." the Environment Switcher in the 'mu_plugins' folder.",
 								'validate'	=>	[$this, 'install_environment'],
 								'advanced'	=> 	true,
 						]
 					];
-				} else {
+				} else if (file_exists(WPMU_PLUGIN_DIR.'/eacDoojiggerEnvironment.php')) {
 					$tools = ['_btnEnvironment' =>
 						[
 								'type'		=>	'display',
 								'label'		=>	'Environment Switcher',
-								'default'	=>	"See: <a href='".admin_url('options-general.php')."#wp-environment'>General settings</a>.",
+								'default'	=>	"See: <a href='".admin_url('options-general.php')."#wp-environment'>General settings</a>",
 								'advanced'	=> 	true,
 						]
 					];

@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.3.0-RC4
-Last Updated:           13-Sep-2026
+Stable tag:             3.3.0-RC5
+Last Updated:           17-Sep-2026
 Requires at least:      5.8
 Tested up to:           7.1
 Requires PHP:           8.1
@@ -65,6 +65,7 @@ If you're customizing a WordPress site, code that needs to survive a theme chang
 +   [Automatic Updates](#automatic-updates)
 +   [Contextual Help](#contextual-help)
 +   [Advanced Mode](#advanced-mode)
++   [Multi-Site Support](#multi-site-support)
 
 = Provided With {eac}Doojigger =
 
@@ -125,7 +126,7 @@ Plus shared PHP traits for plugin loading, updates, contextual help, HTML input 
 |   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
 |   [{eac}Readme]                       | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
 |   [{eac}SimpleGTM]                    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
-|   [{eac}MetaPixel]                    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
+|   [{eac}MetaPixel]                    | Installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
 
 [WordPress Repository]:		https://wordpress.org/plugins/search/earthasylum/
 
@@ -217,82 +218,12 @@ Advanced Mode gives developers a method to implement options or features based o
 
 >   See [Implementing and Using Advanced Mode](https://eacdoojigger.earthasylum.com/how-to/#implementing-and-using-advanced-mode) for details.
 
-
-== Multi-Site Network ==
-
->   A multisite network is a collection of sites that all share the same WordPress installation core files. They can also share plugins and themes. The individual sites in the network are virtual sites in the sense that they do not have their own directories on your server, although they do have separate directories for media uploads within the shared installation, and they do have separate tables in the database.
+= Multi-Site Support =
 
 {eac}Doojigger is well aware of multi-site/network environments where only a network administrator may install plugins and plugins may be *network-activated* (enabled for all sites) or *site-activated* (enabled for/by individual sites within the network).
 
-{eac}Doojigger manages installation, activation, deactivation and un-installing properly based on the type of installation and activation. For example, when an Doojigger plugin is *network-activated*, it is activated on all sites in the network. When un-installed, it is un-installed from all sites. When installed by the network administrator but not *network activated*, each site administrator may properly activate or de-activate the plugin.
+>   See the [Multi-Site Network](https://eacdoojigger.earthasylum.com/multisite/) page (found in the *[Extras]/MultiSite/* folder) for more detail.
 
-{eac}Doojigger distinguishes between a plugin being *network-installed* versus *network-activated*, and its option/transient methods behave accordingly — deliberately diverging from WordPress's own defaults, where `*_network_option()` and `*_site_option()` fall back to single-site behavior without checking activation type.
-
-In short:
-
-- `$this->add_option()` — site-only, always.
-- `$this->add_network_option()` — only takes effect when network-activated; otherwise a no-op.
-- `$this->add_site_option()` — site-scoped normally, but automatically becomes network-wide when the plugin is network-activated.
-
-WordPress does not check (nor should it) for the type of plugin *activation* (network wide vs. individual site).
-
-If you manage plugins across a multi-site network — some sites opting in, others not — this gives you option and transient behavior that matches actual activation state without extra code on your part.
-
-To illustrate these differences, if we run this code:
-
-    \add_option('my_test_option','my test');
-    \add_network_option(null,'my_test_option','my network test');
-
-    $this->add_option('my_test_option','my test');
-    $this->add_network_option('my_test_option','my network test');
-
-We get this...
-
-| 'get' option                  | Single site installation  | Site activated        | Network activated |
-| ---                           | ---                       | ---                   | --- |
-| `get_option()`                | 'my network test'         | 'my test'             | 'my test' |
-| `get_network_option()`        | 'my network test'         | 'my network test'     | 'my network test' |
-| `get_site_option()`           | 'my network test'         | 'my network test'     | 'my network test' |
-| `$this->get_option()`         | 'my test'                 | 'my test'             | 'my test' |
-| `$this->get_network_option()` | false                     | false                 | 'my network test' |
-| `$this->get_site_option()`    | 'my test'                 | 'my test'             | 'my network test' |
-
-Add this code:
-
-    \add_site_option('my_test_option','my site test');
-    $this->add_site_option('my_test_option','my site test');
-
-And we get this...
-
-| 'get' option                  | Single site installation  | Site activated        | Network activated |
-| ---                           | ---                       | ---                   | --- |
-| `get_option()`                | 'my site test'            | 'my test'             | 'my test' |
-| `get_network_option()`        | 'my site test'            | 'my site test'        | 'my site test' |
-| `get_site_option()`           | 'my site test'            | 'my site test'        | 'my site test' |
-| `$this->get_option()`         | 'my site test'            | 'my test'             | 'my test' |
-| `$this->get_network_option()` | false                     | false                 | 'my site test' |
-| `$this->get_site_option()`    | 'my site test'            | 'my site test'        | 'my site test' |
-
-= Network Related Methods =
-
-| Method Name                                               | Description |
-| -----------                                               | ----------- |
-| `$this->is_network_enabled()`                             | Returns true if plugin is network-enabled |
-| `$this->forEachNetworkSite( $callback, ...$arguments )`   | Execute $callback on each active site in a network |
-| `$this->switch_to_blog( $new_blog_id )`                   | Switch the current WordPress blog |
-| `$this->restore_current_blog()`                           | Restore the current blog, after calling switch_to_blog() |
-
-\* *use `$this->is_network_enabled()` to determine if the plugin is network activated. Extensions may use `$this->is_network_enabled()` to determine if the extension is enabled at the network level or `$this->plugin->is_network_enabled()` to determine if the plugin is network activated.*
-
-*Using `$this->switch_to_blog()` and `$this->restore_current_blog()` over the corresponding WordPress functions ensures that options are correctly saved and loaded for the switched-from/to blogs.*
-
-= Administrator Settings =
-
-The __network__ attribute of *administrator option fields* can be used on multisite installations to share or limit options across the network of sites, giving the network administrator the ability to set required/minimum/maximum values that ensure proper settings by site administrators.
-
-This field attribute can be set to: 'override', 'merge', 'minimum', or 'maximum' to control how a network option value limits a site value.
-
-See [Administrator Options and Settings - Option Meta Data](https://eacDoojigger.earthasylum.com/options/#meta-data)
 
 == More Information ==
 
@@ -500,7 +431,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.3.0 – September 13, 2026 =
+= Version 3.3.0 – September 17, 2026 =
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.
@@ -518,6 +449,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
 +	New 'network' option attribute used to push/merge/select network setting to/on individual sites.
 	+	See [Administrator Options and Settings - Option Meta Data](https://eacDoojigger.earthasylum.com/options/#meta-data)
++	Reworked, more reliable, plugin post install/upgrade code.
 +	Plugin loader - uses `is_non_code_request()` rather than `isPHP()` on load option (load only for code files).
 +	Moved admin-only extensions to admin folder.
 +	Use case-insensitive search for readme.txt/md file.
