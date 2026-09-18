@@ -758,12 +758,15 @@ if (! class_exists(__NAMESPACE__.'\event_scheduler_extension', false) )
 			$scheduledTime 	= $this->defaultTime(false,$scheduledTime);
 			$event_time 	= $scheduledTime->getTimestamp();
 
-			$result = \wp_schedule_single_event( (int)$event_time, $hook, $args, true );
-
-			if (is_wp_error($result))
+			if (! wp_next_scheduled($hook, $args) )
 			{
-				$this->add_admin_notice($hook.': '.$result->get_error_message(),'error');
-				return false;
+				$result = \wp_schedule_single_event( (int)$event_time, $hook, $args, true );
+
+				if (is_wp_error($result))
+				{
+					$this->add_admin_notice($hook.': '.$result->get_error_message(),'error');
+					return false;
+				}
 			}
 
 			if ($event_time <= time() && !defined('DOING_CRON') )

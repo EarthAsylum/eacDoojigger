@@ -4,12 +4,12 @@
 [![eacDoojigger](https://img.shields.io/badge/Requires-%7Beac%7DDoojigger-da821d)](https://eacDoojigger.earthasylum.com/)
 [![Sponsorship](https://img.shields.io/static/v1?label=Sponsorship&message=%E2%9D%A4&logo=GitHub&color=bf3889)](https://github.com/sponsors/EarthAsylum)
 
-<details><summary>Plugin Header</summary><small>
+<details><summary>Plugin Header</summary>
 
 Plugin URI:             https://eacDoojigger.earthasylum.com/  
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             3.3.0-RC4  
-Last Updated:           15-Sep-2026  
+Stable tag:             3.3.0-RC5  
+Last Updated:           17-Sep-2026  
 Requires at least:      5.8  
 Tested up to:           7.1  
 Requires PHP:           8.1  
@@ -21,7 +21,7 @@ License URI:            https://eacDoojigger.earthasylum.com/end-user-license-ag
 Tags:                   plugin development, rapid development, multi-function, security, encryption, debugging, administration, contextual-help, session management, maintenance mode, plugin framework, plugin derivative, plugin extensions, toolkit  
 GitHub URI:             https://github.com/EarthAsylum/docs.eacDoojigger/wiki  
 
-</details></small>
+</details>
 
 > {eac}Doojigger is a powerful, extensible WordPress framework: a ready-to-use utility plugin combined with an architecture for building your own plugins, so you can ship professional-grade results in a fraction of the usual development time.
 
@@ -135,7 +135,7 @@ Plus shared PHP traits for plugin loading, updates, contextual help, HTML input 
 |   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
 |   [{eac}Readme]                       | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
 |   [{eac}SimpleGTM]                    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
-|   [{eac}MetaPixel]                    | installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
+|   [{eac}MetaPixel]                    | Installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
 
 [WordPress Repository]:		https://wordpress.org/plugins/search/earthasylum/
 

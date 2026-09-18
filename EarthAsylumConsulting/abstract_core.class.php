@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0913.1
+ * @version		26.0917.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend

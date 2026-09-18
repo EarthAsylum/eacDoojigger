@@ -1,6 +1,6 @@
 ### Changelog
 
-#### Version 3.3.0 – September 13, 2026
+#### Version 3.3.0 – September 17, 2026
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.
@@ -18,6 +18,7 @@
 	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
 +	New 'network' option attribute used to push/merge/select network setting to/on individual sites.
 	+	See [Administrator Options and Settings - Option Meta Data](https://eacDoojigger.earthasylum.com/options/#meta-data)
++	Reworked, more reliable, plugin post install/upgrade code.
 +	Plugin loader - uses `is_non_code_request()` rather than `isPHP()` on load option (load only for code files).
 +	Moved admin-only extensions to admin folder.
 +	Use case-insensitive search for readme.txt/md file.

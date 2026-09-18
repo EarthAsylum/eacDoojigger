@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting;
  * @package 	{eac}Doojigger\Helpers\Functions
  * @author 		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright 	Copyright 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	26.0904.1
+ * @version 	26.0916.1
  */
 
 /*
@@ -66,6 +66,7 @@ function is_non_code_request(): bool
 		);
 		if (array_key_exists('REQUEST_URI', $_SERVER))
 		{
+
 			$extension 		= explode('?',$_SERVER['REQUEST_URI']);
 			$extension 		= pathinfo(trim($extension[0],'/'),PATHINFO_EXTENSION);
 			$is_non_code 	= (!empty($extension) && in_array($extension,$fileTypes));

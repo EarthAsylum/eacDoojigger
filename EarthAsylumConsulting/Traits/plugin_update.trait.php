@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0829.1
+ * @version		26.0916.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		abstract_backend.class.php
@@ -142,9 +142,8 @@ trait plugin_update
 	{
 		$className = basename(str_replace('\\', '/', $className));
 
-		$plugin_update_options 	= [
-			'environment' => wp_get_environment_type()
-		];
+		$plugin_update_options 	= (function_exists('\wp_get_environment_type'))
+			? ['environment' => wp_get_environment_type()] : [];
 
 		// check for constant ('{classname}_PLUGIN_UPDATE_CHANNEL')
 		// 		 	or option ('{classname}_selected_update_channel')

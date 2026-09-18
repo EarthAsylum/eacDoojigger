@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0914.1
+ * @version		26.0917.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -163,10 +163,11 @@ abstract class abstract_backend extends abstract_core
 		// Register the Plugin Deactivation Hook
 		register_deactivation_hook($header['PluginFile'],	array( $this, 'plugin_admin_deactivated') );
 
-		// when upgrade completes (old version is active)
-		add_action( 'upgrader_process_complete',			array( $this, 'plugin_admin_upgraded'), 10, 2 );
-		// Register admin_init to check for new install or upgraded version of the plugin
-		add_action( 'admin_init',							array( $this, 'plugin_admin_installed') );
+		// when upload and upgrade complete (old version is active)
+		add_action( 'upgrader_process_complete',			array( $this, 'plugin_admin_maybe_upgraded'), 10, 2 );
+
+		// check for new install or upgraded version of the plugin
+		add_action( 'admin_init',							array( $this, 'plugin_admin_maybe_installed'), PHP_INT_MAX );
 	}
 
 
@@ -286,45 +287,9 @@ abstract class abstract_backend extends abstract_core
 
 	/*
 	 *
-	 * Plugin install/update methods
+	 * Plugin activate/deactivate, install/upgrade methods
 	 *
 	 */
-
-
-	/**
-	 * after plugin upgrade on 'upgrader_process_complete' filter
-	 *
-	 * $hook_extra may only have 'action' and 'type'; action may be 'update' or 'install' (on a manual update).
-	 * Since we can't check that it's actually our plugin being updated, we do it for any plugin.
-	 * And can't perform updates since we're still in the old version of our code at this point.
-	 * We may pass through here more than once, if network-enabled.
-	 * In multisite environment, network admin calls upgrade for each active site.
-	 *
-	 * This doesn't work if instaling on multisite but not network activated.
-	 *
-	 * @param	object	$upgrader_object
-	 * @param	array	$hook_extra
-	 * @return	void
-	 */
-	public function plugin_admin_upgraded( object $upgrader_object, array $hook_extra ): void
-	{
-		if ( $hook_extra['type'] === 'plugin' && in_array($hook_extra['action'], ['install','update']) )
-		{
-			// are we updating this plugin?
-			if ((array_key_exists('plugin',$hook_extra) &&  $hook_extra['plugin'] == $this->PLUGIN_SLUG)
-			||  (array_key_exists('plugins',$hook_extra) && in_array($this->PLUGIN_SLUG, $hook_extra['plugins'])) )
-			{
-				$this->delete_site_transient( self::PLUGIN_HEADER_TRANSIENT );
-				// delete transient on all sites
-				$this->forEachNetworkSite(function()
-					{
-						$this->delete_site_transient( self::PLUGIN_HEADER_TRANSIENT );
-					}
-				);
-			}
-		}
-	}
-
 
 	/**
 	 * Activate the plugin (via register_activation_hook)
@@ -340,11 +305,10 @@ abstract class abstract_backend extends abstract_core
 		$this->logInfo('',__METHOD__);
 
 		$this->deleteTransients( ($isNetwork===true) );
-		$this->createScheduledEvents();
 
 		/**
 		 * action {classname}_plugin_activated when plugin is activated
-		 * @param	bool	$$isNetwork activated network-wide
+		 * @param	bool	$isNetwork activated network-wide
 		 * @param	bool	$asNetworkAdmin running as network admin
 		 * @return	void
 		 */
@@ -358,7 +322,7 @@ abstract class abstract_backend extends abstract_core
 					$this->prefixOptionName(self::PLUGIN_OPTION_NAME),
 					$this->prefixOptionName(self::NETWORK_OPTION_NAME)
 				],
-				'yes'
+				'no'
 			);
 		}
 
@@ -387,11 +351,10 @@ abstract class abstract_backend extends abstract_core
 		$this->logInfo('',__METHOD__);
 
 		$this->deleteTransients( ($isNetwork===true) );
-		$this->removeScheduledEvents();
 
 		/**
 		 * action {classname}_plugin_deactivated when plugin is deactivated
-		 * @param	bool	$$isNetwork activated network-wide
+		 * @param	bool	$isNetwork activated network-wide
 		 * @param	bool	$asNetworkAdmin running as network admin
 		 * @return	void
 		 */
@@ -421,28 +384,76 @@ abstract class abstract_backend extends abstract_core
 
 
 	/**
-	 * Install/Upgrade the plugin (via admin_init, there is no register_install_hook)
+	 * Install/Upgrade the plugin (via admin_init, there is no register_upgrade_hook).
+	 * If we don't have an installed version, we must be doing a new install,
+	 * otherwise we look for our 'maybe upgrade' option set by 'upgrader_process_complete'.
 	 *
 	 * @return	void
 	 */
-	public function plugin_admin_installed(): void
+	public function plugin_admin_maybe_installed(): void
 	{
 		if ( ! ($version = $this->getInstalledVersion()) )
 		{
-			$this->logDebug($this->className.' install',__METHOD__);
+			$this->logDebug($this->className.' new install',__METHOD__);
 			$this->admin_install_plugin();			// New install
+			// if network-admin, install each activated site
+			$this->forEachNetworkSite(function()
+				{
+					$this->admin_install_plugin();
+				}
+			);
 		}
-		else
+		else if ($this->get_transient('plugin_maybe_upgraded'))
 		{
-			$this->admin_upgrade_plugin($version);	// Maybe version upgrade(?)
+			$this->admin_upgrade_plugin($version);
+			// if network-admin, upgrade each activated site
+			$this->forEachNetworkSite(function() use($version)
+				{
+					$this->admin_upgrade_plugin($version);
+				}
+			);
 		}
+	}
 
-		// if network-admin, install/upgrade each activated site
-		$this->forEachNetworkSite(function()
-			{
-				$this->plugin_admin_installed();
+
+	/**
+	 * after plugin upgrade on 'upgrader_process_complete' filter
+	 *
+	 * $hook_extra may only have 'action' and 'type'; action may be 'update' or 'install' (on a manual update).
+	 * Since we can't check that it's actually our plugin being updated, we do it for any plugin.
+	 * And can't perform updates since we're still in the old version of our code at this point.
+	 * We may pass through here more than once, if network-enabled.
+	 * In multisite environment, network admin calls upgrade for each active site.
+	 *
+	 * on manual upload, caled after upload and after install
+	 *
+	 * @param	object	$upgrader_object
+	 * @param	array	$hook_extra
+	 * @return	void
+	 */
+	public function plugin_admin_maybe_upgraded( object $upgrader_object, array $hook_extra ): void
+	{
+		if ( $hook_extra['type'] === 'plugin' && in_array($hook_extra['action'], ['install','update']) )
+		{
+			// when uploading, no way to tell who got the update
+			$check = ( (! array_key_exists('plugin',$hook_extra)) && (! array_key_exists('plugins',$hook_extra)) );
+			if (! $check) {
+				// single plugin updated, is it ours?
+				$check = (array_key_exists('plugin',$hook_extra) && $hook_extra['plugin'] == $this->PLUGIN_SLUG);
+				if (! $check) {
+					// bulk updates, is one of them ours?
+					$check = (array_key_exists('plugins',$hook_extra) && in_array($this->PLUGIN_SLUG, $hook_extra['plugins']));
+				}
 			}
-		);
+			if ($check) {
+				$this->set_transient('plugin_maybe_upgraded',time());
+				$this->forEachNetworkSite(function()
+					{
+						$this->set_transient('plugin_maybe_upgraded',time());
+					}
+				);
+			}
+		}
 	}
 
 
@@ -458,15 +469,7 @@ abstract class abstract_backend extends abstract_core
 	{
 		$version = $this->getSemanticVersion()->version;
 
-		$this->logInfo($this->className.sprintf(' %s install version %s',\get_option('blogname'),$version),__METHOD__);
-
-		if (!$this->is_network_admin())
-		{
-			// install/update tables used by the plugin
-			$this->createCustomTables();
-			// Create scheduled events
-			$this->createScheduledEvents();
-		}
+		$this->logInfo(sprintf('%s install version %s',$this->PLUGIN_SLUG,$version),__METHOD__);
 
 		// Save installed version, avoid running install() more then once
 		$this->markAsInstalled();
@@ -474,7 +477,7 @@ abstract class abstract_backend extends abstract_core
 		/**
 		 * action {classname}_version_installed when plugin version installed
 		 * @param	string	$oldVersion null
-		 * @param	string	$version currently installed version
+		 * @param	string	$version installed version
 		 * @param	bool	$asNetworkAdmin running as network admin
 		 * @return	void
 		 */
@@ -493,27 +496,18 @@ abstract class abstract_backend extends abstract_core
 	 */
 	protected function admin_upgrade_plugin(string $oldVersion): void
 	{
-		if ( is_multisite() && !$this->is_network_enabled() ) {
-			// because we can't detect plugin update
-			$this->setPluginHeaderValues([]); // force reload of header values
-		}
+		$this->delete_transient('plugin_maybe_upgraded');
+		$this->setPluginHeaderValues([]); // force reload of header values
+
 		$newVersion = $this->getSemanticVersion()->version;
 		if ( ($compare = $this->isVersionCompare($oldVersion, $newVersion, true, 'upgrade', 'downgrade')) === true ) return;
 
-		$this->logInfo($this->className.sprintf(" %s {$compare} from version %s to %s",\get_option('blogname'),$oldVersion,$newVersion),__METHOD__);
+		$this->logInfo(sprintf("%s {$compare} from version %s to %s",$this->PLUGIN_SLUG,$oldVersion,$newVersion),__METHOD__);
 
 		//	if ($this->isVersionLessThan($newVersion,'3.0.0')) {...}
 
 		// delete (old) transients
 		$this->deleteTransients();
-
-		if (!$this->is_network_admin())
-		{
-			// install/update tables used by the plugin
-			$this->createCustomTables();
-			// Create scheduled events
-			$this->createScheduledEvents();
-		}
 
 		// record the installed version
 		$this->markAsInstalled();
@@ -566,77 +560,6 @@ abstract class abstract_backend extends abstract_core
 	protected function getInstalledVersion(): string
 	{
 		return $this->get_option( self::PLUGIN_INSTALLED_VERSION );
-	}
-
-
-	/**
-	 * Install/update database tables
-	 *
-	 * @used-by	admin_install_plugin()
-	 * @used-by	admin_upgrade_plugin()
-	 * @see		https://codex.wordpress.org/Creating_Tables_with_Plugins - specific requirements for dbDelta()
-	 * @return	void
-	 */
-	protected function createCustomTables(): void
-	{
-	}
-
-
-	/**
-	 * Create scheduled events
-	 *
-	 * @used-by	admin_install_plugin()
-	 * @used-by	admin_upgrade_plugin()
-	 * @return	void
-	 */
-	protected function createScheduledEvents(): void
-	{
-	/* -- now handled through event_scheduler extension */
-
-	//	$this->removeScheduledEvents();
-
-	//	/**
-	//	 * action {pluginname}_hourly_event to run hourly
-	//	 * @return	void
-	//	 */
-	//	$scheduledTime = new \DateTime( wp_date('Y-m-d H:00:00'), wp_timezone() );
-	//	$scheduledTime->modify('next hour');
-	//	wp_schedule_event( $scheduledTime->getTimestamp(), 'hourly', $this->prefixHookName('hourly_event') );
-
-	//	/**
-	//	 * action {pluginname}_daily_event to run daily
-	//	 * @return	void
-	//	 */
-	//	$scheduledTime = new \DateTime( 'tomorrow 1am', wp_timezone() );
-	//	wp_schedule_event( $scheduledTime->getTimestamp(), 'daily', $this->prefixHookName('daily_event') );
-
-	//	/**
-	//	 * action {pluginname}_weekly_event to run start of week
-	//	 * @return	void
-	//	 */
-	//	$startOfWeekDay = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-	//	$startOfWeekDay = $startOfWeekDay[ get_option( 'start_of_week' ) ];
-	//	$scheduledTime = new \DateTime( 'next '.$startOfWeekDay.' midnight', wp_timezone() );
-	//	wp_schedule_event( $scheduledTime->getTimestamp(), 'weekly', $this->prefixHookName('weekly_event') );
-	}
-
-
-	/**
-	 * Remove scheduled events
-	 *
-	 * @used-by	createScheduledEvents()
-	 * @used-by	plugin_admin_deactivated()
-	 * @return	void
-	 */
-	protected function removeScheduledEvents(): void
-	{
-	/* -- now handled through event_scheduler extension */
-
-	//	foreach ( ['hourly_event','daily_event','weekly_event'] as $eventName)
-	//	{
-	//		$eventName = $this->prefixHookName($eventName);
-	//		wp_unschedule_hook($eventName);
-	//	}
 	}
 
 
@@ -1971,6 +1894,11 @@ abstract class abstract_backend extends abstract_core
 			wp_die( __( 'Security Violation' ), 403 );
 		}
 
+		// let's check marked version
+		if ($this->getInstalledVersion() != $this->getSemanticVersion()->version) {
+			$this->setPluginHeaderValues([]); // force reload of header values
+		}
+
 		/**
 		 * action {classname}_options_settings_page - last chance to register options
 		 * @return	void
@@ -2012,7 +1940,6 @@ abstract class abstract_backend extends abstract_core
 		}
 
 		// HTML for the page
-
 		$pluginClass = $this->toKeyString( $this->prefixOptionName($this->className.'_settings'),'_' );
 		echo "<div class='wrap {$pluginClass} {$settingsGroup}'>\n";
 
@@ -2231,7 +2158,7 @@ abstract class abstract_backend extends abstract_core
 		}
 
 		if (defined('EACDOOJIGGER_VERSION')) {
-			$info .= "<tr><td>". __('eacDoojigger Version', $this->PLUGIN_TEXTDOMAIN) ."</td>";
+			$info .= "<tr><td>". __($this->className.' Version', $this->PLUGIN_TEXTDOMAIN) ."</td>";
 			$info .= "<td>". $this->getRelease() ."</td></tr>\n";
 		}
 
