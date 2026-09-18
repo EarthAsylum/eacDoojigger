@@ -1,6 +1,6 @@
 ### Changelog
 
-#### Version 3.3.0 – September 17, 2026
+#### Version 3.3.0 – September 18, 2026
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.
@@ -18,12 +18,12 @@
 	+	Adds 'Trigger Reinstall' links to plugins page using `plugin_auto_update_setting_html` filter.
 +	New 'network' option attribute used to push/merge/select network setting to/on individual sites.
 	+	See [Administrator Options and Settings - Option Meta Data](https://eacDoojigger.earthasylum.com/options/#meta-data)
-+	Reworked, more reliable, plugin post install/upgrade code.
-+	Plugin loader - uses `is_non_code_request()` rather than `isPHP()` on load option (load only for code files).
++	Reworked, more reliable, plugin post-install/upgrade.
++	Plugin loader - uses `!is_non_code_request()` rather than `isPHP()` on load option (load only for code files).
 +	Moved admin-only extensions to admin folder.
 +	Use case-insensitive search for readme.txt/md file.
 +	Admin page tool-tips now converts new-line to break.
-+	Fix: Pass full/un-truncated blog version in plugin_update.trait.
++	Fix: in plugin_update.trait, realtime check `tested` version(s) with current blog version (7.1 == 7.1.1).
 +	Fix: decryption in `eacKeyValue::get()`
 +	Fix/improve maintenance mode with accurate retry-after and [UntilTime] shortcode.
 +	Updated `IpGeoLocation` API to v3.
@@ -31,7 +31,7 @@
 +	Always respect `Retry-After` header in risk assessment APIs.
 +	Aesthetic/Nonstructural changes...
 	+	Enhanced `getDocumentationLink()`.
-	+	Enhanced `getSupportLink()` with use of `Support Link` in readme.txt.
+	+	Enhanced `getSupportLink()` with use of `Support link` in readme.txt.
 	+	Removed 'Registration' link added 'Support' and 'Sponsor' to plugins page listing.
 	+	Updated readme and other documentation.
 +	Allow single option passed to `add_admin_action_link` then passed through url to triggered action.

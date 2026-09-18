@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0916.1
+ * @version		26.0918.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		abstract_backend.class.php
@@ -398,7 +398,7 @@ trait plugin_update
 		{
 			if ($result = \get_site_transient($this->update_plugin_info['transient_name']))
 			{
-				return $result[$context];
+				return $this->check_plugin_version($result)[$context];
 			}
 		}
 
@@ -431,20 +431,6 @@ trait plugin_update
 			$result = $this->get_plugin_info_unknown((object) $result);
 		}
 
-		// check version tested to proper length - tested = 6.0 == 6.0.1|6.0.2
-		$blogVersion = explode('-',get_bloginfo('version')); // strip '-RCx'
-		$blogVersion = $blogVersion[0];
-		if ($result['info']->tested) {
-			if (version_compare( $result['info']->tested, substr($blogVersion,0,strlen($result['info']->tested)) ) == 0) {
-		//		$result['info']->tested = $blogVersion; // substr($blogVersion,0,5);
-			}
-		}
-		if ($result['update']->tested) {
-			if (version_compare( $result['update']->tested, substr($blogVersion,0,strlen($result['update']->tested)) ) == 0) {
-		//		$result['update']->tested = $blogVersion; // substr($blogVersion,0,5);
-			}
-		}
-
 		// make sure we have the correct slug & plugin (case-sensitive)
 		$result['info']->slug 	= $result['update']->slug 	= $this->update_plugin_info['plugin_name'];
 		$result['info']->plugin = $result['update']->plugin = $this->update_plugin_info['plugin_slug'];
@@ -455,7 +441,33 @@ trait plugin_update
 			\set_site_transient($this->update_plugin_info['transient_name'], $result, $this->update_plugin_info['transient_time']);
 		}
 
-		return $result[$context];
+		return $this->check_plugin_version($result)[$context];
+	}
+
+
+	/**
+	 * check version to proper length - tested = 6.0 == 6.0.1|6.0.2
+	 *
+	 * @param 	array 	$result from remote request
+	 * @return	array 	$result with updated versions
+	 */
+	private function check_plugin_version($result)
+	{
+		$blogVersion = explode('-',get_bloginfo('version')); // strip '-RCx'
+		$blogVersion = $blogVersion[0];
+
+		if ($result['info']->tested) {
+			if (version_compare( $result['info']->tested, substr($blogVersion,0,strlen($result['info']->tested)) ) == 0) {
+				$result['info']->tested = $blogVersion; // substr($blogVersion,0,5);
+			}
+		}
+
+		if ($result['update']->tested) {
+			if (version_compare( $result['update']->tested, substr($blogVersion,0,strlen($result['update']->tested)) ) == 0) {
+				$result['update']->tested = $blogVersion; // substr($blogVersion,0,5);
+			}
+		}
+		return $result;
 	}
 
 
