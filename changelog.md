@@ -1,6 +1,6 @@
 ### Changelog
 
-#### Version 3.3.0 – September 18, 2026
+#### Version 3.3.0 – September 28, 2026
 
 +	Compatible with WordPress 7.1.
 +	New `Request Rate Limit` setting in Risk Assessment extension.

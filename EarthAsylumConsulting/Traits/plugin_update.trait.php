@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0918.1
+ * @version		26.0928.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		abstract_backend.class.php
@@ -302,7 +302,13 @@ trait plugin_update
 	 */
 	public function plugin_update_get_plugin_info( $result, string $action, object $args )
 	{
-		if ($action !== 'plugin_information') return $result;
+		// Only if we're looking at our plugin slug
+		// ajax installer (ajax-action.php) converts slug to lower case
+		if ( $action != 'plugin_information' ||
+		     strtolower($args->slug) != strtolower($this->update_plugin_info['plugin_name']) )
+		{
+			return $result;
+		}
 
 		if ($this->update_plugin_info['plugin_name'] !== $args->slug) return $result;
 
