@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	26.0913.1
+ * @version 	26.1005.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -31,6 +31,15 @@ $this->registerExtensionOptions( $this->className,
 				'info'		=>	"CORS is a security feature implemented by browsers. These options implement basic ".
 								"CORS security at the server level helping to prevent malicious activty from browser &amp; non-browser sources.",
 				'help'		=> 	'CORS (Cross-Origin Resource Sharing) - [info]',
+				'network'	=> 'merge',
+		),
+		'secRequiredCors' 	=> array(
+				'type'		=>	'textarea',
+				'label'		=>	"CORS Required URIs",
+				'default'	=>	$this->is_network_option('secRequiredCors'),
+				'info'		=>	"Require CORS security checks on these URIs, blocking access from unknown origins. ".
+								"Enter URIs, 1 per line, beginning with /.",
+			//	'attributes'=>	['placeholder'=>'/wp-includes/...'],
 				'network'	=> 'merge',
 		),
 		'secAllowCors' 	=> array(

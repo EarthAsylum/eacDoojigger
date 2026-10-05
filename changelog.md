@@ -1,5 +1,16 @@
 ### Changelog
 
+#### Version 3.3.1 – October 5, 2026
+
++	Fix rate limit initialization bug.
++	Added 'CORS Required URIs' to require CORS validation on specified URIs.
++	Added 'concern' as a low-level risk type ('fraud', 'threat', 'abuse', 'risk', 'concern').
+	+	Has a lower risk weight towards risk limit and not counted towards risk threshold.
++	Treat 404 (page not found) error as low-risk 'concern' to detect/prevent probing of URLs.
++	Option to hide (as 404 not found) author pages to hide user names.
++	Prevent first failure with authentication nonce.
++	Security methods comparing URIs now check ending URI as well as beginning (either).
+
 #### Version 3.3.0 – September 28, 2026
 
 +	Compatible with WordPress 7.1.

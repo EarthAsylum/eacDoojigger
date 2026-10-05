@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.3.0
-Last Updated:           28-Sep-2026
+Stable tag:             3.3.1
+Last Updated:           05-Oct-2026
 Requires at least:      5.8
 Tested up to:           7.1
 Requires PHP:           8.1
@@ -430,6 +430,17 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.3.1 – October 5, 2026 =
+
++	Fix rate limit initialization bug.
++	Added 'CORS Required URIs' to require CORS validation on specified URIs.
++	Added 'concern' as a low-level risk type ('fraud', 'threat', 'abuse', 'risk', 'concern').
+	+	Has a lower risk weight towards risk limit and not counted towards risk threshold.
++	Treat 404 (page not found) error as low-risk 'concern' to detect/prevent probing of URLs.
++	Option to hide (as 404 not found) author pages to hide user names.
++	Prevent first failure with authentication nonce.
++	Security methods comparing URIs now check ending URI as well as beginning (either).
 
 = Version 3.3.0 – September 28, 2026 =
 

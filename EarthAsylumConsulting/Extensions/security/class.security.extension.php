@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '26.0905.1';
+		const VERSION			= '26.1005.1';
 
 		/**
 		 * @var string extension alias
@@ -205,7 +205,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				 * @param int $score risk score (0-100)
 				 * @param int $http_status optional, set http status on die
 				 */
-				foreach (['fraud','threat','abuse','risk'] as $type)
+				foreach (['fraud','threat','abuse','risk','concern'] as $type)
 				{
 					$this->add_action( "register_{$type}", array($this, 'register_risk_action'),10,3 );
 				}
@@ -386,6 +386,23 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				$this->disable_embeds();
 			}
 
+			// track 404 errors
+			if ($this->isPolicyEnabled('secTrackEvents','404'))
+			{
+				add_action('set_404', function($wp_query) {
+					$this->do_action('register_concern','http 404 error');
+				});
+			}
+
+			// block author pages
+			if ($this->isPolicyEnabled('secTrackEvents','author'))
+			{
+				add_filter( "template_include", 			array($this, "checkTemplatePage") );
+				add_filter( 'author_link', 					function($link, $author_id, $author_nicename){
+					return rtrim(str_replace($author_nicename,'',$link),'/');
+				},10,3);
+			}
+
 			// set cookie flags
 			if ($this->isPolicyEnabled('secCookies'))
 			{
@@ -530,8 +547,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 */
 		public function wp_login_form()
 		{
+			add_filter('determine_current_user','__return_false');
 			// nonce name/action is itself nonce'd
-			$action = '_eac_'.wp_create_nonce(date('Ymd'));
+			$action = '_eac_'.wp_create_nonce('eaclogin');
 			wp_nonce_field( $action, $action, false );
 		}
 
@@ -549,8 +567,9 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 			if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			{
-				remove_action('wp_verify_nonce_failed', array($this, 'wp_nonce_failure'));
-				$action = '_eac_'.wp_create_nonce(date('Ymd'));
+			//	remove_action('wp_verify_nonce_failed', array($this, 'wp_nonce_failure'));
+				add_filter('determine_current_user','__return_false');
+				$action = '_eac_'.wp_create_nonce('eaclogin');
 				$nonce	= $_REQUEST[$action] ?? null;
 				if ( ! wp_verify_nonce( $nonce, $action ) ) {
 					if (is_wp_error($user)) {
@@ -1159,7 +1178,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			if (empty($uriList)) return;
 
 			$found = array_filter($uriList,function($uri) use($request) {
-				return (stripos($request, $uri) === 0);
+				return (str_starts_with($request, $uri) || str_ends_with($request, $uri));
 			});
 			return !empty($found);
 		}
@@ -1189,6 +1208,25 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			}
 
 			wp_die( $this->plugin->access_denied('access denied by IP address') );
+		}
+
+
+		/**
+		 * set flags in Set-Cookie headers before output (used by header_register_callback)
+		 *
+		 * @return void
+		 */
+		public function checkTemplatePage($template)
+		{
+			global $wp_query;
+			if (!empty($_GET['author']) || is_author()) {
+				$wp_query->post_count = 0;
+				$wp_query->set_404();
+				status_header(404);
+				nocache_headers();
+				$template = get_404_template();
+			}
+			return $template;
 		}
 
 

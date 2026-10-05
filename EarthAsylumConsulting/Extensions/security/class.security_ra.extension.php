@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.0905.1';
+		const VERSION 			= '26.1004.1';
 
 		/**
 		 * @var string alias
@@ -53,7 +53,10 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * @var array risk type priority/weight
 		 * when reported within the app without giving a score, the score is calculated and multiplied by weight.
 		 */
-		const RISK_TYPES 		= [ 'fraud' => 1.5, 'threat' => 1.25, 'abuse' => 1.0, 'risk' => 0.75, 'none' => 0 ];
+		const RISK_TYPES 		= [
+			'fraud' => 1.5, 'threat'=> 1.25, 'abuse' => 1.0, 'risk' => 0.75,
+			'concern' => 0.5, 'none' => 0 // <- non-risk-event
+		];
 
 		/**
 		 * @var string IP block list file name (write)
@@ -324,10 +327,10 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			}
 			else 	// temporarily account for pre-existing transients
 			{
-				if (!isset($date['RequestCount'])) $date['RequestCount'] = 1;
-				if (!isset($date['RequestTime'])) $date['RequestTime'] = time();
-				if (!isset($date['RateLimitCount'])) $date['RateLimitCount'] = 1;
-				if (!isset($date['RateLimitTime'])) $date['RateLimitTime'] = time();
+				if (!isset($data['RequestCount'])) $data['RequestCount'] = 1;
+				if (!isset($data['RequestTime'])) $data['RequestTime'] = time();
+				if (!isset($data['RateLimitCount'])) $data['RateLimitCount'] = 1;
+				if (!isset($data['RateLimitTime'])) $data['RateLimitTime'] = time();
 			}
 
 			// get registered score (from register_risk)
@@ -657,10 +660,12 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			$ipAddress 				= $this->getVisitorIP();
 			$score 					= $score ?: round(($limit / $threshold) * self::RISK_TYPES[$type],0);
 
+			$counter 				= (self::RISK_TYPES[$type] < .75) ? 0 : 1;
+
 			// get previously registered
 			if ($registered = $this->transient_register($ipAddress,true))
 			{
-				$registered['count'] 	+= 1;
+				$registered['count'] 	+= $counter;
 				$registered['type']		= (self::RISK_TYPES[$type] >= self::RISK_TYPES[$registered['type']])
 					? $type : $registered['type'];
 				$registered['score']	= min(100, ($registered['score'] + $score));
@@ -669,7 +674,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			// or first report
 			else
 			{
-				$registered['count']	= 1;
+				$registered['count']	= $counter;
 				$registered['type']		= $type;
 				$registered['score']	= min(100, $score);
 				$registered['message']	= [$message];

@@ -29,7 +29,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.0912.1';
+		const VERSION 			= '26.1005.1';
 
 		/**
 		 * @var string extension tab name
@@ -193,6 +193,10 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 				}
 			}
 			else
+			if ($this->security->match_disabled_uris('secRequiredCors')) {
+				add_action('init', 								array($this,'validate_cors_origin'), 50);
+			}
+			else
 			if ($this->security->isPolicyEnabled('secCorsOpt','post')) {
 				if (in_array($_SERVER['REQUEST_METHOD'],['POST','PUT','PATCH','DELETE'])) {
 					add_action('wp', 							function() {
@@ -233,9 +237,8 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		 */
 		public function validate_cors_origin(): void
 		{
-			static $once = false;
-			if ($once) return;
-			$once = true;
+			static $once = 0;
+			if ($once++) return;
 
 			// should we trust browser sec headers?
 		//	if ( ($this->plugin->varServer('Sec-Fetch-Mode') == 'cors') &&

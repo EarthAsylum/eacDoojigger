@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	26.0913.1
+ * @version 	26.1005.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -178,6 +178,16 @@ $this->registerExtensionOptions( $this->className,
 				'info'		=>	"oEmbed is a format for allowing an embedded representation of a URL on third party sites.",
 				'advanced'	=> 	true,
 				'network'	=>	'override',
+		),
+		'secTrackEvents' 	=> array(
+				'type'		=>	'switch',
+				'label'		=>	"Suspicious Activity",
+				'options'	=>	[
+					"<abbr title='Prevent repeated probing of URLs.'>404 Page Not Found</abbr>" => '404',
+					"<abbr title='Author URLs reveal user names.'>Hide Author Pages</abbr>" => 'author',
+				],
+				'default'	=>	$this->is_network_option('secFileChanges'),
+				'info'		=>	"Detect specific, suspicious activities to prevent brute-force attacks and repeated concerns.",
 		),
 		'secRequireHttp' 	=> array(
 				'type'		=>	'textarea',
