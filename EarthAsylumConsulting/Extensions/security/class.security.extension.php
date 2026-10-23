@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '26.1005.1';
+		const VERSION			= '26.1017.1';
 
 		/**
 		 * @var string extension alias
@@ -370,7 +370,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 				}
 				*/
 				if ($this->isPolicyEnabled('secDisableXML','no-rpc')) {
-					add_action('wp_headers',				array($this, 'disable_invalid_xml'));
+					add_filter('wp_headers',				array($this, 'disable_invalid_xml'));
 				}
 			}
 
@@ -796,7 +796,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			});
 
 			if ($this->isPolicyEnabled('secUnAuthRest','no-json')) {
-				add_action('wp_headers',				array($this, 'disable_invalid_json'));
+				add_filter('wp_headers',				array($this, 'disable_invalid_json'));
 			}
 		}
 
@@ -951,7 +951,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 * disable invalid json request
 		 *
 		 */
-		public function disable_invalid_json()
+		public function disable_invalid_json($headers)
 		{
 			if (wp_is_json_request())
 			{
@@ -960,6 +960,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 				$this->do_action('register_threat','prohibited JSON request',0,400);
 			}
+			return $headers;
 		}
 
 
@@ -1022,7 +1023,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		 * disable invalid xml request
 		 *
 		 */
-		public function disable_invalid_xml()
+		public function disable_invalid_xml($headers)
 		{
 			if (wp_is_xml_request())
 			{
@@ -1031,6 +1032,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 				$this->do_action('register_threat','prohibited XML request',0,400);
 			}
+			return $headers;
 		}
 
 

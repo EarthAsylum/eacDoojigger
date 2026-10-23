@@ -15,7 +15,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	/**
 	 * @var string extension version
 	 */
-	const VERSION 			= '26.0904.1';
+	const VERSION 			= '26.1011.1';
 
 	/**
 	 * @var string extension tab name
@@ -73,7 +73,22 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 		add_action('admin_init', function()
 		{
 			// Register plugin options when needed
-			$this->add_action( "options_settings_page", array($this, 'admin_options_settings') );
+			$this->add_action( "options_settings_page", function() {
+				$this->registerExtensionOptions( $this->className,
+					[
+						static::PROVIDER.'_priority'	=> 	array(
+						//		'type'		=>	'number',
+								'type'		=>	($this->has_filter_count('risk_assessment_provider') > 1)
+										? 'number' : 'hidden',
+								'label'		=>	'Priority',
+								'default'	=>  1,
+								'info'		=>	'Priority (1-9) controls the execution order of multiple Risk Assessment providers. ',
+								'attributes'=>	['min="1"', 'max="9"','step="1"'],
+						),
+					]
+				);
+				$this->admin_options_settings();
+			});
 			// Add contextual help
 			$this->add_action( 'options_settings_help', array($this, 'admin_options_help') );
 		});
@@ -118,14 +133,16 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	 */
 	public function addActionsAndFilters()
 	{
+		$priority = $this->get_option(static::PROVIDER.'_priority',10);
+
 		if (! current_user_can('edit_pages') ) 	// not editor or better
 		{
-			$this->add_filter('risk_assessment_provider', 	array($this, 'check_for_risk'));
+			$this->add_filter('risk_assessment_provider', 	array($this, 'check_for_risk'),$priority);
 			return true; 						// let child know it's ok to add additional filters
 		}
 		else									// dummy filter required for risk_assessment_method
 		{
-			$this->add_filter('risk_assessment_provider', function($data) {return $data;});
+			$this->add_filter('risk_assessment_provider', function($data) {return $data;},$priority);
 			return false;
 		}
 	}
@@ -141,6 +158,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	{
 		// if we already got our score...
 		if (isset($data['RiskAssessmentData'][static::PROVIDER])) return $data;
+
 
 		$limit = match($data['RiskAssessmentMethod']) {
 			'divergent' 	=> 0,								// first score >= 0 is used
@@ -161,7 +179,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 		if ($status !== 200)
 		{
 			$this->logError('Status '.$status.': '.get_status_header_desc($status),static::PROVIDER.' API Error');
-			if ($status == 429) {	// rate limit exceeded (day or month)
+			if ($status == 429 || $status == 403) {	// rate limit exceeded (day or month) or forbidden (expired?)
 				$this->isRateLimit($this->rate_limit['retry']);
 			}
 		}
@@ -184,6 +202,27 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	 */
 	abstract function get_assessment_result(array $data): array;
 
+
+	/**
+	 * Process an API error (status != 200)
+	 *
+	 * @param int $status api status
+	 * @param array $result api response
+	 */
+	public function assessment_result_error($status, $result)
+	{
+		if ($status == 429 || $status == 403) {	// rate limit exceeded or forbidden (expired?)
+			if ($rateLimit = wp_remote_retrieve_header($result,'Retry-After')) {
+				$this->rate_limit['retry'] = $rateLimit;
+			} else if (empty($this->rate_limit['retry'])) {
+				$this->rate_limit['retry'] = strtotime('tomorrow');
+			}
+		}
+		$this->logDebug(json_decode( wp_remote_retrieve_body($result), true ),static::PROVIDER.' API Error '.$status);
+		$this->logDebug(current(
+			(array)wp_remote_retrieve_headers($result)
+		),static::PROVIDER.' API Response Headers');
+	}
 
 	/*
 	 * Rate limiting by provider or account plan
@@ -264,7 +303,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 				$time = time() + HOUR_IN_SECONDS;
 			}
 			$this->plugin->set_site_transient($transient_rate_key,[0,$time],$time - time());
-			$this->logError(wp_date('c',$time),$provider.' provider rate limit exceeded');
+			$this->logError(wp_date('c',$time),$provider.' provider rate limit pause');
 			return [0,$time];
 		}
 		else

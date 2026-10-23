@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_fraudguard', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.0904.1';
+		const VERSION 			= '26.1013.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -83,15 +83,15 @@ if (! class_exists(__NAMESPACE__.'\security_ra_fraudguard', false) )
 			if ( ! parent::initialize() ) return; // disabled
 
 			// get the api user/pass to set our account id
-			if (! ($user = $this->security->isPolicyEnabled('fraudguard_user'))
-			||  ! ($pass = $this->security->isPolicyEnabled('fraudguard_pass'))
+			if (! ($user = $this->get_option('fraudguard_user'))
+			||  ! ($pass = $this->get_option('fraudguard_pass'))
 			) {
 				return $this->isEnabled(false);
 			}
 			$this->account_id = $user.':'.$pass;
 
 			// set the account plan and rate limit
-			if ($account = $this->security->isPolicyEnabled('fraudguard_plan'))
+			if ($account = $this->get_option('fraudguard_plan'))
 			{
 				$this->account_plan 		= self::ACCOUNT_LIMITS[$account];
 				$this->rate_limit['limit'] 	= $this->account_plan['month'];
@@ -108,13 +108,13 @@ if (! class_exists(__NAMESPACE__.'\security_ra_fraudguard', false) )
 		 */
 		public function get_assessment_result(array $data): array
 		{
-			$ipAddress = $data['ipAddress'];
+			$ipAddress = urlencode( $data['ipAddress'] );
 
-			$api_url = ($this->security->isPolicyEnabled('fraudguard_plan') != 'hacker')
-					? 'https://api.fraudguard.io/v2/ip/'
-					: 'https://api.fraudguard.io/ip/';
+			$api_url = (in_array($this->get_option('fraudguard_plan'),['hacker','starter']))
+					? 'https://api.fraudguard.io/ip/%s'
+					: 'https://api.fraudguard.io/v2/ip/%s';
 
-			$result = wp_remote_get($api_url.$ipAddress,
+			$responce = wp_remote_get(sprintf($api_url,$ipAddress),
 				[
 					'headers' 	=> [
 						'Accept' 		=> 'application/json',
@@ -123,36 +123,46 @@ if (! class_exists(__NAMESPACE__.'\security_ra_fraudguard', false) )
 				]
 			);
 
-			$status = intval(wp_remote_retrieve_response_code($result));
+			$status = intval(wp_remote_retrieve_response_code($responce));
 			$data['RiskAssessmentData'][self::PROVIDER] = ['status'=>$status];
 
 			if ($status != 200)
 			{
-				if ($status == 429) {	// rate limit exceeded (day or month)
-					if ($rateLimit = wp_remote_retrieve_header($result,'Retry-After')) {
-						$this->rate_limit['retry'] = $rateLimit;
-					}
-				}
-			//	$this->logDebug(wp_remote_retrieve_headers($result),self::PROVIDER.' API Error Response');
-				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
-					$this->logError($result,self::PROVIDER.' API Error');
-				}
+				$this->assessment_result_error($status,$responce);
 			}
 			else
 			{
-				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
+				if ($result = json_decode( wp_remote_retrieve_body($responce), true )) {
 					array_walk($result, function(&$value,$key) {
 						if ($value == 'unknown') $value = '';
 					});
-					$score = [1=>0,2=>30,3=>60,4=>80,5=>100];
+					if (!isset($result['timezone']))		// v1
+					{
+						$data = array_replace($data,array_filter([
+							'CountryCode'		=> $result['isocode'],
+							'CountryName'		=> $result['country'],
+							'Region'			=> $result['state'],
+							'City'				=> $result['city'],
+						]));
+					}
+					else									// v2
+					{
+						$data = array_replace($data,array_filter([
+							'CountryCode'		=> $result['isocode'],
+							'CountryName'		=> $result['country'],
+							'Region'			=> $result['state_code'],
+							'City'				=> $result['city'],
+							'PostalCode'		=> $result['postal_code'],
+							'Latitude'			=> $result['latitude'],
+							'Longitude'			=> $result['longitude'],
+							'TimeZone'			=> $result['timezone'],
+						]));
+					}
+					$type = [1=>'risk',2=>'abuse',3=>'threat',4=>'threat',5=>'fraud'];
+					$type = $type[ intval($result['risk_level']) ];
+					$score = [1=>10,2=>30,3=>60,4=>80,5=>100];
 					$score = $score[ intval($result['risk_level']) ];
-					$data = array_replace($data,[
-						'CountryCode'		=> $result['isocode'],
-						'CountryName'		=> $result['country'],
-						'Region'			=> $result['state'],
-						'City'				=> $result['city'],
-					]);
-					$data['RiskAssessmentScores'][self::PROVIDER]	= [ 'threat' => $score ];
+					$data['RiskAssessmentScores'][self::PROVIDER]	= [ $type => $score ];
 					$data['RiskAssessmentData']  [self::PROVIDER]	+= $result;
 				}
 			}

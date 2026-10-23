@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0928.1
+ * @version		26.1016.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -486,6 +486,8 @@ abstract class abstract_core
 					'LastUpdated'		=> 'Last Updated',			// From readme.txt
 					'DonateLink'		=> 'Donate link',			// From readme.txt
 					'SupportLink'		=> 'Support link',			// From readme.txt
+					'SupportLink'		=> 'Support URL',			// From readme.txt
+					'SupportLink'		=> 'Support URI',			// From readme.txt
 				);
 
 				$readme = plugin_dir_path($header['PluginFile']);
@@ -1883,7 +1885,8 @@ abstract class abstract_core
 
 		if (is_array($plugin))							// get_plugin_data() array
 		{
-			if (empty($slug) && isset($plugin['slug'])) $slug = $plugin['slug'];
+			if ( empty($slug) &&  isset($plugin['slug'])) $slug = $plugin['slug'];
+			if (!empty($slug) && !isset($plugin['slug'])) $plugin['slug'] = $slug;
 		}
 
 		if ($plugin === true || $slug == $this->PLUGIN_SLUG)	// this plugin
@@ -1892,10 +1895,11 @@ abstract class abstract_core
 		}
 		else if (is_array($plugin))						// get_plugin_data() array
 		{
+			if (!isset($plugin['plugin']) && isset($plugin['slug'])) $plugin['plugin'] = $plugin['slug'];
 			$readme = WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . dirname($plugin['plugin']) . DIRECTORY_SEPARATOR;
 			list($readme) = glob($readme.'[rR][eE][aA][dD][mM][eE].{txt,TXT,md,MD}', GLOB_BRACE|GLOB_NOSORT);
 			if (empty($readme)) return '';
-			$url = get_file_data( $readme, ['SupportLink' => 'Support link'], 'readme');
+			$url = get_file_data( $readme, ['SupportLink' => 'Support link', 'SupportLink' => 'Support URL', 'SupportLink' =>'Support URI'], 'readme');
 			$url = $url['SupportLink'] ?? '';
 		}
 

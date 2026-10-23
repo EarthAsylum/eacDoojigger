@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0917.1
+ * @version		26.1022.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -2857,6 +2857,11 @@ abstract class abstract_backend extends abstract_core
 				break;
 
 			case 'button': // backwards compatible (use 'submit')
+				$value = esc_attr($savedOptionValue);
+				$html .= $tab."<button class='{$inputClass}' type='button' name='{$optionKey}' id='{$optionKey}'".
+						 "value='{$value}'{$attributes} onclick=\"this.type='submit';this.form.submit();\">$value</button>";
+				break;
+
 			case 'submit':
 				// attributes should include "onclick='doSomething();return false;'"
 				$value = esc_attr($savedOptionValue);
@@ -2943,7 +2948,7 @@ abstract class abstract_backend extends abstract_core
 				$attributes .= " disabled=\"disabled\"";
 				// no break
 			case 'readonly':
-				$optionMeta['type'] = (isset($optionMeta['encrypt']) && $optionMeta['encrypt']) ? 'passwword' : 'text';
+				$optionMeta['type'] = (isset($optionMeta['encrypt']) && $optionMeta['encrypt']) ? 'password' : 'text';
 				$attributes .= " readonly=\"readonly\"";
 					//ondblclick=\"this.readOnly=false;this.type='text';\" ontouchend=\"this.readOnly=false;this.type='text';\" onblur=\"this.readOnly=true\"";
 				// no break

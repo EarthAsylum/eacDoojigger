@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.3.1
-Last Updated:           05-Oct-2026
+Stable tag:             3.3.2
+Last Updated:           23-Oct-2026
 Requires at least:      5.8
 Tested up to:           7.1
 Requires PHP:           8.1
@@ -66,6 +66,7 @@ If you're customizing a WordPress site, code that needs to survive a theme chang
 +   [Contextual Help](#contextual-help)
 +   [Advanced Mode](#advanced-mode)
 +   [Multi-Site Support](#multi-site-support)
++ 	[Web Site Security](#web-site-security)
 
 = Provided With {eac}Doojigger =
 
@@ -76,7 +77,7 @@ If you're customizing a WordPress site, code that needs to survive a theme chang
 |   *[Security]*                        | Adds a number of security/firewall options to your WordPress installation including obfuscating the login url and adding a custom security nonce, enforcing password policies, limiting login attempts, disabling RSS/XML, limiting REST access, checking for required http headers, setting global cookie flags, and more. |
 |   *[Content Security Assistant][Security]* | Adds security nonce to `script` and style `link` tags to facilitate creation of comprehensive *Content Security Policy* (CSP) |
 |   *[Server-Side CORS][Security]*      | Implements the Cross-Origin Resource Sharing protocol to allow or deny access to resources when requested from non-browser origins using the referring address or reverse DNS lookup to identify the origin. |
-|   *[Threat Detection][Security]*      | Block access by IP address based on *security* and *CORS* violations and third-party threat-score APIs (AbuseIPDB, FraudGuard, IPGeoLocation). Version 3.3 adds request rate limiting. |
+|   *[Threat Detection][Security]*      | Block access by IP address based on *security* and *CORS* violations and third-party threat-score APIs ([AbuseIPDB], [FraudGuard], [iPASIS], [IPGeoLocation], [IPQualityScore], and/or [Scamalytics]). Version 3.3 adds request rate limiting. 3.3.1 adds 404 tracking to block URL probing. |
 |   *[Event Scheduler]*                 | Easily set and enable WordPress and custom CRON schedules (intervals), events, and tasks (actions). |
 |   *[Key/Value Storage]*               | Lightweight key-value storage that takes full advatage of the WP Object Cache. |
 |   *[Debugging]*                       | Provides powerful debugging and detailed logging tools with controls for WordPress debugging options. |
@@ -102,7 +103,11 @@ Plus shared PHP traits for plugin loading, updates, contextual help, HTML input 
 [WP Consent API]:		https://wordpress.org/plugins/wp-consent-api/
 [AbuseIPDB]:			https://www.abuseipdb.com/user/165095
 [FraudGuard]:			https://www.fraudguard.io
+[iPASIS]:				https://www.ipasis.com/
 [IpGeoLocation]:		https://www.ipgeolocation.io
+[IPQualityScore]:		https://ipqualityscore.com/?r=11946441
+[Scamalytics]:			https://www.scamalytics.com/
+
 
 |   {eac}Doojigger Utilities            |                       |
 |   :--------------------------------   |   :---------------    |
@@ -126,6 +131,7 @@ Plus shared PHP traits for plugin loading, updates, contextual help, HTML input 
 |   [{eac}SimpleAWS]                    | Includes and enables use of the Amazon Web Services (AWS) PHP Software Development Kit (SDK). |
 |   [{eac}Readme]                       | Translates a WordPress style markdown 'readme.txt' file and provides _shortcodes_ to access header lines, section blocks, or the entire document. |
 |   [{eac}SimpleGTM]                    | Installs the Google Tag Manager (gtm) or Google Analytics (gtag) script, sets default consent options, and enables tracking of views, searches, and, with WooCommerce, e-commerce actions. |
+|   [{eac}Cloudflare]                   | Provides control of several Cloudflare security and speed settings, intelligent caching management, short-term rate-limiting, and IP black-listing based on risk assessment from WordPress. |
 |   [{eac}MetaPixel]                    | Installs the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events. |
 
 [WordPress Repository]:		https://wordpress.org/plugins/search/earthasylum/
@@ -136,6 +142,7 @@ Plus shared PHP traits for plugin loading, updates, contextual help, HTML input 
 [{eac}SimpleAWS]:			https://eacdoojigger.earthasylum.com/eacsimpleaws/
 [{eac}Readme]:				https://eacdoojigger.earthasylum.com/eacreadme/
 [{eac}SimpleGTM]:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
+[{eac}Cloudflare]:			https://eacdoojigger.earthasylum.com/eaccloudflare/
 [{eac}MetaPixel]:			https://eacdoojigger.earthasylum.com/eacmetapixel/
 
 __Extras & Examples__
@@ -224,6 +231,14 @@ Advanced Mode gives developers a method to implement options or features based o
 
 >   See the [Multi-Site Network](https://eacdoojigger.earthasylum.com/multisite/) page (found in the *[Extras]/MultiSite/* folder) for more detail.
 
+= Web Site Security =
+
+The Security Extension of {eac}Doojigger enables general security options, Server-Side CORS (Cross-Origin Resource Sharing), and Risk Assessment tools providing a general-purpose, effective, and easy to use "firewall" to your WordPress site.
+
+Live traffic monitoring; Blocks malicious requests and brute-force attacks; Enforces strong passwords and limited login retries; Mitigates URL scanning; Disables file changes, REST/JSON request, XML requests, and oEmbed requests; Validates HTTP headers; Apply CORS rules to API requests and specific URLs; Performs risk assessment based on internal rules and (6) third-party services.
+
+>   See the [Security Extension](https://eacdoojigger.earthasylum.com/eacdoojigger-security/) page (found in the *[Extras]/Security/* folder) for more detail.
+
 
 == More Information ==
 
@@ -291,6 +306,9 @@ An {eac}Doojigger extension to translate a WordPress style markdown 'readme.txt'
 +   [{eac}SimpleGTM]
 Installs and configures the Google Tag Manager (GTM) or Google Analytics (GA4) script with optional tracking events.
 
++   [{eac}Cloudflare]
+Provides control of several Cloudflare security and speed settings, intelligent caching management, short-term rate-limiting, and IP black-listing based on risk assessment from WordPress.
+
 +   [{eac}MetaPixel]
 An {eac}Doojigger extension to install the Facebook/Meta Pixel to enable tracking of PageView, ViewContent, AddToCart, InitiateCheckout and Purchase events.
 
@@ -304,6 +322,7 @@ An easy to use, efficient, key-value pair storage mechanism for WordPress that t
 [{eac}SimpleAWS]:			https://eacdoojigger.earthasylum.com/eacsimpleaws/
 [{eac}Readme]:				https://eacdoojigger.earthasylum.com/eacreadme/
 [{eac}SimpleGTM]:			https://eacdoojigger.earthasylum.com/eacsimplegtm/
+[{eac}Cloudflare]:			https://eacdoojigger.earthasylum.com/eaccloudflare/
 [{eac}MetaPixel]:			https://eacdoojigger.earthasylum.com/eacmetapixel/
 [{eac}KeyValue]:			https://eacdoojigger.earthasylum.com/eackeyvalue/
 
@@ -430,6 +449,22 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.3.2 – October 23, 2026 =
+
++	3 new Risk Assessment providers.
+	+	iPASIS - https://www.ipasis.com/
+	+ 	IPQualityScore - https://ipqualityscore.com/?r=11946441
+	+	Scamalytics - https://www.scamalytics.com/
++	Added `Priority` to each RA provider to control execution order.
++	Improved support for FraudGuard API v2.
++	Added action `risk_assessment_blocked` to act when a request is denied due to risk assessment.
+	+	Used by [cloudflare Doololly](https://eacdoojigger.earthasylum.com/eaccloudflare/)
++	Added action `risk_assessment_unblocked` to act when an ip address is cleared in risk assessment.
+	+	Used by [cloudflare Doololly](https://eacdoojigger.earthasylum.com/eaccloudflare/)
++ 	Accept variations of `Support link` (uri, url) and pass `support_url` in plugin update.
++	Fix `button` input to not submit unless it is the button that triggers the submit.
++	Fix input type & attributes for disabled, read-only, encrypted input field.
 
 = Version 3.3.1 – October 5, 2026 =
 

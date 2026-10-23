@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.0904.1';
+		const VERSION 			= '26.1013.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -86,14 +86,14 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 			if ( ! parent::initialize() ) return; // disabled
 
 			// get the api key to set our account id
-			if (! ($key = $this->security->isPolicyEnabled('abuse_ipdb_key')) )
+			if (! ($key = $this->get_option('abuse_ipdb_key')) )
 			{
 				return $this->isEnabled(false);
 			}
 			$this->account_id = $key;
 
 			// set the account plan and rate limit - AbuseIPDB passes rate limit in the api
-			//	if ($account = $this->security->isPolicyEnabled('abuse_ipdb_plan')) {
+			//	if ($account = $this->get_option('abuse_ipdb_plan')) {
 			//		$this->account_plan 		= self::ACCOUNT_LIMITS[$account];
 			//		$this->rate_limit['limit'] 	= $this->account_plan['month'];
 			//		$this->rate_limit['retry'] 	= strtotime('tomorrow');
@@ -124,10 +124,10 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 		 */
 		public function get_assessment_result(array $data): array
 		{
-			$ipAddress = $data['ipAddress'];
+			$ipAddress = urlencode( $data['ipAddress'] );
 
-			$result = wp_remote_get(
-				add_query_arg(['ipAddress'=>urlencode($ipAddress)],'https://api.abuseipdb.com/api/v2/check'),
+			$responce = wp_remote_get(
+				add_query_arg(['ipAddress'=>$ipAddress],'https://api.abuseipdb.com/api/v2/check'),
 				[
 					'headers' 	=> [
 						'Accept' 	=> 'application/json',
@@ -136,37 +136,35 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 				]
 			);
 
-			$status = intval(wp_remote_retrieve_response_code($result));
+			$status = intval(wp_remote_retrieve_response_code($responce));
 			$data['RiskAssessmentData'][self::PROVIDER] = ['status'=>$status];
 			// only use on status 429, otherwise informational only
 			$this->rate_limit = [
-				'limit' 	=> intval(wp_remote_retrieve_header($result,'X-RateLimit-Limit')),
-				'retry' 	=> intval(wp_remote_retrieve_header($result,'X-RateLimit-Reset')),
+				'limit' 	=> intval(wp_remote_retrieve_header($responce,'X-RateLimit-Limit')),
+				'retry' 	=> intval(wp_remote_retrieve_header($responce,'X-RateLimit-Reset')),
 			];
 
 			if ($status != 200)
 			{
-				if ($status == 429) {	// rate limit exceeded (day or month)
-					if ($rateLimit = wp_remote_retrieve_header($result,'Retry-After')) {
-						$this->rate_limit['retry'] = $rateLimit;
-					}
-				}
-			//	$this->logDebug(wp_remote_retrieve_headers($result),self::PROVIDER.' API Error Response');
-				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
-					$this->logError($result['errors'][0]['detail'],self::PROVIDER.' API Error');
-				}
+				$this->assessment_result_error($status,$responce);
 			}
 			else
 			{
-				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
+				if ($result = json_decode( wp_remote_retrieve_body($responce), true )) {
 					$result = $result['data'];
 					unset($result['reports']);
 					$score = intval($result['abuseConfidenceScore']);
-					$data = array_replace($data,[
+					$type = match(true) {
+						$score <= 20 => 'risk',
+						$score <= 50 => 'abuse',
+						$score <= 80 => 'threat',
+						default => 'fraud',
+					};
+					$data = array_replace($data,array_filter([
 						'CountryCode'		=> $result['countryCode'],
 						'CountryName'		=> $result['countryName'] ?? $data['CountryName'],
-					]);
-					$data['RiskAssessmentScores'][self::PROVIDER]	= [ 'abuse' => $score ];
+					]));
+					$data['RiskAssessmentScores'][self::PROVIDER]	= [ $type => $score ];
 					$data['RiskAssessmentData']  [self::PROVIDER]	+= $result;
 				}
 			}
@@ -241,11 +239,11 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 			];
 			$this->logDebug($report,__FUNCTION__);
 			// abuse report file
-			if ($this->security->isPolicyEnabled('abuse_ipdb_reporting','csv')) {
+			if ($this->is_option('abuse_ipdb_reporting','csv')) {
 				$this->report_to_provider_file($report);
 			}
 			// abuse repoort api
-			if ($this->security->isPolicyEnabled('abuse_ipdb_reporting','api')) {
+			if ($this->is_option('abuse_ipdb_reporting','api')) {
 				$this->report_to_provider_api($report);
 			}
 		}

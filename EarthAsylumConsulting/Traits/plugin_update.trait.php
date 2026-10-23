@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0928.1
+ * @version		26.1016.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		abstract_backend.class.php
@@ -498,6 +498,8 @@ trait plugin_update
 				'new_version'		=> 'version',
 				'download_link' 	=> 'package',
 				'package'			=> 'download_link',
+				'support_url' 		=> 'support_link',
+				'support_url' 		=> 'support_uri',
 				'requires'			=> 'tested',
 				'tested'			=> 'requires',
 				'homepage' 			=> 'url',

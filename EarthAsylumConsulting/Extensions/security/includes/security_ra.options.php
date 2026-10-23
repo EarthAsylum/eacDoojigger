@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	26.0912.1
+ * @version 	26.1010.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -103,21 +103,6 @@ $this->registerExtensionOptions( $this->className,
 								"<em>Convergent</em>: Check each RA until and unless the <em>risk assessment score</em> reaches or exceeds the risk assessment limit.<br>".
 								"<em>Average</em>: Sum the resulting scores of each RA and calculate the average of the scores.",
 		),
-		'risk_assessment_rate_limit'	=> 	array(
-				'type'		=>	'number',
-				'label'		=>	'Request Rate Limit',
-				'default'	=>  0,
-				'info'		=>	'Limit the number of requests from the same source over a 10 minute period, '.
-								'blocking access if exceeded for up to '.self::RA_TTL/HOUR_IN_SECONDS.' hours.',
-				'help'		=>  '[info] This should be a number exceeding what would be considered normal for a human, '.
-								'but take into consideration legitimate scanning bots that may scan your entire site.',
-				'after'		=>	'Average <code>'.
-								'<output name="risk_assessment_rate_limit_show" for="risk_assessment_rate_limit">'.$rateLimit.'</output>'.
-								'</code> pages per second.',
-				'attributes'=>	['min="0"', 'max="99999"','step="10"',
-								'oninput'=>"risk_assessment_rate_limit_show.value = (this.value/".self::RL_SPAN.").toFixed(2)"],
-				'network'	=>	'minimum',
-		),
 		'risk_assessment_api' 	=> array(
 				'type'		=>	'switch',
 				'label'		=>	'Register Risk API',
@@ -144,10 +129,25 @@ $this->registerExtensionOptions( $this->className,
 								},
 				'advanced'	=> 	true,
 		),
+		'risk_assessment_rate_limit'	=> 	array(
+				'type'		=>	'number',
+				'label'		=>	'Request Rate Limit',
+				'default'	=>  0,
+				'info'		=>	'Limit the number of requests from the same IP source over a 10 minute period, '.
+								'blocking access if exceeded for up to '.self::RA_TTL/HOUR_IN_SECONDS.' hours.',
+				'help'		=>  '[info] This should be a number exceeding what would be considered normal for a human, '.
+								'but take into consideration legitimate scanning bots that may scan your entire site.',
+				'after'		=>	'Average <code>'.
+								'<output name="risk_assessment_rate_limit_show" for="risk_assessment_rate_limit">'.$rateLimit.'</output>'.
+								'</code> pages per second.',
+				'attributes'=>	['min="0"', 'max="99999"','step="10"',
+								'oninput'=>"risk_assessment_rate_limit_show.value = (this.value/".self::RL_SPAN.").toFixed(2)"],
+				'network'	=>	'minimum',
+		),
 		'risk_assessment_banned' 	=> array(
 				'type'		=>	'textarea',
 				'label'		=>	"Banned IP Addresses",
-				'info'		=>	"Treat additional IP addresses as high-risk (banned). Enter 1 IPv4 or IPv6 address or subnet per line.",
+				'info'		=>	"Treat additional IP addresses as high-risk (banned). Enter 1 IPv4 or IPv6 address or subnet (CIDR) per line.",
 				'advanced'	=> 	true,
 				'network'	=>	'merge',
 		),

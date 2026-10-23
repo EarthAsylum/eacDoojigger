@@ -1,5 +1,21 @@
 ### Changelog
 
+= Version 3.3.2 – October 23, 2026 =
+
++	3 new Risk Assessment providers.
+	+	iPASIS - https://www.ipasis.com/
+	+ 	IPQualityScore - https://ipqualityscore.com/?r=11946441
+	+	Scamalytics - https://www.scamalytics.com/
++	Added `Priority` to each RA provider to control execution order.
++	Improved support for FraudGuard API v2.
++	Added action `risk_assessment_blocked` to act when a request is denied due to risk assessment.
+	+	Used by [cloudflare Doololly](https://eacdoojigger.earthasylum.com/eaccloudflare/)
++	Added action `risk_assessment_unblocked` to act when an ip address is cleared in risk assessment.
+	+	Used by [cloudflare Doololly](https://eacdoojigger.earthasylum.com/eaccloudflare/)
++ 	Accept variations of `Support link` (uri, url) and pass `support_url` in plugin update.
++	Fix `button` input to not submit unless it is the button that triggers the submit.
++	Fix input type & attributes for disabled, read-only, encrypted input field.
+
 #### Version 3.3.1 – October 5, 2026
 
 +	Fix rate limit initialization bug.

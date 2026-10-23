@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.0904.1';
+		const VERSION 			= '26.1013.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -93,14 +93,14 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 			if ( ! parent::initialize() ) return; // disabled
 
 			// get the api key to set our account id
-			if (! ($key = $this->security->isPolicyEnabled('ipgeolocation_key')) )
+			if (! ($key = $this->get_option('ipgeolocation_key')) )
 			{
 				return $this->isEnabled(false);
 			}
 			$this->account_id = $key;
 
 			// set the account plan and rate limit
-			if ($account = $this->security->isPolicyEnabled('ipgeolocation_plan'))
+			if ($account = $this->get_option('ipgeolocation_plan'))
 			{
 				// old plans to standard
 				if (!isset(self::ACCOUNT_LIMITS[$account])) {
@@ -126,16 +126,16 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 		 */
 		public function get_assessment_result(array $data): array
 		{
-			$ipAddress = $data['ipAddress'];
+			$ipAddress = urlencode( $data['ipAddress'] );
 
 			$api_url = add_query_arg([
 					'apiKey'	=> $this->account_id,
 					'ip'		=> $ipAddress,
-					'include'	=> ($this->security->isPolicyEnabled('ipgeolocation_plan') != 'developer')
+					'include'	=> ($this->get_option('ipgeolocation_plan') != 'developer')
 						? 'security' : '',
 				],'https://api.ipgeolocation.io/v3/ipgeo');
 
-			$result = wp_remote_get($api_url,
+			$responce = wp_remote_get($api_url,
 				[
 					'headers' 	=> [
 						'Accept' 		=> 'application/json',
@@ -143,28 +143,26 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 				]
 			);
 
-			$status = intval(wp_remote_retrieve_response_code($result));
+			$status = intval(wp_remote_retrieve_response_code($responce));
 			$data['RiskAssessmentData'][self::PROVIDER] = ['status'=>$status];
 
 			if ($status != 200)
 			{
-				if ($status == 429) {	// rate limit exceeded (day or month)
-					if ($rateLimit = wp_remote_retrieve_header($result,'Retry-After')) {
-						$this->rate_limit['retry'] = $rateLimit;
-					}
-				}
-			//	$this->logDebug(wp_remote_retrieve_headers($result),self::PROVIDER.' API Error Response');
-				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
-					$this->logError($result['message'],self::PROVIDER.' API Error');
-				}
+				$this->assessment_result_error($status,$responce);
 			}
 			else
 			{
-				if ($result = json_decode( wp_remote_retrieve_body($result), true )) {
+				if ($result = json_decode( wp_remote_retrieve_body($responce), true )) {
 					$score = (isset($result['security']))
 						? intval($result['security']['threat_score'])
 						: 0;
-					$data = array_replace($data,[
+					$type = match(true) {
+						$score <= 20 => 'risk',
+						$score <= 50 => 'abuse',
+						$score <= 80 => 'threat',
+						default => 'fraud',
+					};
+					$data = array_replace($data,array_filter([
 						'CountryCode'		=> $result['location']['country_code2'],
 						'CountryName'		=> $result['location']['country_name'],
 						'PostalCode'		=> $result['location']['zipcode'],
@@ -172,10 +170,12 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipgeolocation', false) )
 												? substr($result['location']['state_code'],-2)
 												: $result['location']['state_prov'],
 						'City'				=> $result['location']['city'],
+						'Latitude'			=> $result['location']['latitude'],
+						'Longitude'			=> $result['location']['longitude'],
 						'TimeZone'			=> $result['time_zone']['name'] ?? $data['TimeZone'],
 						'Currency'			=> $result['currency']['code'] ?? $data['Currency'],
-					]);
-					$data['RiskAssessmentScores'][self::PROVIDER]	= [ 'threat' => $score ];
+					]));
+					$data['RiskAssessmentScores'][self::PROVIDER]	= [ $type => $score ];
 					$data['RiskAssessmentData']  [self::PROVIDER]	+= $result;
 				}
 			}

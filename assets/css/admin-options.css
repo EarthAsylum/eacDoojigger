@@ -1,6 +1,6 @@
 /**
  * {eac}Doojigger for WordPress - Administrator options screen stylesheet
- * @version 26.0905.1
+ * @version 26.1015.1
  */
 
 /*
@@ -226,7 +226,7 @@ details.settings-grid-head summary > * {display: inline;}
 .settings-grid-container .input-switch-wrap {
 	position: relative;
 	display: flex;
-	margin: 1px 0 .25em 0;
+	margin: 1px 0 .35em 0;
 	height: 20px;
 	font-weight: normal;
 	color: black;
