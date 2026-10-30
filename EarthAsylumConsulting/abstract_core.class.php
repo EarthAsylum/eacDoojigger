@@ -1243,20 +1243,12 @@ abstract class abstract_core
 		while (ob_get_level()) {ob_end_clean();}
 		if (! headers_sent())
 		{
-			if (http_response_code() == 200) {
-				http_response_code( $status );
-			}
-			$send_headers = function() use($status)
+			$this->add_action('http_headers_ready', function() use ($status)
 			{
-				header_remove('Set-Cookie');
-				header_remove('Link');
+				header_remove();
+				http_response_code( $status );
 				nocache_headers();
-			};
-			if (did_action('send_headers')) {
-				$send_headers();
-			} else {
-				add_action('send_headers', fn()=>$send_headers()); // WP hiccups on variable function (Undefined array key)
-			}
+			},PHP_INT_MAX);
 		}
 		return new \WP_Error(__FUNCTION__, $message, ['status' => $status, 'log' => $logMsg]);
 	}

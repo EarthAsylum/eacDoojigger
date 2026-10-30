@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.1026.1
+ * @version		26.1030.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -179,15 +179,18 @@ abstract class abstract_backend extends abstract_core
 	 */
 	public function initialize(): void
 	{
-		/**
-		 * action {classname}_http_headers_ready triggered on PHP header_register_callback()
-		 * add_action( '{className}_admin_http_headers_ready', function(){...} );
-		 */
-		header_register_callback( function()
-			{
-				$this->do_action('admin_http_headers_ready');
-			}
-		);
+		add_action('send_headers', function()
+		{
+			/**
+			 * action {classname}_admin_http_headers_ready triggered on PHP header_register_callback()
+			 * add_action( '{className}_admin_http_headers_ready', function(){...} );
+			 */
+			header_register_callback( function()
+				{
+					$this->do_action('admin_http_headers_ready');
+				}
+			);
+		});
 
 		parent::initialize();
 	}

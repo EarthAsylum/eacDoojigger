@@ -8,7 +8,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0729.1
+ * @version		26.1030.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -71,16 +71,18 @@ abstract class abstract_frontend extends abstract_core
 	 */
 	public function initialize(): void
 	{
-		/**
-		 * action {classname}_http_headers_ready triggered on PHP header_register_callback()
-		 * add_action( '{className}_http_headers_ready', function(){...} );
-		 */
-		header_register_callback( function()
-			{
-				$this->do_action('http_headers_ready');
-			}
-		);
-
+		add_action('send_headers', function()
+		{
+			/**
+			 * action {classname}_http_headers_ready triggered on PHP header_register_callback()
+			 * add_action( '{className}_http_headers_ready', function(){...} );
+			 */
+			header_register_callback( function()
+				{
+					$this->do_action('http_headers_ready');
+				}
+			);
+		});
 		parent::initialize();
 	}
 

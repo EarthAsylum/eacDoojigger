@@ -8,7 +8,8 @@
 +	Wrap `get_config_path()` code in try...catch block to catch wp_filesystem error.
 +	Fixed use of variations of `Support link` (one overwriting another).
 +	Fix debug logging shutting off (temporarily disable on file access error).
-+	Check http_response_code() before setting in access_denied().
++	Use `http_headers_ready` action to clear/set headers in `access_denied()`.
++	Delay setting `header_register_callback` (http_headers_ready) using WP `send_headers`.
 
 #### Version 3.3.2 – October 23, 2026
 
