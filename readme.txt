@@ -461,6 +461,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 +	Wrap `get_config_path()` code in try...catch block to catch wp_filesystem error.
 +	Fix use of variations of `Support link` (one overwriting another).
 +	Fix debug logging shutting off (temporarily disable on file access error).
++	Check http_response_code() before setting in access_denied().
 
 = Version 3.3.2 – October 23, 2026 =
 

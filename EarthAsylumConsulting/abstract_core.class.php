@@ -1243,7 +1243,9 @@ abstract class abstract_core
 		while (ob_get_level()) {ob_end_clean();}
 		if (! headers_sent())
 		{
-			http_response_code( $status );
+			if (http_response_code() == 200) {
+				http_response_code( $status );
+			}
 			$send_headers = function() use($status)
 			{
 				header_remove('Set-Cookie');
