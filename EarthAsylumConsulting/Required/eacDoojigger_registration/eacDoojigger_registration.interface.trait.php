@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}SoftwareRegistry
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0729.1
+ * @version		26.1025.1
  */
 
 trait eacDoojigger_registration_interface
@@ -73,7 +73,7 @@ trait eacDoojigger_registration_interface
 	 *
 	 * @return object|bool scheduled event or false
 	 */
-	abstract function nextRegistryRefreshEvent(string $registrationKey=null);
+	abstract function nextRegistryRefreshEvent(?string $registrationKey = null);
 
 
 	/**
@@ -81,7 +81,7 @@ trait eacDoojigger_registration_interface
 	 *
 	 * @return bool
 	 */
-	abstract function checkRegistryRefreshEvent(string $registrationKey=null);
+	abstract function checkRegistryRefreshEvent(?string $registrationKey = null);
 
 
 	/**
@@ -101,7 +101,7 @@ trait eacDoojigger_registration_interface
 	 * @param string registration key
 	 * @return bool
 	 */
-	public function isValidRegistration(string $registrationKey=null)
+	public function isValidRegistration(?string $registrationKey = null)
 	{
 		static $isValid = null;
 
@@ -182,7 +182,7 @@ trait eacDoojigger_registration_interface
 	 * @param string registration key
 	 * @return object|null
 	 */
-	public function getCurrentRegistration(string $registrationKey=null)
+	public function getCurrentRegistration(?string $registrationKey = null)
 	{
 		static $registryKey = null;
 		static $currentRegistry = null;
@@ -206,7 +206,7 @@ trait eacDoojigger_registration_interface
 	 * @param string registration key
 	 * @return string
 	 */
-	public function refreshRegistration(string $registrationKey=null, array $registrationValues=[])
+	public function refreshRegistration(?string $registrationKey = null, array $registrationValues=[])
 	{
 		$registrationKey = $this->getRegistrationKey($registrationKey);
 
@@ -256,7 +256,7 @@ trait eacDoojigger_registration_interface
 	 * @param string registration key
 	 * @return string
 	 */
-	abstract public function getRegistrationKey(string $registrationKey=null);
+	abstract public function getRegistrationKey(?string $registrationKey = null);
 
 
 	/**
@@ -316,7 +316,7 @@ trait eacDoojigger_registration_interface
 
 		$request = [
 			'method' 		=> $method,
-			'timeout' 		=> 6,
+			'timeout' 		=> 12,
 			'redirection' 	=> 5,
 			'sslverify' 	=> false,
 		];

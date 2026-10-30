@@ -11,7 +11,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 	 * @category	WordPress Plugin
 	 * @package		{eac}Doojigger\Extensions
 	 * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
-	 * @copyright	Copyright (c) 2025 EarthAsylum Consulting <www.EarthAsylum.com>
+	 * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
 	 * @link		https://eacDoojigger.earthasylum.com/
 	 * @see			https://eacDoojigger.earthasylum.com/phpdoc/
 	 */
@@ -21,7 +21,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION	= '26.0904.1';
+		const VERSION	= '26.1028.1';
 
 		/**
 		 * @var string extension tab name
@@ -138,6 +138,14 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function admin_options_settings()
 		{
+			if ($this->plugin->isSettingsPage('Debugging'))
+			{
+				if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+					$this->delete_option('debug_to_file_allowed'); // no longer used
+					$this->delete_transient('debug_to_file_disabled');
+				}
+			}
+
 			include 'includes/debugging.options.php';
 		}
 
@@ -214,13 +222,6 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
-			if ($this->plugin->isSettingsPage('Debugging'))
-			{
-				if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-					$this->update_option('debug_to_file_allowed','yes');
-				}
-			}
-
 			// subscribe to Logger action - file output
 			if ( ($this->is_option('debug_to_file','plugin') && $this->setLoggingPathname(true)) || $this->is_option('debug_to_file','server') )
 			{
@@ -548,7 +549,7 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		public function purge_logs($asNetAdmin=false)
 		{
-			if (!$this->setLoggingPathname(false,$asNetAdmin) || !is_dir($this->logPath)) {
+			if (!$this->setLoggingPathname(true,$asNetAdmin) || !is_dir($this->logPath)) {
 			//	trigger_error('Unable to purge logs, path not found',E_USER_WARNING);
 				return;
 			}
@@ -1450,7 +1451,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 		 */
 		private function setLoggingPathname($create=false,$asNetAdmin=false)
 		{
-			if (! $this->is_option('debug_to_file_allowed')) return false;
+		//	if (! $this->is_option('debug_to_file_allowed')) return false;
+			if ($this->get_transient('debug_to_file_disabled')) return false;
 
 			$logPath 		= $this->pluginName;
 			if (is_multisite())
@@ -1469,7 +1471,8 @@ if (! class_exists(__NAMESPACE__.'\debugging_extension', false) )
 				$this->plugin->add_admin_notice($this->pluginName.' Debugging: Unable to access log path','error',
 					$logPath->get_error_message().'<br>File logging has been disabled');
 				trigger_error($this->pluginName.': unable to access log path '.$logPath->get_error_message(),E_USER_WARNING);
-				$this->update_option('debug_to_file_allowed','no');
+			//	$this->update_option('debug_to_file_allowed','no');
+				$this->set_transient('debug_to_file_disabled',1,HOUR_IN_SECONDS*8);
 				return false;
 			}
 

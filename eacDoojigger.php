@@ -6,7 +6,7 @@
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		3.3.2
+ * @version		3.3.3
  *
  * @link		https://eacDoojigger.earthasylum.com/
  * @link 		https://github.com/EarthAsylum/eacDoojigger/
@@ -23,10 +23,10 @@
  * Plugin URI:			https://eacDoojigger.earthasylum.com/
  * Update URI: 			https://eacdoojigger.earthasylum.com/software-updates/eacdoojigger.json
  * Description:			{eac}Doojigger for WordPress - A powerful, extensible WordPress framework: a ready-to-use utility plugin combined with an architecture for building your own plugins, so you can ship professional-grade results in a fraction of the usual development time.
- * Version:				3.3.2
+ * Version:				3.3.3
  * Requires at least:	5.8
  * Tested up to: 		7.1
- * Requires PHP:		8.1
+ * Requires PHP:		8.2
  * Author:				EarthAsylum Consulting
  * Author URI:			http://www.earthasylum.com
  * License: 			EarthAsylum Consulting Proprietary License - {eac}PLv1
@@ -39,7 +39,7 @@
 namespace EarthAsylumConsulting
 {
 	/* prefered (as of 2.6.0) */
-	if (!defined('EACDOOJIGGER_VERSION')) define('EACDOOJIGGER_VERSION','3.3.2');
+	if (!defined('EACDOOJIGGER_VERSION')) define('EACDOOJIGGER_VERSION','3.3.3');
 
 	/* deprecated (may be referenced in derivatives and extensions) */
 	if (!defined('EAC_DOOJIGGER_VERSION')) define('EAC_DOOJIGGER_VERSION',\EACDOOJIGGER_VERSION);
@@ -73,7 +73,7 @@ namespace EarthAsylumConsulting
 				'NameSpace'			=> __NAMESPACE__,
 				'PluginClass'		=> __NAMESPACE__.'\\Plugin\\eacDoojigger',
 				'RequiresWP'		=> '5.8',			// WordPress
-				'RequiresPHP'		=> '8.1',			// PHP
+				'RequiresPHP'		=> '8.2',			// PHP
 				'NetworkActivate'	=>	true,			// require (or forbid) network activation
 				'AutoUpdate'		=> 'self',			// automatic update 'self' or 'wp'
 			];

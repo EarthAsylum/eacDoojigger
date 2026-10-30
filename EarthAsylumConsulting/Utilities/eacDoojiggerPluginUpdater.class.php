@@ -7,8 +7,8 @@ namespace EarthAsylumConsulting;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Utilities
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright 2025 EarthAsylum Consulting <www.EarthAsylum.com>
- * Version: 	1.0.1
+ * @copyright	Copyright 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * Version: 	26.1029.1
  */
 
 /*
@@ -89,7 +89,7 @@ class eacDoojiggerPluginUpdater
 					'transient_name'		=> true,					// use transient
 					'transient_time'		=> HOUR_IN_SECONDS,			// transient time
 					'disableAutoUpdates' 	=> false,					// disable auto updating
-					'requestTimeout'		=> 6,						// timeout
+					'requestTimeout'		=> 10,						// timeout
 					'requestHeaders'		=> [],						// optional headers in request
 					'requestSslVerify'		=> true,					// verify valid ssl cert
 			]
@@ -157,8 +157,10 @@ class eacDoojiggerPluginUpdater
 					use \EarthAsylumConsulting\Traits\plugin_update;
 					public function __construct($pluginFile,$className,$plugin_info)
 					{
-						$pluginUri = get_file_data( $pluginFile, ['UpdateURI'=>'Update URI'], 'plugin' );
-						$plugin_info['plugin_uri'] =  $pluginUri['UpdateURI'];
+						if (empty($plugin_info['plugin_uri'])) {
+							$pluginUri = get_file_data( $pluginFile, ['UpdateURI'=>'Update URI'], 'plugin' );
+							$plugin_info['plugin_uri'] =  $pluginUri['UpdateURI'];
+						}
 						$this->addPluginUpdateHooks($plugin_info,$className);
 					}
 				};

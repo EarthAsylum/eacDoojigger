@@ -9,8 +9,8 @@ namespace EarthAsylumConsulting\Traits;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2024 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		24.0510.1
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @version		26.1025.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/contextual-help/
  * @used-by		abstract_backend.class.php
@@ -353,7 +353,7 @@ trait plugin_help
 	 * @param string $tooltip a title tooltip (optional)
 	 * @return void
 	 */
-	public function addPluginSidebarLink(string $title, string $link, string $tooltip=null): void
+	public function addPluginSidebarLink(string $title, string $link, ?string $tooltip=null): void
 	{
 		if ($tooltip)
 		{

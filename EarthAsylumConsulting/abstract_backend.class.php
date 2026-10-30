@@ -10,7 +10,7 @@ use EarthAsylumConsulting\Helpers\wp_config_editor;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.1022.1
+ * @version		26.1026.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_context
@@ -650,31 +650,37 @@ abstract class abstract_backend extends abstract_core
 		// see if we can get to the config file (only single site or network admin)
 		if ($this->is_admin() && (!is_multisite() || $this->is_network_admin()))
 		{
-			if (!$fileId) $fileId = pathinfo($filepath, PATHINFO_FILENAME);
-			/**
-			 * filter {classname}_{$fileId}_path
-			 * set the pathname to the {filePath} file
-			 * @param	string	default pathname
-			 * @return	string	pathname
-			 */
-			if ($filePath = $this->apply_filters("{$fileId}_path}",$filePath))
-			{
-				if ($useWPfs && ($fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem)))
+			try {
+				if (!$fileId) $fileId = pathinfo($filepath, PATHINFO_FILENAME);
+				/**
+				 * filter {classname}_{$fileId}_path
+				 * set the pathname to the {filePath} file
+				 * @param	string	default pathname
+				 * @return	string	pathname
+				 */
+				if ($filePath = $this->apply_filters("{$fileId}_path}",$filePath))
 				{
-					$fsFilePath = $filePath;
-					if (! $fs->exists($filePath)) {
-						if (($fsFilePath = $fs->find_folder(dirname($filePath))) && $fs->is_writable($fsFilePath)) {
-							$fsFilePath .= basename($filePath);
-							$fs->put_contents($fsFilePath,'',FS_CHMOD_FILE & ~0007); // no world access
+					if ($useWPfs && ($fs = apply_filters('eacDoojigger_load_filesystem',$wp_filesystem)))
+					{
+						$fsFilePath = $filePath;
+						if (! $fs->exists($filePath)) {
+							if (($fsFilePath = $fs->find_folder(dirname($filePath))) && $fs->is_writable($fsFilePath)) {
+								$fsFilePath .= basename($filePath);
+								$fs->put_contents($fsFilePath,'',FS_CHMOD_FILE & ~0007); // no world access
+							}
 						}
+						return ($fs->is_writable($fsFilePath)) ? $fsFilePath : false;
 					}
-					return ($fs->is_writable($fsFilePath)) ? $fsFilePath : false;
-				}
 
-				if ( ! file_exists( $filePath ) ) {
-					touch($filePath);
+					if ( ! file_exists( $filePath ) ) {
+						touch($filePath);
+					}
+					return (is_writable($filePath)) ? $filePath : false;
 				}
-				return (is_writable($filePath)) ? $filePath : false;
+			} catch (\Throwable $e) {
+				$this->add_admin_notice($e->getMessage(),'error');
+				error_log($e->getCode().': '.$e->getMessage().' in '.$e->getFile().' ('.$e->getLine().')');
+				return false;
 			}
 		}
 		return false;

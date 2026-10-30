@@ -1,11 +1,11 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.3.2
-Last Updated:           23-Oct-2026
+Stable tag:             3.3.3
+Last Updated:           30-Oct-2026
 Requires at least:      5.8
 Tested up to:           7.1
-Requires PHP:           8.1
+Requires PHP:           8.2
 Contributors:       	EarthAsylum@github,KevinBurkholder@wordpress
 Donate link:            https://github.com/sponsors/EarthAsylum
 Support link:           https://github.com/EarthAsylum/eacDoojigger/issues
@@ -431,6 +431,9 @@ Thank you!
 
 As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1+
 
+= 3.3.3 =
+
+{eac}Doojigger requires PHP 8.2+
 
 == Copyright ==
 
@@ -449,6 +452,15 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.3.3 – October 30, 2026 =
+
++	Requires PHP 8.2.
++	Fixed `Implicitly marking parameter as nullable` (?string).
+	+	wpmu_installer, plugin_help, abstract_core, registration
++	Wrap `get_config_path()` code in try...catch block to catch wp_filesystem error.
++	Fix use of variations of `Support link` (one overwriting another).
++	Fix debug logging shutting off (temporarily disable on file access error).
 
 = Version 3.3.2 – October 23, 2026 =
 

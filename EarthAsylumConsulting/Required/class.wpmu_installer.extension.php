@@ -41,7 +41,7 @@ namespace EarthAsylumConsulting\Extensions;
  * @category	WordPress Plugin
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
- * @copyright	Copyright (c) 2023 EarthAsylum Consulting <www.EarthAsylum.com>
+ * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
  * @version		1.x
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
@@ -52,7 +52,7 @@ class wpmu_installer extends \EarthAsylumConsulting\abstract_extension
 	/**
 	 * @var string extension version
 	 */
-	const VERSION				= '24.0419.1';
+	const VERSION				= '26.1025.1';
 
 	/**
 	 * @var string extension alias
@@ -608,7 +608,7 @@ class wpmu_installer extends \EarthAsylumConsulting\abstract_extension
 	 * @param bool|null $lock lock/unlock
 	 * @return	bool
 	 */
-	private function wpmu_lock(string $installMethod,bool $lock=null): bool
+	private function wpmu_lock(string $installMethod, ?bool $lock=null): bool
 	{
 		if (is_null($lock))
 		{

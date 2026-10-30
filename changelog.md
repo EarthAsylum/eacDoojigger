@@ -1,6 +1,15 @@
 ### Changelog
 
-= Version 3.3.2 – October 23, 2026 =
+#### Version 3.3.3 – October 30, 2026
+
++	Requires PHP 8.2.
++   Fixed `Implicitly marking parameter as nullable` (?string).
+	+	wpmu_installer, plugin_help, abstract_core, registration
++	Wrap `get_config_path()` code in try...catch block to catch wp_filesystem error.
++	Fixed use of variations of `Support link` (one overwriting another).
++	Fix debug logging shutting off (temporarily disable on file access error).
+
+#### Version 3.3.2 – October 23, 2026
 
 +	3 new Risk Assessment providers.
 	+	iPASIS - https://www.ipasis.com/

@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.1016.1
+ * @version		26.1029.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -486,8 +486,8 @@ abstract class abstract_core
 					'LastUpdated'		=> 'Last Updated',			// From readme.txt
 					'DonateLink'		=> 'Donate link',			// From readme.txt
 					'SupportLink'		=> 'Support link',			// From readme.txt
-					'SupportLink'		=> 'Support URL',			// From readme.txt
-					'SupportLink'		=> 'Support URI',			// From readme.txt
+					'SupportURL'		=> 'Support URL',			// From readme.txt
+					'SupportURI'		=> 'Support URI',			// From readme.txt
 				);
 
 				$readme = plugin_dir_path($header['PluginFile']);
@@ -502,6 +502,8 @@ abstract class abstract_core
 					array_filter(get_file_data($header['PluginFile'], $default_headers, 'plugin') )
 				);
 
+				$supportLink = $pluginData['SupportLink'] ?: $pluginData['SupportURL'] ?: $pluginData['SupportURI'] ?: '';
+				$pluginData['SupportLink'] 		= $supportLink;
 				$pluginData['PluginDir'] 		= untrailingslashit(plugin_dir_path( $header['PluginFile'] ));	// Plugin directory
 				$pluginData['PluginSlug']		= plugin_basename( $pluginData['PluginFile'] );					// Plugin slug
 				$pluginData['PluginDirUrl']		= plugin_dir_url( $pluginData['PluginFile'] );					// URL to plugin directory
@@ -1241,12 +1243,12 @@ abstract class abstract_core
 		while (ob_get_level()) {ob_end_clean();}
 		if (! headers_sent())
 		{
+			http_response_code( $status );
 			$send_headers = function() use($status)
 			{
 				header_remove('Set-Cookie');
 				header_remove('Link');
 				nocache_headers();
-				http_response_code( $status );
 			};
 			if (did_action('send_headers')) {
 				$send_headers();
@@ -1481,6 +1483,27 @@ abstract class abstract_core
 	{
 		\_deprecated_function( __FUNCTION__, '2.6.1', 'doing_ajax()');
 		return $this->doing_ajax();
+	}
+
+
+	/**
+	 * reverse parse_url
+	 *
+	 * @return	bool
+	 */
+	public function unparse_url( array $parsed_url )
+	{
+		$scheme   = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] . '://' : '';
+		$host     = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
+		$port     = isset( $parsed_url['port'] ) ? ':' . $parsed_url['port'] : '';
+		$user     = isset( $parsed_url['user'] ) ? $parsed_url['user'] : '';
+		$pass     = isset( $parsed_url['pass'] ) ? ':' . $parsed_url['pass']  : '';
+		$pass     = ( $user || $pass ) ? "$pass@" : '';
+		$path     = isset( $parsed_url['path'] ) ? $parsed_url['path'] : '';
+		$query    = isset( $parsed_url['query'] ) ? '?' . $parsed_url['query'] : '';
+		$fragment = isset( $parsed_url['fragment'] ) ? '#' . $parsed_url['fragment'] : '';
+
+		return "{$scheme}{$user}{$pass}{$host}{$port}{$path}{$query}{$fragment}";
 	}
 
 
@@ -1834,7 +1857,7 @@ abstract class abstract_core
 	 * get WordPress support link for this plugin
 	 *
 	 * @param mixed $plugin true=use this plugin title, array=get_plugin_data array, string = title
-	 * @param string $slug WP plugin slug
+	 * @param string $slug WP plugin slug  (dirname/slug)
 	 * @param string $name link name ('Support')
 	 * @param string $title title ('%1$s Support')
 	 * @return	string	the Support link
@@ -1849,7 +1872,7 @@ abstract class abstract_core
 		else if (is_array($plugin))						// get_plugin_data() array
 		{
 			if (isset($plugin['Name'])) $pluginId = $plugin['Name'];
-			if (empty($slug) && isset($plugin['slug'])) $slug = $plugin['slug'];
+			if (empty($slug) && isset($plugin['plugin'])) $slug = $plugin['plugin'];
 		}
 		else if (is_scalar($plugin))					// named plugin
 		{
@@ -1876,36 +1899,42 @@ abstract class abstract_core
 	 * get WordPress support URL for this plugin
 	 *
 	 * @param mixed $plugin true=use this plugin title, array=get_plugin_data array, string = title
-	 * @param string $slug uri plugin slug
+	 * @param string $slug uri plugin slug (dirname/slug)
 	 * @return	string	the Support URL
 	 */
 	public function getSupportURL($plugin=true,$slug=null): string
 	{
 		$url = '';
 
-		if (is_array($plugin))							// get_plugin_data() array
+		if (is_array($plugin))										// get_plugin_data() array
 		{
-			if ( empty($slug) &&  isset($plugin['slug'])) $slug = $plugin['slug'];
-			if (!empty($slug) && !isset($plugin['slug'])) $plugin['slug'] = $slug;
+			// if no recent update check, get_plugin_data() is limited to plugin.php header
+			if (!isset($plugin['plugin']) && ($action = current_action())) {
+				if (str_starts_with($action,'plugin_action_links_')) {
+					$plugin['plugin'] = substr($action,20);
+					$plugin['slug'] = dirname($plugin['plugin']);
+				}
+			}
+			$slug = $plugin['slug'];
 		}
 
-		if ($plugin === true || $slug == $this->PLUGIN_SLUG)	// this plugin
+		if ($plugin === true || $slug == $this->PLUGIN_SLUG)		// this plugin
 		{
 			$url = $this->pluginHeader('SupportLink');
+			$slug = dirname($slug);
 		}
-		else if (is_array($plugin))						// get_plugin_data() array
+		else if (is_array($plugin) && isset($plugin['plugin']))		// get_plugin_data() array
 		{
-			if (!isset($plugin['plugin']) && isset($plugin['slug'])) $plugin['plugin'] = $plugin['slug'];
 			$readme = WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . dirname($plugin['plugin']) . DIRECTORY_SEPARATOR;
 			list($readme) = glob($readme.'[rR][eE][aA][dD][mM][eE].{txt,TXT,md,MD}', GLOB_BRACE|GLOB_NOSORT);
 			if (empty($readme)) return '';
-			$url = get_file_data( $readme, ['SupportLink' => 'Support link', 'SupportLink' => 'Support URL', 'SupportLink' =>'Support URI'], 'readme');
-			$url = $url['SupportLink'] ?? '';
+			$url = get_file_data( $readme, ['Link' => 'Support link', 'URL' => 'Support URL', 'URI' =>'Support URI'], 'readme');
+			$url = $url['Link'] ?: $url['URL'] ?: $url['URI'] ?: '';
 		}
 
-		if (empty($url))								// default to wp plugin support
+		if (empty($url))											// default to wp plugin support
 		{
-			if (empty($slug)) $slug = $this->PLUGIN_SLUG;
+			if (empty($slug)) $slug = dirname($this->PLUGIN_SLUG);
 			$url = "https://wordpress.org/support/plugin/{$slug}";
 		}
 		return esc_url( $url );
@@ -3082,7 +3111,7 @@ abstract class abstract_core
 	 * @param	string	$className	class/extension name
 	 * @return	object	class object or null
 	 */
-	public function getClassObject(string $className=null): ?object
+	public function getClassObject(?string $className=null): ?object
 	{
 		if (empty($className) || $className == $this->className)
 		{

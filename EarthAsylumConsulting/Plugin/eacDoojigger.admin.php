@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Plugin;
  * @package		{eac}Doojigger\Traits
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.0915.1
+ * @version		26.1029.1
  */
 
 trait eacDoojigger_admin_traits
@@ -90,6 +90,14 @@ trait eacDoojigger_admin_traits
 
 		},1);
 
+		// override the update_uri for earthasylum domains.
+	 	// this works, but may carry or miss url options (un)inteded for some plugins
+		// and removes the 'View Details" link from the plugins page.
+		//add_filter( 'plugin_update_by_host_eacdoojigger.earthasylum.com',
+		//											array( $this, 'alter_plugin_update' ), 10, 2 );
+		//add_filter( 'plugin_update_by_host_swregistry.earthasylum.com',
+		//											array( $this, 'alter_plugin_update' ), 10, 2 );
+
 		// Register plugin options
 		$this->add_action( 'options_settings_page', array( $this, 'admin_options_settings' ), 1 );
 		// Add contextual help
@@ -103,6 +111,24 @@ trait eacDoojigger_admin_traits
 				echo "<style>.row-actions {white-space: normal;}</style>\n";
 			}
 		}, 100 );
+	}
+
+
+	/**
+	 * alter the plugin update url to use once for all doojigger plugins.
+	 * this works, but may carry or miss url options (un)inteded for some plugins
+	 * and removes the 'View Details" link from the plugins page.
+	 *
+	 */
+	public function alter_plugin_update($params,$hostname)
+	{
+		$params['plugin_uri'] 		= preg_replace(
+				'|\/software-updates\/(.*)\.json|',
+				'/software-updates/plugin_info.json',
+				$params['plugin_uri']
+		);
+		$params['transient_name'] 	= 'update_plugin_earthasylum';
+		return $params;
 	}
 
 

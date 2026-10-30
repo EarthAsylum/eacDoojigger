@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Traits;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.1016.1
+ * @version		26.1029.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see 		https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		abstract_backend.class.php
@@ -183,7 +183,7 @@ trait plugin_update
 					'transient_name'		=> true,					// use transient
 					'transient_time'		=> HOUR_IN_SECONDS,			// transient time
 					'disableAutoUpdates' 	=> false,					// disable auto updating
-					'requestTimeout'		=> 6,						// timeout
+					'requestTimeout'		=> 10,						// timeout
 					'requestHeaders'		=> [],						// optional headers in request
 					'requestSslVerify'		=> true,					// verify valid ssl cert
 			],$plugin_info)
@@ -234,6 +234,12 @@ trait plugin_update
 		if ( version_compare( get_bloginfo('version' ), '5.8.0', '>=' ) )
 		{
 			$hostname = wp_parse_url( sanitize_url( $this->update_plugin_info['plugin_uri'] ), PHP_URL_HOST );
+			/**
+			 * filter {className}_plugin_update_{$hostname} - filter plugin update parameters
+			 * @param 	array parameters
+			 * @return 	array parameters
+			 */
+			$this->update_plugin_info = \apply_filters( "plugin_update_by_host_{$hostname}",$this->update_plugin_info,$hostname);
 			add_filter( "update_plugins_{$hostname}", 	array( $this, 'plugin_update_update_plugins_hostname'), 10, 4 );
 		}
 		else
@@ -309,8 +315,6 @@ trait plugin_update
 		{
 			return $result;
 		}
-
-		if ($this->update_plugin_info['plugin_name'] !== $args->slug) return $result;
 
 		$result = $this->get_plugin_info_cache('info');
 
@@ -531,8 +535,8 @@ trait plugin_update
 				case 'banners_rtl':
 				case 'icons':
 					if (!empty($value)) {
-						$value['1x'] = $value['low'] ?? null;
-						$value['2x'] = $value['high'] ?? null;
+						if (empty($value['1x'])) $value['1x'] = $value['low'] ?? null;
+						if (empty($value['2x'])) $value['2x'] = $value['high'] ?? null;
 					}
 					break;
 			}

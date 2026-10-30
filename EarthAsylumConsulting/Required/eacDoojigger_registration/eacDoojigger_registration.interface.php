@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting\Interfaces;
  * @package		{eac}SoftwareRegistry
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version		26.0729.1
+ * @version		26.1025.1
  */
 
 interface eacDoojigger_registration
@@ -122,7 +122,7 @@ interface eacDoojigger_registration
 	 *
 	 * @return object|bool scheduled event or false
 	 */
-	public function nextRegistryRefreshEvent(string $registrationKey=null);
+	public function nextRegistryRefreshEvent(?string $registrationKey = null);
 
 
 	/**
@@ -130,7 +130,7 @@ interface eacDoojigger_registration
 	 *
 	 * @return void
 	 */
-	public function checkRegistryRefreshEvent(string $registrationKey=null);
+	public function checkRegistryRefreshEvent(?string $registrationKey = null);
 
 
 	/**
@@ -150,7 +150,7 @@ interface eacDoojigger_registration
 	 * @param string registration key
 	 * @return bool
 	 */
-	public function isValidRegistration(string $registrationKey=null);
+	public function isValidRegistration(?string $registrationKey = null);
 
 
 	/**
@@ -173,7 +173,7 @@ interface eacDoojigger_registration
 	 * @param string registration key
 	 * @return string
 	 */
-	public function getRegistrationKey(string $registrationKey=null);
+	public function getRegistrationKey(?string $registrationKey = null);
 
 
 	/**
@@ -182,7 +182,7 @@ interface eacDoojigger_registration
 	 * @param string registration key
 	 * @return string
 	 */
-	public function getCurrentRegistration(string $registrationKey=null);
+	public function getCurrentRegistration(?string $registrationKey = null);
 
 
 	/**
@@ -191,7 +191,7 @@ interface eacDoojigger_registration
 	 * @param string registration key
 	 * @return string
 	 */
-	public function refreshRegistration(string $registrationKey=null, array $registrationValues=[]);
+	public function refreshRegistration(?string $registrationKey = null, array $registrationValues=[]);
 
 
 	/**
