@@ -1,8 +1,10 @@
 ### Changelog
 
-#### Version 3.3.3 – October 30, 2026
+#### Version 3.3.3 – November 1, 2026
 
 +	Requires PHP 8.2.
++	Added optional asynchronous risk assessment. 
+    +   Performs assessment via REST api rather than inline with page load. 
 +   Fixed `Implicitly marking parameter as nullable` (?string).
 	+	wpmu_installer, plugin_help, abstract_core, registration
 +	Wrap `get_config_path()` code in try...catch block to catch wp_filesystem error.
@@ -10,6 +12,7 @@
 +	Fix debug logging shutting off (temporarily disable on file access error).
 +	Use `http_headers_ready` action to clear/set headers in `access_denied()`.
 +	Delay setting `header_register_callback` (http_headers_ready) using WP `send_headers`.
++	Fix potential geo location warning in iPASIS & Scamalytics..
 
 #### Version 3.3.2 – October 23, 2026
 

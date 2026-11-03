@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipasis', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.1013.1';
+		const VERSION 			= '26.1101.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -130,7 +130,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_ipasis', false) )
 						$score <= 80 => 'threat',
 						default => 'fraud',
 					};
-					$geo = explode(',',$result['loc']);
+					$geo = explode(',',$result['loc'] ?: "0,0");
 					$data = array_replace($data,array_filter([
 						'CountryCode'		=> $result['country'],
 						'City'				=> $result['city'],

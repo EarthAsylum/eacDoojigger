@@ -13,6 +13,10 @@
 
 defined( 'ABSPATH' ) or exit;
 
+if ($this->is_option('risk_assessment_api','Enabled')) {
+	$this->update_option('risk_assessment_api',['remote']);
+}
+
 if ($rateLimit = $this->security->isPolicyEnabled('risk_assessment_rate_limit')) {
 	$rateLimit = round($rateLimit/self::RL_SPAN,2);
 } else $rateLimit = 'n';
@@ -53,7 +57,7 @@ $this->registerExtensionOptions( $this->className,
 		),
 		'risk_assessment_threshold' => array(
 				'type'		=>	'range',
-				'label'		=>	'Risk Assignment Threshold',
+				'label'		=>	'Risk Assessment Threshold',
 				'default'	=>	$this->is_network_option('risk_assessment_threshold') ?: 5,
 				'info'		=>	"Block access (and report) after an IP address has been tagged (internally) at least [value] times in a 24 hour period.",
 				'after'		=>	'<datalist id="risk_assessment_threshold-ticks">'.
@@ -105,10 +109,15 @@ $this->registerExtensionOptions( $this->className,
 		),
 		'risk_assessment_api' 	=> array(
 				'type'		=>	'switch',
-				'label'		=>	'Register Risk API',
-				'options' 	=> 	['API Enabled'=>'Enabled'],
+				'label'		=>	'Risk Assessment APIs',
+				'options' 	=> 	[
+									"<abbr title='Perform risk assessment asynchronously, allowing the inital request but possibly blocking subsequent requests.'>Asynchronous Assessment</abbr>"	=> 'async',
+									"<abbr title='This API may be used to (externally) redirect high-risk requests to be blocked and reported.'>Remote API Enabled</abbr>" => 'remote'
+								],
 				'default'	=>	$this->is_network_option('risk_assessment_api'),
-				'info'		=> 	"This API may be used to (externally) redirect high-risk requests to be blocked and reported.".
+				'info'		=> 	"<em>Asynchronous Assessment</em>: Perform risk assessment asynchronously, allowing the inital request but possibly blocking subsequent requests.<br>".
+								"<em>Remote API</em>: may be used to (externally) redirect high-risk requests to be blocked and reported.",
+				'help'		=> 	"[info]".
 								"<br>&rarr; /wp-json/".$this->pluginName."/v1/register_fraud?score=nn".
 								"<br>&rarr; /wp-json/".$this->pluginName."/v1/register_threat?score=nn".
 								"<br>&rarr; /wp-json/".$this->pluginName."/v1/register_abuse?score=nn".

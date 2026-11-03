@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_scamalytics', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.1013.1';
+		const VERSION 			= '26.1101.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -129,7 +129,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_scamalytics', false) )
 					$type  = ['low'=>'risk', 'medium'=>'abuse', 'high'=>'threat', 'very high'=>'fraud'];
 					$type  = $type[$scamalytics['scamalytics_risk']] ?? 'threat';
 					$location = $result['external_datasources']['maxmind_geolite2'];
-					$geo = explode(',',$location['ip_geolocation']);
+					$geo = explode(',',$location['ip_geolocation'] ?: "0,0");
 					$data = array_replace($data,array_filter([
 						'CountryCode'		=> $location['ip_country_code'],
 						'CountryName'		=> $location['ip_country_name'],

@@ -2,7 +2,7 @@
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
 Stable tag:             3.3.3
-Last Updated:           30-Oct-2026
+Last Updated:           01-Nov-2026
 Requires at least:      5.8
 Tested up to:           7.1
 Requires PHP:           8.2
@@ -429,11 +429,7 @@ Thank you!
 
 = 3.0 =
 
-As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1+
-
-= 3.3.3 =
-
-{eac}Doojigger requires PHP 8.2+
+As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.2+
 
 == Copyright ==
 
@@ -453,9 +449,11 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 == Changelog ==
 
-= Version 3.3.3 – October 30, 2026 =
+= Version 3.3.3 – November 1, 2026 =
 
 +	Requires PHP 8.2.
++	Added optional asynchronous risk assessment.
+	+	Performs assessment via REST api rather than inline with page load.
 +	Fixed `Implicitly marking parameter as nullable` (?string).
 	+	wpmu_installer, plugin_help, abstract_core, registration
 +	Wrap `get_config_path()` code in try...catch block to catch wp_filesystem error.
@@ -463,6 +461,7 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 +	Fix debug logging shutting off (temporarily disable on file access error).
 +	Use `http_headers_ready` action to clear/set headers in `access_denied()`.
 +	Delay setting `header_register_callback` (http_headers_ready) using WP `send_headers`.
++	Fix potential geo location warning in iPASIS & Scamalytics..
 
 = Version 3.3.2 – October 23, 2026 =
 

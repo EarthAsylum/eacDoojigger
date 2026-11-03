@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.1023.1';
+		const VERSION 			= '26.1031.1';
 
 		/**
 		 * @var string alias
@@ -151,9 +151,16 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			if ( ! parent::initialize() ) return; // disabled
 
 			/*
+			 * setup rest api - perform risk assessment for IP address
+			 */
+			if ($this->is_option('risk_assessment_api','async'))
+			{
+				add_action( 'rest_api_init', 	array($this,'risk_assessment_api') );
+			}
+			/*
 			 * setup rest api - allow external risk reporting
 			 */
-			if ($this->get_option('risk_assessment_api'))
+			if ($this->is_option('risk_assessment_api','remote'))
 			{
 				add_action( 'rest_api_init', 	array($this,'risk_api_register') );
 			}
@@ -196,10 +203,17 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 			if ($this->isEnabled() && ! current_user_can('edit_pages') ) // not editor or better
 			{
+				if ($_SERVER['REQUEST_METHOD'] != 'PUT' && !defined('REST_REQUEST')
+				&& ($this->is_option('risk_assessment_api','async')))
+				{
+					if ($this->do_async_assessment()) return;
+				}
+
 				add_action('init',						array($this, 'isBlacklisted'));
 				add_filter('wp_headers',				array($this, 'get_risk_assessment_result'),99);
 				add_action('login_init',				array($this, 'get_risk_assessment_result'),99);
 			}
+
 			add_action('xmlrpc_enabled',				array($this, 'get_risk_assessment_result'),99);
 			add_action('rest_pre_serve_request',		array($this, 'get_risk_assessment_result'),99);
 
@@ -268,6 +282,38 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					$this->register_risk('blocked by IP blacklist rule', 'threat', 100);
 				}
 			}
+		}
+
+
+		/**
+		 * Do risk assessment asynchronously
+		 *
+		 */
+		public function do_async_assessment(): bool
+		{
+			$ipAddress 	= $this->getVisitorIP();
+			if (! ($this->transient_provider($ipAddress,true)) )
+			{
+				$origin = parse_url(site_url());
+				$origin = $origin['scheme'].'://'.$origin['host'];
+				$result = wp_remote_request(
+					home_url('wp-json/eacDoojigger/v1/risk_assessment'),
+					[
+						'method'	=> 'PUT',
+						'timeout'   => 0.01,
+						'blocking'  => false,
+						'headers'	=> [
+							'Authorization' 	=> 'token '.base64_encode(wp_salt('auth')),
+							'true-client-ip' 	=> $ipAddress,
+							'referer' 			=> $this->varServer('Referer') ?: $this->getRequestURL(),
+							'User-Agent'		=> $this->varServer('User-Agent'),
+							'Origin'			=> $origin,
+						]
+					]
+				);
+				return true;
+			}
+			return false;
 		}
 
 
@@ -530,6 +576,49 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 
 		/*
+		 * Do risk assessment API
+		 * used by REST api: /wp-json/eacDoojigger/v1/risk_assessment
+		 */
+
+
+		/**
+		 * Register a WP REST api
+		 *
+		 * @return void
+		 */
+		public function risk_assessment_api()
+		{
+			$types = implode('|',array_keys(self::RISK_TYPES));
+			register_rest_route( $this->pluginName, "/v1/risk_assessment", array(
+				array(
+					'methods'             	=> \WP_REST_Server::EDITABLE,
+					'callback'            	=> [$this, 'get_risk_assessment_result'],
+					'permission_callback' 	=> [$this,'risk_assessment_api_auth'],
+				),
+			));
+		}
+
+
+		/**
+		 * Register a WP REST api
+		 *
+		 * @return void
+		 */
+		public function risk_assessment_api_auth($request)
+		{
+			list ($authType,$authKey) = explode(' ',$request->get_header( 'Authorization' ));
+			if ($authKey) {
+				$authKey = base64_decode( trim($authKey) );
+				$authKey = ($authKey == wp_salt('auth'));
+			}
+			if (!$authKey) {
+				wp_die( $this->plugin->access_denied("Asynchronous Risk authentication failed",401) );
+			}
+			return true;
+		}
+
+
+		/*
 		 * Register risk activity
 		 * used by REST api: /wp-json/eacDoojigger/v1/register_[fraud|threat|abuse|risk]
 		 * - or - actions: do_action( 'eacDoojigger_register_[fraud|threat|abuse|risk]' )
@@ -575,7 +664,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			 */
 			if (! $this->apply_filters('risk_api_register_request',true,$request))
 			{
-				return $this->plugin->access_denied("Register Risk authentication failed",401);
+				wp_die( $this->plugin->access_denied("Register Risk authentication failed",401) );
 			}
 
 			// allow origin in CORS
