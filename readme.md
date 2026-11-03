@@ -438,11 +438,7 @@ Thank you!
 
 #### 3.0
 
-As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.1+
-
-#### 3.3.3
-
-{eac}Doojigger requires PHP 8.2+
+As of version 3.0, PHP 7 is no longer supported; {eac}Doojigger requires PHP 8.2+
 
 ### Copyright
 
