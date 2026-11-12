@@ -29,7 +29,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.1005.1';
+		const VERSION 			= '26.1110.1';
 
 		/**
 		 * @var string extension tab name
@@ -277,7 +277,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 				},101);
 			}
 
-			// should we trust browser referer header?
+			// should we trust browser host/referer header?
 			if ($this->security->isPolicyEnabled('secCorsOpt','referer')) {
 				add_filter( 'http_origin', function ($origin) {
 					if (empty($origin)) {
@@ -297,7 +297,11 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			if ($this->security->isPolicyEnabled('secCorsOpt','ip_address')) {
 				add_filter( 'http_origin', function ($origin) {
 					if (empty($origin)) {
-						$origin = $this->plugin->getRequestScheme().'://'.gethostbyaddr($this->plugin->getVisitorIP());
+						if ($origin = $this->plugin->varServer('REMOTE_HOST')) {
+							$origin = $this->plugin->getRequestScheme().'://'.$origin;
+						} else {
+							$origin = $this->plugin->getRequestScheme().'://'.gethostbyaddr($this->plugin->getVisitorIP());
+						}
 					}
 					return $origin;
 				},101);

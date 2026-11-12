@@ -1,8 +1,8 @@
 === EarthAsylum Consulting {eac}Doojigger for WordPress ===
 Plugin URI:             https://eacDoojigger.earthasylum.com/
 Author:             	[EarthAsylum Consulting](https://www.earthasylum.com)
-Stable tag:             3.3.3
-Last Updated:           01-Nov-2026
+Stable tag:             3.3.4
+Last Updated:           12-Nov-2026
 Requires at least:      5.8
 Tested up to:           7.1
 Requires PHP:           8.2
@@ -448,6 +448,19 @@ See: [EarthAsylum Consulting EULA](https://eacDoojigger.earthasylum.com/end-user
 
 
 == Changelog ==
+
+= Version 3.3.4 – November 12, 2026 =
+
++	Tweaks In Risk assessment:
+	+	Added check for url parameters (`?register_{type}`) and header (`X-Register-{type}`).
+		+	'Fraud' and 'Threat' types always block the request.
+		+	e.g. may be set in .htaccess based on `RewriteCond`.
+	+	Check blacklist, url, headers before spawning async assessment.
+	+	Support passing `ip=...` in remote APIs.
+	+	Set assessment actions on init action.
+	+	Build/check white-list on init (before black-list check).
++	Use `REMOTE_HOST`, if available, before `gethostbyaddr()` in CORS validation.
++	Explicitly include the escape parameter in `fputcsv()` (PHP 8.4).
 
 = Version 3.3.3 – November 1, 2026 =
 

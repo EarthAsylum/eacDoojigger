@@ -1245,7 +1245,7 @@ abstract class abstract_core
 		{
 			$this->add_action('http_headers_ready', function() use ($status)
 			{
-				header_remove();
+				if ($status != 429) header_remove();
 				http_response_code( $status );
 				nocache_headers();
 			},PHP_INT_MAX);

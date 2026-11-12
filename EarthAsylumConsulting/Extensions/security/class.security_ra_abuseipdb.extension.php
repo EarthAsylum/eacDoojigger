@@ -19,7 +19,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.1013.1';
+		const VERSION 			= '26.1110.1';
 
 		/**
 		 * @var string risk assessment provider name (display name, array key, transient id)
@@ -264,7 +264,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_abuseipdb', false) )
 			);
 			if (! is_wp_error($file)) {
 				$fp = fopen($file, 'a');
-				fputcsv($fp, $report);
+				fputcsv($fp, $report, escape: "");
 				fclose($fp);
 			}
 		}

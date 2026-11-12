@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.1031.1';
+		const VERSION 			= '26.1112.1';
 
 		/**
 		 * @var string alias
@@ -69,14 +69,14 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		const IP_WHITELIST_FILE = ABSPATH."ip_allow_list.conf";
 
 		/**
-		 * @var array ignore these addresses
-		 */
-		private $ip_whitelist 	= [];
-
-		/**
 		 * @var int http status on die
 		 */
 		private $http_status 	= 403;
+
+		/**
+		 * @var string remote IP address
+		 */
+		private $ipAddress 		= null;
 
 
 		/**
@@ -150,19 +150,21 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		{
 			if ( ! parent::initialize() ) return; // disabled
 
+			$this->ipAddress = $this->getVisitorIP();
+
 			/*
 			 * setup rest api - perform risk assessment for IP address
 			 */
 			if ($this->is_option('risk_assessment_api','async'))
 			{
-				add_action( 'rest_api_init', 	array($this,'risk_assessment_api') );
+				add_action( 'rest_api_init', 	array($this,'risk_assessment_api'), 25 );
 			}
 			/*
 			 * setup rest api - allow external risk reporting
 			 */
 			if ($this->is_option('risk_assessment_api','remote'))
 			{
-				add_action( 'rest_api_init', 	array($this,'risk_api_register') );
+				add_action( 'rest_api_init', 	array($this,'register_risk_api'), 25 );
 			}
 
 			/**
@@ -175,21 +177,6 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			{
 				$this->add_action( "register_{$type}", array($this, 'register_risk_action'),10,3 );
 			}
-
- 			/**
-			 * filter {pluginName}_risk_assessment_ignore - IP addresses to ignore
-			 * 'ignore' is a misnomer, these IPs are processed but reset (i.e. for testing)
-			 * @param array IP addresses
-			 * @return array IP addresses
-			 */
-			$this->ip_whitelist = $this->security->mergePolicies('risk_assessment_allowed') ?: [];
-			$this->ip_whitelist = $this->apply_filters('risk_assessment_whitelist',$this->ip_whitelist);
-
-			// allow list can be used to reset allowed IP addresses
-			if (is_file(self::IP_WHITELIST_FILE))
-			{
-				$this->input_ip_whitelist_file();
-			}
 		}
 
 
@@ -199,28 +186,18 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function addActionsAndFilters()
 		{
-			if ($this->isWhitelisted()) return;
-
 			if ($this->isEnabled() && ! current_user_can('edit_pages') ) // not editor or better
 			{
-				if ($_SERVER['REQUEST_METHOD'] != 'PUT' && !defined('REST_REQUEST')
-				&& ($this->is_option('risk_assessment_api','async')))
+				if (! str_ends_with($_SERVER['REQUEST_URI'],'/eacDoojigger/v1/risk_assessment'))
 				{
-					if ($this->do_async_assessment()) return;
+					add_action('init',						array($this, 'addAssessmentActions'));
 				}
-
-				add_action('init',						array($this, 'isBlacklisted'));
-				add_filter('wp_headers',				array($this, 'get_risk_assessment_result'),99);
-				add_action('login_init',				array($this, 'get_risk_assessment_result'),99);
 			}
-
-			add_action('xmlrpc_enabled',				array($this, 'get_risk_assessment_result'),99);
-			add_action('rest_pre_serve_request',		array($this, 'get_risk_assessment_result'),99);
 
 			/**
 			 * action {pluginName}_risk_assessment - used to force the assessment
 			 */
-			$this->add_action('risk_assessment',		array($this, 'get_risk_assessment_result'));
+			$this->add_action('risk_assessment',			array($this, 'get_risk_assessment_result'));
 
 			// capture IP addresses to block file
 			if ($this->get_option('risk_assessment_file'))
@@ -231,45 +208,83 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			/**
 			 * action {pluginName}_clear_risk_assessment - forget any previously registered risk
 			 */
-			$this->add_action( 'clear_risk_assessment', array($this,'clear_risk_action') );
+			$this->add_action( 'clear_risk_assessment', 	array($this,'clear_risk_action') );
+		}
+
+
+		/**
+		 * Add assessment actions on init
+		 *
+		 */
+		public function addAssessmentActions()
+		{
+			if ($this->isWhitelisted()) return;
+
+			// blacklist will die with 403 status
+			if ($this->isBlacklisted()) return;
+
+			// external risk may die with passed status
+			if ($this->isExternalRisk()) return;
+
+			// do this asynchronously?
+			if ($this->is_option('risk_assessment_api','async'))
+			{
+				if ($this->do_async_assessment()) return;
+			}
+
+			/*
+			 * We want to do this always
+			 * We want to do this early 	(to block nefarious actors)
+			 *        but
+			 * We want to do this late 		(to allow actions to identify risk(s))
+			 */
+			add_action('wp_login',					array($this, 'get_risk_assessment_result'),99);
+			add_action('wp_login_failed',			array($this, 'get_risk_assessment_result'),99);
+
+			add_action('rest_pre_serve_request',	array($this, 'get_risk_assessment_result'),99);
+			add_action('xmlrpc_call',				array($this, 'get_risk_assessment_result'),99);
+
+			add_filter('wp_headers',				array($this, 'get_risk_assessment_result'),99);
 		}
 
 
 		/**
 		 * Check an IP address is in ignored list
 		 *
-		 * @param string $ipAddress IPv4 or IPv6 address
 		 * @return bool
 		 */
-		public function isWhitelisted(?string $ipAddress=null): bool
+		public function isWhitelisted(): bool
 		{
-			static $checked = null;
-			if (is_null($checked))
+			static $ip_whitelist = null;
+			static $ip_checked = null;
+
+			if (is_null($ip_whitelist))
 			{
-				$checked = $this->plugin->isIpInList($ipAddress ?? $this->getVisitorIP(), $this->ip_whitelist);
+				$ip_whitelist = $this->security->mergePolicies('risk_assessment_allowed') ?: [];
+				/**
+				 * filter {pluginName}_risk_assessment_whitelist - IP addresses to allow
+				 * @param array IP addresses
+				 * @return array IP addresses
+				 */
+				$ip_whitelist = $this->apply_filters('risk_assessment_whitelist',$ip_whitelist);
+				// allow list can be used to reset allowed IP addresses
+				$ip_whitelist = $this->input_ip_whitelist_file($ip_whitelist);
 			}
-			return $checked;
+
+			if (is_null($ip_checked))
+			{
+				$ip_checked = $this->plugin->isIpInList($this->ipAddress, $ip_whitelist);
+			}
+			return $ip_checked;
 		}
 
 
 		/**
-		 * Check http header and blocked IP addresses
+		 * Check blocked IP addresses
 		 *
 		 */
-		public function isBlacklisted(): void
+		public function isBlacklisted(): bool
 		{
-			// get score passed in custom header
-			foreach (array_keys(self::RISK_TYPES) as $type)
-			{
-				// X-{$type}-Assessment-Score: 0|n|auto; reason message text
-				// X-Threat-Assessment-Score: auto; known threat source tagged
-				if ($score = $this->plugin->varServer("X-{$type}-Assessment-Score")) {
-					$score 	= explode(';',$score);
-					$reason = __(sanitize_text_field($score[1] ?? "indentified {$type} source"),$this->plugin->PLUGIN_TEXTDOMAIN);
-					$this->register_risk($reason, $type, intval($score[0]));
-				}
-			}
-
 			/**
 			 * filter {pluginName}_risk_assessment_blacklist - IP addresses to ban
 			 * @param array IP addresses
@@ -278,10 +293,54 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			$ip_blacklist = $this->security->mergePolicies('risk_assessment_banned') ?: [];
 			if ( $ip_blacklist = $this->apply_filters('risk_assessment_blacklist',$ip_blacklist) )
 			{
-				if ($this->plugin->isIpInList($this->getVisitorIP(),$ip_blacklist)) {
-					$this->register_risk('blocked by IP blacklist rule', 'threat', 100);
+				if ($this->plugin->isIpInList($this->ipAddress,$ip_blacklist)) {
+					$reason = 'blocked by IP blacklist rule';
+					$this->http_status = 403;
+					$this->register_risk($reason, 'threat', 100);
+					$this->get_risk_assessment_result(); 	// will die here
+					return true;
 				}
 			}
+			return false;
+		}
+
+
+		/**
+		 * Check http header and URL parameter
+		 *
+		 * URL: 	...?register_{$type}=auto;reason_message
+		 * Header: 	X-{$type}-Assessment-Score: 0|n|auto; reason_message
+		 * 			X-Register-{$type}: 0|n|auto; reason_message
+		 */
+		public function isExternalRisk(): bool
+		{
+			// get score passed in custom header
+			foreach (array_keys(self::RISK_TYPES) as $type)
+			{
+				if ($score =
+						$_REQUEST["register_{$type}"]
+					?? 	$this->plugin->varServer("X-Register-{$type}")
+					?? 	$this->plugin->varServer("X-{$type}-Assessment-Score")
+				) {
+					$score 	= explode(';',$score);
+
+					$reason = str_replace('_',' ',
+						sanitize_text_field($score[1] ?? "identified {$type} source")
+					);
+
+					if ($status = intval($score[2] ?? 400)) {
+						$this->http_status = $status;
+					}
+
+					$this->register_risk($reason, $type, intval($score[0]));
+					$this->get_risk_assessment_result();	// may die here
+					if (self::RISK_TYPES[$type] > 1.0) {
+						wp_die( $this->plugin->access_denied($reason, $this->http_status) );
+					}
+					return true;
+				}
+			}
+			return false;
 		}
 
 
@@ -291,22 +350,21 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function do_async_assessment(): bool
 		{
-			$ipAddress 	= $this->getVisitorIP();
-			if (! ($this->transient_provider($ipAddress,true)) )
+			if (! ($this->transient_provider()) )
 			{
 				$origin = parse_url(site_url());
 				$origin = $origin['scheme'].'://'.$origin['host'];
-				$result = wp_remote_request(
+				$result = wp_remote_head(
 					home_url('wp-json/eacDoojigger/v1/risk_assessment'),
 					[
-						'method'	=> 'PUT',
 						'timeout'   => 0.01,
 						'blocking'  => false,
 						'headers'	=> [
 							'Authorization' 	=> 'token '.base64_encode(wp_salt('auth')),
-							'true-client-ip' 	=> $ipAddress,
-							'referer' 			=> $this->varServer('Referer') ?: $this->getRequestURL(),
-							'User-Agent'		=> $this->varServer('User-Agent'),
+							'X-Doojigger-Ip' 	=> $this->ipAddress,
+							'X-Doojigger-Uri'	=> $this->varServer('REQUEST_URI'),
+							'Referer' 			=> $this->varServer('REFERER') ?: '',
+							'User-Agent'		=> $this->varServer('USER-AGENT'),
 							'Origin'			=> $origin,
 						]
 					]
@@ -321,7 +379,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * get the risk assessment result
 		 *
 		 */
-		public function get_risk_assessment_result($arg=null)
+		public function get_risk_assessment_result($filterArg=null)
 		{
 			static $once = 0;
 			if (! $once++)
@@ -332,7 +390,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				 */
 				$this->do_action('risk_assessment_result', $this->do_risk_assessment());
 			}
-			return $arg;
+			return $filterArg;
 		}
 
 
@@ -341,16 +399,15 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @return array risk assessment data
 		 */
-		private function do_risk_assessment($arg=null): array
+		private function do_risk_assessment(): array
 		{
-			$ipAddress 	= $this->getVisitorIP();
 			$method 	= $this->get_option('risk_assessment_method');
 			$limit 		= intval($this->get_option('risk_assessment_limit'));
 
-			if (! ($data = $this->transient_provider($ipAddress,true)) )
+			if (! ($data = $this->transient_provider()) )
 			{
 				$data = [
-					'ipAddress'				=> $ipAddress,		// remote address
+					'ipAddress'				=> $this->ipAddress,// remote address
 					'RequestCount'			=> 0,				// track number of requests
 					'RequestTime'			=> 0,				// track time of last requests
 					'RateLimitCount'		=> 0,				// for rate limiting - request count
@@ -373,6 +430,8 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					'TimeZone'				=> '',
 					'Currency'				=> '',
 				];
+				// save the transient early to prevent dual processing (give providers time)
+				$this->transient_provider($data,self::RA_TTL);
 			}
 			else 	// temporarily account for pre-existing transients
 			{
@@ -398,24 +457,23 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			$data = $this->apply_filters('risk_assessment_data', $data);
 
 			// save data in transient
-			$transient_provider_key = $this->transient_provider($ipAddress,false);
-			$this->plugin->set_site_transient($transient_provider_key,$data,self::RA_TTL);
+			$this->transient_provider($data,self::RA_TTL);
 
 			$this->logNotice(
 				sprintf("%d/%d", $data['RiskAssessmentScore'], $limit),
 				'Risk assessment score'
 			);
 
-			// block request if we've reached the limit
-			if ($limit && $data['RiskAssessmentScore'] >= $limit)
-			{
-				$this->plugin->logDebug($data['RiskAssessmentScores'],__FUNCTION__);
-				$this->risk_assessment_abort($ipAddress, $data);
-			}
-
 			// save in current session (use getVariable('RiskAssessment') to get data)
 			$this->plugin->setVariable('RiskAssessment',$data);
 			$this->plugin->setVariable('RiskAssessmentScore',$data['RiskAssessmentScore']);
+
+			// block request if we've reached the limit
+			if ($limit && $data['RiskAssessmentScore'] >= $limit)
+			{
+			//	$this->plugin->logDebug($data['RiskAssessmentScores'],__FUNCTION__);
+				$this->risk_assessment_abort($data);
+			}
 
 			return $data;
 		}
@@ -452,7 +510,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				}
 			}
 
-			if ($result = $this->transient_register($data['ipAddress'],true))
+			if ($result = $this->transient_register())
 			{
 				// save registered type/score
 				$data['RiskAssessmentScores']['registered'] = [ $result['type'] => $result['score'] ];
@@ -544,31 +602,31 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * die with response and logging
 		 *
-		 * @param string $ipAddress IP address
 		 * @param array $data risk assessment data
 		 */
-		private function risk_assessment_abort(string $ipAddress, array $data): void
+		private function risk_assessment_abort(array $data): void
 		{
-			if ($this->isWhitelisted($ipAddress))
+			if ($this->isWhitelisted($this->ipAddress))
 			{
-				$this->clear_risk_action($ipAddress);
+				$this->clear_risk_action($this->ipAddress);
 			}
 			else
 			{
 				$message = sprintf(
-					__("Request from %s denied; Risk assessment score: %d/%d",$this->plugin->PLUGIN_TEXTDOMAIN),
-					$ipAddress, $data['RiskAssessmentScore'], $data['RiskAssessmentLimit']
+					__("Request denied; Risk assessment score: %d/%d",$this->plugin->PLUGIN_TEXTDOMAIN),
+					$data['RiskAssessmentScore'], $data['RiskAssessmentLimit']
 				);
+				header_remove();
 				if ($this->http_status == 429) {
 					$httpDate = gmdate('D, d M Y H:i:s', time()+self::RA_TTL) . ' GMT';
 					header('Retry-After: '.$httpDate);
-				} else if (self::RISK_TYPES[$data['RiskAssessmentType']] > .5) {
+				} else /*if (self::RISK_TYPES[$data['RiskAssessmentType']] > .5)*/ {
 					/**
 					 * action {pluginName}_risk_assessment_blocked
 					 * @param string 	$ipAddress
 					 * @param array 	$data
 					 */
-					$this->do_action('risk_assessment_blocked',$ipAddress,$data);
+					$this->do_action('risk_assessment_blocked',$this->ipAddress,$data);
 				}
 				wp_die( $this->plugin->access_denied($message, $this->http_status) );
 			}
@@ -588,12 +646,11 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function risk_assessment_api()
 		{
-			$types = implode('|',array_keys(self::RISK_TYPES));
 			register_rest_route( $this->pluginName, "/v1/risk_assessment", array(
 				array(
-					'methods'             	=> \WP_REST_Server::EDITABLE,
-					'callback'            	=> [$this, 'get_risk_assessment_result'],
-					'permission_callback' 	=> [$this,'risk_assessment_api_auth'],
+					'methods'             	=> 'HEAD',
+					'callback'            	=> [$this, 'risk_assessment_api_request'],
+					'permission_callback' 	=> [$this, 'risk_assessment_api_auth'],
 				),
 			));
 		}
@@ -611,10 +668,29 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				$authKey = base64_decode( trim($authKey) );
 				$authKey = ($authKey == wp_salt('auth'));
 			}
-			if (!$authKey) {
+			if (! $authKey)
+			{
 				wp_die( $this->plugin->access_denied("Asynchronous Risk authentication failed",401) );
 			}
 			return true;
+		}
+
+
+		/**
+		 * Do the risk assessment
+		 *
+		 * @return void
+		 */
+		public function risk_assessment_api_request($request)
+		{
+			define('RISK_ASSESSMENT_API',true);
+			if ($header = $request->get_header( 'X-Doojigger-Ip' )) {
+				$this->ipAddress = $header;
+			}
+			if ($header = $request->get_header( 'X-Doojigger-Uri' )) {
+				$_SERVER['REQUEST_URI'] = $header;
+			}
+			$this->get_risk_assessment_result();
 		}
 
 
@@ -630,15 +706,16 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @return void
 		 */
-		public function risk_api_register()
+		public function register_risk_api()
 		{
 			$types = implode('|',array_keys(self::RISK_TYPES));
 			register_rest_route( $this->pluginName, "/v1/register_(?P<type>{$types})", array(
 				array(
 					'methods'             	=> \WP_REST_Server::ALLMETHODS,
-					'callback'            	=> [$this, 'risk_api_register_request'],
-					'permission_callback' 	=> [$this, 'risk_api_permission'],
+					'callback'            	=> [$this, 'register_risk_api_request'],
+					'permission_callback' 	=> [$this, 'register_risk_api_auth'],
 					'args'					=> array(
+						'ip'				=> ['default' => ''],
 						'url'				=> ['default' => ''],
 						'reason'			=> ['default' => ''],
 						'score'				=> ['default' => '100'],
@@ -654,15 +731,15 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @return void
 		 */
-		public function risk_api_permission($request)
+		public function register_risk_api_auth($request)
 		{
 			/**
-			 * filter - {pluginName}_risk_api_register_request - allow actors to authenticate and/or process request
+			 * filter - {pluginName}_register_risk_api_auth - allow actors to authenticate and/or process request
 			 * @param bool is authenticated
 			 * @param object API request object
 			 * @return bool
 			 */
-			if (! $this->apply_filters('risk_api_register_request',true,$request))
+			if (! $this->apply_filters('register_risk_api_auth',true,$request))
 			{
 				wp_die( $this->plugin->access_denied("Register Risk authentication failed",401) );
 			}
@@ -679,13 +756,15 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 *
 		 * @param object $request REST request
 		 */
-		public function risk_api_register_request($request)
+		public function register_risk_api_request($request)
 		{
 			$type 		= sanitize_text_field($request->get_param('type'));		// fraud|threat|abuse|risk
-			$score 		= intval($request->get_param('score')) ?: 100;
-			$reason 	= sanitize_text_field($request->get_param('reason'))
-							?: "remote request registered {$type} ($score)";
+			$score 		= intval($request->get_param('score'));
+			$reason 	= str_replace('_',' ',
+							sanitize_text_field($request->get_param('reason'))
+						) ?: "remote request registered {$type} ($score)";
 			$url 		= $request->get_param('url');
+			$this->ipAddress = $request->get_param('ip') ?: $this->getVisitorIP();
 
 			$this->http_status = intval($request->get_param('status'));
 
@@ -714,7 +793,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			$type 		= end($type);
 			$score 		= intval($score);
 
-			$this->http_status = intval($http_status) ?: $this->http_status;
+			$this->http_status = intval($http_status) ?: 403;
 
 			$this->register_risk($message,$type,$score);
 		}
@@ -757,13 +836,12 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				$threshold 			= $this->get_option('risk_assessment_threshold') ?: 5;
 			}
 
-			$ipAddress 				= $this->getVisitorIP();
 			$score 					= $score ?: round(($limit / $threshold) * self::RISK_TYPES[$type],0);
 
 			$counter 				= (self::RISK_TYPES[$type] > .5) ? 1 : 0; // don't count 'concern'
 
 			// get previously registered
-			if ($registered = $this->transient_register($ipAddress,true))
+			if ($registered = $this->transient_register())
 			{
 				$registered['count'] 	+= $counter;
 				$registered['type']		= (self::RISK_TYPES[$type] >= self::RISK_TYPES[$registered['type']])
@@ -779,7 +857,6 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				$registered['score']	= min(100, $score);
 				$registered['message']	= [$message];
 				$registered['expires'] 	= self::RA_TTL;
-				$registered['status']	= 200;
 			}
 			$registered['message']		= array_slice($registered['message'],- $threshold);
 
@@ -790,7 +867,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			if ($registered['count'] >= $threshold) $registered['score'] = max($limit,$registered['score']);
 
 			// report risk to providers...
-			if ($registered['count'] == $threshold && self::RISK_TYPES[$type] > .5 && !$this->isWhitelisted($ipAddress))
+			if ($registered['count'] == $threshold && self::RISK_TYPES[$type] > .5 && !$this->isWhitelisted())
 			{
 				if ($this->has_action('risk_assessment_report') && $this->http_status != 429)
 				{
@@ -805,17 +882,15 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					 * @param int 		$threshold risk reporting threshold (1-50)
 					 * @param int 		$limit risk reporting limit (1-100)
 					 */
-					$this->do_action('risk_assessment_report',$ipAddress,$registered,$threshold,$limit);
+					$this->do_action('risk_assessment_report',$this->ipAddress,$registered,$threshold,$limit);
 				}
 				// update expiration time (report once in 12hrs)
 				$registered['expires'] = self::RA_TTL;
 			}
 
-			$transient_register_key = $this->transient_register($ipAddress,false);
-
 			// save current status (for at least a minute, we're obviously still active)
 			$seconds = ($registered['expires'] > time()) ? $registered['expires'] - time() : MINUTE_IN_SECONDS;
-			$this->plugin->set_site_transient($transient_register_key,$registered,$seconds);
+			$this->transient_register($registered,$seconds);
 			return ($registered['score'] >= $limit);
 		}
 
@@ -827,7 +902,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function clear_risk_action($ipAddress = null)
 		{
-			$ipAddress 				= $ipAddress ?: $this->getVisitorIP();
+			$ipAddress = $ipAddress ?: $this->ipAddress;
 			if (! \filter_var($ipAddress,FILTER_VALIDATE_IP,FILTER_FLAG_IPV4|FILTER_FLAG_IPV6)) {
 				return;
 			}
@@ -839,40 +914,53 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			 */
 			$this->do_action('risk_assessment_unblocked',$ipAddress);
 
-			$this->plugin->setVariable('RiskAssessment',null);
-			$this->plugin->setVariable('RiskAssessmentScore',null);
+			if ($ipAddress == $this->ipAddress) {
+				$this->plugin->setVariable('RiskAssessment',null);
+				$this->plugin->setVariable('RiskAssessmentScore',null);
+			}
 
-			$transient_provider_key = $this->transient_provider($ipAddress,false);
-			$this->plugin->delete_site_transient($transient_provider_key);
-
-			$transient_register_key = $this->transient_register($ipAddress,false);
-			$this->plugin->delete_site_transient($transient_register_key);
+			$this->transient_provider(false);
+			$this->transient_register(false);
 		}
 
 
 		/**
-		 * get transient provider key or data
+		 * get/set/delete provider transient
 		 *
-		 * @param string $ipAddress IP address
-		 * @param bool $getIt get the transient data
+		 * @param mixed $data write array or null (read) or false (delete)
+		 * @param int $seconds transient time (write)
 		 */
-		private function transient_provider($ipAddress,$getIt=true)
+		private function transient_provider($data=null,$seconds=0)
 		{
-			$key = sprintf('%s-%s','ip_risk_provider',sanitize_key(str_replace(['.',':'],'-',$ipAddress)));
-			return ($getIt) ? $this->plugin->get_site_transient($key,[]) : $key;
+			static $key = null;
+			if (empty($key)) {
+				$key = sprintf('%s-%s','ip_risk_provider',str_replace(['.',':'],'-',$this->ipAddress));
+			}
+			return match ($data) {
+				null 		=> $this->plugin->get_site_transient($key,[]),
+				false 		=> $this->plugin->delete_site_transient($key),
+				default  	=> $this->plugin->set_site_transient($key,$data,$seconds),
+			};
 		}
 
 
 		/**
-		 * get transient registered key or data
+		 * get/set/delete registered transient
 		 *
-		 * @param string $ipAddress IP address
-		 * @param bool $getIt get the transient data
+		 * @param mixed $data write array or null (read) or false (delete)
+		 * @param int $seconds transient time (write)
 		 */
-		private function transient_register($ipAddress,$getIt=true)
+		private function transient_register($data=null,$seconds=0)
 		{
-			$key = sprintf('%s-%s','ip_risk_register',sanitize_key(str_replace(['.',':'],'-',$ipAddress)));
-			return ($getIt) ?  $this->plugin->get_site_transient($key,[]) : $key;
+			static $key = null;
+			if (empty($key)) {
+				$key = sprintf('%s-%s','ip_risk_register',str_replace(['.',':'],'-',$this->ipAddress));
+			}
+			return match ($data) {
+				null 		=> $this->plugin->get_site_transient($key,[]),
+				false 		=> $this->plugin->delete_site_transient($key),
+				default  	=> $this->plugin->set_site_transient($key,$data,$seconds),
+			};
 		}
 
 
@@ -880,17 +968,18 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * Input ip allow file
 		 *
 		 */
-		public function input_ip_whitelist_file()
+		public function input_ip_whitelist_file($ip_whitelist)
 		{
 			if (is_file(self::IP_WHITELIST_FILE))
 			{
 				if ($ip_allow = file(self::IP_WHITELIST_FILE,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)) {
-					$this->ip_whitelist = array_merge(
-						$this->ip_whitelist,
+					$ip_whitelist = array_merge(
+						$ip_whitelist,
 						array_filter($ip_allow, function($line){return $line[0] != '#';})
 					);
 				}
 			}
+			return $ip_whitelist;
 		}
 
 

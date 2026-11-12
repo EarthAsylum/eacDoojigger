@@ -8,7 +8,7 @@
  * @package		{eac}Doojigger\Extensions
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.EarthAsylum.com>
- * @version 	26.1010.1
+ * @version 	26.1110.1
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -112,7 +112,7 @@ $this->registerExtensionOptions( $this->className,
 				'label'		=>	'Risk Assessment APIs',
 				'options' 	=> 	[
 									"<abbr title='Perform risk assessment asynchronously, allowing the inital request but possibly blocking subsequent requests.'>Asynchronous Assessment</abbr>"	=> 'async',
-									"<abbr title='This API may be used to (externally) redirect high-risk requests to be blocked and reported.'>Remote API Enabled</abbr>" => 'remote'
+									"<abbr title='This API may be used to (externally) register high-risk requests to be blocked and reported.'>Remote API Enabled</abbr>" => 'remote'
 								],
 				'default'	=>	$this->is_network_option('risk_assessment_api'),
 				'info'		=> 	"<em>Asynchronous Assessment</em>: Perform risk assessment asynchronously, allowing the inital request but possibly blocking subsequent requests.<br>".

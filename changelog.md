@@ -1,5 +1,18 @@
 ### Changelog
 
+#### Version 3.3.4 – November 12, 2026
+
++	Tweaks In Risk assessment:
+	+	Added check for url parameters (`?register_{type}`) and header (`X-Register-{type}`).
+		+	'Fraud' and 'Threat' types always block the request.
+		+	e.g. may be set in .htaccess based on `RewriteCond`.
+	+	Check blacklist, url, headers before spawning async assessment.
+	+	Support passing `ip=...` in remote APIs.
+	+	Set assessment actions on init action.
+	+	Build/check white-list on init (before black-list check).
++	Use `REMOTE_HOST`, if available, before `gethostbyaddr()` in CORS validation.
++	Explicitly include the escape parameter in `fputcsv()` (PHP 8.4).
+
 #### Version 3.3.3 – November 1, 2026
 
 +	Requires PHP 8.2.

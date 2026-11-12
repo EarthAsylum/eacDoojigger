@@ -11,7 +11,7 @@ namespace EarthAsylumConsulting\Helpers;
  * @example $remote_ip = \EarthAsylumConsulting\Helpers\ipUtil::getRemoteIP();
  * @example \EarthAsylumConsulting\Helpers\ipUtil::checkIp($remote_ip,$listOfIPs);
  *
- * @version 	25.0503.1
+ * @version 	26.1111.1
  */
 class ipUtil
 {
@@ -37,6 +37,7 @@ class ipUtil
 	 * @var array http headers containing remote IP address
 	 */
 	public const HTTP_IP_HEADERS = [
+		'HTTP_X_DOOJIGGER_IP',
 		'HTTP_TRUE_CLIENT_IP',
 		'HTTP_X_REAL_IP',
 		'HTTP_CF_CONNECTING_IP',
