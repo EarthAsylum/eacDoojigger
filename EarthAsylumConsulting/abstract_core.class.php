@@ -10,7 +10,7 @@ namespace EarthAsylumConsulting;
  * @package		{eac}Doojigger
  * @author		Kevin Burkholder <KBurkholder@EarthAsylum.com>
  * @copyright	Copyright (c) 2026 EarthAsylum Consulting <www.earthasylum.com>
- * @version		26.1029.1
+ * @version		26.1113.1
  * @link		https://eacDoojigger.earthasylum.com/
  * @see			https://eacDoojigger.earthasylum.com/phpdoc/
  * @used-by		\EarthAsylumConsulting\abstract_frontend
@@ -1246,8 +1246,11 @@ abstract class abstract_core
 			$this->add_action('http_headers_ready', function() use ($status)
 			{
 				if ($status != 429) header_remove();
-				http_response_code( $status );
+				header_remove('Link');
+				header_remove('X-Pingback');
+				header_remove('Last-Modified');
 				nocache_headers();
+				status_header( $status );
 			},PHP_INT_MAX);
 		}
 		return new \WP_Error(__FUNCTION__, $message, ['status' => $status, 'log' => $logMsg]);

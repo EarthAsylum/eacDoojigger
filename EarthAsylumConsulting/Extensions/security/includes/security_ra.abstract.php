@@ -15,7 +15,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 	/**
 	 * @var string extension version
 	 */
-	const VERSION 			= '26.1011.1';
+	const VERSION 			= '26.1114.1';
 
 	/**
 	 * @var string extension tab name
@@ -70,6 +70,13 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 		// must have risk_assessment enabled
 		if (! $this->isEnabled('risk_assessment')) return $this->isEnabled(false);
 
+		// build/return a list of provider names (before initialize)
+		$priority = $this->get_option(static::PROVIDER.'_priority',10);
+		$this->add_filter('risk_assessment_providers', 		function($providers)
+		{
+			return array_merge($providers,[static::PROVIDER]);
+		},$priority);
+
 		add_action('admin_init', function()
 		{
 			// Register plugin options when needed
@@ -77,7 +84,6 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 				$this->registerExtensionOptions( $this->className,
 					[
 						static::PROVIDER.'_priority'	=> 	array(
-						//		'type'		=>	'number',
 								'type'		=>	($this->has_filter_count('risk_assessment_provider') > 1)
 										? 'number' : 'hidden',
 								'label'		=>	'Priority',
@@ -142,7 +148,7 @@ abstract class security_ra_abstract extends \EarthAsylumConsulting\abstract_exte
 		}
 		else									// dummy filter required for risk_assessment_method
 		{
-			$this->add_filter('risk_assessment_provider', function($data) {return $data;},$priority);
+			$this->add_filter('risk_assessment_provider', 	function($data) {return $data;},$priority);
 			return false;
 		}
 	}

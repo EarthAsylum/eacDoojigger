@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION			= '26.1017.1';
+		const VERSION			= '26.1115.1';
 
 		/**
 		 * @var string extension alias
@@ -507,6 +507,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			{
 				$this->do_action('register_risk','accessing invalid login page');
 				if ($wp_query) $wp_query->set_404();
+			//	http_response_code( 404 );
 				status_header( 404 );
 				if (get_template_part( 404 ) === false) {
 					wp_die( $this->plugin->access_denied(status: 404) );
@@ -577,6 +578,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 					} else {
 						$user = new \WP_Error( 'eac_login_nonce',__( 'Invalid form submission.' ) );
 					}
+				//	http_response_code( 401 );
 					status_header( 401 );
 					header_remove('Set-Cookie');
 					$this->do_action('register_threat','prohibited login attempt',0,401);
@@ -1214,7 +1216,7 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 
 
 		/**
-		 * set flags in Set-Cookie headers before output (used by header_register_callback)
+		 * get 404 template when looking for author
 		 *
 		 * @return void
 		 */
@@ -1224,7 +1226,8 @@ if (! class_exists(__NAMESPACE__.'\security_extension', false) )
 			if (!empty($_GET['author']) || is_author()) {
 				$wp_query->post_count = 0;
 				$wp_query->set_404();
-				status_header(404);
+			//	http_response_code(404);
+				status_header( 404 );
 				nocache_headers();
 				$template = get_404_template();
 			}

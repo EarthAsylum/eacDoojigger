@@ -17,7 +17,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.1112.1';
+		const VERSION 			= '26.1115.1';
 
 		/**
 		 * @var string alias
@@ -67,6 +67,25 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 * @var string IP allow list file name (read)
 		 */
 		const IP_WHITELIST_FILE = ABSPATH."ip_allow_list.conf";
+
+		/**
+		 * @var string origin used in async api
+		 */
+		const RISK_ASSESSMENT_ORIGIN = 'RiskAssessment.Doojigger.api';
+
+		/**
+		 * @var int provider assessment modes
+		 */
+		const RA_MODE_OFF 		= 0b0000;
+		const RA_MODE_API 		= 0b1000;	// api flag
+		const RA_MODE_INLINE 	= 0b0001;	// inline
+		const RA_MODE_ASYNC 	= 0b1010;	// async (api)
+		const RA_MODE_ACTIVE 	= 0b1001;	// inline (api)
+
+		/**
+		 * @var string flag async request
+		 */
+		private $risk_assessment_mode = null;
 
 		/**
 		 * @var int http status on die
@@ -152,19 +171,31 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 			$this->ipAddress = $this->getVisitorIP();
 
+			$this->risk_assessment_mode = match(true)
+			{
+				// we're running the async assessment now
+				(bool)($this->varServer('Origin') == self::RISK_ASSESSMENT_ORIGIN) 	=> self::RA_MODE_ACTIVE,
+				// there are no providers to check
+				(bool)(empty($this->apply_filters('risk_assessment_providers',[])))	=> self::RA_MODE_OFF,
+				// the async option is enabled
+				(bool)($this->is_option('risk_assessment_api','async'))			 	=> self::RA_MODE_ASYNC,
+				// the async option is not enabled
+				default 															=> self::RA_MODE_INLINE,
+			};
+
 			/*
 			 * setup rest api - perform risk assessment for IP address
 			 */
-			if ($this->is_option('risk_assessment_api','async'))
+			if ($this->risk_assessment_mode & self::RA_MODE_API)
 			{
-				add_action( 'rest_api_init', 	array($this,'risk_assessment_api'), 25 );
+				add_action( 'rest_api_init', 	array($this,'risk_assessment_api') );
 			}
 			/*
 			 * setup rest api - allow external risk reporting
 			 */
 			if ($this->is_option('risk_assessment_api','remote'))
 			{
-				add_action( 'rest_api_init', 	array($this,'register_risk_api'), 25 );
+				add_action( 'rest_api_init', 	array($this,'register_risk_api') );
 			}
 
 			/**
@@ -188,16 +219,11 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		{
 			if ($this->isEnabled() && ! current_user_can('edit_pages') ) // not editor or better
 			{
-				if (! str_ends_with($_SERVER['REQUEST_URI'],'/eacDoojigger/v1/risk_assessment'))
+				if ($this->risk_assessment_mode != self::RA_MODE_ACTIVE)
 				{
 					add_action('init',						array($this, 'addAssessmentActions'));
 				}
 			}
-
-			/**
-			 * action {pluginName}_risk_assessment - used to force the assessment
-			 */
-			$this->add_action('risk_assessment',			array($this, 'get_risk_assessment_result'));
 
 			// capture IP addresses to block file
 			if ($this->get_option('risk_assessment_file'))
@@ -224,19 +250,19 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			if ($this->isBlacklisted()) return;
 
 			// external risk may die with passed status
-			if ($this->isExternalRisk()) return;
+			$this->isExternalRisk();
 
-			// do this asynchronously?
-			if ($this->is_option('risk_assessment_api','async'))
-			{
-				if ($this->do_async_assessment()) return;
-			}
+			/**
+			 * action {pluginName}_risk_assessment - used to force the assessment
+			 */
+			$this->add_action('risk_assessment',	array($this, 'get_risk_assessment_result'));
 
 			/*
 			 * We want to do this always
 			 * We want to do this early 	(to block nefarious actors)
 			 *        but
 			 * We want to do this late 		(to allow actions to identify risk(s))
+			 * We have to do this before any output
 			 */
 			add_action('wp_login',					array($this, 'get_risk_assessment_result'),99);
 			add_action('wp_login_failed',			array($this, 'get_risk_assessment_result'),99);
@@ -333,43 +359,12 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					}
 
 					$this->register_risk($reason, $type, intval($score[0]));
-					$this->get_risk_assessment_result();	// may die here
 					if (self::RISK_TYPES[$type] > 1.0) {
+						$this->get_risk_assessment_result();	// may die here
 						wp_die( $this->plugin->access_denied($reason, $this->http_status) );
 					}
 					return true;
 				}
-			}
-			return false;
-		}
-
-
-		/**
-		 * Do risk assessment asynchronously
-		 *
-		 */
-		public function do_async_assessment(): bool
-		{
-			if (! ($this->transient_provider()) )
-			{
-				$origin = parse_url(site_url());
-				$origin = $origin['scheme'].'://'.$origin['host'];
-				$result = wp_remote_head(
-					home_url('wp-json/eacDoojigger/v1/risk_assessment'),
-					[
-						'timeout'   => 0.01,
-						'blocking'  => false,
-						'headers'	=> [
-							'Authorization' 	=> 'token '.base64_encode(wp_salt('auth')),
-							'X-Doojigger-Ip' 	=> $this->ipAddress,
-							'X-Doojigger-Uri'	=> $this->varServer('REQUEST_URI'),
-							'Referer' 			=> $this->varServer('REFERER') ?: '',
-							'User-Agent'		=> $this->varServer('USER-AGENT'),
-							'Origin'			=> $origin,
-						]
-					]
-				);
-				return true;
 			}
 			return false;
 		}
@@ -418,6 +413,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					'RiskAssessmentScore'	=> -1,				// 0 - 100
 					'RiskAssessmentScores'	=> [],				// [ provider => [ type => score ]
 					'RiskAssessmentData'	=> [],				// [ provider => [ data ] ]
+					'ProvidersChecked'		=> 0,				// count of 3rd party providers checked
 					// assigned by ra provider (if available)
 					'CountryCode'			=> '',
 					'CountryName'			=> '',
@@ -430,22 +426,30 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 					'TimeZone'				=> '',
 					'Currency'				=> '',
 				];
-				// save the transient early to prevent dual processing (give providers time)
-				$this->transient_provider($data,self::RA_TTL);
 			}
 			else 	// temporarily account for pre-existing transients
 			{
-				if (!isset($data['RequestCount'])) $data['RequestCount'] = 1;
-				if (!isset($data['RequestTime'])) $data['RequestTime'] = time();
-				if (!isset($data['RateLimitCount'])) $data['RateLimitCount'] = 1;
-				if (!isset($data['RateLimitTime'])) $data['RateLimitTime'] = time();
+				if (!isset($data['RequestCount'])) 		$data['RequestCount'] = 1;
+				if (!isset($data['RequestTime'])) 		$data['RequestTime'] = time();
+				if (!isset($data['RateLimitCount'])) 	$data['RateLimitCount'] = 1;
+				if (!isset($data['RateLimitTime'])) 	$data['RateLimitTime'] = time();
+				if (!isset($data['ProvidersChecked'])) 	$data['ProvidersChecked'] = count(array_keys($data['RiskAssessmentData'])) - 1;
+			}
+
+			// we already checked providers
+			if ($data['ProvidersChecked'] > 0)
+			{
+				$this->risk_assessment_mode = self::RA_MODE_OFF;
 			}
 
 			// get registered score (from register_risk)
 			$data = $this->risk_assessment_registered($data);
 
-			// get api scores (from external providers)
-			$data = $this->risk_assessment_providers($data);
+			// get scores (from external providers) - inline
+			if ($this->risk_assessment_mode & self::RA_MODE_INLINE)
+			{
+				$data = $this->risk_assessment_providers($data);
+			}
 
 			// get the final score
 			$data = $this->risk_assessment_scores($data);
@@ -473,6 +477,12 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			{
 			//	$this->plugin->logDebug($data['RiskAssessmentScores'],__FUNCTION__);
 				$this->risk_assessment_abort($data);
+			}
+
+			// get scores (from external providers) - async
+			if ($this->risk_assessment_mode == self::RA_MODE_ASYNC)
+			{
+				$this->async_assessment_providers();
 			}
 
 			return $data;
@@ -582,6 +592,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 						$registerScore					= $score;
 					} else {
 						if ($score > 0) $averageScore[]	= $score;
+						$data['ProvidersChecked']++;
 					}
 				}
 			}
@@ -640,6 +651,31 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 
 
 		/**
+		 * Do risk assessment asynchronously
+		 *
+		 */
+		public function async_assessment_providers()
+		{
+			$result = wp_remote_head(
+				home_url('wp-json/eacDoojigger/v1/risk_assessment'),
+				[
+					'timeout'   	=> 0.01,
+					'blocking'  	=> false,
+					'cache-control' => 'no-cache',
+					'headers'		=> [
+						'Authorization' 	=> 'token '.base64_encode(wp_salt('auth')),
+						'X-Doojigger-Ip' 	=> $this->ipAddress,
+						'X-Doojigger-Uri'	=> $this->varServer('REQUEST_URI'),
+						'Referer' 			=> $this->varServer('REFERER') ?: '',
+						'User-Agent'		=> $this->varServer('USER-AGENT'),
+						'Origin'			=> self::RISK_ASSESSMENT_ORIGIN,
+					]
+				]
+			);
+		}
+
+
+		/**
 		 * Register a WP REST api
 		 *
 		 * @return void
@@ -648,7 +684,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		{
 			register_rest_route( $this->pluginName, "/v1/risk_assessment", array(
 				array(
-					'methods'             	=> 'HEAD',
+					'methods'             	=> 'HEAD,GET',
 					'callback'            	=> [$this, 'risk_assessment_api_request'],
 					'permission_callback' 	=> [$this, 'risk_assessment_api_auth'],
 				),
@@ -672,6 +708,7 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 			{
 				wp_die( $this->plugin->access_denied("Asynchronous Risk authentication failed",401) );
 			}
+			$this->plugin->allow_request_origin();
 			return true;
 		}
 
@@ -683,7 +720,6 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 		 */
 		public function risk_assessment_api_request($request)
 		{
-			define('RISK_ASSESSMENT_API',true);
 			if ($header = $request->get_header( 'X-Doojigger-Ip' )) {
 				$this->ipAddress = $header;
 			}
@@ -691,6 +727,9 @@ if (! class_exists(__NAMESPACE__.'\security_ra_extension', false) )
 				$_SERVER['REQUEST_URI'] = $header;
 			}
 			$this->get_risk_assessment_result();
+			header_remove();
+			status_header( 200 );
+			nocache_headers();
 		}
 
 

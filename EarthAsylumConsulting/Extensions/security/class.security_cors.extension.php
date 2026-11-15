@@ -29,7 +29,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 		/**
 		 * @var string extension version
 		 */
-		const VERSION 			= '26.1110.1';
+		const VERSION 			= '26.1113.1';
 
 		/**
 		 * @var string extension tab name
@@ -186,7 +186,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 			if ($this->plugin->doing_ajax()) {
 				if ($this->security->isPolicyEnabled('secCorsOpt','ajax')) {
 				//	if (!$this->plugin->varServer('X-Requested-With')) {
-				//		$this->do_action('report_threat','Invalid XMLHttp Request',100);
+				//		$this->do_action('register_threat','Invalid XMLHttp Request',100);
 				//		wp_die( $this->plugin->access_denied('Invalid XMLHttp Request') );
 				//	}
 					add_action('init', 							array($this,'validate_cors_origin'), 50);
@@ -225,7 +225,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 				$ipAddress 	= $this->plugin->getVisitorIP();
 				$ipAsHost	= $this->plugin->getRequestScheme() . '://' . $ipAddress;
 				if (!in_array($ipAddress,$this->host_ips) && !is_allowed_http_origin($ipAsHost)) {
-					$this->do_action('report_threat','cross-origin access denied from '.$origin." ({$ipAddress})",100,400);
+					$this->do_action('register_threat','cross-origin access denied from '.$origin." ({$ipAddress})",100,400);
 				}
 			}
 		}
@@ -284,7 +284,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 						if ($origin = $this->plugin->varServer('HTTP_REFERER')) {
 							$origin = parse_url($origin);
 							if (isset($origin['host'])) {
-								$this->validate_local_origin($origin['host']);
+							//	$this->validate_local_origin($origin['host']);
 								$origin = $origin['scheme'].'://'.$origin['host'];
 							}
 						}
@@ -356,7 +356,7 @@ if (! class_exists(__NAMESPACE__.'\security_cors', false) )
 				$this->logDebug($origin,'cross-origin access allowed');
 			} else {
 				header( 'Access-Control-Allow-Origin: ' . site_url() );
-				$this->do_action('report_threat','cross-origin access denied from '.$origin,100);
+				$this->do_action('register_threat','cross-origin access denied from '.$origin,100);
 				wp_die( $this->plugin->access_denied('cross-origin access denied from '.$origin) );
 			}
 			return $value;
